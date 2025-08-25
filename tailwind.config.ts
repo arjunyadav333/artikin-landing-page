@@ -52,6 +52,18 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
+				creative: {
+					DEFAULT: 'hsl(var(--creative))',
+					foreground: 'hsl(var(--creative-foreground))'
+				},
+				opportunity: {
+					DEFAULT: 'hsl(var(--opportunity))',
+					foreground: 'hsl(var(--opportunity-foreground))'
+				},
+				connection: {
+					DEFAULT: 'hsl(var(--connection))',
+					foreground: 'hsl(var(--connection-foreground))'
+				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',
