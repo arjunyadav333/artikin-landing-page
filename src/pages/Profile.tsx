@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { 
   MapPin, 
   Calendar, 
@@ -19,13 +20,19 @@ import {
   UserPlus,
   MessageSquare,
   ChevronDown,
-  ExternalLink
+  ExternalLink,
+  X,
+  Play
 } from "lucide-react";
 
 const Profile = () => {
   const [activeTab, setActiveTab] = useState("posts");
   const [showFullBio, setShowFullBio] = useState(false);
+  const [selectedPost, setSelectedPost] = useState<any>(null);
   const [expandedComments, setExpandedComments] = useState<Set<number>>(new Set());
+  const [likedPosts, setLikedPosts] = useState<Set<number>>(new Set([2]));
+  const [bookmarkedPosts, setBookmarkedPosts] = useState<Set<number>>(new Set([2]));
+  const [scrollPosition, setScrollPosition] = useState(0);
 
   const userProfile = {
     name: "Sarah Chen",
@@ -57,11 +64,10 @@ const Profile = () => {
       },
       content: "Just finished this UI design for a sustainable fashion app. Really excited about the clean aesthetic and eco-friendly color palette! #UIDesign #SustainableFashion",
       media: ["/placeholder.svg"],
+      mediaType: "image",
       likes: 124,
       comments: 18,
       shares: 12,
-      bookmarked: false,
-      liked: false,
       timestamp: "2h",
       topComments: [
         { id: 1, author: "Alex Kim", content: "Love the color scheme! 🎨", likes: 3 },
@@ -78,14 +84,90 @@ const Profile = () => {
       },
       content: "Working on a series of illustrations inspired by urban landscapes. Each piece captures a different mood of city life. What do you think about this direction?",
       media: ["/placeholder.svg", "/placeholder.svg"],
+      mediaType: "image",
       likes: 89,
       comments: 12,
       shares: 7,
-      bookmarked: true,
-      liked: true,
       timestamp: "1d",
       topComments: [
         { id: 3, author: "David Park", content: "The mood in this series is amazing!", likes: 8 }
+      ]
+    },
+    {
+      id: 3,
+      author: {
+        name: "Sarah Chen",
+        username: "@sarahchen",
+        avatar: "",
+        role: "Digital Artist"
+      },
+      content: "Experimenting with typography in motion graphics. Here's a sneak peek of my latest project! ✨",
+      media: ["/placeholder.svg"],
+      mediaType: "video",
+      likes: 156,
+      comments: 24,
+      shares: 18,
+      timestamp: "3d",
+      topComments: [
+        { id: 4, author: "Lisa Wang", content: "This is so smooth! 🔥", likes: 12 },
+        { id: 5, author: "Tom Rodriguez", content: "What software did you use?", likes: 6 }
+      ]
+    },
+    {
+      id: 4,
+      author: {
+        name: "Sarah Chen",
+        username: "@sarahchen",
+        avatar: "",
+        role: "Digital Artist"
+      },
+      content: "Color study for an upcoming brand identity project. Exploring warm vs cool palettes.",
+      media: ["/placeholder.svg"],
+      mediaType: "image",
+      likes: 92,
+      comments: 8,
+      shares: 5,
+      timestamp: "5d",
+      topComments: [
+        { id: 6, author: "Emma Stone", content: "Beautiful color harmony!", likes: 4 }
+      ]
+    },
+    {
+      id: 5,
+      author: {
+        name: "Sarah Chen",
+        username: "@sarahchen",
+        avatar: "",
+        role: "Digital Artist"
+      },
+      content: "Behind the scenes of my creative process. From sketch to final design! 🎨",
+      media: ["/placeholder.svg"],
+      mediaType: "image",
+      likes: 78,
+      comments: 15,
+      shares: 9,
+      timestamp: "1w",
+      topComments: [
+        { id: 7, author: "Mike Chen", content: "Love seeing the process!", likes: 7 }
+      ]
+    },
+    {
+      id: 6,
+      author: {
+        name: "Sarah Chen",
+        username: "@sarahchen",
+        avatar: "",
+        role: "Digital Artist"
+      },
+      content: "Quick logo animation for a tech startup. What do you think? 💫",
+      media: ["/placeholder.svg"],
+      mediaType: "video",
+      likes: 203,
+      comments: 31,
+      shares: 22,
+      timestamp: "1w",
+      topComments: [
+        { id: 8, author: "Anna Davis", content: "So clean! Love the animation timing", likes: 15 }
       ]
     }
   ];
@@ -126,6 +208,49 @@ const Profile = () => {
     }
     setExpandedComments(newExpanded);
   };
+
+  const toggleLike = (postId: number) => {
+    const newLiked = new Set(likedPosts);
+    if (newLiked.has(postId)) {
+      newLiked.delete(postId);
+    } else {
+      newLiked.add(postId);
+    }
+    setLikedPosts(newLiked);
+  };
+
+  const toggleBookmark = (postId: number) => {
+    const newBookmarked = new Set(bookmarkedPosts);
+    if (newBookmarked.has(postId)) {
+      newBookmarked.delete(postId);
+    } else {
+      newBookmarked.add(postId);
+    }
+    setBookmarkedPosts(newBookmarked);
+  };
+
+  const openPostDetail = (post: any) => {
+    setScrollPosition(window.scrollY);
+    setSelectedPost(post);
+  };
+
+  const closePostDetail = () => {
+    setSelectedPost(null);
+    setTimeout(() => {
+      window.scrollTo(0, scrollPosition);
+    }, 100);
+  };
+
+  useEffect(() => {
+    if (selectedPost) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [selectedPost]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -268,139 +393,220 @@ const Profile = () => {
           </div>
         </div>
 
-        {/* Posts Tab */}
+        {/* Posts Tab - Grid Layout */}
         {activeTab === "posts" && (
-          <div className="space-y-8 pb-20">
-            {mockPosts.map((post) => (
-              <article key={post.id} className="bg-background">
-                {/* Post Header */}
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage src={post.author.avatar} alt={post.author.name} />
-                      <AvatarFallback className="bg-primary/10 text-primary text-sm">
-                        {post.author.name.split(' ').map(n => n[0]).join('')}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="font-semibold text-sm text-foreground hover:text-primary cursor-pointer">
-                        {post.author.name}
-                      </p>
-                      <p className="text-xs text-muted-foreground">{post.author.role} • {post.timestamp}</p>
-                    </div>
+          <div className="pb-20">
+            <div className="grid grid-cols-3 md:grid-cols-2 lg:grid-cols-3 gap-1 md:gap-4">
+              {mockPosts.map((post) => (
+                <div
+                  key={post.id}
+                  className="aspect-square bg-gradient-to-br from-primary/10 to-primary/5 cursor-pointer group relative overflow-hidden"
+                  onClick={() => openPostDetail(post)}
+                >
+                  {/* Media Preview */}
+                  <div className="w-full h-full flex items-center justify-center">
+                    {post.mediaType === "video" && (
+                      <Play className="h-6 w-6 text-white absolute z-10" />
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                    <span className="text-muted-foreground text-xs opacity-50">Preview</span>
                   </div>
-                  <Button variant="ghost" size="icon" className="text-muted-foreground">
-                    <MoreHorizontal className="h-4 w-4" />
-                  </Button>
-                </div>
-
-                {/* Post Content */}
-                <div className="mb-4">
-                  <p className="text-sm leading-relaxed text-foreground mb-4">
-                    {post.content.split(' ').map((word, i) => (
-                      <span key={i}>
-                        {word.startsWith('#') ? (
-                          <span className="text-primary hover:underline cursor-pointer">{word}</span>
-                        ) : word.startsWith('@') ? (
-                          <span className="text-primary hover:underline cursor-pointer">{word}</span>
-                        ) : (
-                          word
-                        )}
-                        {i < post.content.split(' ').length - 1 ? ' ' : ''}
-                      </span>
-                    ))}
-                  </p>
-
-                  {/* Media */}
-                  {post.media && post.media.length > 0 && (
-                    <div className="rounded-lg overflow-hidden bg-muted mb-4">
-                      <div className="aspect-square bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
-                        <span className="text-muted-foreground text-sm">Artwork Preview</span>
+                  
+                  {/* Hover overlay with stats */}
+                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
+                    <div className="flex items-center gap-4 text-white text-sm">
+                      <div className="flex items-center gap-1">
+                        <Heart className="h-4 w-4 fill-current" />
+                        {post.likes}
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <MessageCircle className="h-4 w-4 fill-current" />
+                        {post.comments}
                       </div>
                     </div>
-                  )}
-                </div>
-
-                {/* Action Bar */}
-                <div className="flex items-center justify-between mb-4 py-2">
-                  <div className="flex items-center gap-6">
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className={`text-muted-foreground hover:text-red-500 ${post.liked ? 'text-red-500' : ''}`}
-                    >
-                      <Heart className={`h-5 w-5 mr-2 ${post.liked ? 'fill-current' : ''}`} />
-                      {post.likes}
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="text-muted-foreground hover:text-primary"
-                      onClick={() => toggleComments(post.id)}
-                    >
-                      <MessageCircle className="h-5 w-5 mr-2" />
-                      {post.comments}
-                    </Button>
-                    <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary">
-                      <Share2 className="h-5 w-5 mr-2" />
-                      {post.shares}
-                    </Button>
                   </div>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className={`text-muted-foreground hover:text-primary ${post.bookmarked ? 'text-primary' : ''}`}
+                </div>
+              ))}
+            </div>
+
+            {/* Detailed Post Modal */}
+            {selectedPost && (
+              <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
+                <div className="bg-background max-w-4xl w-full max-h-[90vh] overflow-y-auto rounded-lg relative">
+                  {/* Close Button */}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute top-4 right-4 z-10 bg-background/80 backdrop-blur hover:bg-background"
+                    onClick={closePostDetail}
                   >
-                    <Bookmark className={`h-5 w-5 ${post.bookmarked ? 'fill-current' : ''}`} />
+                    <X className="h-4 w-4" />
                   </Button>
-                </div>
 
-                {/* Like Summary */}
-                <div className="text-sm text-muted-foreground mb-3">
-                  Liked by <span className="font-semibold text-foreground">alex_kim</span> and{' '}
-                  <span className="font-semibold text-foreground">{post.likes - 1} others</span>
-                </div>
-
-                {/* Comments Preview */}
-                <div className="space-y-2 mb-4">
-                  {post.topComments.slice(0, 2).map((comment) => (
-                    <div key={comment.id} className="text-sm">
-                      <span className="font-semibold text-foreground mr-2">{comment.author}</span>
-                      <span className="text-foreground">{comment.content}</span>
-                    </div>
-                  ))}
-                  {post.comments > 2 && (
-                    <button 
-                      onClick={() => toggleComments(post.id)}
-                      className="text-sm text-primary hover:underline"
-                    >
-                      View all {post.comments} comments
-                    </button>
-                  )}
-                </div>
-
-                {/* Expanded Comments */}
-                {expandedComments.has(post.id) && (
-                  <div className="border-t border-border pt-4 space-y-4">
-                    {/* Comment Input */}
-                    <div className="flex gap-3">
-                      <Avatar className="h-8 w-8">
-                        <AvatarFallback className="bg-primary/10 text-primary text-xs">SC</AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <input
-                          type="text"
-                          placeholder="Add a comment..."
-                          className="w-full bg-transparent border-b border-border pb-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:border-primary"
-                        />
+                  {/* Post Header */}
+                  <div className="p-6 border-b border-border">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-12 w-12">
+                          <AvatarImage src={selectedPost.author.avatar} alt={selectedPost.author.name} />
+                          <AvatarFallback className="bg-primary/10 text-primary">
+                            {selectedPost.author.name.split(' ').map((n: string) => n[0]).join('')}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="font-semibold text-foreground hover:text-primary cursor-pointer">
+                            {selectedPost.author.name}
+                          </p>
+                          <p className="text-sm text-muted-foreground">{selectedPost.author.role} • {selectedPost.timestamp}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button variant="default" className="bg-primary hover:bg-primary/90 text-primary-foreground">
+                          <UserPlus className="h-4 w-4 mr-2" />
+                          Follow
+                        </Button>
+                        <Button variant="ghost" size="icon">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
                   </div>
-                )}
 
-                <Separator className="mt-8" />
-              </article>
-            ))}
+                  {/* Post Media */}
+                  <div className="relative">
+                    <div className="aspect-square bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+                      {selectedPost.mediaType === "video" ? (
+                        <div className="flex flex-col items-center gap-2">
+                          <Play className="h-12 w-12 text-primary" />
+                          <span className="text-muted-foreground">Video Content</span>
+                        </div>
+                      ) : (
+                        <span className="text-muted-foreground">Image Content</span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Action Bar */}
+                  <div className="px-6 py-4">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-6">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className={`text-muted-foreground hover:text-red-500 transition-colors ${likedPosts.has(selectedPost.id) ? 'text-red-500' : ''}`}
+                          onClick={() => toggleLike(selectedPost.id)}
+                        >
+                          <Heart className={`h-6 w-6 mr-2 transition-all ${likedPosts.has(selectedPost.id) ? 'fill-current scale-110' : ''}`} />
+                          {selectedPost.likes + (likedPosts.has(selectedPost.id) ? 1 : 0)}
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="text-muted-foreground hover:text-primary transition-colors"
+                          onClick={() => toggleComments(selectedPost.id)}
+                        >
+                          <MessageCircle className="h-6 w-6 mr-2" />
+                          {selectedPost.comments}
+                        </Button>
+                        <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary transition-colors">
+                          <Share2 className="h-6 w-6 mr-2" />
+                          {selectedPost.shares}
+                        </Button>
+                      </div>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className={`text-muted-foreground hover:text-primary transition-colors ${bookmarkedPosts.has(selectedPost.id) ? 'text-primary' : ''}`}
+                        onClick={() => toggleBookmark(selectedPost.id)}
+                      >
+                        <Bookmark className={`h-6 w-6 transition-all ${bookmarkedPosts.has(selectedPost.id) ? 'fill-current scale-110' : ''}`} />
+                      </Button>
+                    </div>
+
+                    {/* Like Summary */}
+                    <div className="text-sm text-muted-foreground mb-4">
+                      Liked by <span className="font-semibold text-foreground cursor-pointer hover:text-primary">alex_kim</span> and{' '}
+                      <span className="font-semibold text-foreground">{selectedPost.likes + (likedPosts.has(selectedPost.id) ? 1 : 0) - 1} others</span>
+                    </div>
+
+                    {/* Post Caption */}
+                    <div className="mb-4">
+                      <p className="text-sm leading-relaxed text-foreground">
+                        <span className="font-semibold cursor-pointer hover:text-primary mr-2">{selectedPost.author.name}</span>
+                        {selectedPost.content.split(' ').map((word: string, i: number) => (
+                          <span key={i}>
+                            {word.startsWith('#') ? (
+                              <span className="text-primary hover:underline cursor-pointer transition-colors">{word}</span>
+                            ) : word.startsWith('@') ? (
+                              <span className="text-primary hover:underline cursor-pointer transition-colors">{word}</span>
+                            ) : (
+                              word
+                            )}
+                            {i < selectedPost.content.split(' ').length - 1 ? ' ' : ''}
+                          </span>
+                        ))}
+                      </p>
+                    </div>
+
+                    {/* Comments Section */}
+                    <div className="space-y-4 mb-6">
+                      {selectedPost.topComments.map((comment: any) => (
+                        <div key={comment.id} className="flex items-start gap-3">
+                          <Avatar className="h-8 w-8">
+                            <AvatarFallback className="bg-primary/10 text-primary text-xs">
+                              {comment.author.split(' ').map((n: string) => n[0]).join('')}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1">
+                            <p className="text-sm">
+                              <span className="font-semibold cursor-pointer hover:text-primary mr-2">{comment.author}</span>
+                              <span className="text-foreground">{comment.content}</span>
+                            </p>
+                            <div className="flex items-center gap-4 mt-1">
+                              <span className="text-xs text-muted-foreground">2h</span>
+                              <button className="text-xs text-muted-foreground hover:text-primary transition-colors">
+                                {comment.likes} likes
+                              </button>
+                              <button className="text-xs text-muted-foreground hover:text-primary transition-colors">
+                                Reply
+                              </button>
+                            </div>
+                          </div>
+                          <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-red-500 p-1">
+                            <Heart className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ))}
+                      
+                      {selectedPost.comments > selectedPost.topComments.length && (
+                        <button className="text-sm text-primary hover:underline transition-colors">
+                          View all {selectedPost.comments} comments
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Add Comment */}
+                    <div className="border-t border-border pt-4">
+                      <div className="flex gap-3">
+                        <Avatar className="h-8 w-8">
+                          <AvatarFallback className="bg-primary/10 text-primary text-xs">SC</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                          <input
+                            type="text"
+                            placeholder="Add a comment..."
+                            className="w-full bg-transparent border-b border-border pb-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors"
+                          />
+                        </div>
+                        <Button variant="ghost" size="sm" className="text-primary hover:bg-primary/10">
+                          Post
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
