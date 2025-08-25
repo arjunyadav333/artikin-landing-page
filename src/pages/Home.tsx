@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { 
@@ -8,7 +8,8 @@ import {
   Bookmark, 
   MoreHorizontal,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Plus
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -16,83 +17,30 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { usePosts, useLikePost } from "@/hooks/usePosts";
+import { useAuth } from "@/hooks/useAuth";
+import { Link } from "react-router-dom";
 
 const Home = () => {
-  const [likedPosts, setLikedPosts] = useState<Set<number>>(new Set());
-  const [bookmarkedPosts, setBookmarkedPosts] = useState<Set<number>>(new Set());
-  const [expandedComments, setExpandedComments] = useState<Set<number>>(new Set());
+  const [bookmarkedPosts, setBookmarkedPosts] = useState<Set<string>>(new Set());
+  const [expandedComments, setExpandedComments] = useState<Set<string>>(new Set());
+  const { user } = useAuth();
+  const { data: postsData, isLoading, fetchNextPage, hasNextPage } = usePosts();
+  const likePostMutation = useLikePost();
 
-  const mockPosts = [
-    {
-      id: 1,
-      author: "Sarah Chen",
-      username: "@sarahartist",
-      avatar: "",
-      role: "Visual Artist",
-      time: "2h",
-      content: "Just finished this watercolor piece inspired by urban landscapes. The interplay of light and shadow in city spaces never fails to amaze me. #UrbanArt #Watercolor #CityLife",
-      images: ["/placeholder.svg", "/placeholder.svg"],
-      likes: 24,
-      comments: 8,
-      shares: 3,
-      isFollowing: false,
-      likedBy: ["Alex Rivera", "Marcus"],
-      topComments: [
-        { author: "Alex Rivera", content: "Absolutely stunning work! The depth is incredible.", avatar: "" },
-        { author: "Maria Lopez", content: "This captures the essence of city life beautifully", avatar: "" }
-      ]
-    },
-    {
-      id: 2,
-      author: "Marcus Rodriguez",
-      username: "@marcusmusic",
-      avatar: "",
-      role: "Music Producer",
-      time: "4h",
-      content: "Excited to share my latest composition. This piece explores the intersection of jazz and electronic music. What do you think about this fusion? #Jazz #Electronic #MusicProduction",
-      likes: 18,
-      comments: 12,
-      shares: 5,
-      isFollowing: true,
-      likedBy: ["Sarah Chen", "Elena"],
-      topComments: [
-        { author: "DJ Nova", content: "This fusion is exactly what the industry needs!", avatar: "" }
-      ]
-    },
-    {
-      id: 3,
-      author: "Elena Kowalski",
-      username: "@elenadesign",
-      avatar: "",
-      role: "Brand Designer",
-      time: "6h",
-      content: "Working on a new brand identity for a sustainable fashion startup. Love how creative projects can drive positive change! Check out the full case study on my portfolio. #BrandDesign #Sustainability #Fashion",
-      images: ["/placeholder.svg"],
-      likes: 31,
-      comments: 15,
-      shares: 8,
-      isFollowing: false,
-      likedBy: ["Sarah Chen", "Marcus", "David Kim"],
-      topComments: [
-        { author: "Green Studio", content: "Sustainability meets beautiful design ✨", avatar: "" },
-        { author: "Fashion Forward", content: "Would love to collaborate on similar projects!", avatar: "" }
-      ]
+  const posts = postsData?.pages.flat() || [];
+
+  const handleLike = (postId: string) => {
+    const post = posts.find(p => p.id === postId);
+    if (post) {
+      likePostMutation.mutate({ 
+        postId, 
+        isLiked: post.user_liked || false 
+      });
     }
-  ];
-
-  const handleLike = (postId: number) => {
-    setLikedPosts(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(postId)) {
-        newSet.delete(postId);
-      } else {
-        newSet.add(postId);
-      }
-      return newSet;
-    });
   };
 
-  const handleBookmark = (postId: number) => {
+  const handleBookmark = (postId: string) => {
     setBookmarkedPosts(prev => {
       const newSet = new Set(prev);
       if (newSet.has(postId)) {
@@ -104,7 +52,7 @@ const Home = () => {
     });
   };
 
-  const toggleComments = (postId: number) => {
+  const toggleComments = (postId: string) => {
     setExpandedComments(prev => {
       const newSet = new Set(prev);
       if (newSet.has(postId)) {
@@ -141,45 +89,55 @@ const Home = () => {
     <div className="min-h-screen bg-background">
       <div className="max-w-2xl mx-auto">
         {/* Header */}
-        <div className="sticky top-0 bg-background/80 backdrop-blur-md border-b border-border z-10 px-4 py-3">
+        <div className="sticky top-0 bg-background/80 backdrop-blur-md border-b border-border z-10 px-4 py-3 flex items-center justify-between">
           <h1 className="text-xl font-bold">Home</h1>
+          <Link to="/create">
+            <Button size="sm" className="bg-primary hover:bg-primary/90">
+              <Plus className="h-4 w-4 mr-2" />
+              Create
+            </Button>
+          </Link>
         </div>
 
         {/* Feed */}
         <div className="pb-20 md:pb-8">
-          {mockPosts.map((post) => (
-            <article key={post.id} className="border-b border-border">
-              {/* Post Header */}
-              <div className="flex items-center justify-between p-4 pb-3">
-                <div className="flex items-center space-x-3">
-                  <Avatar className="h-10 w-10 cursor-pointer">
-                    <AvatarImage src={post.avatar} alt={post.author} />
-                    <AvatarFallback className="bg-muted text-foreground">
-                      {post.author.split(' ').map(n => n[0]).join('')}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <div className="flex items-center space-x-2">
-                      <span className="font-bold text-sm cursor-pointer hover:text-primary transition-colors">
-                        {post.author}
-                      </span>
-                      <span className="text-muted-foreground text-sm">{post.username}</span>
-                    </div>
-                    <div className="flex items-center space-x-2 text-xs text-muted-foreground">
-                      <span>{post.role}</span>
-                      <span>•</span>
-                      <span>{post.time}</span>
+          {isLoading ? (
+            <div className="flex items-center justify-center p-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+          ) : posts.length === 0 ? (
+            <div className="text-center p-8">
+              <p className="text-muted-foreground mb-4">No posts yet!</p>
+              <Link to="/create">
+                <Button>Create your first post</Button>
+              </Link>
+            </div>
+          ) : (
+            posts.map((post) => (
+              <article key={post.id} className="border-b border-border">
+                {/* Post Header */}
+                <div className="flex items-center justify-between p-4 pb-3">
+                  <div className="flex items-center space-x-3">
+                    <Avatar className="h-10 w-10 cursor-pointer">
+                      <AvatarImage src={post.profiles?.avatar_url} alt={post.profiles?.display_name} />
+                      <AvatarFallback className="bg-muted text-foreground">
+                        {post.profiles?.display_name?.split(' ').map(n => n[0]).join('') || 'U'}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <div className="flex items-center space-x-2">
+                        <span className="font-bold text-sm cursor-pointer hover:text-primary transition-colors">
+                          {post.profiles?.display_name}
+                        </span>
+                        <span className="text-muted-foreground text-sm">@{post.profiles?.username}</span>
+                      </div>
+                      <div className="flex items-center space-x-2 text-xs text-muted-foreground">
+                        <span>{post.profiles?.role || 'Creator'}</span>
+                        <span>•</span>
+                        <span>{new Date(post.created_at).toLocaleDateString()}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Button 
-                    size="sm" 
-                    variant={post.isFollowing ? "secondary" : "default"}
-                    className="h-8 px-4 rounded-full text-xs font-medium"
-                  >
-                    {post.isFollowing ? "Following" : "Follow"}
-                  </Button>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
@@ -193,135 +151,86 @@ const Home = () => {
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
-              </div>
 
-              {/* Post Content */}
-              <div className="px-4 pb-3">
-                <p className="text-sm leading-relaxed">
-                  {formatText(post.content)}
-                </p>
-              </div>
+                {/* Post Content */}
+                <div className="px-4 pb-3">
+                  {post.title && (
+                    <h3 className="font-semibold text-lg mb-2">{post.title}</h3>
+                  )}
+                  <p className="text-sm leading-relaxed">
+                    {formatText(post.content)}
+                  </p>
+                </div>
 
-              {/* Post Media */}
-              {post.images && (
-                <div className="relative bg-muted">
-                  {post.images.length === 1 ? (
+                {/* Post Media */}
+                {post.media_urls && post.media_urls.length > 0 && (
+                  <div className="relative bg-muted">
                     <div className="aspect-square bg-gradient-to-br from-muted to-muted/60 flex items-center justify-center">
-                      <span className="text-muted-foreground text-sm">Artwork Preview</span>
+                      <span className="text-muted-foreground text-sm">Media Preview</span>
                     </div>
-                  ) : (
-                    <div className="relative">
-                      <div className="aspect-square bg-gradient-to-br from-muted to-muted/60 flex items-center justify-center">
-                        <span className="text-muted-foreground text-sm">Gallery Preview 1/{post.images.length}</span>
-                      </div>
-                      <Button variant="ghost" size="sm" className="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0 bg-black/20 hover:bg-black/40 text-white">
-                        <ChevronLeft className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="sm" className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0 bg-black/20 hover:bg-black/40 text-white">
-                        <ChevronRight className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              )}
+                  </div>
+                )}
 
-              {/* Action Bar */}
-              <div className="flex items-center justify-between px-4 py-3">
-                <div className="flex items-center space-x-4">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-auto p-0 text-foreground hover:text-red-500 transition-colors"
-                    onClick={() => handleLike(post.id)}
-                  >
-                    <Heart 
-                      className={`h-6 w-6 mr-1 transition-all ${
-                        likedPosts.has(post.id) ? 'fill-red-500 text-red-500' : ''
-                      }`} 
-                    />
-                    <span className="text-sm font-medium">{post.likes + (likedPosts.has(post.id) ? 1 : 0)}</span>
-                  </Button>
-                  
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-auto p-0 text-foreground hover:text-primary transition-colors"
-                    onClick={() => toggleComments(post.id)}
-                  >
-                    <MessageCircle className="h-6 w-6 mr-1" />
-                    <span className="text-sm font-medium">{post.comments}</span>
-                  </Button>
-                  
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-auto p-0 text-foreground hover:text-primary transition-colors"
-                  >
-                    <Share2 className="h-6 w-6 mr-1" />
-                    <span className="text-sm font-medium">{post.shares}</span>
-                  </Button>
-                </div>
-                
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-auto p-0 text-foreground hover:text-primary transition-colors"
-                  onClick={() => handleBookmark(post.id)}
-                >
-                  <Bookmark 
-                    className={`h-6 w-6 transition-all ${
-                      bookmarkedPosts.has(post.id) ? 'fill-primary text-primary' : ''
-                    }`} 
-                  />
-                </Button>
-              </div>
-
-              {/* Post Footer */}
-              <div className="px-4 pb-4 space-y-2">
-                {/* Like Summary */}
-                <div className="text-sm">
-                  <span className="font-medium">Liked by </span>
-                  <span className="font-bold cursor-pointer hover:text-primary transition-colors">
-                    {post.likedBy[0]}
-                  </span>
-                  {post.likedBy.length > 1 && (
-                    <>
-                      <span> and </span>
-                      <span className="font-bold cursor-pointer hover:text-primary transition-colors">
-                        {post.likes - 1} others
-                      </span>
-                    </>
-                  )}
-                </div>
-
-                {/* Comments Preview */}
-                <div className="space-y-1">
-                  {post.topComments.slice(0, 2).map((comment, index) => (
-                    <div key={index} className="text-sm">
-                      <span className="font-bold cursor-pointer hover:text-primary transition-colors mr-2">
-                        {comment.author}
-                      </span>
-                      <span>{comment.content}</span>
-                    </div>
-                  ))}
-                  
-                  {post.comments > 2 && (
-                    <button 
-                      className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                {/* Action Bar */}
+                <div className="flex items-center justify-between px-4 py-3">
+                  <div className="flex items-center space-x-4">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-auto p-0 text-foreground hover:text-red-500 transition-colors"
+                      onClick={() => handleLike(post.id)}
+                      disabled={likePostMutation.isPending}
+                    >
+                      <Heart 
+                        className={`h-6 w-6 mr-1 transition-all ${
+                          post.user_liked ? 'fill-red-500 text-red-500' : ''
+                        }`} 
+                      />
+                      <span className="text-sm font-medium">{post.likes_count}</span>
+                    </Button>
+                    
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-auto p-0 text-foreground hover:text-primary transition-colors"
                       onClick={() => toggleComments(post.id)}
                     >
-                      View all {post.comments} comments
-                    </button>
-                  )}
+                      <MessageCircle className="h-6 w-6 mr-1" />
+                      <span className="text-sm font-medium">{post.comments_count}</span>
+                    </Button>
+                    
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-auto p-0 text-foreground hover:text-primary transition-colors"
+                    >
+                      <Share2 className="h-6 w-6 mr-1" />
+                      <span className="text-sm font-medium">{post.shares_count}</span>
+                    </Button>
+                  </div>
+                  
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-auto p-0 text-foreground hover:text-primary transition-colors"
+                    onClick={() => handleBookmark(post.id)}
+                  >
+                    <Bookmark 
+                      className={`h-6 w-6 transition-all ${
+                        bookmarkedPosts.has(post.id) ? 'fill-primary text-primary' : ''
+                      }`} 
+                    />
+                  </Button>
                 </div>
 
                 {/* Expanded Comments */}
                 {expandedComments.has(post.id) && (
-                  <div className="mt-4 space-y-3 border-t border-border pt-4">
+                  <div className="px-4 pb-4 mt-4 space-y-3 border-t border-border pt-4">
                     <div className="flex space-x-3">
                       <Avatar className="h-8 w-8">
+                        <AvatarImage src={user?.user_metadata?.avatar_url} />
                         <AvatarFallback className="bg-muted text-foreground text-xs">
-                          SC
+                          {user?.email?.charAt(0).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1">
@@ -337,17 +246,24 @@ const Home = () => {
                     </div>
                   </div>
                 )}
-              </div>
-            </article>
-          ))}
+              </article>
+            ))
+          )}
         </div>
 
         {/* Load More */}
-        <div className="p-4 text-center">
-          <Button variant="outline" className="w-full max-w-sm rounded-full">
-            Load More Posts
-          </Button>
-        </div>
+        {hasNextPage && (
+          <div className="p-4 text-center">
+            <Button 
+              variant="outline" 
+              className="w-full max-w-sm rounded-full"
+              onClick={() => fetchNextPage()}
+              disabled={isLoading}
+            >
+              {isLoading ? 'Loading...' : 'Load More Posts'}
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );
