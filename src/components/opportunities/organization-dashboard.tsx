@@ -74,7 +74,7 @@ export function OrganizationDashboard() {
             onClick={() => setSelectedOpportunity(null)}
             className="px-2"
           >
-            ← Back to Dashboard
+            ← Back
           </Button>
           <div>
             <h2 className="text-xl font-semibold">{opportunity?.title}</h2>
@@ -96,7 +96,7 @@ export function OrganizationDashboard() {
       <div className="flex justify-end mb-6">
         <Button className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-white shadow-lg">
           <Plus className="h-4 w-4 mr-2" />
-          Post New Opportunity
+          Post
         </Button>
       </div>
 

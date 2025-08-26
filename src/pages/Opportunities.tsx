@@ -37,7 +37,7 @@ const Opportunities = () => {
       <div className="min-h-screen bg-background pb-20 md:pb-8 flex items-center justify-center">
         <div className="text-center space-y-4">
           <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full mx-auto"></div>
-          <p className="text-muted-foreground">Loading opportunities...</p>
+          <p className="text-muted-foreground">Loading...</p>
         </div>
       </div>
     );
@@ -218,13 +218,13 @@ const Opportunities = () => {
                   value="opportunities" 
                   className="data-[state=active]:bg-opportunities-active data-[state=active]:text-opportunities-active-foreground data-[state=active]:font-bold data-[state=active]:shadow-sm transition-all duration-200 text-base"
                 >
-                  All Opportunities
+                  Browse
                 </TabsTrigger>
                 <TabsTrigger 
                   value="applications"
                   className="data-[state=active]:bg-opportunities-active data-[state=active]:text-opportunities-active-foreground data-[state=active]:font-bold data-[state=active]:shadow-sm transition-all duration-200 text-base"
                 >
-                  My Applications
+                  Applied
                 </TabsTrigger>
               </TabsList>
             </div>
@@ -256,16 +256,10 @@ const Opportunities = () => {
                     exit={{ opacity: 0, y: -20 }}
                   >
                     {/* Results Counter */}
-                    <div className="mb-6 flex items-center justify-between">
-                      <p className="text-muted-foreground">
-                        <span className="font-semibold text-foreground">{filteredOpportunities.length}</span> opportunities found
-                        {searchQuery && (
-                          <span> for "<span className="font-semibold text-foreground">{searchQuery}</span>"</span>
-                        )}
-                      </p>
+                    <div className="mb-6 flex items-center justify-end">
                       {filteredOpportunities.length > 0 && (
                         <Badge variant="outline" className="bg-primary/5 text-primary border-primary/20">
-                          {filteredOpportunities.filter(opp => !opp.user_applied).length} available to apply
+                          {filteredOpportunities.filter(opp => !opp.user_applied).length} available
                         </Badge>
                       )}
                     </div>
