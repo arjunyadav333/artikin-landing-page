@@ -24,10 +24,7 @@ export function TopBar() {
         {/* Left: Logo + Sidebar Toggle */}
         <div className="flex items-center gap-4">
           <SidebarTrigger className="md:flex hidden" />
-          <Link to="/home" className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-lg">A</span>
-            </div>
+          <Link to="/home" className="flex items-center">
             <span className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
               Artikin
             </span>
@@ -66,49 +63,6 @@ export function TopBar() {
             <Bell className="h-4 w-4" />
             <span className="absolute -top-1 -right-1 h-3 w-3 bg-destructive rounded-full text-xs"></span>
           </Button>
-
-          {/* Profile Dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-9 w-9 rounded-full">
-                <Avatar className="h-9 w-9">
-                  <AvatarImage src={user?.user_metadata?.avatar_url} alt="Profile" />
-                  <AvatarFallback className="bg-primary text-primary-foreground text-sm">
-                    {user?.email?.charAt(0).toUpperCase() || 'U'}
-                  </AvatarFallback>
-                </Avatar>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-64" align="end" forceMount>
-              <div className="flex flex-col space-y-1 p-3">
-                <p className="text-sm font-medium leading-none">
-                  {user?.user_metadata?.display_name || user?.email}
-                </p>
-                <p className="text-xs leading-none text-muted-foreground">
-                  @{user?.user_metadata?.username || 'user'}
-                </p>
-                <p className="text-xs text-primary font-medium">
-                  {user?.user_metadata?.role || 'Artist'}
-                </p>
-              </div>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <Link to="/profile" className="cursor-pointer">
-                  <User className="mr-2 h-4 w-4" />
-                  Profile
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Settings className="mr-2 h-4 w-4" />
-                Settings
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={signOut} className="cursor-pointer">
-                <LogOut className="mr-2 h-4 w-4" />
-                Sign out
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
         </div>
       </div>
     </header>
