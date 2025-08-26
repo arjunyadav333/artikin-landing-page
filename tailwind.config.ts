@@ -76,6 +76,10 @@ export default {
 					active: 'hsl(var(--sidebar-active))',
 					inactive: 'hsl(var(--sidebar-inactive))',
 					hover: 'hsl(var(--sidebar-hover))'
+				},
+				opportunities: {
+					active: 'hsl(var(--opportunities-active))',
+					'active-foreground': 'hsl(var(--opportunities-active-foreground))'
 				}
 			},
 			borderRadius: {

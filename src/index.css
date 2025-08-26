@@ -63,6 +63,10 @@ All colors MUST be HSL.
     --sidebar-border: 220 13% 91%;
 
     --sidebar-ring: 217.2 91.2% 59.8%;
+    
+    /* Opportunities Page Colors */
+    --opportunities-active: 221 84% 95%;
+    --opportunities-active-foreground: 221 84% 45%;
   }
 
   .dark {
@@ -116,6 +120,10 @@ All colors MUST be HSL.
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+    
+    /* Opportunities Page Colors - Dark Mode */
+    --opportunities-active: 221 84% 15%;
+    --opportunities-active-foreground: 221 84% 75%;
   }
 }
 
