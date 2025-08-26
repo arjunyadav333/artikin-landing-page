@@ -1,3 +1,4 @@
+import { Suspense, lazy } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -5,15 +6,24 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./hooks/useAuth";
 import { AppLayout } from "./components/layout/app-layout";
-import Home from "./pages/Home";
-import Opportunities from "./pages/Opportunities";
-import Create from "./pages/Create";
-import Connections from "./pages/Connections";
-import Profile from "./pages/Profile";
-import Messages from "./pages/Messages";
-import AuthNew from "./pages/AuthNew";
-import SignUp from "./pages/SignUp";
 import NotFound from "./pages/NotFound";
+
+// Lazy load components for better performance and code splitting
+const Home = lazy(() => import("./pages/Home"));
+const Opportunities = lazy(() => import("./pages/Opportunities"));
+const Create = lazy(() => import("./pages/Create"));
+const Connections = lazy(() => import("./pages/Connections"));
+const Profile = lazy(() => import("./pages/Profile"));
+const Messages = lazy(() => import("./pages/Messages"));
+const AuthNew = lazy(() => import("./pages/AuthNew"));
+const SignUp = lazy(() => import("./pages/SignUp"));
+
+// Loading component for lazy routes
+const PageLoader = () => (
+  <div className="flex items-center justify-center min-h-screen">
+    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+  </div>
+);
 
 const queryClient = new QueryClient();
 
@@ -42,57 +52,83 @@ const AppRoutes = () => {
     <BrowserRouter>
       <Routes>
         {/* Auth Routes (No Layout) */}
-        <Route path="/auth" element={<AuthNew />} />
-        <Route path="/signup" element={<SignUp />} />
-        <Route path="/auth/signup" element={<SignUp />} />
+        <Route path="/auth" element={
+          <Suspense fallback={<PageLoader />}>
+            <AuthNew />
+          </Suspense>
+        } />
+        <Route path="/signup" element={
+          <Suspense fallback={<PageLoader />}>
+            <SignUp />
+          </Suspense>
+        } />
+        <Route path="/auth/signup" element={
+          <Suspense fallback={<PageLoader />}>
+            <SignUp />
+          </Suspense>
+        } />
         
         {/* App Routes (With Layout) */}
         <Route path="/" element={
           <ProtectedRoute>
             <AppLayout>
-              <Home />
+              <Suspense fallback={<PageLoader />}>
+                <Home />
+              </Suspense>
             </AppLayout>
           </ProtectedRoute>
         } />
         <Route path="/home" element={
           <ProtectedRoute>
             <AppLayout>
-              <Home />
+              <Suspense fallback={<PageLoader />}>
+                <Home />
+              </Suspense>
             </AppLayout>
           </ProtectedRoute>
         } />
         <Route path="/opportunities" element={
           <ProtectedRoute>
             <AppLayout>
-              <Opportunities />
+              <Suspense fallback={<PageLoader />}>
+                <Opportunities />
+              </Suspense>
             </AppLayout>
           </ProtectedRoute>
         } />
         <Route path="/create" element={
           <ProtectedRoute>
             <AppLayout>
-              <Create />
+              <Suspense fallback={<PageLoader />}>
+                <Create />
+              </Suspense>
             </AppLayout>
           </ProtectedRoute>
         } />
         <Route path="/connections" element={
           <ProtectedRoute>
             <AppLayout>
-              <Connections />
+              <Suspense fallback={<PageLoader />}>
+                <Connections />
+              </Suspense>
             </AppLayout>
           </ProtectedRoute>
         } />
         <Route path="/profile" element={
           <ProtectedRoute>
             <AppLayout>
-              <Profile />
+              <Suspense fallback={<PageLoader />}>
+                <Profile />
+              </Suspense>
             </AppLayout>
           </ProtectedRoute>
         } />
         <Route path="/messages" element={
           <ProtectedRoute>
             <AppLayout>
-              <Messages />
+              <Suspense fallback={<PageLoader />}>
+                <Messages />
+              </Suspense>
             </AppLayout>
           </ProtectedRoute>
         } />

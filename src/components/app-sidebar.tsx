@@ -77,20 +77,32 @@ export function AppSidebar() {
       <SidebarContent className="px-3">
         <SidebarGroup>
           <SidebarGroupContent>
-            <SidebarMenu className="space-y-1">
+            <SidebarMenu className="space-y-3">
               {navItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton 
                     asChild 
-                    className={`w-full justify-start px-3 py-2.5 rounded-lg transition-all duration-200 ${
+                    className={`w-full justify-start px-4 py-3 rounded-lg transition-all duration-200 border-0 ${
                       isActive(item.url) 
-                        ? 'bg-primary text-primary-foreground shadow-sm' 
-                        : 'hover:bg-muted/80'
+                        ? 'text-sidebar-active font-bold bg-transparent hover:bg-sidebar-hover' 
+                        : 'text-sidebar-inactive font-normal hover:bg-sidebar-hover'
                     }`}
                   >
                     <Link to={item.url === '#' ? location.pathname : item.url}>
-                      <item.icon className={`h-5 w-5 ${isCollapsed ? '' : 'mr-3'}`} />
-                      {!isCollapsed && <span className="font-medium">{item.title}</span>}
+                      <item.icon className={`h-5 w-5 ${
+                        isActive(item.url) 
+                          ? 'text-sidebar-active' 
+                          : 'text-sidebar-inactive'
+                      } ${isCollapsed ? '' : 'mr-3'}`} />
+                      {!isCollapsed && (
+                        <span className={
+                          isActive(item.url) 
+                            ? 'font-bold text-sidebar-active' 
+                            : 'font-normal text-sidebar-inactive'
+                        }>
+                          {item.title}
+                        </span>
+                      )}
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
