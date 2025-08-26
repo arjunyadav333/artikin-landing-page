@@ -216,13 +216,13 @@ const Opportunities = () => {
               <TabsList className="grid w-full max-w-md grid-cols-2 bg-muted/30 p-1 rounded-xl h-12">
                 <TabsTrigger 
                   value="opportunities" 
-                  className="data-[state=active]:bg-opportunities-active data-[state=active]:text-opportunities-active-foreground data-[state=active]:font-bold data-[state=active]:shadow-sm transition-all duration-200 text-base"
+                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:font-bold data-[state=active]:shadow-md data-[state=active]:border-primary/50 transition-all duration-200 text-base hover:bg-primary/10"
                 >
                   Browse
                 </TabsTrigger>
                 <TabsTrigger 
                   value="applications"
-                  className="data-[state=active]:bg-opportunities-active data-[state=active]:text-opportunities-active-foreground data-[state=active]:font-bold data-[state=active]:shadow-sm transition-all duration-200 text-base"
+                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:font-bold data-[state=active]:shadow-md data-[state=active]:border-primary/50 transition-all duration-200 text-base hover:bg-primary/10"
                 >
                   Applied
                 </TabsTrigger>
