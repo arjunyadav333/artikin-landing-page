@@ -175,6 +175,29 @@ body {
   @apply bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent;
 }
 
+/* Text containment utilities */
+.text-contain {
+  @apply break-words hyphens-auto;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.text-ellipsis-container {
+  @apply overflow-hidden text-ellipsis whitespace-nowrap;
+}
+
+.text-wrap-balance {
+  text-wrap: balance;
+}
+
+/* Improved button text handling */
+.btn-text-contain {
+  @apply text-contain;
+  min-height: fit-content;
+  white-space: normal;
+  line-height: 1.4;
+}
+
 /* Mobile-first responsive utilities */
 @media (max-width: 640px) {
   .mobile-padding {
@@ -183,6 +206,10 @@ body {
   
   .mobile-text {
     @apply text-sm;
+  }
+  
+  .mobile-text-xs {
+    @apply text-xs leading-relaxed;
   }
 }
 
