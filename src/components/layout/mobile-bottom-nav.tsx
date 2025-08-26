@@ -24,7 +24,6 @@ const navigation: NavigationItem[] = [
   { name: "Create", href: "/create", icon: Plus, isSpecial: true },
   { name: "Connections", href: "/connections", icon: Users },
   { name: "Messages", href: "/messages", icon: MessageSquare },
-  { name: "Profile", href: "/profile", icon: User },
 ];
 
 // Memoized navigation item component
@@ -45,49 +44,32 @@ const NavigationItemComponent = memo(({
   if (isSpecial) {
     return (
       <Link key={item.name} to={item.href}>
-        <motion.div
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.95 }}
-          onHoverStart={handleHover}
-          onTapStart={handleTap}
+        <Button
+          size="sm"
+          className="h-10 w-10 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground"
         >
-          <Button
-            size="sm"
-            className="h-12 w-12 rounded-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-white shadow-lg"
-          >
-            <Icon className="h-5 w-5" />
-          </Button>
-        </motion.div>
+          <Icon className="h-4 w-4" />
+        </Button>
       </Link>
     );
   }
 
   return (
     <Link key={item.name} to={item.href} className="flex-1 max-w-16">
-      <motion.div
-        whileHover={{ y: -2 }}
-        whileTap={{ y: 0 }}
-        onHoverStart={handleHover}
-        onTapStart={handleTap}
+      <div
         className={`
           flex flex-col items-center justify-center py-2 px-1 rounded-lg transition-colors
           ${isActive 
-            ? "text-primary bg-primary/10" 
-            : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+            ? "text-foreground" 
+            : "text-muted-foreground hover:text-foreground"
           }
         `}
       >
-        <Icon className={`h-5 w-5 mb-1 ${isActive ? "fill-current" : ""}`} />
-        <span className="text-xs font-medium truncate w-full text-center">
+        <Icon className={`h-5 w-5 mb-1`} />
+        <span className={`text-xs truncate w-full text-center ${isActive ? "font-bold" : "font-medium"}`}>
           {item.name}
         </span>
-        {isActive && (
-          <motion.div
-            layoutId="activeTab"
-            className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-primary rounded-full"
-          />
-        )}
-      </motion.div>
+      </div>
     </Link>
   );
 });
