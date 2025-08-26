@@ -61,28 +61,26 @@ export default function SignUpPage() {
                   <Button
                     onClick={() => setSelectedRole('artist')}
                     variant="outline"
-                    className="h-32 flex flex-col items-center justify-center space-y-3 border-2 border-primary/20 hover:border-primary hover:bg-primary/5 transition-all duration-200 p-4 text-contain"
+                    className="h-32 flex flex-col items-center justify-center space-y-3 border-2 border-primary/20 hover:border-primary hover:bg-primary/5 transition-all duration-200"
                   >
-                    <div className="h-12 w-12 rounded-full bg-gradient-blue flex items-center justify-center flex-shrink-0">
+                    <div className="h-12 w-12 rounded-full bg-gradient-blue flex items-center justify-center">
                       <Palette className="h-6 w-6 text-primary-foreground" />
                     </div>
-                    <div className="text-center text-contain max-w-full">
-                      <h3 className="font-semibold text-lg leading-tight mb-1">Artist 🎭</h3>
-                      <p className="text-xs text-muted-foreground leading-relaxed break-words">Showcase your work</p>
+                    <div className="text-center">
+                      <h3 className="font-semibold text-lg">Artist</h3>
                     </div>
                   </Button>
 
                   <Button
                     onClick={() => setSelectedRole('organization')}
                     variant="outline"
-                    className="h-32 flex flex-col items-center justify-center space-y-3 border-2 border-primary/20 hover:border-primary hover:bg-primary/5 transition-all duration-200 p-4 text-contain"
+                    className="h-32 flex flex-col items-center justify-center space-y-3 border-2 border-primary/20 hover:border-primary hover:bg-primary/5 transition-all duration-200"
                   >
-                    <div className="h-12 w-12 rounded-full bg-gradient-blue flex items-center justify-center flex-shrink-0">
+                    <div className="h-12 w-12 rounded-full bg-gradient-blue flex items-center justify-center">
                       <Building2 className="h-6 w-6 text-primary-foreground" />
                     </div>
-                    <div className="text-center text-contain max-w-full">
-                      <h3 className="font-semibold text-lg leading-tight mb-1">Organization 🏢</h3>
-                      <p className="text-xs text-muted-foreground leading-relaxed break-words">Hire talent</p>
+                    <div className="text-center">
+                      <h3 className="font-semibold text-lg">Organization</h3>
                     </div>
                   </Button>
                 </div>
