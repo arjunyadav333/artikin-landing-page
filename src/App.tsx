@@ -51,6 +51,11 @@ const AppRoutes = () => {
               <Home />
             </ProtectedRoute>
           } />
+          <Route path="/home" element={
+            <ProtectedRoute>
+              <Home />
+            </ProtectedRoute>
+          } />
           <Route path="/opportunities" element={
             <ProtectedRoute>
               <Opportunities />

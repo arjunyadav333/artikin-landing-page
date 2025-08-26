@@ -115,7 +115,7 @@ const ArtistSignupForm = () => {
     });
 
     if (!error) {
-      navigate('/');
+      navigate('/home');
     }
 
     setIsLoading(false);
