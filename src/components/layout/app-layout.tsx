@@ -2,7 +2,7 @@ import React, { memo, useMemo } from "react";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { TopBar } from "@/components/layout/top-bar";
-import Navigation from "@/components/Navigation";
+
 import { MobileBottomNav } from "@/components/layout/mobile-bottom-nav";
 
 interface AppLayoutProps {
@@ -87,12 +87,9 @@ export const AppLayout = memo(({ children }: AppLayoutProps) => {
         <AppSidebar />
         
         <div className="flex-1 flex flex-col overflow-hidden">
-          <div className="hidden md:block">
-            <TopBar />
-          </div>
+          <TopBar />
           
           <div className="md:hidden">
-            <Navigation />
             <MobileBottomNav />
           </div>
           

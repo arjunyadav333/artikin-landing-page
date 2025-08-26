@@ -21,10 +21,9 @@ export function TopBar() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/80 backdrop-blur-xl">
       <div className="flex h-16 items-center gap-4 px-4 lg:px-6">
-        {/* Left: Profile + Logo */}
-        <div className="flex items-center gap-3">
-          {/* Profile Avatar - Mobile Only */}
-          <Link to="/profile" className="md:hidden">
+        {/* Left: Mobile Profile */}
+        <div className="md:hidden">
+          <Link to="/profile">
             <Avatar className="h-8 w-8">
               <AvatarImage src={user?.user_metadata?.avatar_url} />
               <AvatarFallback className="text-xs bg-primary/10 text-primary">
@@ -32,8 +31,20 @@ export function TopBar() {
               </AvatarFallback>
             </Avatar>
           </Link>
-          
+        </div>
+
+        {/* Left: Desktop Logo */}
+        <div className="hidden md:flex items-center gap-3">
           <Link to="/home" className="flex items-center">
+            <span className="text-xl font-bold text-primary">
+              Artikin
+            </span>
+          </Link>
+        </div>
+
+        {/* Center: Mobile Logo */}
+        <div className="md:hidden absolute left-1/2 transform -translate-x-1/2">
+          <Link to="/home">
             <span className="text-xl font-bold text-primary">
               Artikin
             </span>
