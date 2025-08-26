@@ -31,18 +31,6 @@ const Opportunities = () => {
   const isArtist = currentProfile?.role === 'artist';
   const isOrganization = currentProfile?.role === 'organization';
 
-  // Wait for profile to load before showing role-specific content
-  if (profileLoading) {
-    return (
-      <div className="min-h-screen bg-background pb-20 md:pb-8 flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full mx-auto"></div>
-          <p className="text-muted-foreground">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
   // Filter and sort opportunities based on search query and sort preference
   const filteredOpportunities = useMemo(() => {
     if (!opportunities) return [];
@@ -120,6 +108,18 @@ const Opportunities = () => {
     // TODO: Navigate to opportunity detail page
     console.log("View opportunity:", opportunityId);
   };
+
+  // Wait for profile to load before showing role-specific content
+  if (profileLoading) {
+    return (
+      <div className="min-h-screen bg-background pb-20 md:pb-8 flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full mx-auto"></div>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Show organization dashboard for organizations
   if (isOrganization) {
