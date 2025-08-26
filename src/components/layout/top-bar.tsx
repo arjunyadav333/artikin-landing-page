@@ -21,9 +21,8 @@ export function TopBar() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/80 backdrop-blur-xl">
       <div className="flex h-16 items-center gap-4 px-4 lg:px-6">
-        {/* Left: Logo + Sidebar Toggle */}
-        <div className="flex items-center gap-4">
-          <SidebarTrigger className="md:flex hidden" />
+        {/* Left: Logo Only */}
+        <div className="flex items-center">
           <Link to="/home" className="flex items-center">
             <span className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
               Artikin
