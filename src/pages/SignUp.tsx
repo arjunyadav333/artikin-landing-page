@@ -6,13 +6,13 @@ import { useAuth } from "@/hooks/useAuth";
 import { ArrowLeft, Users, Palette } from "lucide-react";
 import ArtistSignupForm from "@/components/auth/artist-signup-form";
 import OrganizationSignupForm from "@/components/auth/organization-signup-form";
-
 type UserRole = 'artist' | 'organization';
-
 const SignUp = () => {
   const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const {
+    user
+  } = useAuth();
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -20,13 +20,10 @@ const SignUp = () => {
       navigate('/');
     }
   }, [user, navigate]);
-
   if (user) {
     return null;
   }
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center px-4 py-8">
+  return <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center px-4 py-8">
       <Card className="w-full max-w-2xl shadow-2xl border-0">
         <CardHeader className="text-center pb-6 px-6 pt-8">
           <div className="flex items-center justify-center mb-6">
@@ -43,34 +40,21 @@ const SignUp = () => {
         </CardHeader>
 
         <CardContent className="px-6 pb-8">
-          {!selectedRole ? (
-            <div className="space-y-6">
+          {!selectedRole ? <div className="space-y-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Button
-                  variant="outline"
-                  onClick={() => setSelectedRole('artist')}
-                  className="h-auto p-6 flex-col gap-4 hover:bg-primary/5 border-2 hover:border-primary transition-colors min-h-[140px]"
-                >
+                <Button variant="outline" onClick={() => setSelectedRole('artist')} className="h-auto p-6 flex-col gap-4 hover:bg-primary/5 border-2 hover:border-primary transition-colors min-h-[140px]">
                   <Palette className="h-10 w-10 text-primary" />
                   <div className="text-center space-y-1">
                     <div className="font-semibold text-lg">Artist</div>
-                    <div className="text-sm text-muted-foreground leading-tight">
-                      Showcase your creative work and connect with opportunities
-                    </div>
+                    
                   </div>
                 </Button>
 
-                <Button
-                  variant="outline"
-                  onClick={() => setSelectedRole('organization')}
-                  className="h-auto p-6 flex-col gap-4 hover:bg-primary/5 border-2 hover:border-primary transition-colors min-h-[140px]"
-                >
+                <Button variant="outline" onClick={() => setSelectedRole('organization')} className="h-auto p-6 flex-col gap-4 hover:bg-primary/5 border-2 hover:border-primary transition-colors min-h-[140px]">
                   <Users className="h-10 w-10 text-primary" />
                   <div className="text-center space-y-1">
                     <div className="font-semibold text-lg">Organization</div>
-                    <div className="text-sm text-muted-foreground leading-tight">
-                      Find and hire talented artists for your projects
-                    </div>
+                    
                   </div>
                 </Button>
               </div>
@@ -78,49 +62,30 @@ const SignUp = () => {
               <div className="text-center pt-2">
                 <p className="text-sm text-muted-foreground">
                   Already have an account?{" "}
-                  <Link 
-                    to="/auth" 
-                    className="text-accent hover:text-accent/80 hover:underline font-medium transition-colors"
-                  >
+                  <Link to="/auth" className="text-accent hover:text-accent/80 hover:underline font-medium transition-colors">
                     Sign in
                   </Link>
                 </p>
               </div>
-            </div>
-          ) : (
-            <div className="space-y-6">
-              <Button
-                variant="ghost"
-                onClick={() => setSelectedRole(null)}
-                className="flex items-center gap-2 text-muted-foreground hover:text-foreground p-0 h-auto"
-              >
+            </div> : <div className="space-y-6">
+              <Button variant="ghost" onClick={() => setSelectedRole(null)} className="flex items-center gap-2 text-muted-foreground hover:text-foreground p-0 h-auto">
                 <ArrowLeft className="h-4 w-4" />
                 Back to role selection
               </Button>
 
-              {selectedRole === 'artist' ? (
-                <ArtistSignupForm />
-              ) : (
-                <OrganizationSignupForm />
-              )}
+              {selectedRole === 'artist' ? <ArtistSignupForm /> : <OrganizationSignupForm />}
 
               <div className="text-center">
                 <p className="text-sm text-muted-foreground">
                   Already have an account?{" "}
-                  <Link 
-                    to="/auth" 
-                    className="text-accent hover:text-accent/80 hover:underline font-medium transition-colors"
-                  >
+                  <Link to="/auth" className="text-accent hover:text-accent/80 hover:underline font-medium transition-colors">
                     Sign in
                   </Link>
                 </p>
               </div>
-            </div>
-          )}
+            </div>}
         </CardContent>
       </Card>
-    </div>
-  );
+    </div>;
 };
-
 export default SignUp;
