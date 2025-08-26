@@ -284,7 +284,7 @@ const ArtistSignupForm = () => {
         <Textarea
           id="bio"
           name="bio"
-          placeholder="Tell us about yourself and your artistic journey..."
+          placeholder="Tell us about yourself..."
           value={formData.bio}
           onChange={handleInputChange}
           className="min-h-[100px] resize-none"

@@ -111,11 +111,6 @@ export default function SignUpPage() {
                 <CardTitle className="text-2xl font-bold text-foreground">
                   {selectedRole === 'artist' ? 'Artist Registration' : 'Organization Registration'}
                 </CardTitle>
-                <CardDescription className="text-base">
-                  {selectedRole === 'artist' 
-                    ? 'Create your creative profile' 
-                    : 'Set up your organization account'}
-                </CardDescription>
               </CardHeader>
 
               <CardContent>
