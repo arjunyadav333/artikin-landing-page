@@ -24,7 +24,7 @@ export function TopBar() {
         {/* Left: Logo Only */}
         <div className="flex items-center">
           <Link to="/home" className="flex items-center">
-            <span className="text-xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+            <span className="text-xl font-bold text-primary">
               Artikin
             </span>
           </Link>
