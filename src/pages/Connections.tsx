@@ -96,7 +96,6 @@ const Connections = () => {
       <div className="container max-w-4xl mx-auto px-4 py-6">
         <div className="mb-6">
           <h1 className="text-2xl font-bold mb-2">Connections</h1>
-          <p className="text-muted-foreground">Build your creative network</p>
         </div>
 
         <div className="mb-6">

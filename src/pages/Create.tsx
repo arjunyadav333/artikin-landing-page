@@ -47,7 +47,6 @@ const Create = () => {
       <div className="container max-w-2xl mx-auto px-4 py-6">
         <div className="mb-6">
           <h1 className="text-2xl font-bold mb-2">Create Post</h1>
-          <p className="text-muted-foreground">Share your work and connect with the community</p>
         </div>
 
         <Card>

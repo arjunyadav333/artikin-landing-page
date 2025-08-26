@@ -154,9 +154,6 @@ const Opportunities = () => {
             <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-primary via-primary to-accent bg-clip-text text-transparent mb-3">
               Creative Opportunities
             </h1>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
-              Discover amazing opportunities and launch your creative career
-            </p>
           </div>
         </motion.div>
 
