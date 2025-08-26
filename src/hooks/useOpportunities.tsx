@@ -17,10 +17,11 @@ export interface Opportunity {
   created_at: string;
   updated_at: string;
   profiles?: {
-    id: string;
+    user_id: string;
     username: string;
     display_name: string;
     avatar_url?: string;
+    role?: string;
   };
   user_applied?: boolean;
 }
@@ -31,39 +32,49 @@ export const useOpportunities = () => {
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       
+      // Fetch opportunities
       const { data: opportunities, error } = await supabase
         .from('opportunities')
-        .select(`
-          *,
-          profiles!opportunities_user_id_fkey (
-            id,
-            username,
-            display_name,
-            avatar_url
-          )
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
+      if (!opportunities?.length) return [];
 
-      // Check if user applied to each opportunity
-      if (user && opportunities.length > 0) {
+      // Get unique user IDs for profile lookup
+      const userIds = [...new Set(opportunities.map(o => o.user_id))];
+      
+      // Batch fetch profiles
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('user_id, username, display_name, avatar_url, role')
+        .in('user_id', userIds);
+
+      const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
+
+      // Check applications if user is authenticated
+      let appliedOpportunityIds = new Set();
+      if (user) {
         const { data: applications } = await supabase
           .from('opportunity_applications')
           .select('opportunity_id')
-          .eq('user_id', user.id)
-          .in('opportunity_id', opportunities.map(o => o.id));
-
-        const appliedOpportunityIds = new Set(applications?.map(a => a.opportunity_id));
+          .eq('user_id', user.id);
         
-        return opportunities.map(opportunity => ({
-          ...opportunity,
-          user_applied: appliedOpportunityIds.has(opportunity.id)
-        })) as any;
+        appliedOpportunityIds = new Set(applications?.map(a => a.opportunity_id) || []);
       }
 
-      return opportunities as any;
-    }
+      // Combine data efficiently
+      return opportunities.map(opportunity => ({
+        ...opportunity,
+        profiles: profileMap.get(opportunity.user_id),
+        user_applied: appliedOpportunityIds.has(opportunity.id)
+      }));
+    },
+    // Advanced caching
+    staleTime: 3 * 60 * 1000, // 3 minutes (opportunities change more frequently)
+    gcTime: 8 * 60 * 1000, // 8 minutes
+    refetchOnWindowFocus: false,
+    retry: 2,
   });
 };
 
@@ -91,19 +102,23 @@ export const useCreateOpportunity = () => {
           ...newOpportunity,
           user_id: user.id
         })
-        .select(`
-          *,
-          profiles!opportunities_user_id_fkey (
-            id,
-            username,
-            display_name,
-            avatar_url
-          )
-        `)
+        .select('*')
         .single();
 
       if (error) throw error;
-      return data;
+      
+      // Get profile for the created opportunity
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('user_id, username, display_name, avatar_url, role')
+        .eq('user_id', user.id)
+        .single();
+
+      return {
+        ...data,
+        profiles: profile,
+        user_applied: false
+      };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['opportunities'] });
@@ -144,19 +159,46 @@ export const useApplyToOpportunity = () => {
       if (error) throw error;
       return data;
     },
+    // Optimistic updates for better UX
+    onMutate: async ({ opportunityId }) => {
+      await queryClient.cancelQueries({ queryKey: ['opportunities'] });
+      
+      const previousOpportunities = queryClient.getQueryData(['opportunities']);
+      
+      queryClient.setQueryData(['opportunities'], (old: any) => {
+        if (!old) return old;
+        
+        return old.map((opportunity: any) =>
+          opportunity.id === opportunityId
+            ? {
+                ...opportunity,
+                user_applied: true,
+                applications_count: opportunity.applications_count + 1
+              }
+            : opportunity
+        );
+      });
+      
+      return { previousOpportunities };
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['opportunities'] });
       toast({
         title: "Application submitted",
         description: "Your application has been successfully submitted."
       });
     },
-    onError: (error: any) => {
+    onError: (error: any, variables, context) => {
+      if (context?.previousOpportunities) {
+        queryClient.setQueryData(['opportunities'], context.previousOpportunities);
+      }
       toast({
         title: "Application failed",
         description: error.message,
         variant: "destructive"
       });
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['opportunities'] });
     }
   });
 };
