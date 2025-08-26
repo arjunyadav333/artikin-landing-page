@@ -15,13 +15,13 @@ All colors MUST be HSL.
     --card-foreground: 30 41 59;
     --popover: 255 255 255;
     --popover-foreground: 30 41 59;
-    --primary: 213 93% 49%; /* #1A73E8 light blue */
+    --primary: 214 100% 50%; /* #2563EB sky blue as specified */
     --primary-foreground: 255 255 255;
     --secondary: 205 100% 67%;
     --secondary-foreground: 255 255 255;
     --muted: 248 250 252;
     --muted-foreground: 100 116 139;
-    --accent: 205 100% 67%;
+    --accent: 260 88% 58%; /* #9333EA purple for hover effects */
     --accent-foreground: 255 255 255;
     
     /* Custom sidebar colors */
@@ -79,7 +79,7 @@ All colors MUST be HSL.
     --popover: 240 10% 3.9%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 213 93% 49%; /* #1A73E8 */
+    --primary: 214 100% 50%; /* #2563EB sky blue */
     --primary-foreground: 0 0% 98%;
 
     --secondary: 240 4% 16%;
@@ -88,7 +88,7 @@ All colors MUST be HSL.
     --muted: 240 4% 16%;
     --muted-foreground: 240 5% 65%;
 
-    --accent: 195 100% 69%; /* #5AB9FF sky blue for links */
+    --accent: 260 88% 58%; /* #9333EA purple for hover effects */
     --accent-foreground: 0 0% 98%;
     
     /* Custom sidebar colors for dark mode */
@@ -127,12 +127,37 @@ All colors MUST be HSL.
   }
 }
 
+/* Typography Scale - Mobile First Responsive */
 @layer base {
-  * {
-    @apply border-border;
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold leading-tight;
   }
 
-  body {
-    @apply bg-background text-foreground;
+  /* Mobile Typography (Base) */
+  h1 { @apply text-3xl; }      /* 18px bold */
+  h2 { @apply text-2xl; }      /* 15px semibold */  
+  h3 { @apply text-xl; }
+  h4 { @apply text-lg; }
+  h5 { @apply text-base; }
+  h6 { @apply text-sm; }
+  
+  p, body { @apply text-sm; }  /* 14px normal */
+
+  /* Tablet Typography */
+  @media (min-width: 768px) {
+    h1 { @apply text-4xl; }    /* 20px bold */
+    h2 { @apply text-3xl; }    /* 16px semibold */
+    h3 { @apply text-2xl; }
+    h4 { @apply text-xl; }
+    p, body { @apply text-base; } /* 15px normal */
+  }
+
+  /* Desktop Typography */
+  @media (min-width: 1024px) {
+    h1 { @apply text-5xl; }    /* 22px bold */
+    h2 { @apply text-4xl; }    /* 18px semibold */
+    h3 { @apply text-3xl; }
+    h4 { @apply text-2xl; }
+    p, body { @apply text-lg; } /* 16px normal */
   }
 }

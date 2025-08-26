@@ -1,7 +1,8 @@
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { TopBar } from "@/components/layout/top-bar";
-import Navigation from "@/components/Navigation"; // Keep mobile navigation
+import Navigation from "@/components/Navigation";
+import { MobileBottomNav } from "@/components/layout/mobile-bottom-nav";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -21,9 +22,10 @@ export function AppLayout({ children }: AppLayoutProps) {
             <TopBar />
           </div>
           
-          {/* Mobile Navigation (unchanged) */}
+          {/* Mobile Navigation + Bottom Nav */}
           <div className="md:hidden">
             <Navigation />
+            <MobileBottomNav />
           </div>
           
           {/* Main Content */}
