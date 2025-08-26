@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { 
@@ -20,15 +20,25 @@ import {
 import { usePosts, useLikePost } from "@/hooks/usePosts";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "react-router-dom";
+import { PostListSkeleton } from "@/components/ui/post-skeleton";
+import { createSampleData } from "@/utils/sampleData";
+import { useEffect } from "react";
 
 const Home = () => {
   const [bookmarkedPosts, setBookmarkedPosts] = useState<Set<string>>(new Set());
   const [expandedComments, setExpandedComments] = useState<Set<string>>(new Set());
   const { user } = useAuth();
-  const { data: postsData, isLoading, fetchNextPage, hasNextPage } = usePosts();
+  const { data: postsData, isLoading, fetchNextPage, hasNextPage, isError } = usePosts();
   const likePostMutation = useLikePost();
 
   const posts = postsData?.pages.flat() || [];
+
+  // Create sample data if user is authenticated and no posts exist
+  useEffect(() => {
+    if (user && !isLoading && posts.length === 0 && !isError) {
+      createSampleData();
+    }
+  }, [user, posts.length, isLoading, isError]);
 
   const handleLike = (postId: string) => {
     const post = posts.find(p => p.id === postId);
@@ -102,8 +112,11 @@ const Home = () => {
         {/* Feed */}
         <div className="pb-20 md:pb-8">
           {isLoading ? (
-            <div className="flex items-center justify-center p-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            <PostListSkeleton count={3} />
+          ) : isError ? (
+            <div className="text-center p-8">
+              <p className="text-muted-foreground mb-4">Failed to load posts</p>
+              <Button onClick={() => window.location.reload()}>Try Again</Button>
             </div>
           ) : posts.length === 0 ? (
             <div className="text-center p-8">

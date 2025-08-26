@@ -39,7 +39,11 @@ export const usePosts = (limit = 10) => {
         .range(pageParam * limit, (pageParam + 1) * limit - 1);
 
       if (error) throw error;
-      if (!posts?.length) return [];
+      
+      // Early return for empty state - no need for additional queries
+      if (!posts?.length) {
+        return [];
+      }
 
       // Get unique user IDs for profile lookup
       const userIds = [...new Set(posts.map(p => p.user_id))];
