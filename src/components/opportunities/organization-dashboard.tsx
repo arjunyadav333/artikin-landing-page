@@ -15,7 +15,8 @@ import {
   Eye,
   Calendar,
   MapPin,
-  DollarSign
+  DollarSign,
+  Filter
 } from "lucide-react";
 import { 
   DropdownMenu,
@@ -92,11 +93,7 @@ export function OrganizationDashboard() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Opportunities Dashboard</h1>
-          <p className="text-muted-foreground">Manage your posted opportunities and applications</p>
-        </div>
+      <div className="flex justify-end mb-6">
         <Button className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-white shadow-lg">
           <Plus className="h-4 w-4 mr-2" />
           Post New Opportunity
@@ -106,14 +103,20 @@ export function OrganizationDashboard() {
       {/* Search and Stats */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
         <div className="lg:col-span-2">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search your opportunities..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 bg-muted/40 border-border/50"
-            />
+          <div className="flex gap-4 items-center">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search your opportunities..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 bg-muted/40 border-border/50"
+              />
+            </div>
+            <Button variant="outline" className="sm:w-auto">
+              <Filter className="h-4 w-4 mr-2" />
+              Filter
+            </Button>
           </div>
         </div>
         

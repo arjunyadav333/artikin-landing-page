@@ -15,7 +15,8 @@ import {
   Paperclip,
   Smile,
   Image,
-  Plus
+  Plus,
+  Filter
 } from "lucide-react";
 
 const Messages = () => {
@@ -128,9 +129,6 @@ const Messages = () => {
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-8">
       <div className="container max-w-6xl mx-auto px-4 py-6">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold mb-2">Messages</h1>
-        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[600px]">
           {/* Conversations List */}
@@ -142,14 +140,19 @@ const Messages = () => {
                   <Plus className="h-4 w-4" />
                 </Button>
               </div>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search conversations..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
+              <div className="flex gap-4 items-center">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search conversations..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+                <Button variant="outline" size="icon" className="sm:w-auto">
+                  <Filter className="h-4 w-4" />
+                </Button>
               </div>
             </CardHeader>
 

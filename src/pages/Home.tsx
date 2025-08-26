@@ -98,16 +98,6 @@ const Home = () => {
   return (
     <div className="w-full">
       <div className="max-w-2xl mx-auto md:max-w-none">
-        {/* Header - Mobile only */}
-        <div className="md:hidden sticky top-0 bg-background/80 backdrop-blur-md border-b border-border z-10 px-4 py-3 flex items-center justify-between">
-          <h1 className="text-xl font-bold">Home</h1>
-          <Link to="/create">
-            <Button size="sm" className="bg-primary hover:bg-primary/90">
-              <Plus className="h-4 w-4 mr-2" />
-              Create
-            </Button>
-          </Link>
-        </div>
 
         {/* Feed */}
         <div className="pb-20 md:pb-8">

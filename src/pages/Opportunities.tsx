@@ -144,19 +144,6 @@ const Opportunities = () => {
       className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 pb-20 md:pb-8"
     >
       <div className="container max-w-7xl mx-auto px-4 py-6 lg:py-8">
-        {/* Enhanced Header */}
-        <motion.div 
-          initial={{ y: -20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          className="mb-8"
-        >
-          <div className="text-center mb-8">
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-primary via-primary to-accent bg-clip-text text-transparent mb-3">
-              Creative Opportunities
-            </h1>
-          </div>
-        </motion.div>
-
         {/* Enhanced Search and Filter Bar */}
         <motion.div 
           initial={{ y: 20, opacity: 0 }}
@@ -165,7 +152,7 @@ const Opportunities = () => {
           className="mb-8"
         >
           <Card className="p-4 shadow-lg bg-card/50 backdrop-blur-sm border-border/50">
-            <div className="flex flex-col lg:flex-row gap-4">
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
@@ -177,11 +164,16 @@ const Opportunities = () => {
                 />
               </div>
               
-              <div className="flex gap-2 flex-wrap">
+              <div className="flex gap-2 items-center">
+                <Button variant="outline" size="default" className="px-4">
+                  <Filter className="h-4 w-4 mr-2" />
+                  <span className="hidden sm:inline">Filter</span>
+                </Button>
+                
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="px-4 py-3 border border-border/50 rounded-md text-sm bg-background/50 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 min-w-32"
+                  className="hidden md:block px-4 py-3 border border-border/50 rounded-md text-sm bg-background/50 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 min-w-32"
                 >
                   <option value="newest">Newest First</option>
                   <option value="oldest">Oldest First</option>
@@ -189,11 +181,6 @@ const Opportunities = () => {
                   <option value="salary-low">Lowest Salary</option>
                   <option value="applications">Most Applied</option>
                 </select>
-                
-                <Button variant="outline" size="default" className="px-4">
-                  <Filter className="h-4 w-4 mr-2" />
-                  <span className="hidden sm:inline">Filter</span>
-                </Button>
                 
                 <div className="flex bg-muted/50 rounded-md p-1">
                   <Button
