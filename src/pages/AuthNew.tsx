@@ -49,26 +49,26 @@ const AuthNew = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center px-4 py-8">
       <Card className="w-full max-w-md shadow-2xl border-0">
-        <CardHeader className="text-center pb-6">
+        <CardHeader className="text-center pb-6 px-6 pt-8">
           <div className="flex items-center justify-center mb-6">
-            <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center shadow-lg">
+            <div className="h-16 w-16 rounded-2xl bg-primary flex items-center justify-center shadow-lg">
               <span className="text-primary-foreground font-bold text-2xl">A</span>
             </div>
           </div>
-          <CardTitle className="text-3xl font-bold text-foreground">
+          <CardTitle className="text-2xl sm:text-3xl font-bold text-foreground">
             Welcome Back
           </CardTitle>
-          <CardDescription className="text-muted-foreground">
+          <CardDescription className="text-muted-foreground text-sm sm:text-base">
             Sign in to your Artikin account
           </CardDescription>
         </CardHeader>
 
-        <CardContent className="space-y-6">
-          <form onSubmit={handleSignIn} className="space-y-4">
+        <CardContent className="space-y-6 px-6 pb-8">
+          <form onSubmit={handleSignIn} className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-medium">
+              <Label htmlFor="email" className="text-sm font-medium text-foreground">
                 Email Address
               </Label>
               <div className="relative">
@@ -80,14 +80,14 @@ const AuthNew = () => {
                   placeholder="Enter your email"
                   value={formData.email}
                   onChange={handleInputChange}
-                  className="pl-10"
+                  className="pl-10 h-11"
                   required
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-sm font-medium">
+              <Label htmlFor="password" className="text-sm font-medium text-foreground">
                 Password
               </Label>
               <div className="relative">
@@ -98,6 +98,7 @@ const AuthNew = () => {
                   placeholder="Enter your password"
                   value={formData.password}
                   onChange={handleInputChange}
+                  className="pr-10 h-11"
                   required
                 />
                 <Button
@@ -118,25 +119,25 @@ const AuthNew = () => {
 
             <Button 
               type="submit" 
-              className="w-full bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90" 
+              className="w-full bg-primary hover:bg-primary/90 h-11 text-base font-medium" 
               disabled={isLoading}
             >
               {isLoading ? "Signing in..." : "Sign In"}
             </Button>
           </form>
 
-          <div className="text-center space-y-2">
+          <div className="text-center space-y-3">
             <Link 
               to="/forgot-password" 
-              className="text-sm text-primary hover:underline"
+              className="block text-sm text-accent hover:text-accent/80 hover:underline transition-colors"
             >
               Forgot your password?
             </Link>
             <p className="text-sm text-muted-foreground">
               Don't have an account?{" "}
               <Link 
-                to="/auth/signup" 
-                className="text-primary hover:underline font-medium"
+                to="/signup" 
+                className="text-accent hover:text-accent/80 hover:underline font-medium transition-colors"
               >
                 Sign up
               </Link>

@@ -11,15 +11,15 @@ import { supabase } from "@/integrations/supabase/client";
 
 // Organization type options for the select dropdown
 const organizationTypeOptions = [
-  { value: 'gallery', label: 'Gallery' },
-  { value: 'museum', label: 'Museum' },
-  { value: 'studio', label: 'Studio' },
-  { value: 'agency', label: 'Agency' },
-  { value: 'non_profit', label: 'Non-Profit' },
-  { value: 'corporate', label: 'Corporate' },
-  { value: 'educational', label: 'Educational' },
-  { value: 'media', label: 'Media' },
-  { value: 'other', label: 'Other' }
+  { value: 'director', label: 'Director' },
+  { value: 'producer', label: 'Producer' },
+  { value: 'casting_director', label: 'Casting Director' },
+  { value: 'production_house', label: 'Production House' },
+  { value: 'casting_agency', label: 'Casting Agency' },
+  { value: 'event_management', label: 'Event Management' },
+  { value: 'institution', label: 'Institution' },
+  { value: 'individual_hirer', label: 'Individual Hirer' },
+  { value: 'others', label: 'Others' }
 ];
 
 const OrganizationSignupForm = () => {
@@ -122,10 +122,10 @@ const OrganizationSignupForm = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <form onSubmit={handleSubmit} className="space-y-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="organizationName" className="text-sm font-medium">
+          <Label htmlFor="organizationName" className="text-sm font-medium text-foreground">
             Organization Name *
           </Label>
           <div className="relative">
@@ -136,37 +136,37 @@ const OrganizationSignupForm = () => {
               placeholder="Enter organization name"
               value={formData.organizationName}
               onChange={handleInputChange}
-              className="pl-10"
+              className="pl-10 h-11"
               required
             />
           </div>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="username" className="text-sm font-medium">
+          <Label htmlFor="username" className="text-sm font-medium text-foreground">
             Username *
           </Label>
           <div className="relative">
-            <span className="absolute left-3 top-3 text-muted-foreground">@</span>
+            <span className="absolute left-3 top-3 text-muted-foreground text-sm">@</span>
             <Input
               id="username"
               name="username"
               placeholder="username"
               value={formData.username}
               onChange={handleInputChange}
-              className="pl-8"
+              className="pl-8 h-11"
               required
             />
           </div>
           {usernameError && (
-            <p className="text-sm text-destructive">{usernameError}</p>
+            <p className="text-sm text-destructive font-medium">{usernameError}</p>
           )}
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="email" className="text-sm font-medium">
+          <Label htmlFor="email" className="text-sm font-medium text-foreground">
             Email Address *
           </Label>
           <div className="relative">
@@ -178,14 +178,14 @@ const OrganizationSignupForm = () => {
               placeholder="Enter email address"
               value={formData.email}
               onChange={handleInputChange}
-              className="pl-10"
+              className="pl-10 h-11"
               required
             />
           </div>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="password" className="text-sm font-medium">
+          <Label htmlFor="password" className="text-sm font-medium text-foreground">
             Password *
           </Label>
           <div className="relative">
@@ -197,7 +197,7 @@ const OrganizationSignupForm = () => {
               placeholder="Create a password"
               value={formData.password}
               onChange={handleInputChange}
-              className="pl-10 pr-10"
+              className="pl-10 pr-10 h-11"
               minLength={6}
               required
             />
@@ -218,9 +218,9 @@ const OrganizationSignupForm = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="phone" className="text-sm font-medium">
+          <Label htmlFor="phone" className="text-sm font-medium text-foreground">
             Phone Number
           </Label>
           <div className="relative">
@@ -232,24 +232,24 @@ const OrganizationSignupForm = () => {
               placeholder="Phone number"
               value={formData.phone}
               onChange={handleInputChange}
-              className="pl-10"
+              className="pl-10 h-11"
             />
           </div>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="organizationType" className="text-sm font-medium">
+          <Label htmlFor="organizationType" className="text-sm font-medium text-foreground">
             Organization Type *
           </Label>
           <Select 
             value={formData.organizationType} 
             onValueChange={(value) => handleSelectChange('organizationType', value)}
           >
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="w-full h-11">
               <Users className="h-4 w-4 text-muted-foreground mr-2" />
               <SelectValue placeholder="Select organization type" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-popover">
               {organizationTypeOptions.map((option) => (
                 <SelectItem key={option.value} value={option.value}>
                   {option.label}
@@ -261,7 +261,7 @@ const OrganizationSignupForm = () => {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="location" className="text-sm font-medium">
+        <Label htmlFor="location" className="text-sm font-medium text-foreground">
           Location
         </Label>
         <div className="relative">
@@ -272,13 +272,13 @@ const OrganizationSignupForm = () => {
             placeholder="City, Country"
             value={formData.location}
             onChange={handleInputChange}
-            className="pl-10"
+            className="pl-10 h-11"
           />
         </div>
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="bio" className="text-sm font-medium">
+        <Label htmlFor="bio" className="text-sm font-medium text-foreground">
           About Organization
         </Label>
         <Textarea
@@ -287,13 +287,13 @@ const OrganizationSignupForm = () => {
           placeholder="Tell us about your organization and what you do..."
           value={formData.bio}
           onChange={handleInputChange}
-          className="min-h-[100px]"
+          className="min-h-[100px] resize-none"
         />
       </div>
 
       <Button 
         type="submit" 
-        className="w-full bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90" 
+        className="w-full bg-primary hover:bg-primary/90 h-11 text-base font-medium" 
         disabled={isLoading || !validateForm()}
       >
         {isLoading ? "Creating Account..." : "Create Organization Account"}

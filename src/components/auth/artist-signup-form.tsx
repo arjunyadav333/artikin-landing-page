@@ -11,15 +11,15 @@ import { supabase } from "@/integrations/supabase/client";
 
 // Artform options for the select dropdown
 const artformOptions = [
-  { value: 'visual_arts', label: 'Visual Arts' },
-  { value: 'music', label: 'Music' },
-  { value: 'performing_arts', label: 'Performing Arts' },
-  { value: 'literature', label: 'Literature' },
-  { value: 'digital_arts', label: 'Digital Arts' },
-  { value: 'crafts', label: 'Crafts' },
-  { value: 'fashion', label: 'Fashion' },
-  { value: 'film_video', label: 'Film & Video' },
-  { value: 'other', label: 'Other' }
+  { value: 'actor', label: 'Actor' },
+  { value: 'dancer', label: 'Dancer' },
+  { value: 'model', label: 'Model' },
+  { value: 'photographer', label: 'Photographer' },
+  { value: 'videographer', label: 'Videographer' },
+  { value: 'instrumentalist', label: 'Instrumentalist' },
+  { value: 'singer', label: 'Singer' },
+  { value: 'drawing', label: 'Drawing' },
+  { value: 'painting', label: 'Painting' }
 ];
 
 const ArtistSignupForm = () => {
@@ -122,10 +122,10 @@ const ArtistSignupForm = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <form onSubmit={handleSubmit} className="space-y-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="fullName" className="text-sm font-medium">
+          <Label htmlFor="fullName" className="text-sm font-medium text-foreground">
             Full Name *
           </Label>
           <div className="relative">
@@ -136,37 +136,37 @@ const ArtistSignupForm = () => {
               placeholder="Enter your full name"
               value={formData.fullName}
               onChange={handleInputChange}
-              className="pl-10"
+              className="pl-10 h-11"
               required
             />
           </div>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="username" className="text-sm font-medium">
+          <Label htmlFor="username" className="text-sm font-medium text-foreground">
             Username *
           </Label>
           <div className="relative">
-            <span className="absolute left-3 top-3 text-muted-foreground">@</span>
+            <span className="absolute left-3 top-3 text-muted-foreground text-sm">@</span>
             <Input
               id="username"
               name="username"
               placeholder="username"
               value={formData.username}
               onChange={handleInputChange}
-              className="pl-8"
+              className="pl-8 h-11"
               required
             />
           </div>
           {usernameError && (
-            <p className="text-sm text-destructive">{usernameError}</p>
+            <p className="text-sm text-destructive font-medium">{usernameError}</p>
           )}
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="email" className="text-sm font-medium">
+          <Label htmlFor="email" className="text-sm font-medium text-foreground">
             Email Address *
           </Label>
           <div className="relative">
@@ -178,14 +178,14 @@ const ArtistSignupForm = () => {
               placeholder="Enter your email"
               value={formData.email}
               onChange={handleInputChange}
-              className="pl-10"
+              className="pl-10 h-11"
               required
             />
           </div>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="password" className="text-sm font-medium">
+          <Label htmlFor="password" className="text-sm font-medium text-foreground">
             Password *
           </Label>
           <div className="relative">
@@ -197,7 +197,7 @@ const ArtistSignupForm = () => {
               placeholder="Create a password"
               value={formData.password}
               onChange={handleInputChange}
-              className="pl-10 pr-10"
+              className="pl-10 pr-10 h-11"
               minLength={6}
               required
             />
@@ -218,9 +218,9 @@ const ArtistSignupForm = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="phone" className="text-sm font-medium">
+          <Label htmlFor="phone" className="text-sm font-medium text-foreground">
             Phone Number
           </Label>
           <div className="relative">
@@ -232,24 +232,24 @@ const ArtistSignupForm = () => {
               placeholder="Your phone number"
               value={formData.phone}
               onChange={handleInputChange}
-              className="pl-10"
+              className="pl-10 h-11"
             />
           </div>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="artform" className="text-sm font-medium">
+          <Label htmlFor="artform" className="text-sm font-medium text-foreground">
             Artform *
           </Label>
           <Select 
             value={formData.artform} 
             onValueChange={(value) => handleSelectChange('artform', value)}
           >
-            <SelectTrigger className="w-full">
+            <SelectTrigger className="w-full h-11">
               <Palette className="h-4 w-4 text-muted-foreground mr-2" />
               <SelectValue placeholder="Select your artform" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-popover">
               {artformOptions.map((option) => (
                 <SelectItem key={option.value} value={option.value}>
                   {option.label}
@@ -261,7 +261,7 @@ const ArtistSignupForm = () => {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="location" className="text-sm font-medium">
+        <Label htmlFor="location" className="text-sm font-medium text-foreground">
           Location
         </Label>
         <div className="relative">
@@ -272,13 +272,13 @@ const ArtistSignupForm = () => {
             placeholder="City, Country"
             value={formData.location}
             onChange={handleInputChange}
-            className="pl-10"
+            className="pl-10 h-11"
           />
         </div>
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="bio" className="text-sm font-medium">
+        <Label htmlFor="bio" className="text-sm font-medium text-foreground">
           Bio
         </Label>
         <Textarea
@@ -287,13 +287,13 @@ const ArtistSignupForm = () => {
           placeholder="Tell us about yourself and your artistic journey..."
           value={formData.bio}
           onChange={handleInputChange}
-          className="min-h-[100px]"
+          className="min-h-[100px] resize-none"
         />
       </div>
 
       <Button 
         type="submit" 
-        className="w-full bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90" 
+        className="w-full bg-primary hover:bg-primary/90 h-11 text-base font-medium" 
         disabled={isLoading || !validateForm()}
       >
         {isLoading ? "Creating Account..." : "Create Artist Account"}
