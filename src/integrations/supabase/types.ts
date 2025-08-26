@@ -304,42 +304,60 @@ export type Database = {
       }
       profiles: {
         Row: {
+          artform: Database["public"]["Enums"]["artform_type"] | null
           avatar_url: string | null
           bio: string | null
           cover_url: string | null
           created_at: string | null
           display_name: string
+          full_name: string | null
           id: string
           location: string | null
-          role: string | null
+          organization_type:
+            | Database["public"]["Enums"]["organization_type"]
+            | null
+          phone_number: string | null
+          role: Database["public"]["Enums"]["user_role"] | null
           updated_at: string | null
           user_id: string
           username: string
           website: string | null
         }
         Insert: {
+          artform?: Database["public"]["Enums"]["artform_type"] | null
           avatar_url?: string | null
           bio?: string | null
           cover_url?: string | null
           created_at?: string | null
           display_name: string
+          full_name?: string | null
           id?: string
           location?: string | null
-          role?: string | null
+          organization_type?:
+            | Database["public"]["Enums"]["organization_type"]
+            | null
+          phone_number?: string | null
+          role?: Database["public"]["Enums"]["user_role"] | null
           updated_at?: string | null
           user_id: string
           username: string
           website?: string | null
         }
         Update: {
+          artform?: Database["public"]["Enums"]["artform_type"] | null
           avatar_url?: string | null
           bio?: string | null
           cover_url?: string | null
           created_at?: string | null
           display_name?: string
+          full_name?: string | null
           id?: string
           location?: string | null
-          role?: string | null
+          organization_type?:
+            | Database["public"]["Enums"]["organization_type"]
+            | null
+          phone_number?: string | null
+          role?: Database["public"]["Enums"]["user_role"] | null
           updated_at?: string | null
           user_id?: string
           username?: string
@@ -355,7 +373,27 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      artform_type:
+        | "actor"
+        | "dancer"
+        | "model"
+        | "photographer"
+        | "videographer"
+        | "instrumentalist"
+        | "singer"
+        | "drawing"
+        | "painting"
+      organization_type:
+        | "director"
+        | "producer"
+        | "production_house"
+        | "casting_agency"
+        | "casting_director"
+        | "event_management"
+        | "individual_hirer"
+        | "institution"
+        | "others"
+      user_role: "artist" | "organization"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -482,6 +520,30 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      artform_type: [
+        "actor",
+        "dancer",
+        "model",
+        "photographer",
+        "videographer",
+        "instrumentalist",
+        "singer",
+        "drawing",
+        "painting",
+      ],
+      organization_type: [
+        "director",
+        "producer",
+        "production_house",
+        "casting_agency",
+        "casting_director",
+        "event_management",
+        "individual_hirer",
+        "institution",
+        "others",
+      ],
+      user_role: ["artist", "organization"],
+    },
   },
 } as const

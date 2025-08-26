@@ -7,12 +7,16 @@ export interface Profile {
   user_id: string;
   username: string;
   display_name: string;
+  full_name?: string;
   bio?: string;
-  role?: string;
+  role?: 'artist' | 'organization';
   location?: string;
   website?: string;
   avatar_url?: string;
   cover_url?: string;
+  phone_number?: string;
+  artform?: 'actor' | 'dancer' | 'model' | 'photographer' | 'videographer' | 'instrumentalist' | 'singer' | 'drawing' | 'painting';
+  organization_type?: 'director' | 'producer' | 'production_house' | 'casting_agency' | 'casting_director' | 'event_management' | 'individual_hirer' | 'institution' | 'others';
   created_at: string;
   updated_at: string;
 }
