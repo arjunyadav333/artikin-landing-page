@@ -151,22 +151,22 @@ const Opportunities = () => {
           transition={{ delay: 0.1 }}
           className="mb-8"
         >
-          <Card className="p-4 shadow-lg bg-card/50 backdrop-blur-sm border-border/50">
-            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+          <Card className="p-3 md:p-4 lg:p-6 shadow-lg bg-card/50 backdrop-blur-sm border-border/50">
+            <div className="flex flex-col sm:flex-row gap-2 md:gap-4 items-start sm:items-center">
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 md:h-5 md:w-5 text-muted-foreground" />
                 <Input
                   type="search"
                   placeholder="Search opportunities, companies, skills, locations..."
-                  className="pl-11 h-12 bg-background/50 border-border/50 text-base focus:border-primary/50 focus:ring-2 focus:ring-primary/20"
+                  className="pl-10 md:pl-11 h-10 md:h-12 bg-background/50 border-border/50 text-sm md:text-base focus:border-primary/50 focus:ring-2 focus:ring-primary/20"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
               
               <div className="flex gap-2 items-center">
-                <Button variant="outline" size="default" className="px-4">
-                  <Filter className="h-4 w-4 mr-2" />
+                <Button variant="outline" size="sm" className="px-2 md:px-4 h-8 md:h-10 text-xs md:text-sm">
+                  <Filter className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2" />
                   <span className="hidden sm:inline">Filter</span>
                 </Button>
                 
@@ -212,17 +212,17 @@ const Opportunities = () => {
           transition={{ delay: 0.2 }}
         >
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <div className="flex justify-center mb-8">
-              <TabsList className="grid w-full max-w-md grid-cols-2 bg-muted/30 p-1 rounded-xl h-12">
+            <div className="flex justify-center mb-4 md:mb-8">
+              <TabsList className="grid w-full max-w-md grid-cols-2 bg-muted/30 p-1 rounded-xl h-10 md:h-12">
                 <TabsTrigger 
                   value="opportunities" 
-                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:font-bold data-[state=active]:shadow-md data-[state=active]:border-primary/50 transition-all duration-200 text-base hover:bg-primary/10"
+                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:font-bold data-[state=active]:shadow-md data-[state=active]:border-primary/50 transition-all duration-200 text-sm md:text-base hover:bg-primary/10 py-2 md:py-3 px-2 md:px-3"
                 >
                   Browse
                 </TabsTrigger>
                 <TabsTrigger 
                   value="applications"
-                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:font-bold data-[state=active]:shadow-md data-[state=active]:border-primary/50 transition-all duration-200 text-base hover:bg-primary/10"
+                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:font-bold data-[state=active]:shadow-md data-[state=active]:border-primary/50 transition-all duration-200 text-sm md:text-base hover:bg-primary/10 py-2 md:py-3 px-2 md:px-3"
                 >
                   Applied
                 </TabsTrigger>
@@ -238,11 +238,11 @@ const Opportunities = () => {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className={`grid gap-6 ${
-                      viewMode === "grid" 
-                        ? "grid-cols-1 md:grid-cols-2 xl:grid-cols-3" 
-                        : "grid-cols-1 max-w-4xl mx-auto"
-                    }`}
+                     className={`grid gap-3 md:gap-6 ${
+                       viewMode === "grid" 
+                         ? "grid-cols-1 md:grid-cols-2 xl:grid-cols-3" 
+                         : "grid-cols-1 max-w-4xl mx-auto"
+                     }`}
                   >
                     {Array.from({ length: 6 }).map((_, i) => (
                       <OpportunitySkeletonCard key={i} />
@@ -264,7 +264,7 @@ const Opportunities = () => {
                       )}
                     </div>
 
-                    <div className={`grid gap-6 mb-8 ${
+                    <div className={`grid gap-3 md:gap-6 mb-4 md:mb-8 ${
                       viewMode === "grid" 
                         ? "grid-cols-1 md:grid-cols-2 xl:grid-cols-3" 
                         : "grid-cols-1 max-w-4xl mx-auto"
@@ -288,14 +288,14 @@ const Opportunities = () => {
                     </div>
 
                     {filteredOpportunities.length === 0 && (
-                      <Card className="p-8 text-center bg-card/50 backdrop-blur-sm">
-                        <div className="max-w-md mx-auto space-y-4">
-                          <div className="mx-auto w-16 h-16 bg-muted/50 rounded-full flex items-center justify-center">
-                            <Search className="h-8 w-8 text-muted-foreground" />
+                      <Card className="p-4 md:p-8 text-center bg-card/50 backdrop-blur-sm">
+                        <div className="max-w-md mx-auto space-y-3 md:space-y-4">
+                          <div className="mx-auto w-12 h-12 md:w-16 md:h-16 bg-muted/50 rounded-full flex items-center justify-center">
+                            <Search className="h-6 w-6 md:h-8 md:w-8 text-muted-foreground" />
                           </div>
                           <div>
-                            <h3 className="text-xl font-semibold mb-2">No opportunities found</h3>
-                            <p className="text-muted-foreground mb-4">
+                            <h3 className="text-lg md:text-xl font-semibold mb-2">No opportunities found</h3>
+                            <p className="text-sm md:text-base text-muted-foreground mb-3 md:mb-4">
                               {searchQuery 
                                 ? "Try adjusting your search terms or filters to find more opportunities" 
                                 : "New opportunities are posted regularly. Check back soon!"
@@ -305,7 +305,7 @@ const Opportunities = () => {
                               <Button 
                                 variant="outline" 
                                 onClick={() => setSearchQuery("")}
-                                className="mt-2"
+                                className="mt-2 h-8 md:h-10 px-3 md:px-4 text-xs md:text-sm"
                               >
                                 Clear Search
                               </Button>
@@ -325,7 +325,7 @@ const Opportunities = () => {
                         <Button 
                           variant="outline" 
                           size="lg"
-                          className="px-8 py-3 bg-card/50 backdrop-blur-sm border-primary/20 hover:bg-primary/5"
+                          className="px-4 md:px-8 py-2 md:py-3 h-10 md:h-12 text-sm md:text-base bg-card/50 backdrop-blur-sm border-primary/20 hover:bg-primary/5"
                         >
                           Load More Opportunities
                         </Button>
@@ -345,7 +345,7 @@ const Opportunities = () => {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"
+                    className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-6"
                   >
                     {Array.from({ length: 6 }).map((_, i) => (
                       <ApplicationSkeletonCard key={i} />
@@ -367,7 +367,7 @@ const Opportunities = () => {
                       </p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-6 mb-4 md:mb-8">
                       <AnimatePresence>
                         {filteredApplications.map((application, index) => (
                           <motion.div
@@ -388,16 +388,16 @@ const Opportunities = () => {
                     </div>
 
                     {filteredApplications.length === 0 && (
-                      <Card className="p-8 text-center bg-card/50 backdrop-blur-sm">
-                        <div className="max-w-md mx-auto space-y-4">
-                          <div className="mx-auto w-16 h-16 bg-muted/50 rounded-full flex items-center justify-center">
-                            <Plus className="h-8 w-8 text-muted-foreground" />
+                      <Card className="p-4 md:p-8 text-center bg-card/50 backdrop-blur-sm">
+                        <div className="max-w-md mx-auto space-y-3 md:space-y-4">
+                          <div className="mx-auto w-12 h-12 md:w-16 md:h-16 bg-muted/50 rounded-full flex items-center justify-center">
+                            <Plus className="h-6 w-6 md:h-8 md:w-8 text-muted-foreground" />
                           </div>
                           <div>
-                            <h3 className="text-xl font-semibold mb-2">
+                            <h3 className="text-lg md:text-xl font-semibold mb-2">
                               {searchQuery ? "No matching applications" : "No applications yet"}
                             </h3>
-                            <p className="text-muted-foreground mb-4">
+                            <p className="text-sm md:text-base text-muted-foreground mb-3 md:mb-4">
                               {searchQuery 
                                 ? "Try adjusting your search terms" 
                                 : "Start applying to opportunities to see them here"
@@ -406,7 +406,7 @@ const Opportunities = () => {
                             {!searchQuery && (
                               <Button 
                                 onClick={() => setActiveTab("opportunities")}
-                                className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90"
+                                className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 h-8 md:h-10 px-3 md:px-4 text-xs md:text-sm"
                               >
                                 Browse Opportunities
                               </Button>
