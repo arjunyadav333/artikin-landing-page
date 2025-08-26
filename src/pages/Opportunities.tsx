@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Plus, Search, Filter, SortDesc, Grid3X3, List } from "lucide-react";
+import { Plus, Search, Filter } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { EnhancedOpportunityCard } from "@/components/opportunities/enhanced-opportunity-card";
@@ -18,7 +18,6 @@ import { useToast } from "@/hooks/use-toast";
 const Opportunities = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("opportunities");
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [sortBy, setSortBy] = useState("newest");
   
   const { data: currentProfile, isLoading: profileLoading } = useCurrentProfile();
@@ -144,66 +143,24 @@ const Opportunities = () => {
       className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 pb-20 md:pb-8"
     >
       <div className="container max-w-7xl mx-auto px-4 py-6 lg:py-8">
-        {/* Enhanced Search and Filter Bar */}
-        <motion.div 
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.1 }}
-          className="mb-8"
-        >
-          <Card className="p-3 md:p-4 lg:p-6 shadow-lg bg-card/50 backdrop-blur-sm border-border/50">
-            <div className="flex flex-col sm:flex-row gap-2 md:gap-4 items-start sm:items-center">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 md:h-5 md:w-5 text-muted-foreground" />
-                <Input
-                  type="search"
-                  placeholder="Search opportunities, companies, skills, locations..."
-                  className="pl-10 md:pl-11 h-10 md:h-12 bg-background/50 border-border/50 text-sm md:text-base focus:border-primary/50 focus:ring-2 focus:ring-primary/20"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-              
-              <div className="flex gap-2 items-center">
-                <Button variant="outline" size="sm" className="px-2 md:px-4 h-8 md:h-10 text-xs md:text-sm">
-                  <Filter className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2" />
-                  <span className="hidden sm:inline">Filter</span>
-                </Button>
-                
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                  className="hidden md:block px-4 py-3 border border-border/50 rounded-md text-sm bg-background/50 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 min-w-32"
-                >
-                  <option value="newest">Newest First</option>
-                  <option value="oldest">Oldest First</option>
-                  <option value="salary-high">Highest Salary</option>
-                  <option value="salary-low">Lowest Salary</option>
-                  <option value="applications">Most Applied</option>
-                </select>
-                
-                <div className="flex bg-muted/50 rounded-md p-1">
-                  <Button
-                    variant={viewMode === "grid" ? "default" : "ghost"}
-                    size="sm"
-                    onClick={() => setViewMode("grid")}
-                    className="px-3"
-                  >
-                    <Grid3X3 className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant={viewMode === "list" ? "default" : "ghost"}
-                    size="sm"
-                    onClick={() => setViewMode("list")}
-                    className="px-3"
-                  >
-                    <List className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
+        {/* Simple Search Bar */}
+        <div className="mb-6">
+          <div className="flex gap-2 md:gap-4 items-center max-w-2xl mx-auto">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder="Search opportunities..."
+                className="pl-10 h-10 text-sm md:text-base"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
             </div>
-          </Card>
-        </motion.div>
+            <Button variant="outline" size="sm" className="md:hidden p-2 h-10 w-10">
+              <Filter className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
 
         {/* Enhanced Tabs */}
         <motion.div
@@ -238,11 +195,7 @@ const Opportunities = () => {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                     className={`grid gap-3 md:gap-6 ${
-                       viewMode === "grid" 
-                         ? "grid-cols-1 md:grid-cols-2 xl:grid-cols-3" 
-                         : "grid-cols-1 max-w-4xl mx-auto"
-                     }`}
+                     className="grid gap-3 md:gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3"
                   >
                     {Array.from({ length: 6 }).map((_, i) => (
                       <OpportunitySkeletonCard key={i} />
@@ -264,11 +217,7 @@ const Opportunities = () => {
                       )}
                     </div>
 
-                    <div className={`grid gap-3 md:gap-6 mb-4 md:mb-8 ${
-                      viewMode === "grid" 
-                        ? "grid-cols-1 md:grid-cols-2 xl:grid-cols-3" 
-                        : "grid-cols-1 max-w-4xl mx-auto"
-                    }`}>
+                    <div className="grid gap-3 md:gap-6 mb-4 md:mb-8 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
                       <AnimatePresence>
                         {filteredOpportunities.map((opportunity, index) => (
                           <EnhancedOpportunityCard
