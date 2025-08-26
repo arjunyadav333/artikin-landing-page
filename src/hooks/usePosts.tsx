@@ -49,23 +49,31 @@ export const usePosts = (limit = 10) => {
       const { data: posts, error } = await query;
       if (error) throw error;
 
-      // Check if user liked each post
+      // Sort posts to show user's posts first
+      let sortedPosts = posts;
       if (user && posts.length > 0) {
+        const userPosts = posts.filter(post => post.user_id === user.id);
+        const otherPosts = posts.filter(post => post.user_id !== user.id);
+        sortedPosts = [...userPosts, ...otherPosts];
+      }
+
+      // Check if user liked each post
+      if (user && sortedPosts.length > 0) {
         const { data: likes } = await supabase
           .from('likes')
           .select('post_id')
           .eq('user_id', user.id)
-          .in('post_id', posts.map(p => p.id));
+          .in('post_id', sortedPosts.map(p => p.id));
 
         const likedPostIds = new Set(likes?.map(l => l.post_id));
         
-        return posts.map(post => ({
+        return sortedPosts.map(post => ({
           ...post,
           user_liked: likedPostIds.has(post.id)
         })) as any;
       }
 
-      return posts as any;
+      return sortedPosts as any;
     },
     getNextPageParam: (lastPage, pages) => {
       return lastPage.length === limit ? pages.length : undefined;

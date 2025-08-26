@@ -67,9 +67,9 @@ const ArtistSignupForm = () => {
         .from('profiles')
         .select('username')
         .eq('username', username)
-        .single();
+        .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
+      if (error) {
         console.error('Error checking username:', error);
         return false;
       }
@@ -115,7 +115,7 @@ const ArtistSignupForm = () => {
     });
 
     if (!error) {
-      navigate('/auth/confirmation');
+      navigate('/');
     }
 
     setIsLoading(false);
