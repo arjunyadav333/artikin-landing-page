@@ -4,7 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./hooks/useAuth";
-import Navigation from "./components/Navigation";
+import { AppLayout } from "./components/layout/app-layout";
 import Home from "./pages/Home";
 import Opportunities from "./pages/Opportunities";
 import Create from "./pages/Create";
@@ -40,51 +40,66 @@ const AppRoutes = () => {
 
   return (
     <BrowserRouter>
-      <div className="min-h-screen bg-background">
-        {user && <Navigation />}
-        <Routes>
-          <Route path="/auth" element={<AuthNew />} />
-          <Route path="/signup" element={<SignUp />} />
-          <Route path="/auth/signup" element={<SignUp />} />
-          <Route path="/" element={
-            <ProtectedRoute>
+      <Routes>
+        {/* Auth Routes (No Layout) */}
+        <Route path="/auth" element={<AuthNew />} />
+        <Route path="/signup" element={<SignUp />} />
+        <Route path="/auth/signup" element={<SignUp />} />
+        
+        {/* App Routes (With Layout) */}
+        <Route path="/" element={
+          <ProtectedRoute>
+            <AppLayout>
               <Home />
-            </ProtectedRoute>
-          } />
-          <Route path="/home" element={
-            <ProtectedRoute>
+            </AppLayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/home" element={
+          <ProtectedRoute>
+            <AppLayout>
               <Home />
-            </ProtectedRoute>
-          } />
-          <Route path="/opportunities" element={
-            <ProtectedRoute>
+            </AppLayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/opportunities" element={
+          <ProtectedRoute>
+            <AppLayout>
               <Opportunities />
-            </ProtectedRoute>
-          } />
-          <Route path="/create" element={
-            <ProtectedRoute>
+            </AppLayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/create" element={
+          <ProtectedRoute>
+            <AppLayout>
               <Create />
-            </ProtectedRoute>
-          } />
-          <Route path="/connections" element={
-            <ProtectedRoute>
+            </AppLayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/connections" element={
+          <ProtectedRoute>
+            <AppLayout>
               <Connections />
-            </ProtectedRoute>
-          } />
-          <Route path="/profile" element={
-            <ProtectedRoute>
+            </AppLayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/profile" element={
+          <ProtectedRoute>
+            <AppLayout>
               <Profile />
-            </ProtectedRoute>
-          } />
-          <Route path="/messages" element={
-            <ProtectedRoute>
+            </AppLayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/messages" element={
+          <ProtectedRoute>
+            <AppLayout>
               <Messages />
-            </ProtectedRoute>
-          } />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </div>
+            </AppLayout>
+          </ProtectedRoute>
+        } />
+        
+        {/* Catch-all */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
     </BrowserRouter>
   );
 };
