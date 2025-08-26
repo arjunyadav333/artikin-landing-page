@@ -44,6 +44,7 @@ const AppRoutes = () => {
         {user && <Navigation />}
         <Routes>
           <Route path="/auth" element={<AuthNew />} />
+          <Route path="/signup" element={<SignUp />} />
           <Route path="/auth/signup" element={<SignUp />} />
           <Route path="/" element={
             <ProtectedRoute>
