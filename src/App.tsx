@@ -11,7 +11,8 @@ import Create from "./pages/Create";
 import Connections from "./pages/Connections";
 import Profile from "./pages/Profile";
 import Messages from "./pages/Messages";
-import Auth from "./pages/Auth";
+import AuthNew from "./pages/AuthNew";
+import SignUp from "./pages/SignUp";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -42,7 +43,8 @@ const AppRoutes = () => {
       <div className="min-h-screen bg-background">
         {user && <Navigation />}
         <Routes>
-          <Route path="/auth" element={<Auth />} />
+          <Route path="/auth" element={<AuthNew />} />
+          <Route path="/auth/signup" element={<SignUp />} />
           <Route path="/" element={
             <ProtectedRoute>
               <Home />
