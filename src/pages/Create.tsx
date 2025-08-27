@@ -1,224 +1,284 @@
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState, useCallback, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Image, Video, Music, Palette, Type, Globe, X } from "lucide-react";
+import { Image, X, Upload, Loader2 } from "lucide-react";
+import { useCurrentProfile } from "@/hooks/useProfiles";
+import { useCreatePost } from "@/hooks/usePosts";
 
 const Create = () => {
+  const navigate = useNavigate();
+  const { data: profile } = useCurrentProfile();
+  const createPostMutation = useCreatePost();
+  
   const [content, setContent] = useState("");
-  const [title, setTitle] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const [currentTag, setCurrentTag] = useState("");
+  const [mediaFiles, setMediaFiles] = useState<File[]>([]);
+  const [mediaPreview, setMediaPreview] = useState<string[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const addTag = () => {
-    if (currentTag.trim() && !tags.includes(currentTag.trim())) {
-      setTags([...tags, currentTag.trim()]);
+  const addTag = useCallback(() => {
+    if (currentTag.trim() && !tags.includes(currentTag.trim()) && tags.length < 10) {
+      setTags(prev => [...prev, currentTag.trim()]);
       setCurrentTag("");
     }
-  };
+  }, [currentTag, tags]);
 
-  const removeTag = (tagToRemove: string) => {
-    setTags(tags.filter(tag => tag !== tagToRemove));
-  };
+  const removeTag = useCallback((tagToRemove: string) => {
+    setTags(prev => prev.filter(tag => tag !== tagToRemove));
+  }, []);
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyPress = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       e.preventDefault();
       addTag();
     }
+  }, [addTag]);
+
+  const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    const validFiles = files.filter(file => 
+      file.type.startsWith('image/') || file.type.startsWith('video/')
+    ).slice(0, 4); // Max 4 files
+
+    setMediaFiles(validFiles);
+
+    // Create previews
+    const previews: string[] = [];
+    validFiles.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        previews.push(event.target?.result as string);
+        if (previews.length === validFiles.length) {
+          setMediaPreview([...previews]);
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+
+    if (validFiles.length === 0) {
+      setMediaPreview([]);
+    }
+  }, []);
+
+  const removeMedia = useCallback((index: number) => {
+    setMediaFiles(prev => prev.filter((_, i) => i !== index));
+    setMediaPreview(prev => prev.filter((_, i) => i !== index));
+  }, []);
+
+  const handleSubmit = useCallback(async () => {
+    if (!content.trim()) return;
+
+    // For now, we'll create the post without media upload
+    // In a real app, you'd upload files to Supabase Storage first
+    const postData = {
+      content: content.trim(),
+      tags: tags.length > 0 ? tags : undefined,
+      media_urls: mediaPreview.length > 0 ? mediaPreview : undefined,
+      media_type: mediaFiles.length > 0 ? 'image' : 'text'
+    };
+
+    createPostMutation.mutate(postData, {
+      onSuccess: () => {
+        // Reset form
+        setContent("");
+        setTags([]);
+        setCurrentTag("");
+        setMediaFiles([]);
+        setMediaPreview([]);
+        
+        // Navigate back to home feed
+        navigate("/home");
+      }
+    });
+  }, [content, tags, mediaPreview, mediaFiles, createPostMutation, navigate]);
+
+  const getUserDisplayInfo = () => {
+    if (!profile) return { name: "Loading...", username: "@loading", avatar: "" };
+    
+    const displayName = profile.display_name || profile.full_name || "User";
+    const username = profile.username ? `@${profile.username}` : "@user";
+    const avatar = profile.avatar_url || "";
+    
+    return { name: displayName, username, avatar };
   };
 
-  const mediaTypes = [
-    { id: "image", label: "Image", icon: Image, color: "text-primary" },
-    { id: "video", label: "Video", icon: Video, color: "text-creative" },
-    { id: "audio", label: "Audio", icon: Music, color: "text-opportunity" },
-    { id: "artwork", label: "Artwork", icon: Palette, color: "text-accent" },
-    { id: "text", label: "Text Post", icon: Type, color: "text-muted-foreground" },
-    { id: "link", label: "Link", icon: Globe, color: "text-connection" },
-  ];
+  const { name, username, avatar } = getUserDisplayInfo();
+  const isLoading = createPostMutation.isPending;
 
   return (
-    <div className="min-h-screen bg-background pb-20 md:pb-8">
-      <div className="container max-w-2xl mx-auto px-4 py-6">
+    <div className="min-h-screen bg-background">
+      {/* Mobile-first responsive layout */}
+      <div className="w-full max-w-2xl mx-auto px-4 py-6 lg:px-6">
+        {/* Header */}
         <div className="mb-6">
-          <h1 className="text-2xl font-bold mb-2">Create Post</h1>
+          <h1 className="text-2xl font-bold text-foreground">Create Post</h1>
+          <p className="text-sm text-muted-foreground mt-1">Share your thoughts with the community</p>
         </div>
 
-        <Card>
-          <CardHeader>
+        <Card className="border-border">
+          <CardHeader className="pb-4">
             <div className="flex items-center space-x-3">
-              <Avatar className="h-10 w-10">
-                <AvatarImage src="" alt="Your avatar" />
-                <AvatarFallback className="bg-primary text-primary-foreground">U</AvatarFallback>
+              <Avatar className="h-12 w-12">
+                <AvatarImage src={avatar} alt="Your avatar" />
+                <AvatarFallback className="bg-primary text-primary-foreground text-lg font-semibold">
+                  {name.charAt(0).toUpperCase()}
+                </AvatarFallback>
               </Avatar>
-              <div>
-                <p className="font-semibold">Your Name</p>
-                <p className="text-sm text-muted-foreground">@username</p>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-foreground truncate">{name}</p>
+                <p className="text-sm text-muted-foreground truncate">{username}</p>
               </div>
             </div>
           </CardHeader>
 
           <CardContent className="space-y-6">
-            <Tabs defaultValue="post" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="post">Create Post</TabsTrigger>
-                <TabsTrigger value="opportunity">Post Opportunity</TabsTrigger>
-              </TabsList>
+            {/* Post Content */}
+            <div className="space-y-4">
+              <div>
+                <Textarea
+                  placeholder="What's happening? Share your thoughts, progress, or inspiration..."
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  className="min-h-[120px] text-base resize-none border-input focus:border-primary transition-colors"
+                  maxLength={2000}
+                />
+                <div className="text-xs text-muted-foreground text-right mt-1">
+                  {content.length}/2000
+                </div>
+              </div>
 
-              <TabsContent value="post" className="space-y-6 mt-6">
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="title">Title (optional)</Label>
-                    <Input
-                      id="title"
-                      placeholder="Give your post a title..."
-                      value={title}
-                      onChange={(e) => setTitle(e.target.value)}
-                      className="mt-2"
-                    />
+              {/* Media Upload */}
+              <div className="space-y-3">
+                <div 
+                  className="p-6 border-2 border-dashed border-muted-foreground/30 rounded-lg text-center hover:border-primary/50 transition-colors cursor-pointer"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <div className="space-y-2">
+                    <Upload className="h-8 w-8 mx-auto text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">
+                      Upload photos or videos (max 4)
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      JPG, PNG, GIF, MP4 up to 10MB each
+                    </p>
                   </div>
+                </div>
+                
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  multiple
+                  accept="image/*,video/*"
+                  onChange={handleFileSelect}
+                  className="hidden"
+                />
 
-                  <div>
-                    <Label htmlFor="content">What's on your mind?</Label>
-                    <Textarea
-                      id="content"
-                      placeholder="Share your thoughts, progress, or inspiration..."
-                      value={content}
-                      onChange={(e) => setContent(e.target.value)}
-                      className="min-h-[120px] mt-2 resize-none"
-                    />
-                  </div>
-
-                  <div>
-                    <Label>Media Type</Label>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-2">
-                      {mediaTypes.map((type) => (
+                {/* Media Preview */}
+                {mediaPreview.length > 0 && (
+                  <div className="grid grid-cols-2 gap-3">
+                    {mediaPreview.map((preview, index) => (
+                      <div key={index} className="relative group">
+                        <div className="aspect-square rounded-lg overflow-hidden bg-muted">
+                          {mediaFiles[index]?.type.startsWith('image/') ? (
+                            <img 
+                              src={preview} 
+                              alt={`Preview ${index + 1}`}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <video 
+                              src={preview}
+                              className="w-full h-full object-cover"
+                              controls={false}
+                            />
+                          )}
+                        </div>
                         <Button
-                          key={type.id}
-                          variant="outline"
-                          className="h-16 flex-col space-y-2 hover:border-primary"
+                          size="icon"
+                          variant="destructive"
+                          className="absolute top-2 right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={() => removeMedia(index)}
                         >
-                          <type.icon className={`h-5 w-5 ${type.color}`} />
-                          <span className="text-xs">{type.label}</span>
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="p-4 border-2 border-dashed border-muted rounded-lg text-center">
-                    <div className="space-y-2">
-                      <Image className="h-8 w-8 mx-auto text-muted-foreground" />
-                      <p className="text-sm text-muted-foreground">
-                        Drag and drop your files here, or click to browse
-                      </p>
-                      <Button variant="outline" size="sm">
-                        Choose Files
-                      </Button>
-                    </div>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="tags">Tags</Label>
-                    <div className="mt-2 space-y-3">
-                      <div className="flex space-x-2">
-                        <Input
-                          id="tags"
-                          placeholder="Add a tag..."
-                          value={currentTag}
-                          onChange={(e) => setCurrentTag(e.target.value)}
-                          onKeyPress={handleKeyPress}
-                          className="flex-1"
-                        />
-                        <Button onClick={addTag} size="sm" variant="outline">
-                          Add
+                          <X className="h-3 w-3" />
                         </Button>
                       </div>
-                      {tags.length > 0 && (
-                        <div className="flex flex-wrap gap-2">
-                          {tags.map((tag) => (
-                            <Badge key={tag} variant="secondary" className="text-xs">
-                              {tag}
-                              <button
-                                onClick={() => removeTag(tag)}
-                                className="ml-2 hover:text-destructive"
-                              >
-                                <X className="h-3 w-3" />
-                              </button>
-                            </Badge>
-                          ))}
-                        </div>
-                      )}
-                    </div>
+                    ))}
                   </div>
+                )}
+              </div>
+
+              {/* Tags */}
+              <div className="space-y-3">
+                <div className="flex space-x-2">
+                  <Input
+                    placeholder="Add tags... (press Enter)"
+                    value={currentTag}
+                    onChange={(e) => setCurrentTag(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    className="flex-1"
+                    disabled={tags.length >= 10}
+                  />
+                  <Button 
+                    onClick={addTag} 
+                    size="sm" 
+                    variant="outline"
+                    disabled={!currentTag.trim() || tags.length >= 10}
+                  >
+                    Add
+                  </Button>
                 </div>
-              </TabsContent>
-
-              <TabsContent value="opportunity" className="space-y-6 mt-6">
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="job-title">Opportunity Title</Label>
-                    <Input
-                      id="job-title"
-                      placeholder="e.g., Freelance Graphic Designer"
-                      className="mt-2"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="location">Location</Label>
-                      <Input
-                        id="location"
-                        placeholder="e.g., New York, NY or Remote"
-                        className="mt-2"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="salary">Budget/Salary</Label>
-                      <Input
-                        id="salary"
-                        placeholder="e.g., $5,000 - $10,000"
-                        className="mt-2"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="description">Description</Label>
-                    <Textarea
-                      id="description"
-                      placeholder="Describe the opportunity, requirements, and what you're looking for..."
-                      className="min-h-[120px] mt-2 resize-none"
-                    />
-                  </div>
-
-                  <div>
-                    <Label>Opportunity Type</Label>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-2">
-                      {["Full-time", "Contract", "Freelance", "Internship"].map((type) => (
-                        <Button
-                          key={type}
-                          variant="outline"
-                          className="h-10 hover:border-opportunity"
+                
+                {tags.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {tags.map((tag) => (
+                      <Badge key={tag} variant="secondary" className="text-sm">
+                        #{tag}
+                        <button
+                          onClick={() => removeTag(tag)}
+                          className="ml-2 hover:text-destructive transition-colors"
+                          disabled={isLoading}
                         >
-                          {type}
-                        </Button>
-                      ))}
-                    </div>
+                          <X className="h-3 w-3" />
+                        </button>
+                      </Badge>
+                    ))}
                   </div>
-                </div>
-              </TabsContent>
-            </Tabs>
+                )}
+                
+                <p className="text-xs text-muted-foreground">
+                  {tags.length}/10 tags
+                </p>
+              </div>
+            </div>
 
-            <div className="flex justify-between pt-4 border-t">
-              <Button variant="outline">Save Draft</Button>
-              <Button className="bg-primary hover:bg-primary/90">
-                Publish Post
+            {/* Action Buttons */}
+            <div className="flex justify-between pt-4 border-t border-border">
+              <Button 
+                variant="outline" 
+                onClick={() => navigate("/home")}
+                disabled={isLoading}
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleSubmit}
+                disabled={!content.trim() || isLoading}
+                className="bg-primary hover:bg-primary/90 min-w-[100px]"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Posting...
+                  </>
+                ) : (
+                  "Post"
+                )}
               </Button>
             </div>
           </CardContent>
