@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { 
@@ -24,7 +24,6 @@ import { Link } from "react-router-dom";
 import { PostListSkeleton } from "@/components/ui/post-skeleton";
 import { EnhancedPostCard } from "@/components/post/enhanced-post-card";
 import { createSampleData } from "@/utils/sampleData";
-import { useEffect } from "react";
 
 const Home = () => {
   const [bookmarkedPosts, setBookmarkedPosts] = useState<Set<string>>(new Set());
