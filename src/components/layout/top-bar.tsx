@@ -64,7 +64,7 @@ export function TopBar() {
             <Link to="/home" className="flex items-center">
               <span className="text-xl font-bold text-primary">
                 Artikin
-              </span>
+              </span>  
             </Link>
           </div>
 

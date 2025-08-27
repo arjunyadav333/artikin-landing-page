@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "@/hooks/useAuth";
 import { AppLayout } from "@/components/layout/app-layout";
@@ -7,7 +7,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 
 // Import pages
-import Home from "@/pages/Home";
+import HomeFeed from "@/pages/HomeFeed";
 import Auth from "@/pages/Auth";
 import Profile from "@/pages/Profile";
 import Opportunities from "@/pages/Opportunities";
@@ -32,7 +32,7 @@ const queryClient = new QueryClient({
 
 // Protected Route wrapper component
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  return <AppLayout>{children}</AppLayout>;
+  return <>{children}</>;
 };
 
 const App: React.FC = () => {
@@ -45,10 +45,13 @@ const App: React.FC = () => {
               {/* Auth route - standalone, no layout */}
               <Route path="/auth" element={<Auth />} />
               
+              {/* Redirect root to home */}
+              <Route path="/" element={<Navigate to="/home" replace />} />
+              
               {/* Protected routes with AppLayout */}
-              <Route path="/" element={
+              <Route path="/home" element={
                 <ProtectedRoute>
-                  <Home />
+                  <HomeFeed />
                 </ProtectedRoute>
               } />
               

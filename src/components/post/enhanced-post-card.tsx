@@ -15,11 +15,14 @@ import {
   Share2,
   Bookmark,
   MoreHorizontal,
-  UserPlus
+  UserPlus,
+  UserCheck
 } from "lucide-react";
 import { ProfilePictureModal } from "@/components/profile/profile-picture-modal";
 import { CustomVideoPlayer } from "@/components/media/custom-video-player";
 import { formatDistanceToNow } from "date-fns";
+import { useConnectionStatus, useFollowUser } from "@/hooks/useConnections";
+import { useAuth } from "@/hooks/useAuth";
 
 interface PostCardProps {
   post: {
@@ -37,6 +40,7 @@ interface PostCardProps {
     user_saved?: boolean;
     profiles?: {
       id: string;
+      user_id: string;
       display_name: string;
       username: string;
       avatar_url?: string;
@@ -60,7 +64,11 @@ export const EnhancedPostCard = memo(({
   isLikeLoading = false
 }: PostCardProps) => {
   const [showProfileModal, setShowProfileModal] = useState(false);
-  const [expandedComments, setExpandedComments] = useState(false);
+  const { user } = useAuth();
+  const { data: connectionStatus } = useConnectionStatus(post.profiles?.user_id);
+  const followMutation = useFollowUser();
+  
+  const isOwnPost = user?.id === post.profiles?.user_id;
 
   const formatText = (text: string) => {
     return text.split(' ').map((word, index) => {
@@ -99,6 +107,15 @@ export const EnhancedPostCard = memo(({
   };
 
   const timeAgo = formatDistanceToNow(new Date(post.created_at), { addSuffix: true });
+
+  const handleFollowClick = () => {
+    if (!post.profiles?.user_id || isOwnPost) return;
+    
+    followMutation.mutate({
+      targetUserId: post.profiles.user_id,
+      isCurrentlyFollowing: connectionStatus?.isFollowing || false,
+    });
+  };
 
   return (
     <article className="border-b border-border bg-card">
@@ -146,14 +163,31 @@ export const EnhancedPostCard = memo(({
         </div>
 
         <div className="flex items-center space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="text-xs px-3 py-1 h-8"
-          >
-            <UserPlus className="h-3 w-3 mr-1" />
-            Follow
-          </Button>
+          {!isOwnPost && (
+            <Button
+              variant={connectionStatus?.isFollowing ? "secondary" : "default"}
+              size="sm"
+              className={`text-xs px-3 py-1 h-8 font-medium transition-all ${
+                connectionStatus?.isFollowing 
+                  ? "bg-sky-100 text-sky-600 hover:bg-sky-200 border-sky-200" 
+                  : "bg-blue-600 text-white hover:bg-blue-700"
+              }`}
+              onClick={handleFollowClick}
+              disabled={followMutation.isPending}
+            >
+              {connectionStatus?.isFollowing ? (
+                <>
+                  <UserCheck className="h-3 w-3 mr-1" />
+                  Following
+                </>
+              ) : (
+                <>
+                  <UserPlus className="h-3 w-3 mr-1" />
+                  Follow
+                </>
+              )}
+            </Button>
+          )}
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -161,11 +195,17 @@ export const EnhancedPostCard = memo(({
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuContent align="end" className="w-48 bg-background border border-border">
+              <DropdownMenuItem onClick={() => onBookmark(post.id)}>
+                {post.user_saved ? 'Remove from Saved' : 'Save Post'}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => {
+                const postUrl = `${window.location.origin}/post/${post.id}`;
+                navigator.clipboard.writeText(postUrl);
+              }}>
+                Copy Link
+              </DropdownMenuItem>
               <DropdownMenuItem>Report Post</DropdownMenuItem>
-              <DropdownMenuItem>Mute User</DropdownMenuItem>
-              <DropdownMenuItem>Copy Link</DropdownMenuItem>
-              <DropdownMenuItem>Hide Post</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -248,10 +288,7 @@ export const EnhancedPostCard = memo(({
             variant="ghost"
             size="sm"
             className="h-auto p-0 text-foreground hover:text-primary transition-colors group"
-            onClick={() => {
-              setExpandedComments(!expandedComments);
-              onComment(post.id);
-            }}
+            onClick={() => onComment(post.id)}
           >
             <MessageCircle className="h-5 w-5 md:h-6 md:w-6 mr-1 group-hover:scale-110 transition-transform" />
             <span className="text-sm font-medium">{post.comments_count}</span>
