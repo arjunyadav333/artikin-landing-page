@@ -1,108 +1,178 @@
-import React from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { AuthProvider } from "@/hooks/useAuth";
-import { AppLayout } from "@/components/layout/app-layout";
+import { Suspense, lazy } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider, useAuth } from "./hooks/useAuth";
+import { AppLayout } from "./components/layout/app-layout";
+import NotFound from "./pages/NotFound";
 
-// Import pages
-import HomeFeed from "@/pages/HomeFeed";
-import Auth from "@/pages/Auth";
-import Profile from "@/pages/Profile";
-import Opportunities from "@/pages/Opportunities";
-import Messages from "@/pages/Messages";
-import Connections from "@/pages/Connections";
-import Create from "@/pages/Create";
-import NotFound from "@/pages/NotFound";
+// Lazy load components for better performance and code splitting
+const Home = lazy(() => import("./pages/Home"));
+const Opportunities = lazy(() => import("./pages/Opportunities"));
+const Create = lazy(() => import("./pages/Create"));
+const Connections = lazy(() => import("./pages/Connections"));
+const Profile = lazy(() => import("./pages/Profile"));
+const Messages = lazy(() => import("./pages/Messages"));
+const AuthNew = lazy(() => import("./pages/AuthNew"));
+const SignUp = lazy(() => import("./pages/SignUp"));
 
-// Create QueryClient with proper configuration
+// Loading component for lazy routes
+const PageLoader = () => (
+  <div className="flex items-center justify-center min-h-screen">
+    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+  </div>
+);
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: 1,
+      // Global cache settings for better performance
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 10 * 60 * 1000, // 10 minutes (was cacheTime)
       refetchOnWindowFocus: false,
-      staleTime: 1000 * 60 * 5, // 5 minutes
+      refetchOnMount: false,
+      retry: (failureCount, error: any) => {
+        // Don't retry auth errors
+        if (error?.message?.includes('JWT') || error?.message?.includes('auth')) {
+          return false;
+        }
+        return failureCount < 3;
+      },
+      retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
     },
     mutations: {
+      // Global mutation settings
       retry: 1,
-    },
-  },
+      retryDelay: 1000,
+    }
+  }
 });
 
-// Protected Route wrapper component
-const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/auth" replace />;
+  }
+
   return <>{children}</>;
 };
 
-const App: React.FC = () => {
+const AppRoutes = () => {
+  const { user } = useAuth();
+
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <BrowserRouter>
-          <div className="min-h-screen bg-background font-sans antialiased">
-            <Routes>
-              {/* Auth route - standalone, no layout */}
-              <Route path="/auth" element={<Auth />} />
-              
-              {/* Redirect root to home */}
-              <Route path="/" element={<Navigate to="/home" replace />} />
-              
-              {/* Protected routes with AppLayout */}
-              <Route path="/home" element={
-                <ProtectedRoute>
-                  <HomeFeed />
-                </ProtectedRoute>
-              } />
-              
-              <Route path="/profile" element={
-                <ProtectedRoute>
-                  <Profile />
-                </ProtectedRoute>
-              } />
-              
-              <Route path="/profile/:id" element={
-                <ProtectedRoute>
-                  <Profile />
-                </ProtectedRoute>
-              } />
-              
-              <Route path="/opportunities" element={
-                <ProtectedRoute>
-                  <Opportunities />
-                </ProtectedRoute>
-              } />
-              
-              <Route path="/messages" element={
-                <ProtectedRoute>
-                  <Messages />
-                </ProtectedRoute>
-              } />
-              
-              <Route path="/connections" element={
-                <ProtectedRoute>
-                  <Connections />
-                </ProtectedRoute>
-              } />
-              
-              <Route path="/create" element={
-                <ProtectedRoute>
-                  <Create />
-                </ProtectedRoute>
-              } />
-              
-              {/* Catch-all route for 404 */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-            
-            {/* Toast notifications */}
-            <Toaster />
-            <Sonner />
-          </div>
-        </BrowserRouter>
-      </AuthProvider>
-    </QueryClientProvider>
+    <BrowserRouter>
+      <Routes>
+        {/* Auth Routes (No Layout) */}
+        <Route path="/auth" element={
+          <Suspense fallback={<PageLoader />}>
+            <AuthNew />
+          </Suspense>
+        } />
+        <Route path="/signup" element={
+          <Suspense fallback={<PageLoader />}>
+            <SignUp />
+          </Suspense>
+        } />
+        <Route path="/auth/signup" element={
+          <Suspense fallback={<PageLoader />}>
+            <SignUp />
+          </Suspense>
+        } />
+        
+        {/* App Routes (With Layout) */}
+        <Route path="/" element={
+          <ProtectedRoute>
+            <AppLayout>
+              <Suspense fallback={<PageLoader />}>
+                <Home />
+              </Suspense>
+            </AppLayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/home" element={
+          <ProtectedRoute>
+            <AppLayout>
+              <Suspense fallback={<PageLoader />}>
+                <Home />
+              </Suspense>
+            </AppLayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/opportunities" element={
+          <ProtectedRoute>
+            <AppLayout>
+              <Suspense fallback={<PageLoader />}>
+                <Opportunities />
+              </Suspense>
+            </AppLayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/create" element={
+          <ProtectedRoute>
+            <AppLayout>
+              <Suspense fallback={<PageLoader />}>
+                <Create />
+              </Suspense>
+            </AppLayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/connections" element={
+          <ProtectedRoute>
+            <AppLayout>
+              <Suspense fallback={<PageLoader />}>
+                <Connections />
+              </Suspense>
+            </AppLayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/profile" element={
+          <ProtectedRoute>
+            <AppLayout>
+              <Suspense fallback={<PageLoader />}>
+                <Profile />
+              </Suspense>
+            </AppLayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/messages" element={
+          <ProtectedRoute>
+            <AppLayout>
+              <Suspense fallback={<PageLoader />}>
+                <Messages />
+              </Suspense>
+            </AppLayout>
+          </ProtectedRoute>
+        } />
+        
+        {/* Catch-all */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </BrowserRouter>
   );
 };
+
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <AuthProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <AppRoutes />
+      </TooltipProvider>
+    </AuthProvider>
+  </QueryClientProvider>
+);
 
 export default App;

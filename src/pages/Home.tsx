@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState } from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { 
@@ -18,12 +18,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { usePosts, useLikePost } from "@/hooks/usePosts";
-import { useSavePost } from "@/hooks/useSavePost";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "react-router-dom";
 import { PostListSkeleton } from "@/components/ui/post-skeleton";
-import { EnhancedPostCard } from "@/components/post/enhanced-post-card";
 import { createSampleData } from "@/utils/sampleData";
+import { useEffect } from "react";
 
 const Home = () => {
   const [bookmarkedPosts, setBookmarkedPosts] = useState<Set<string>>(new Set());
@@ -31,7 +30,6 @@ const Home = () => {
   const { user } = useAuth();
   const { data: postsData, isLoading, fetchNextPage, hasNextPage, isError } = usePosts();
   const likePostMutation = useLikePost();
-  const savePostMutation = useSavePost();
 
   const posts = postsData?.pages.flat() || [];
 
@@ -53,13 +51,15 @@ const Home = () => {
   };
 
   const handleBookmark = (postId: string) => {
-    const post = posts.find(p => p.id === postId);
-    if (post) {
-      savePostMutation.mutate({
-        postId,
-        isSaved: post.user_saved || false
-      });
-    }
+    setBookmarkedPosts(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(postId)) {
+        newSet.delete(postId);
+      } else {
+        newSet.add(postId);
+      }
+      return newSet;
+    });
   };
 
   const toggleComments = (postId: string) => {
@@ -72,21 +72,6 @@ const Home = () => {
       }
       return newSet;
     });
-  };
-
-  const handleComment = (postId: string) => {
-    toggleComments(postId);
-  };
-
-  const handleShare = (postId: string) => {
-    if (navigator.share) {
-      navigator.share({
-        title: 'Check out this post',
-        url: `${window.location.origin}/post/${postId}`,
-      });
-    } else if (navigator.clipboard) {
-      navigator.clipboard.writeText(`${window.location.origin}/post/${postId}`);
-    }
   };
 
   const formatText = (text: string) => {
@@ -111,22 +96,8 @@ const Home = () => {
   };
 
   return (
-    <div className="w-full min-h-screen bg-background">
-      <div className="max-w-2xl mx-auto">
-        {/* Create Post Prompt */}
-        {user && (
-          <div className="border-b border-border bg-card p-4 sticky top-16 z-10 backdrop-blur-sm bg-card/95">
-            <Link to="/create">
-              <Button 
-                variant="outline" 
-                className="w-full justify-start text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                What's happening in your creative world?
-              </Button>
-            </Link>
-          </div>
-        )}
+    <div className="w-full">
+      <div className="max-w-2xl mx-auto md:max-w-none">
 
         {/* Feed */}
         <div className="pb-20 md:pb-8">
@@ -145,25 +116,147 @@ const Home = () => {
               </Link>
             </div>
           ) : (
-            <div className="divide-y divide-border">
-              {posts.map((post) => (
-                <EnhancedPostCard
-                  key={post.id}
-                  post={post}
-                  onLike={handleLike}
-                  onBookmark={handleBookmark}
-                  onComment={handleComment}
-                  onShare={handleShare}
-                  isLikeLoading={likePostMutation.isPending}
-                />
-              ))}
-            </div>
+            posts.map((post) => (
+              <article key={post.id} className="border-b border-border">
+                {/* Post Header */}
+                <div className="flex items-center justify-between p-4 pb-3">
+                  <div className="flex items-center space-x-3">
+                    <Avatar className="h-10 w-10 cursor-pointer">
+                      <AvatarImage src={post.profiles?.avatar_url} alt={post.profiles?.display_name} />
+                      <AvatarFallback className="bg-muted text-foreground">
+                        {post.profiles?.display_name?.split(' ').map(n => n[0]).join('') || 'U'}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <div className="flex items-center space-x-2">
+                        <span className="font-bold text-sm cursor-pointer hover:text-primary transition-colors">
+                          {post.profiles?.display_name}
+                        </span>
+                        <span className="text-muted-foreground text-sm">@{post.profiles?.username}</span>
+                      </div>
+                      <div className="flex items-center space-x-2 text-xs text-muted-foreground">
+                        <span>{post.profiles?.role || 'Creator'}</span>
+                        <span>•</span>
+                        <span>{new Date(post.created_at).toLocaleDateString()}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem>Report</DropdownMenuItem>
+                      <DropdownMenuItem>Mute</DropdownMenuItem>
+                      <DropdownMenuItem>Copy Link</DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+
+                {/* Post Content */}
+                <div className="px-4 pb-3">
+                  {post.title && (
+                    <h3 className="font-semibold text-lg mb-2">{post.title}</h3>
+                  )}
+                  <p className="text-sm leading-relaxed">
+                    {formatText(post.content)}
+                  </p>
+                </div>
+
+                {/* Post Media */}
+                {post.media_urls && post.media_urls.length > 0 && (
+                  <div className="relative bg-muted">
+                    <div className="aspect-square bg-gradient-to-br from-muted to-muted/60 flex items-center justify-center">
+                      <span className="text-muted-foreground text-sm">Media Preview</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Action Bar */}
+                <div className="flex items-center justify-between px-4 py-3">
+                  <div className="flex items-center space-x-4">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-auto p-0 text-foreground hover:text-red-500 transition-colors"
+                      onClick={() => handleLike(post.id)}
+                      disabled={likePostMutation.isPending}
+                    >
+                      <Heart 
+                        className={`h-6 w-6 mr-1 transition-all ${
+                          post.user_liked ? 'fill-red-500 text-red-500' : ''
+                        }`} 
+                      />
+                      <span className="text-sm font-medium">{post.likes_count}</span>
+                    </Button>
+                    
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-auto p-0 text-foreground hover:text-primary transition-colors"
+                      onClick={() => toggleComments(post.id)}
+                    >
+                      <MessageCircle className="h-6 w-6 mr-1" />
+                      <span className="text-sm font-medium">{post.comments_count}</span>
+                    </Button>
+                    
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-auto p-0 text-foreground hover:text-primary transition-colors"
+                    >
+                      <Share2 className="h-6 w-6 mr-1" />
+                      <span className="text-sm font-medium">{post.shares_count}</span>
+                    </Button>
+                  </div>
+                  
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-auto p-0 text-foreground hover:text-primary transition-colors"
+                    onClick={() => handleBookmark(post.id)}
+                  >
+                    <Bookmark 
+                      className={`h-6 w-6 transition-all ${
+                        bookmarkedPosts.has(post.id) ? 'fill-primary text-primary' : ''
+                      }`} 
+                    />
+                  </Button>
+                </div>
+
+                {/* Expanded Comments */}
+                {expandedComments.has(post.id) && (
+                  <div className="px-4 pb-4 mt-4 space-y-3 border-t border-border pt-4">
+                    <div className="flex space-x-3">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={user?.user_metadata?.avatar_url} />
+                        <AvatarFallback className="bg-muted text-foreground text-xs">
+                          {user?.email?.charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1">
+                        <input
+                          type="text"
+                          placeholder="Add a comment..."
+                          className="w-full bg-transparent text-sm border-none outline-none placeholder:text-muted-foreground"
+                        />
+                      </div>
+                      <Button size="sm" variant="ghost" className="text-primary hover:text-primary/80 text-sm font-medium">
+                        Post
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </article>
+            ))
           )}
         </div>
 
         {/* Load More */}
         {hasNextPage && (
-          <div className="p-4 text-center border-t border-border">
+          <div className="p-4 text-center">
             <Button 
               variant="outline" 
               className="w-full max-w-sm rounded-full"

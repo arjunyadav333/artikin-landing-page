@@ -266,7 +266,6 @@ export type Database = {
           likes_count: number | null
           media_type: string | null
           media_urls: string[] | null
-          saves_count: number | null
           shares_count: number | null
           tags: string[] | null
           title: string | null
@@ -281,7 +280,6 @@ export type Database = {
           likes_count?: number | null
           media_type?: string | null
           media_urls?: string[] | null
-          saves_count?: number | null
           shares_count?: number | null
           tags?: string[] | null
           title?: string | null
@@ -296,7 +294,6 @@ export type Database = {
           likes_count?: number | null
           media_type?: string | null
           media_urls?: string[] | null
-          saves_count?: number | null
           shares_count?: number | null
           tags?: string[] | null
           title?: string | null
@@ -365,27 +362,6 @@ export type Database = {
           user_id?: string
           username?: string
           website?: string | null
-        }
-        Relationships: []
-      }
-      saves: {
-        Row: {
-          created_at: string | null
-          id: string
-          post_id: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string
-          post_id: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          post_id?: string
-          user_id?: string
         }
         Relationships: []
       }

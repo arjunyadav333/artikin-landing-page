@@ -8,12 +8,11 @@ export interface Post {
   title?: string;
   content: string;
   media_urls?: string[];
-  media_type?: string;
+  media_type: string;
   tags?: string[];
   likes_count: number;
   comments_count: number;
   shares_count: number;
-  saves_count: number;
   created_at: string;
   updated_at: string;
   profiles?: {
@@ -22,10 +21,8 @@ export interface Post {
     display_name: string;
     avatar_url?: string;
     role?: string;
-    artform?: string;
   };
   user_liked?: boolean;
-  user_saved?: boolean;
 }
 
 export const usePosts = (limit = 10) => {
@@ -54,39 +51,29 @@ export const usePosts = (limit = 10) => {
       // Batch fetch profiles for all users
       const { data: profiles } = await supabase
         .from('profiles')
-        .select('id, user_id, username, display_name, avatar_url, role, artform')
+        .select('user_id, username, display_name, avatar_url, role')
         .in('user_id', userIds);
 
       // Create profile lookup map for O(1) access
       const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
 
-      // Batch fetch likes and saves if user is authenticated
+      // Batch fetch likes if user is authenticated
       let likedPostIds = new Set();
-      let savedPostIds = new Set();
       if (user) {
-        const [likesResult, savesResult] = await Promise.all([
-          supabase
-            .from('likes')
-            .select('post_id')
-            .eq('user_id', user.id)
-            .in('post_id', posts.map(p => p.id)),
-          supabase
-            .from('saves')
-            .select('post_id')
-            .eq('user_id', user.id)
-            .in('post_id', posts.map(p => p.id))
-        ]);
+        const { data: likes } = await supabase
+          .from('likes')
+          .select('post_id')
+          .eq('user_id', user.id)
+          .in('post_id', posts.map(p => p.id));
         
-        likedPostIds = new Set(likesResult.data?.map(l => l.post_id) || []);
-        savedPostIds = new Set(savesResult.data?.map(s => s.post_id) || []);
+        likedPostIds = new Set(likes?.map(l => l.post_id) || []);
       }
 
       // Combine data efficiently
       const processedPosts = posts.map(post => ({
         ...post,
         profiles: profileMap.get(post.user_id),
-        user_liked: likedPostIds.has(post.id),
-        user_saved: savedPostIds.has(post.id)
+        user_liked: likedPostIds.has(post.id)
       }));
 
       // Sort to show user's posts first (optimized)
@@ -135,37 +122,27 @@ export const useUserPosts = (userId: string) => {
       // Get profile for the user
       const { data: profile } = await supabase
         .from('profiles')
-        .select('id, user_id, username, display_name, avatar_url, role, artform')
+        .select('user_id, username, display_name, avatar_url, role')
         .eq('user_id', userId)
         .single();
 
-      // Get likes and saves if current user is authenticated
+      // Get likes if current user is authenticated
       let likedPostIds = new Set();
-      let savedPostIds = new Set();
       if (user) {
-        const [likesResult, savesResult] = await Promise.all([
-          supabase
-            .from('likes')
-            .select('post_id')
-            .eq('user_id', user.id)
-            .in('post_id', posts.map(p => p.id)),
-          supabase
-            .from('saves')
-            .select('post_id')
-            .eq('user_id', user.id)
-            .in('post_id', posts.map(p => p.id))
-        ]);
+        const { data: likes } = await supabase
+          .from('likes')
+          .select('post_id')
+          .eq('user_id', user.id)
+          .in('post_id', posts.map(p => p.id));
         
-        likedPostIds = new Set(likesResult.data?.map(l => l.post_id) || []);
-        savedPostIds = new Set(savesResult.data?.map(s => s.post_id) || []);
+        likedPostIds = new Set(likes?.map(l => l.post_id) || []);
       }
 
       // Combine data
       return posts.map(post => ({
         ...post,
         profiles: profile,
-        user_liked: likedPostIds.has(post.id),
-        user_saved: savedPostIds.has(post.id)
+        user_liked: likedPostIds.has(post.id)
       }));
     },
     enabled: !!userId,
@@ -206,15 +183,14 @@ export const useCreatePost = () => {
       // Get profile for the created post
       const { data: profile } = await supabase
         .from('profiles')
-        .select('id, user_id, username, display_name, avatar_url, role, artform')
+        .select('user_id, username, display_name, avatar_url, role')
         .eq('user_id', user.id)
         .single();
 
       return {
         ...data,
         profiles: profile,
-        user_liked: false,
-        user_saved: false
+        user_liked: false
       };
     },
     onSuccess: () => {

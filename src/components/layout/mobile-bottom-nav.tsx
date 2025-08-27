@@ -4,9 +4,10 @@ import { motion } from "framer-motion";
 import { 
   Home, 
   Briefcase, 
+  Plus, 
   Users, 
-  MessageSquare,
-  Bell 
+  User, 
+  MessageSquare 
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -20,9 +21,9 @@ type NavigationItem = {
 const navigation: NavigationItem[] = [
   { name: "Home", href: "/home", icon: Home },
   { name: "Opportunities", href: "/opportunities", icon: Briefcase },
+  { name: "Create", href: "/create", icon: Plus, isSpecial: true },
   { name: "Connections", href: "/connections", icon: Users },
   { name: "Messages", href: "/messages", icon: MessageSquare },
-  { name: "Notifications", href: "/notifications", icon: Bell },
 ];
 
 // Memoized navigation item component
@@ -40,7 +41,18 @@ const NavigationItemComponent = memo(({
   const handleHover = useCallback(() => {}, []);
   const handleTap = useCallback(() => {}, []);
   
-  // No special buttons in mobile nav anymore
+  if (isSpecial) {
+    return (
+      <Link key={item.name} to={item.href}>
+        <Button
+          size="sm"
+          className="h-10 w-10 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground"
+        >
+          <Icon className="h-4 w-4" />
+        </Button>
+      </Link>
+    );
+  }
 
   return (
     <Link key={item.name} to={item.href} className="flex-1 max-w-16">
