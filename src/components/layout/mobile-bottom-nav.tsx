@@ -23,7 +23,7 @@ const navigation: NavigationItem[] = [
   { name: "Opportunities", href: "/opportunities", icon: Briefcase },
   { name: "Create", href: "/create", icon: Plus, isSpecial: true },
   { name: "Connections", href: "/connections", icon: Users },
-  { name: "Messages", href: "/messages", icon: MessageSquare },
+  { name: "Profile", href: "/profile/me", icon: User },
 ];
 
 // Memoized navigation item component

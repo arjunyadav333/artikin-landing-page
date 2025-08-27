@@ -13,7 +13,7 @@ const Home = lazy(() => import("./pages/Home"));
 const Opportunities = lazy(() => import("./pages/Opportunities"));
 const Create = lazy(() => import("./pages/Create"));
 const Connections = lazy(() => import("./pages/Connections"));
-const Profile = lazy(() => import("./pages/Profile"));
+const UserProfile = lazy(() => import("./pages/UserProfile"));
 const Messages = lazy(() => import("./pages/Messages"));
 const AuthNew = lazy(() => import("./pages/AuthNew"));
 const SignUp = lazy(() => import("./pages/SignUp"));
@@ -137,15 +137,25 @@ const AppRoutes = () => {
             </AppLayout>
           </ProtectedRoute>
         } />
-        <Route path="/profile" element={
+        <Route path="/profile/me" element={
           <ProtectedRoute>
             <AppLayout>
               <Suspense fallback={<PageLoader />}>
-                <Profile />
+                <UserProfile />
               </Suspense>
             </AppLayout>
           </ProtectedRoute>
         } />
+        <Route path="/profile/:userId" element={
+          <ProtectedRoute>
+            <AppLayout>
+              <Suspense fallback={<PageLoader />}>
+                <UserProfile />
+              </Suspense>
+            </AppLayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/profile" element={<Navigate to="/profile/me" replace />} />
         <Route path="/messages" element={
           <ProtectedRoute>
             <AppLayout>

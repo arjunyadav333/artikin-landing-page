@@ -24,7 +24,7 @@ export function TopBar() {
         {/* Mobile Layout: Profile, Artikin, Notifications, Hamburger */}
         <div className="flex md:hidden items-center justify-between w-full">
           {/* Mobile Profile */}
-          <Link to="/profile">
+          <Link to="/profile/me">
             <Avatar className="h-8 w-8">
               <AvatarImage src={user?.user_metadata?.avatar_url} />
               <AvatarFallback className="text-xs bg-primary/10 text-primary">
@@ -115,7 +115,7 @@ export function TopBar() {
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56 bg-background/95 backdrop-blur-lg border border-border/50" align="end" forceMount>
                 <DropdownMenuItem asChild>
-                  <Link to="/profile" className="flex items-center">
+                  <Link to="/profile/me" className="flex items-center">
                     <User className="mr-2 h-4 w-4" />
                     <span>Profile</span>
                   </Link>
