@@ -266,6 +266,7 @@ export type Database = {
           likes_count: number | null
           media_type: string | null
           media_urls: string[] | null
+          saves_count: number | null
           shares_count: number | null
           tags: string[] | null
           title: string | null
@@ -280,6 +281,7 @@ export type Database = {
           likes_count?: number | null
           media_type?: string | null
           media_urls?: string[] | null
+          saves_count?: number | null
           shares_count?: number | null
           tags?: string[] | null
           title?: string | null
@@ -294,6 +296,7 @@ export type Database = {
           likes_count?: number | null
           media_type?: string | null
           media_urls?: string[] | null
+          saves_count?: number | null
           shares_count?: number | null
           tags?: string[] | null
           title?: string | null
