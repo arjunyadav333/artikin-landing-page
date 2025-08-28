@@ -200,7 +200,7 @@ export function FullWidthPost({ post }: FullWidthPostProps) {
                   {post.profiles?.display_name || 'Unknown User'}
                 </Link>
                 
-                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <div className="flex items-center text-xs text-muted-foreground space-x-2">
                   <span>
                     {post.profiles?.role === 'artist' && post.profiles?.artform 
                       ? post.profiles.artform 
@@ -209,23 +209,35 @@ export function FullWidthPost({ post }: FullWidthPostProps) {
                         : 'User'
                     }
                   </span>
-                  <span>• {timeAgo}</span>
+                  <span>{timeAgo}</span>
                 </div>
               </div>
             </div>
           </div>
 
           <div className="flex items-center space-x-2 flex-shrink-0">
-            {!isOwnPost && !post.is_following && (
+            {!isOwnPost && (
               <Button
-                variant="outline"
-                size="sm"
-                className="h-8 px-3 text-xs font-medium"
+                className={`
+                  ${post.is_following 
+                    ? 'bg-sky-300 hover:bg-sky-400 text-sky-900 border-sky-300' 
+                    : 'bg-blue-500 hover:bg-blue-600 text-white border-blue-500'
+                  }
+                  rounded-full transition-all duration-200 border
+                  text-[clamp(11px,1.2vw,13px)] 
+                  px-[clamp(12px,1.5vw,16px)] 
+                  py-[clamp(4px,0.6vw,6px)]
+                  font-medium h-auto
+                `}
                 onClick={handleFollow}
                 disabled={followUserMutation.isPending}
               >
-                <UserPlus className="h-3 w-3 mr-1" />
-                Follow
+                {followUserMutation.isPending 
+                  ? 'Loading...' 
+                  : post.is_following 
+                    ? 'Following' 
+                    : 'Follow'
+                }
               </Button>
             )}
             
