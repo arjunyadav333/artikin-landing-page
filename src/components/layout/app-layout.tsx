@@ -66,20 +66,23 @@ export const AppLayout = memo(({ children }: AppLayoutProps) => {
     </div>
   ), []);
 
-  // Memoize main content structure
+  // Memoize main content structure for Instagram-style feed
   const contentStructure = useMemo(() => (
-    <div className="max-w-7xl mx-auto">
-      <div className="flex gap-6 lg:gap-8">
-        {/* Center Column - Main Content */}
-        <div className="flex-1 min-w-0 max-w-2xl mx-auto lg:max-w-none lg:mx-0">
+    <div className="w-full">
+      <div className="flex">
+        {/* Center Column - Main Content (Full Width on Mobile, Centered on Desktop) */}
+        <div className="flex-1 min-w-0">
           {children}
         </div>
         
         {/* Right Column - Suggestions/Trending (Desktop only) */}
-        {sidebarContent}
+        <div className="hidden xl:block w-80 sticky top-20 h-fit ml-8">
+          <TrendingArtists />
+          <FeaturedOpportunities />
+        </div>
       </div>
     </div>
-  ), [children, sidebarContent]);
+  ), [children]);
 
   return (
     <SidebarProvider>
