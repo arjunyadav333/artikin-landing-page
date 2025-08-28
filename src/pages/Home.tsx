@@ -5,7 +5,7 @@ import { usePosts } from "@/hooks/usePosts";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "react-router-dom";
 import { PostListSkeleton } from "@/components/ui/post-skeleton";
-import { InstagramPost } from "@/components/feed/instagram-post";
+import { FullWidthPost } from "@/components/feed/full-width-post";
 import { createSampleData } from "@/utils/sampleData";
 
 const Home = () => {
@@ -34,7 +34,7 @@ const Home = () => {
   }, [posts.length]);
 
   return (
-    <div className="w-full">
+    <div className="w-full min-h-screen bg-background">
       {/* New Posts Banner */}
       {showNewPostsBanner && (
         <div className="sticky top-16 z-40 bg-primary/10 border-b border-primary/20 backdrop-blur-sm">
@@ -52,8 +52,8 @@ const Home = () => {
         </div>
       )}
 
-      {/* Feed Container - Full Width Instagram Style */}
-      <div className="max-w-md mx-auto lg:max-w-2xl">
+      {/* Feed Container - Full Width Mobile-First */}
+      <div className="w-full max-w-none sm:max-w-2xl sm:mx-auto lg:max-w-3xl xl:max-w-4xl">
         {isLoading ? (
           <PostListSkeleton count={3} />
         ) : isError ? (
@@ -79,7 +79,7 @@ const Home = () => {
         ) : (
           <div className="space-y-0">
             {posts.map((post) => (
-              <InstagramPost key={post.id} post={post} />
+              <FullWidthPost key={post.id} post={post} />
             ))}
           </div>
         )}
