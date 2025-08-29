@@ -14,6 +14,9 @@ export interface Opportunity {
   type: string;
   tags?: string[];
   applications_count: number;
+  status?: string;
+  deadline?: string;
+  views_count?: number;
   created_at: string;
   updated_at: string;
   profiles?: {
@@ -92,6 +95,7 @@ export const useCreateOpportunity = () => {
       salary_max?: number;
       type: string;
       tags?: string[];
+      deadline?: string;
     }) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');

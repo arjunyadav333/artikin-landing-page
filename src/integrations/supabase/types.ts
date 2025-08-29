@@ -179,46 +179,55 @@ export type Database = {
           applications_count: number | null
           company: string | null
           created_at: string | null
+          deadline: string | null
           description: string
           id: string
           location: string | null
           salary_max: number | null
           salary_min: number | null
+          status: string | null
           tags: string[] | null
           title: string
           type: string
           updated_at: string | null
           user_id: string
+          views_count: number | null
         }
         Insert: {
           applications_count?: number | null
           company?: string | null
           created_at?: string | null
+          deadline?: string | null
           description: string
           id?: string
           location?: string | null
           salary_max?: number | null
           salary_min?: number | null
+          status?: string | null
           tags?: string[] | null
           title: string
           type: string
           updated_at?: string | null
           user_id: string
+          views_count?: number | null
         }
         Update: {
           applications_count?: number | null
           company?: string | null
           created_at?: string | null
+          deadline?: string | null
           description?: string
           id?: string
           location?: string | null
           salary_max?: number | null
           salary_min?: number | null
+          status?: string | null
           tags?: string[] | null
           title?: string
           type?: string
           updated_at?: string | null
           user_id?: string
+          views_count?: number | null
         }
         Relationships: []
       }
@@ -266,6 +275,7 @@ export type Database = {
           likes_count: number | null
           media_type: string | null
           media_urls: string[] | null
+          saves_count: number | null
           shares_count: number | null
           tags: string[] | null
           title: string | null
@@ -280,6 +290,7 @@ export type Database = {
           likes_count?: number | null
           media_type?: string | null
           media_urls?: string[] | null
+          saves_count?: number | null
           shares_count?: number | null
           tags?: string[] | null
           title?: string | null
@@ -294,6 +305,7 @@ export type Database = {
           likes_count?: number | null
           media_type?: string | null
           media_urls?: string[] | null
+          saves_count?: number | null
           shares_count?: number | null
           tags?: string[] | null
           title?: string | null
@@ -362,6 +374,27 @@ export type Database = {
           user_id?: string
           username?: string
           website?: string | null
+        }
+        Relationships: []
+      }
+      saves: {
+        Row: {
+          created_at: string | null
+          id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          post_id?: string
+          user_id?: string
         }
         Relationships: []
       }
