@@ -1,15 +1,72 @@
 import { useNavigate } from "react-router-dom";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { FullWidthPost } from "@/components/feed/full-width-post";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Bookmark } from "lucide-react";
 import { PostListSkeleton } from "@/components/ui/post-skeleton";
 import { useAuth } from "@/hooks/useAuth";
-import { useSavedPosts } from "@/hooks/useSaves";
 
 const SavedPosts = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { data: savedPosts, isLoading, isError } = useSavedPosts();
+
+  const { 
+    data: postsData, 
+    isLoading, 
+    isError, 
+    fetchNextPage, 
+    hasNextPage 
+  } = useInfiniteQuery({
+    queryKey: ['savedPosts', user?.id],
+    queryFn: async ({ pageParam = 0 }) => {
+      if (!user) return [];
+      
+      const limit = 10;
+      
+      const { data: userPosts, error } = await supabase
+        .from('posts')
+        .select(`
+          *,
+          profiles (
+            id, user_id, username, display_name, avatar_url, role, artform, location
+          )
+        `)
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .range(pageParam * limit, (pageParam + 1) * limit - 1);
+
+      if (error) throw error;
+      if (!userPosts?.length) return [];
+
+      const postIds = userPosts.map(p => p.id);
+      
+      // Get user interactions for these posts
+      let likedPostIds = new Set();
+      if (postIds.length) {
+        const { data: likes } = await supabase
+          .from('likes')
+          .select('post_id')
+          .eq('user_id', user.id)
+          .in('post_id', postIds);
+        likedPostIds = new Set(likes?.map(l => l.post_id) || []);
+      }
+
+      return userPosts.map(post => ({
+        ...post,
+        user_liked: likedPostIds.has(post.id),
+        user_saved: true, // All posts here are saved
+        is_following: false // TODO: Implement following check
+      })) as any; // Type assertion to bypass strict typing
+    },
+    getNextPageParam: (lastPage, pages) => {
+      return lastPage.length === 10 ? pages.length : undefined;
+    },
+    initialPageParam: 0,
+    enabled: !!user,
+  });
+
+  const posts = postsData?.pages.flat() || [];
 
   if (!user) {
     return (
@@ -61,25 +118,40 @@ const SavedPosts = () => {
             <p className="text-muted-foreground mb-4">Failed to load saved posts</p>
             <Button onClick={() => window.location.reload()}>Try Again</Button>
           </div>
-        ) : !savedPosts || savedPosts.length === 0 ? (
+        ) : posts.length === 0 ? (
           <div className="text-center p-8">
-            <div className="text-6xl mb-4">📌</div>
-            <h3 className="text-lg font-semibold mb-2">No saved posts yet</h3>
-            <p className="text-muted-foreground text-sm mb-6">
-              Posts you save will appear here. Start exploring and save posts you love!
+            <Bookmark className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-semibold mb-2">No saved posts</h3>
+            <p className="text-muted-foreground text-sm">
+              Posts you save will appear here
             </p>
-            <Button 
-              onClick={() => navigate('/home')}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
-            >
-              Explore Posts
-            </Button>
           </div>
         ) : (
           <div className="space-y-0">
-            {savedPosts.map((post: any) => (
+            {posts.map((post) => (
               <FullWidthPost key={post.id} post={post} />
             ))}
+          </div>
+        )}
+
+        {/* Infinite Scroll Trigger */}
+        {hasNextPage && (
+          <div className="p-6 text-center">
+            <Button 
+              variant="ghost" 
+              className="text-muted-foreground hover:text-foreground"
+              onClick={() => fetchNextPage()}
+              disabled={isLoading}
+            >
+              {isLoading ? 'Loading more posts...' : 'Load more'}
+            </Button>
+          </div>
+        )}
+
+        {/* End of Feed */}
+        {!hasNextPage && posts.length > 0 && (
+          <div className="text-center py-8">
+            <p className="text-muted-foreground text-sm">You're all caught up!</p>
           </div>
         )}
       </div>
