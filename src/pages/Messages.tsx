@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,26 +16,48 @@ import {
   Smile,
   Image,
   Plus,
-  Filter
+  Filter,
+  Check,
+  CheckCheck,
+  ArrowLeft
 } from "lucide-react";
-import { useConversations } from "@/hooks/useConversations";
-import { useMessages, useSendMessage, useMarkMessagesAsRead, useRealtimeMessages } from "@/hooks/useMessages";
+import { 
+  useConversations,
+  useMessages,
+  useSendMessage,
+  useRealtimeMessages,
+  useTypingIndicator,
+  useMarkMessagesAsRead,
+  type Message,
+  type Conversation
+} from "@/hooks/useMessaging";
 import { useAuth } from "@/hooks/useAuth";
 import { formatDistanceToNow } from "date-fns";
+import { cn } from "@/lib/utils";
+import { toast } from "@/hooks/use-toast";
 
 const Messages = () => {
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
   const [newMessage, setNewMessage] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const { user } = useAuth();
-  const { data: conversations = [], isLoading: conversationsLoading } = useConversations();
+  const { data: conversations = [], isLoading: conversationsLoading, error: conversationsError } = useConversations();
   const { data: messages = [], isLoading: messagesLoading } = useMessages(selectedConversationId);
-  const sendMessage = useSendMessage();
-  const markAsRead = useMarkMessagesAsRead();
+  const sendMessageMutation = useSendMessage();
+  const markAsReadMutation = useMarkMessagesAsRead();
   
-  // Enable real-time updates for the selected conversation
+  const { typingUsers, sendTypingStatus } = useTypingIndicator(selectedConversationId);
+  
+  // Enable real-time updates
   useRealtimeMessages(selectedConversationId);
+
+  // Auto-scroll to bottom when new messages arrive
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
   const selectedConversation = conversations.find(c => c.id === selectedConversationId);
 
@@ -44,27 +66,42 @@ const Messages = () => {
     !searchTerm || 
     conversation.other_participant?.display_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     conversation.other_participant?.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    conversation.last_message?.content?.toLowerCase().includes(searchTerm.toLowerCase())
+    conversation.last_message?.body?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Mark messages as read when conversation is selected
+  // Mark messages as read when conversation is opened
   useEffect(() => {
-    if (selectedConversationId) {
-      markAsRead.mutate(selectedConversationId);
+    if (selectedConversationId && messages.length > 0) {
+      const lastMessage = messages[messages.length - 1];
+      if (lastMessage && lastMessage.sender_id !== user?.id) {
+        markAsReadMutation.mutate({
+          conversationId: selectedConversationId,
+          messageId: lastMessage.id
+        });
+      }
     }
-  }, [selectedConversationId, markAsRead]);
+  }, [selectedConversationId, messages, user?.id, markAsReadMutation]);
 
   const handleSendMessage = async () => {
-    if (!newMessage.trim() || !selectedConversationId) return;
+    if (!newMessage.trim() || !selectedConversationId || !user) return;
 
     try {
-      await sendMessage.mutateAsync({
+      await sendMessageMutation.mutateAsync({
         conversationId: selectedConversationId,
-        content: newMessage.trim()
+        kind: 'text',
+        body: newMessage.trim()
       });
       setNewMessage("");
+      
+      // Stop typing indicator
+      sendTypingStatus(false);
     } catch (error) {
       console.error('Failed to send message:', error);
+      toast({
+        title: "Error",
+        description: "Failed to send message. Please try again.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -75,6 +112,33 @@ const Messages = () => {
     }
   };
 
+  const handleTyping = useCallback((value: string) => {
+    setNewMessage(value);
+    
+    // Send typing indicator
+    if (value.trim()) {
+      sendTypingStatus(true);
+      
+      // Clear existing timeout
+      if (typingTimeout) {
+        clearTimeout(typingTimeout);
+      }
+      
+      // Set new timeout to stop typing
+      const timeout = setTimeout(() => {
+        sendTypingStatus(false);
+      }, 1500);
+      
+      setTypingTimeout(timeout);
+    } else {
+      sendTypingStatus(false);
+      if (typingTimeout) {
+        clearTimeout(typingTimeout);
+        setTypingTimeout(null);
+      }
+    }
+  }, [sendTypingStatus, typingTimeout]);
+
   const getInitials = (name?: string) => {
     if (!name) return '?';
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
@@ -82,98 +146,53 @@ const Messages = () => {
 
   const formatMessageTime = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleTimeString('en-US', { 
-      hour: 'numeric', 
-      minute: '2-digit',
-      hour12: true 
-    });
+    const now = new Date();
+    const diffInHours = Math.abs(now.getTime() - date.getTime()) / (1000 * 60 * 60);
+    
+    if (diffInHours < 24) {
+      return date.toLocaleTimeString('en-US', { 
+        hour: 'numeric', 
+        minute: '2-digit',
+        hour12: true 
+      });
+    } else {
+      return date.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric'
+      });
+    }
   };
 
-  const mockConversations = [
-    {
-      id: 1,
-      name: "Sarah Chen",
-      username: "@sarahartist",
-      avatar: "",
-      lastMessage: "Thanks for the feedback on my latest piece!",
-      lastTime: "2m",
-      unread: 2,
-      online: true
-    },
-    {
-      id: 2,
-      name: "Marcus Rodriguez", 
-      username: "@marcusmusic",
-      avatar: "",
-      lastMessage: "Would love to collaborate on that project",
-      lastTime: "1h",
-      unread: 0,
-      online: true
-    },
-    {
-      id: 3,
-      name: "Elena Kowalski",
-      username: "@elenadesign", 
-      avatar: "",
-      lastMessage: "The brand guidelines look amazing!",
-      lastTime: "3h",
-      unread: 1,
-      online: false
-    },
-    {
-      id: 4,
-      name: "David Park",
-      username: "@davidphoto",
-      avatar: "",
-      lastMessage: "Hey, saw your recent work. Really impressed!",
-      lastTime: "1d",
-      unread: 0,
-      online: false
+  const getMessageStatus = (message: Message) => {
+    if (message.sender_id !== user?.id) return null;
+    
+    // Check receipts for status
+    const receipts = message.receipts || [];
+    const hasDelivered = receipts.some(r => r.status === 'delivered' || r.status === 'read');
+    const hasRead = receipts.some(r => r.status === 'read');
+    
+    if (hasRead) {
+      return <CheckCheck className="h-3 w-3 text-blue-500" />;
+    } else if (hasDelivered) {
+      return <CheckCheck className="h-3 w-3 text-muted-foreground" />;
+    } else {
+      return <Check className="h-3 w-3 text-muted-foreground" />;
     }
-  ];
+  };
 
-  const mockMessages = [
-    {
-      id: 1,
-      senderId: 1,
-      senderName: "Sarah Chen",
-      content: "Hey! I saw your latest UI design work and I'm really impressed. The color palette is so cohesive!",
-      time: "10:30 AM",
-      isMe: false
-    },
-    {
-      id: 2,
-      senderId: "me",
-      senderName: "You",
-      content: "Thank you so much! I spent a lot of time getting the colors just right. Really appreciate the feedback 😊",
-      time: "10:32 AM",
-      isMe: true
-    },
-    {
-      id: 3,
-      senderId: 1,
-      senderName: "Sarah Chen", 
-      content: "I'd love to learn more about your design process. Do you have any resources you'd recommend?",
-      time: "10:35 AM",
-      isMe: false
-    },
-    {
-      id: 4,
-      senderId: "me",
-      senderName: "You",
-      content: "Absolutely! I have a few books and articles that really helped me. Let me send you a list.",
-      time: "10:37 AM",
-      isMe: true
-    },
-    {
-      id: 5,
-      senderId: 1,
-      senderName: "Sarah Chen",
-      content: "Thanks for the feedback on my latest piece!",
-      time: "10:45 AM",
-      isMe: false
-    }
-  ];
+  if (conversationsError) {
+    return (
+      <div className="min-h-screen bg-background pb-20 md:pb-8">
+        <div className="container max-w-6xl mx-auto px-4 py-6">
+          <Card>
+            <CardContent className="p-6 text-center">
+              <p className="text-destructive">Failed to load conversations</p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-8">
@@ -198,7 +217,7 @@ const Messages = () => {
                     className="pl-10"
                   />
                 </div>
-                <Button variant="outline" size="icon" className="sm:w-auto">
+                <Button variant="outline" size="icon">
                   <Filter className="h-4 w-4" />
                 </Button>
               </div>
@@ -218,9 +237,10 @@ const Messages = () => {
                   filteredConversations.map((conversation, index) => (
                     <div key={conversation.id}>
                       <div
-                        className={`flex items-center space-x-3 p-4 cursor-pointer hover:bg-muted transition-colors ${
-                          selectedConversationId === conversation.id ? 'bg-muted' : ''
-                        }`}
+                        className={cn(
+                          "flex items-center space-x-3 p-4 cursor-pointer hover:bg-muted transition-colors",
+                          selectedConversationId === conversation.id && "bg-muted"
+                        )}
                         onClick={() => setSelectedConversationId(conversation.id)}
                       >
                         <div className="relative">
@@ -247,11 +267,11 @@ const Messages = () => {
                             </span>
                           </div>
                           <p className="text-sm text-muted-foreground truncate">
-                            {conversation.last_message?.content || 'No messages yet'}
+                            {conversation.last_message?.body || 'No messages yet'}
                           </p>
                         </div>
 
-                        {conversation.unread_count > 0 && (
+                        {(conversation.unread_count ?? 0) > 0 && (
                           <Badge className="bg-primary text-primary-foreground h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs">
                             {conversation.unread_count}
                           </Badge>
@@ -273,6 +293,14 @@ const Messages = () => {
                 <CardHeader className="pb-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="lg:hidden"
+                        onClick={() => setSelectedConversationId(null)}
+                      >
+                        <ArrowLeft className="h-4 w-4" />
+                      </Button>
                       <Avatar className="h-10 w-10">
                         <AvatarImage 
                           src={selectedConversation.other_participant?.avatar_url} 
@@ -287,7 +315,7 @@ const Messages = () => {
                           {selectedConversation.other_participant?.display_name || 'Unknown User'}
                         </p>
                         <p className="text-sm text-muted-foreground">
-                          @{selectedConversation.other_participant?.username || 'unknown'}
+                          {typingUsers.length > 0 ? 'typing...' : `@${selectedConversation.other_participant?.username || 'unknown'}`}
                         </p>
                       </div>
                     </div>
@@ -339,24 +367,43 @@ const Messages = () => {
                                   </AvatarFallback>
                                 </Avatar>
                               )}
-                              <div className={`rounded-lg px-3 py-2 ${
+                              <div className={cn(
+                                "rounded-lg px-3 py-2",
                                 isMe 
-                                  ? 'bg-primary text-primary-foreground' 
-                                  : 'bg-muted'
-                              }`}>
-                                <p className="text-sm">{message.content}</p>
-                                <p className={`text-xs mt-1 ${
-                                  isMe 
-                                    ? 'text-primary-foreground/70' 
-                                    : 'text-muted-foreground'
-                                }`}>
-                                  {formatMessageTime(message.created_at)}
+                                  ? "bg-primary text-primary-foreground" 
+                                  : "bg-muted"
+                              )}>
+                                {message.reply_to && (
+                                  <div className={cn(
+                                    "text-xs opacity-70 mb-1 p-1 rounded border-l-2",
+                                    isMe ? "border-primary-foreground/30" : "border-primary/30"
+                                  )}>
+                                    Replying to previous message
+                                  </div>
+                                )}
+                                <p className="text-sm whitespace-pre-wrap break-words">
+                                  {message.body}
                                 </p>
+                                <div className={cn(
+                                  "flex items-center justify-between gap-2 mt-1",
+                                  isMe ? "flex-row-reverse" : ""
+                                )}>
+                                  <span className={cn(
+                                    "text-xs",
+                                    isMe 
+                                      ? "text-primary-foreground/70" 
+                                      : "text-muted-foreground"
+                                  )}>
+                                    {formatMessageTime(message.created_at)}
+                                  </span>
+                                  {getMessageStatus(message)}
+                                </div>
                               </div>
                             </div>
                           </div>
                         );
                       })}
+                      <div ref={messagesEndRef} />
                     </div>
                   )}
                 </ScrollArea>
@@ -379,9 +426,10 @@ const Messages = () => {
                       <Input
                         placeholder="Type a message..."
                         value={newMessage}
-                        onChange={(e) => setNewMessage(e.target.value)}
+                        onChange={(e) => handleTyping(e.target.value)}
                         onKeyPress={handleKeyPress}
-                        className="pr-12"
+                        className="pr-12 resize-none"
+                        disabled={sendMessageMutation.isPending}
                       />
                       <Button variant="ghost" size="sm" className="absolute right-2 top-1/2 transform -translate-y-1/2">
                         <Smile className="h-4 w-4" />
@@ -391,7 +439,7 @@ const Messages = () => {
                     <Button 
                       size="sm" 
                       onClick={handleSendMessage}
-                      disabled={!newMessage.trim() || sendMessage.isPending}
+                      disabled={!newMessage.trim() || sendMessageMutation.isPending}
                       className="bg-primary hover:bg-primary/90"
                     >
                       <Send className="h-4 w-4" />
