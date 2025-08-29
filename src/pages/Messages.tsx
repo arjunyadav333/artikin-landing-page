@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,7 +20,10 @@ import {
   Filter,
   Check,
   CheckCheck,
-  ArrowLeft
+  ArrowLeft,
+  Mic,
+  FileText,
+  Download
 } from "lucide-react";
 import { 
   useConversations,
@@ -35,16 +39,49 @@ import { useAuth } from "@/hooks/useAuth";
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { FileUpload } from "@/components/messaging/file-upload";
+import { VoiceRecorder } from "@/components/messaging/voice-recorder";
+import { MessageAttachments } from "@/components/messaging/message-attachments";
 
 const Messages = () => {
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
   const [newMessage, setNewMessage] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Redirect to auth if not authenticated
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate('/auth');
+    }
+  }, [user, loading, navigate]);
+
+  // Handle window resize for responsive layout
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 1024);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Show loading while checking auth
+  if (loading) {
+    return (
+      <div className="h-screen bg-background flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  // If no user, return early (redirect will happen via useEffect)
+  if (!user) {
+    return null;
+  }
   const { data: conversations = [], isLoading: conversationsLoading, error: conversationsError } = useConversations();
   const { data: messages = [], isLoading: messagesLoading } = useMessages(selectedConversationId);
   const sendMessageMutation = useSendMessage();
@@ -213,7 +250,10 @@ const Messages = () => {
     <div className="h-screen bg-background flex flex-col">
       <div className="flex-1 flex overflow-hidden">
         {/* Conversations List */}
-        <div className={`w-80 border-r bg-card flex flex-col ${selectedConversationId ? 'hidden lg:flex' : 'flex'}`}>
+        <div className={cn(
+          "border-r bg-card flex flex-col transition-all duration-300",
+          isMobile ? (selectedConversationId ? "hidden" : "flex w-full") : "w-80 flex"
+        )}>
           <div className="p-4 border-b">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold">Messages</h3>
@@ -308,7 +348,10 @@ const Messages = () => {
         </div>
 
         {/* Chat Area */}
-        <div className="flex-1 flex flex-col bg-background">
+        <div className={cn(
+          "flex-1 flex flex-col bg-background transition-all duration-300",
+          isMobile && !selectedConversationId ? "hidden" : "flex"
+        )}>
           {selectedConversation ? (
             <>
               {/* Chat Header */}
@@ -401,9 +444,12 @@ const Messages = () => {
                                   Replying to previous message
                                 </div>
                               )}
-                              <p className="text-sm whitespace-pre-wrap break-words">
-                                {message.body}
-                              </p>
+                              {message.attachments && message.attachments.length > 0 && (
+                                <div className="mt-2">
+                                  <MessageAttachments attachments={message.attachments} />
+                                </div>
+                              )}
+                              <p className="text-sm whitespace-pre-wrap break-words">{message.body}</p>
                               <div className={cn(
                                 "flex items-center justify-between gap-2 mt-1",
                                 isMe ? "flex-row-reverse" : ""
@@ -431,14 +477,20 @@ const Messages = () => {
               {/* Message Input */}
               <div className="p-4 border-t bg-card">
                 <div className="flex items-end space-x-2">
-                  <div className="flex space-x-1">
-                    <Button variant="ghost" size="sm">
-                      <Paperclip className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="sm">
-                      <Image className="h-4 w-4" />
-                    </Button>
-                  </div>
+                  <FileUpload
+                    onFileUploaded={(file) => {
+                      // Handle file upload - you could extend useSendMessage to support attachments
+                      console.log('File uploaded:', file);
+                    }}
+                    disabled={!selectedConversationId}
+                  />
+                  <VoiceRecorder
+                    onVoiceRecorded={(blob) => {
+                      // Handle voice recording - you could extend useSendMessage to support voice
+                      console.log('Voice recorded:', blob);
+                    }}
+                    disabled={!selectedConversationId}
+                  />
                   
                   <div className="flex-1 relative">
                     <Input
