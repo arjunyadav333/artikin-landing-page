@@ -182,12 +182,26 @@ const Messages = () => {
   };
 
   if (conversationsError) {
+    console.error('Conversations error:', conversationsError);
     return (
-      <div className="min-h-screen bg-background pb-20 md:pb-8">
-        <div className="container max-w-6xl mx-auto px-4 py-6">
-          <Card>
+      <div className="h-screen bg-background flex flex-col">
+        <div className="flex-1 flex items-center justify-center">
+          <Card className="w-96">
             <CardContent className="p-6 text-center">
-              <p className="text-destructive">Failed to load conversations</p>
+              <div className="h-12 w-12 bg-destructive/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Send className="h-6 w-6 text-destructive" />
+              </div>
+              <h3 className="text-lg font-semibold mb-2 text-destructive">Connection Error</h3>
+              <p className="text-muted-foreground mb-4">
+                Unable to load conversations. Please check your internet connection and try again.
+              </p>
+              <Button 
+                onClick={() => window.location.reload()} 
+                variant="outline"
+                className="w-full"
+              >
+                Retry
+              </Button>
             </CardContent>
           </Card>
         </div>
@@ -226,11 +240,21 @@ const Messages = () => {
           <ScrollArea className="flex-1">
             {conversationsLoading ? (
               <div className="p-4 text-center text-muted-foreground">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto mb-2"></div>
                 Loading conversations...
               </div>
             ) : filteredConversations.length === 0 ? (
               <div className="p-4 text-center text-muted-foreground">
-                {searchTerm ? 'No conversations found' : 'No conversations yet'}
+                <div className="h-12 w-12 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Send className="h-6 w-6" />
+                </div>
+                <h4 className="font-medium mb-2">No conversations yet</h4>
+                <p className="text-sm">
+                  {searchTerm 
+                    ? 'No conversations match your search' 
+                    : 'Start a conversation with someone to begin messaging'
+                  }
+                </p>
               </div>
             ) : (
               filteredConversations.map((conversation, index) => (
