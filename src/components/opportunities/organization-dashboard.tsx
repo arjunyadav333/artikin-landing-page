@@ -27,11 +27,13 @@ import {
 import { useOrganizationOpportunities, useUpdateOpportunityStatus, useDeleteOpportunity } from "@/hooks/useOrganizationOpportunities";
 import { ApplicantManagement } from "./applicant-management";
 import { CreateOpportunityModal } from "./create-opportunity-modal";
+import { EditOpportunityModal } from "./edit-opportunity-modal";
 import { formatDistanceToNow, format } from "date-fns";
 
 export function OrganizationDashboard() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedOpportunity, setSelectedOpportunity] = useState<string | null>(null);
+  const [editingOpportunity, setEditingOpportunity] = useState<any | null>(null);
   
   const { data: opportunities, isLoading } = useOrganizationOpportunities();
   const updateStatus = useUpdateOpportunityStatus();
@@ -210,7 +212,9 @@ export function OrganizationDashboard() {
                           <Eye className="h-4 w-4 mr-2" />
                           View Details
                         </DropdownMenuItem>
-                        <DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => setEditingOpportunity(opportunity)}
+                        >
                           <Edit3 className="h-4 w-4 mr-2" />
                           Edit
                         </DropdownMenuItem>
@@ -250,6 +254,14 @@ export function OrganizationDashboard() {
             </div>
           </div>
         </Card>
+      )}
+
+      {editingOpportunity && (
+        <EditOpportunityModal
+          isOpen={!!editingOpportunity}
+          onClose={() => setEditingOpportunity(null)}
+          opportunity={editingOpportunity}
+        />
       )}
     </div>
   );

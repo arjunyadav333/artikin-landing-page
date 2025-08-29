@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useTrackOpportunityView } from './useViewTracking';
 
 export interface Opportunity {
   id: string;
@@ -29,16 +30,24 @@ export interface Opportunity {
   user_applied?: boolean;
 }
 
-export const useOpportunities = () => {
+export const useOpportunities = (searchQuery?: string) => {
   return useQuery({
-    queryKey: ['opportunities'],
+    queryKey: ['opportunities', searchQuery],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       
-      // Fetch opportunities
-      const { data: opportunities, error } = await supabase
+      // Build query with optional search
+      let query = supabase
         .from('opportunities')
         .select('*')
+        .eq('status', 'active');
+
+      // Add search if query provided
+      if (searchQuery?.trim()) {
+        query = query.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%,company.ilike.%${searchQuery}%`);
+      }
+
+      const { data: opportunities, error } = await query
         .order('created_at', { ascending: false });
 
       if (error) throw error;
