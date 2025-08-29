@@ -15,6 +15,7 @@ const Create = lazy(() => import("./pages/Create"));
 const Connections = lazy(() => import("./pages/Connections"));
 const UserProfile = lazy(() => import("./pages/UserProfile"));
 const Messages = lazy(() => import("./pages/Messages"));
+const Auth = lazy(() => import("./pages/Auth"));
 const AuthNew = lazy(() => import("./pages/AuthNew"));
 const SignUp = lazy(() => import("./pages/SignUp"));
 const PostDetail = lazy(() => import("./pages/PostDetail"));
@@ -80,7 +81,7 @@ const AppRoutes = () => {
         {/* Auth Routes (No Layout) */}
         <Route path="/auth" element={
           <Suspense fallback={<PageLoader />}>
-            <AuthNew />
+            <Auth />
           </Suspense>
         } />
         <Route path="/signup" element={
@@ -178,13 +179,9 @@ const AppRoutes = () => {
           </ProtectedRoute>
         } />
         <Route path="/messages" element={
-          <ProtectedRoute>
-            <AppLayout>
-              <Suspense fallback={<PageLoader />}>
-                <Messages />
-              </Suspense>
-            </AppLayout>
-          </ProtectedRoute>
+          <Suspense fallback={<PageLoader />}>
+            <Messages />
+          </Suspense>
         } />
         <Route path="/saved" element={
           <ProtectedRoute>

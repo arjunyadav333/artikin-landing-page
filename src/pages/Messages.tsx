@@ -127,7 +127,8 @@ const Messages = () => {
       await sendMessageMutation.mutateAsync({
         conversationId: selectedConversationId,
         kind: 'text',
-        body: newMessage.trim()
+        body: newMessage.trim(),
+        attachments: [] // TODO: Add attachment support
       });
       setNewMessage("");
       
