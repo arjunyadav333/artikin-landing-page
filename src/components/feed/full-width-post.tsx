@@ -206,7 +206,7 @@ export function FullWidthPost({ post }: FullWidthPostProps) {
                       ? post.profiles.artform 
                       : post.profiles?.role === 'organization' 
                         ? 'Organization' 
-                        : 'User'
+                        : ''
                     }
                   </span>
                   <span>{timeAgo}</span>
@@ -220,15 +220,19 @@ export function FullWidthPost({ post }: FullWidthPostProps) {
               <Button
                 className={`
                   ${post.is_following 
-                    ? 'bg-sky-300 hover:bg-sky-400 text-sky-900 border-sky-300' 
-                    : 'bg-blue-500 hover:bg-blue-600 text-white border-blue-500'
+                    ? 'hover:bg-[#E6F3FF] transition-all duration-300' 
+                    : 'hover:bg-[#0F66D1] transition-all duration-300'
                   }
-                  rounded-full transition-all duration-200 border
+                  rounded-full border-0
                   text-[clamp(11px,1.2vw,13px)] 
                   px-[clamp(12px,1.5vw,16px)] 
                   py-[clamp(4px,0.6vw,6px)]
                   font-medium h-auto
                 `}
+                style={{
+                  backgroundColor: post.is_following ? '#DFF0FF' : '#1877F2',
+                  color: post.is_following ? '#333' : '#FFFFFF'
+                }}
                 onClick={handleFollow}
                 disabled={followUserMutation.isPending}
               >
@@ -243,35 +247,29 @@ export function FullWidthPost({ post }: FullWidthPostProps) {
             
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0 ml-1">
                   <MoreVertical className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem onClick={handleSave}>
-                  <Bookmark className="h-4 w-4 mr-2" />
-                  {post.user_saved ? 'Unsave Post' : 'Save Post'}
+                {!isOwnPost && (
+                  <DropdownMenuItem>
+                    <Flag className="h-4 w-4 mr-2" />
+                    Report
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuItem>
+                  <EyeOff className="h-4 w-4 mr-2" />
+                  Hide Post
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleCopyLink}>
                   <LinkIcon className="h-4 w-4 mr-2" />
                   Copy Link
                 </DropdownMenuItem>
-                {!isOwnPost && (
-                  <>
-                    <DropdownMenuItem>
-                      <EyeOff className="h-4 w-4 mr-2" />
-                      Hide Post
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <Flag className="h-4 w-4 mr-2" />
-                      Report Post
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <UserX className="h-4 w-4 mr-2" />
-                      Mute User
-                    </DropdownMenuItem>
-                  </>
-                )}
+                <DropdownMenuItem onClick={handleShare}>
+                  <Share2 className="h-4 w-4 mr-2" />
+                  Share Outside
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -291,6 +289,21 @@ export function FullWidthPost({ post }: FullWidthPostProps) {
                 </button>
               )}
             </div>
+            
+            {/* Tags */}
+            {post.tags && post.tags.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-2">
+                {post.tags.map((tag, index) => (
+                  <Link
+                    key={index}
+                    to={`/tags/${tag.replace('#', '')}`}
+                    className="text-xs text-blue-600 hover:text-blue-800 hover:underline font-medium"
+                  >
+                    {tag.startsWith('#') ? tag : `#${tag}`}
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
@@ -373,21 +386,19 @@ export function FullWidthPost({ post }: FullWidthPostProps) {
           </div>
         )}
 
-        {/* Action Row with Real-time Counts */}
+        {/* Action Row with Modern Icons and Real-time Counts */}
         <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center space-x-6">
             <Button
               variant="ghost"
               size="sm"
-              className="h-auto p-0 text-foreground hover:text-red-500 transition-colors flex items-center space-x-1"
+              className="h-auto p-0 text-foreground hover:text-blue-600 transition-colors flex items-center space-x-2"
               onClick={handleLike}
               disabled={likePostMutation.isPending}
             >
-              <Heart 
-                className={`h-6 w-6 transition-all ${
-                  post.user_liked ? 'fill-red-500 text-red-500' : ''
-                }`} 
-              />
+              <span className={`text-lg ${post.user_liked ? 'grayscale-0' : 'grayscale'} transition-all`}>
+                👍
+              </span>
               {post.likes_count > 0 && (
                 <span className="text-sm font-medium">
                   {post.likes_count}
@@ -398,10 +409,10 @@ export function FullWidthPost({ post }: FullWidthPostProps) {
             <Button
               variant="ghost"
               size="sm"
-              className="h-auto p-0 text-foreground hover:text-primary transition-colors flex items-center space-x-1"
+              className="h-auto p-0 text-foreground hover:text-blue-600 transition-colors flex items-center space-x-2"
               onClick={() => setShowComments(true)}
             >
-              <MessageCircle className="h-6 w-6" />
+              <span className="text-lg">💬</span>
               {post.comments_count > 0 && (
                 <span className="text-sm font-medium">
                   {post.comments_count}
@@ -412,10 +423,10 @@ export function FullWidthPost({ post }: FullWidthPostProps) {
             <Button
               variant="ghost"
               size="sm"
-              className="h-auto p-0 text-foreground hover:text-primary transition-colors flex items-center space-x-1"
+              className="h-auto p-0 text-foreground hover:text-blue-600 transition-colors flex items-center space-x-2"
               onClick={handleShare}
             >
-              <Share2 className="h-6 w-6" />
+              <span className="text-lg">🔗</span>
               {post.shares_count > 0 && (
                 <span className="text-sm font-medium">
                   {post.shares_count}
@@ -427,15 +438,13 @@ export function FullWidthPost({ post }: FullWidthPostProps) {
           <Button
             variant="ghost"
             size="sm"
-            className="h-auto p-0 text-foreground hover:text-primary transition-colors flex items-center space-x-1"
+            className="h-auto p-0 text-foreground hover:text-blue-600 transition-colors flex items-center space-x-2"
             onClick={handleSave}
             disabled={savePostMutation.isPending}
           >
-            <Bookmark 
-              className={`h-6 w-6 transition-all ${
-                post.user_saved ? 'fill-primary text-primary' : ''
-              }`} 
-            />
+            <span className={`text-lg ${post.user_saved ? 'grayscale-0' : 'grayscale'} transition-all`}>
+              📌
+            </span>
             {post.saves_count > 0 && (
               <span className="text-sm font-medium">
                 {post.saves_count}
