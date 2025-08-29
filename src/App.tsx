@@ -177,6 +177,15 @@ const AppRoutes = () => {
             </AppLayout>
           </ProtectedRoute>
         } />
+        <Route path="/messages" element={
+          <ProtectedRoute>
+            <AppLayout>
+              <Suspense fallback={<PageLoader />}>
+                <Messages />
+              </Suspense>
+            </AppLayout>
+          </ProtectedRoute>
+        } />
         <Route path="/saved" element={
           <ProtectedRoute>
             <AppLayout>
