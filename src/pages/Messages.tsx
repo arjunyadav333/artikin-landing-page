@@ -34,7 +34,7 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
-import { toast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 const Messages = () => {
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
@@ -44,6 +44,7 @@ const Messages = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const { user } = useAuth();
+  const { toast } = useToast();
   const { data: conversations = [], isLoading: conversationsLoading, error: conversationsError } = useConversations();
   const { data: messages = [], isLoading: messagesLoading } = useMessages(selectedConversationId);
   const sendMessageMutation = useSendMessage();
