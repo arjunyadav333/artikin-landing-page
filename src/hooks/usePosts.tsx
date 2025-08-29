@@ -23,6 +23,7 @@ export interface Post {
     avatar_url?: string;
     role?: string;
     artform?: string;
+    organization_type?: string;
     location?: string;
   };
   user_liked?: boolean;
@@ -56,22 +57,31 @@ export const usePosts = (limit = 10) => {
       // Batch fetch profiles for all users
       const { data: profiles } = await supabase
         .from('profiles')
-        .select('id, user_id, username, display_name, avatar_url, role, artform, location')
+        .select('id, user_id, username, display_name, avatar_url, role, artform, organization_type, location')
         .in('user_id', userIds);
 
       // Create profile lookup map for O(1) access
       const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
 
-      // Batch fetch likes if user is authenticated
+      // Batch fetch likes and follows if user is authenticated
       let likedPostIds = new Set();
+      let followedUserIds = new Set();
       if (user) {
-        const { data: likes } = await supabase
-          .from('likes')
-          .select('post_id')
-          .eq('user_id', user.id)
-          .in('post_id', posts.map(p => p.id));
+        const [{ data: likes }, { data: connections }] = await Promise.all([
+          supabase
+            .from('likes')
+            .select('post_id')
+            .eq('user_id', user.id)
+            .in('post_id', posts.map(p => p.id)),
+          supabase
+            .from('connections')
+            .select('following_id')
+            .eq('follower_id', user.id)
+            .in('following_id', userIds)
+        ]);
         
         likedPostIds = new Set(likes?.map(l => l.post_id) || []);
+        followedUserIds = new Set(connections?.map(c => c.following_id) || []);
       }
 
       // Combine data efficiently
@@ -80,7 +90,7 @@ export const usePosts = (limit = 10) => {
         profiles: profileMap.get(post.user_id),
         user_liked: likedPostIds.has(post.id),
         user_saved: false, // Will be updated when save functionality is implemented
-        is_following: false // Will be updated when following is checked
+        is_following: followedUserIds.has(post.user_id)
       }));
 
       // Sort to show user's posts first (optimized)
@@ -129,7 +139,7 @@ export const useUserPosts = (userId: string) => {
       // Get profile for the user
       const { data: profile } = await supabase
         .from('profiles')
-        .select('id, user_id, username, display_name, avatar_url, role, artform, location')
+        .select('id, user_id, username, display_name, avatar_url, role, artform, organization_type, location')
         .eq('user_id', userId)
         .single();
 
@@ -192,7 +202,7 @@ export const useCreatePost = () => {
       // Get profile for the created post
       const { data: profile } = await supabase
         .from('profiles')
-        .select('id, user_id, username, display_name, avatar_url, role, artform, location')
+        .select('id, user_id, username, display_name, avatar_url, role, artform, organization_type, location')
         .eq('user_id', user.id)
         .single();
 

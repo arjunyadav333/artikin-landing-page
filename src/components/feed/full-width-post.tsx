@@ -202,11 +202,11 @@ export function FullWidthPost({ post }: FullWidthPostProps) {
                 
                 <div className="flex items-center text-xs text-muted-foreground space-x-2">
                   <span>
-                    {post.profiles?.role === 'artist' && post.profiles?.artform 
+                    {post.profiles?.artform 
                       ? post.profiles.artform 
-                      : post.profiles?.role === 'organization' 
+                      : post.profiles?.organization_type || post.profiles?.role === 'organization'
                         ? 'Organization' 
-                        : 'User'
+                        : 'Artist'
                     }
                   </span>
                   <span>{timeAgo}</span>
