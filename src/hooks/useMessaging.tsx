@@ -87,7 +87,12 @@ export const useConversations = () => {
   return useQuery({
     queryKey: ['conversations', user?.id],
     queryFn: async () => {
-      if (!user) return [];
+      if (!user) {
+        console.log('useConversations: No user found');
+        return [];
+      }
+
+      console.log('useConversations: Fetching conversations for user:', user.id);
 
       const { data, error } = await supabase
         .from('conversations')
@@ -105,7 +110,17 @@ export const useConversations = () => {
         .or(`participant_a.eq.${user.id},participant_b.eq.${user.id}`)
         .order('updated_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('useConversations: Error fetching conversations:', error);
+        throw error;
+      }
+
+      console.log('useConversations: Raw conversations data:', data);
+
+      if (!data || data.length === 0) {
+        console.log('useConversations: No conversations found');
+        return [];
+      }
 
       // Enrich conversations with other participant info and settings
       const enrichedConversations = await Promise.all(
@@ -114,27 +129,48 @@ export const useConversations = () => {
             ? conv.participant_b 
             : conv.participant_a;
 
+          console.log('useConversations: Getting participant info for:', otherParticipantId);
+
           // Get other participant profile
-          const { data: profile } = await supabase
+          const { data: profile, error: profileError } = await supabase
             .from('profiles')
             .select('id, user_id, username, display_name, avatar_url, bio')
             .eq('user_id', otherParticipantId)
             .maybeSingle();
 
+          if (profileError) {
+            console.error('useConversations: Error fetching profile:', profileError);
+          }
+
           // Get participant settings
-          const { data: settings } = await supabase
+          const { data: settings, error: settingsError } = await supabase
             .from('conversation_participants')
             .select('muted, pinned, archived, last_read_message_id, drafted_text')
             .eq('conversation_id', conv.id)
             .eq('user_id', user.id)
             .maybeSingle();
 
+          if (settingsError) {
+            console.error('useConversations: Error fetching settings:', settingsError);
+          }
+
           // Get unread count
-          const { count: unreadCount } = await supabase
+          const { count: unreadCount, error: countError } = await supabase
             .from('messages')
             .select('*', { count: 'exact', head: true })
             .eq('conversation_id', conv.id)
             .neq('sender_id', user.id);
+
+          if (countError) {
+            console.error('useConversations: Error fetching unread count:', countError);
+          }
+
+          console.log('useConversations: Enriched conversation:', {
+            ...conv,
+            other_participant: profile,
+            unread_count: unreadCount || 0,
+            participant_settings: settings
+          });
 
           return {
             ...conv,
@@ -145,6 +181,7 @@ export const useConversations = () => {
         })
       );
 
+      console.log('useConversations: Final enriched conversations:', enrichedConversations);
       return enrichedConversations as Conversation[];
     },
     enabled: !!user
