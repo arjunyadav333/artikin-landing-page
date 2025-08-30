@@ -16,14 +16,14 @@ import {
 } from "lucide-react";
 import { useProfile, useCurrentProfile } from "@/hooks/useProfiles";
 import { useUserPosts } from "@/hooks/usePosts";
-import { useAuthOptimized } from "@/hooks/useAuthOptimized";
+import { useAuth } from "@/hooks/useAuth";
 import { useConnectionStatus, useFollowUser } from "@/hooks/useConnections";
 import { PostsGrid } from "@/components/profile/posts-grid";
 import { PortfolioGrid } from "@/components/profile/portfolio-grid";
 
 export default function UserProfile() {
   const { userId } = useParams<{ userId: string }>();
-  const { user } = useAuthOptimized();
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("posts");
   
   // Determine if viewing own profile or another user's

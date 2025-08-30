@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuthOptimized } from './useAuthOptimized';
+import { useAuth } from './useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useQueryPerformance } from '@/hooks/usePerformanceMonitoring';
 
@@ -83,7 +83,7 @@ export interface ConversationParticipant {
 
 // Hook to fetch conversations for current user
 export const useConversations = () => {
-  const { user } = useAuthOptimized();
+  const { user } = useAuth();
   const { markQueryComplete } = useQueryPerformance(['conversations']);
   
   return useQuery({
@@ -195,7 +195,7 @@ export const useConversations = () => {
 
 // Hook to fetch messages for a conversation
 export const useMessages = (conversationId?: string) => {
-  const { user } = useAuthOptimized();
+  const { user } = useAuth();
 
   return useQuery({
     queryKey: ['messages', conversationId],
@@ -245,7 +245,7 @@ export const useMessages = (conversationId?: string) => {
 
 // Hook to send a message
 export const useSendMessage = () => {
-  const { user } = useAuthOptimized();
+  const { user } = useAuth();
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -335,7 +335,7 @@ export const useSendMessage = () => {
 
 // Hook to create or get conversation
 export const useCreateOrGetConversation = () => {
-  const { user } = useAuthOptimized();
+  const { user } = useAuth();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -377,7 +377,7 @@ export const useCreateOrGetConversation = () => {
 
 // Hook to mark messages as read using the new database function
 export const useMarkMessagesAsRead = () => {
-  const { user } = useAuthOptimized();
+  const { user } = useAuth();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -409,7 +409,7 @@ export const useMarkMessagesAsRead = () => {
 
 // Hook for real-time message updates
 export const useRealtimeMessages = (conversationId?: string) => {
-  const { user } = useAuthOptimized();
+  const { user } = useAuth();
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -451,7 +451,7 @@ export const useRealtimeMessages = (conversationId?: string) => {
 
 // Hook for typing indicators
 export const useTypingIndicator = (conversationId?: string) => {
-  const { user } = useAuthOptimized();
+  const { user } = useAuth();
   const [typingUsers, setTypingUsers] = useState<string[]>([]);
 
   const sendTypingStatus = useCallback((isTyping: boolean) => {

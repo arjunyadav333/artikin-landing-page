@@ -12,11 +12,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { useAuthOptimized } from "@/hooks/useAuthOptimized";
+import { useAuth } from "@/hooks/useAuth";
 
 export function TopBar() {
   const [searchQuery, setSearchQuery] = useState("");
-  const { user, signOut } = useAuthOptimized();
+  const { user, signOut } = useAuth();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/80 backdrop-blur-xl">

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useAuthOptimized } from "@/hooks/useAuthOptimized";
+import { useAuth } from "@/hooks/useAuth";
 import { ArrowLeft, Users, Palette } from "lucide-react";
 import ArtistSignupForm from "@/components/auth/artist-signup-form";
 import OrganizationSignupForm from "@/components/auth/organization-signup-form";
@@ -12,7 +12,7 @@ const SignUp = () => {
   const navigate = useNavigate();
   const {
     user
-  } = useAuthOptimized();
+  } = useAuth();
 
   // Redirect if already authenticated
   useEffect(() => {
