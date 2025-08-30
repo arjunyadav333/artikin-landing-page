@@ -42,8 +42,6 @@ export const FileUpload = ({ onFileUploaded, disabled }: FileUploadProps) => {
         bucket = 'chat-images';
       } else if (file.type.startsWith('video/')) {
         bucket = 'chat-videos';
-      } else if (file.type.startsWith('audio/')) {
-        bucket = 'chat-voice';
       }
 
       const filePath = `${user.id}/${fileName}`;

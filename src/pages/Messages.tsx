@@ -14,14 +14,14 @@ import {
   Video, 
   MoreHorizontal, 
   Paperclip,
-  Smile,
+  
   Image,
   Plus,
   Filter,
   Check,
   CheckCheck,
   ArrowLeft,
-  Mic,
+  
   FileText,
   Download
 } from "lucide-react";
@@ -40,7 +40,7 @@ import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { FileUpload } from "@/components/messaging/file-upload";
-import { VoiceRecorder } from "@/components/messaging/voice-recorder";
+
 import { MessageAttachments } from "@/components/messaging/message-attachments";
 
 const Messages = () => {
@@ -485,26 +485,15 @@ const Messages = () => {
                     }}
                     disabled={!selectedConversationId}
                   />
-                  <VoiceRecorder
-                    onVoiceRecorded={(blob) => {
-                      // Handle voice recording - you could extend useSendMessage to support voice
-                      console.log('Voice recorded:', blob);
-                    }}
-                    disabled={!selectedConversationId}
-                  />
-                  
                   <div className="flex-1 relative">
                     <Input
                       placeholder="Type a message..."
                       value={newMessage}
                       onChange={(e) => handleTyping(e.target.value)}
                       onKeyPress={handleKeyPress}
-                      className="pr-12 resize-none"
+                      className="resize-none"
                       disabled={sendMessageMutation.isPending}
                     />
-                    <Button variant="ghost" size="sm" className="absolute right-2 top-1/2 transform -translate-y-1/2">
-                      <Smile className="h-4 w-4" />
-                    </Button>
                   </div>
 
                   <Button 

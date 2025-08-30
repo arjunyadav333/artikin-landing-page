@@ -9,7 +9,7 @@ export interface Message {
   id: string;
   conversation_id: string;
   sender_id: string;
-  kind: 'text' | 'image' | 'video' | 'document' | 'audio' | 'voice' | 'link' | 'sticker';
+  kind: 'text' | 'image' | 'video' | 'document' | 'link';
   body?: string;
   meta?: any;
   reply_to?: string;
