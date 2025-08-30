@@ -1,7 +1,4 @@
-'use client'
-
 import { useState } from 'react'
-import { useQuery } from '@apollo/client'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Card, CardContent } from '@/components/ui/card'
@@ -11,8 +8,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { useAuth } from '@/components/providers/auth-provider'
-import LoadingSpinner from '@/components/ui/loading-spinner'
+import { useAuthOptimized } from '@/hooks/useAuthOptimized'
+import { usePostsOptimized, useLikePostOptimized } from '@/hooks/usePostsOptimized'
+import { PostSkeleton } from '@/components/ui/post-skeleton'
 import {
   Heart,
   MessageCircle,
@@ -21,31 +19,27 @@ import {
   MoreHorizontal,
   Plus,
 } from 'lucide-react'
-import Link from 'next/link'
-import { GET_POSTS } from '@/lib/graphql/queries'
+import { Link } from 'react-router-dom'
 import { formatDistanceToNow } from 'date-fns'
 
 export default function HomeFeed() {
-  const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set())
   const [bookmarkedPosts, setBookmarkedPosts] = useState<Set<string>>(new Set())
-  const { user } = useAuth()
+  const { user } = useAuthOptimized()
   
-  const { data, loading, error, fetchMore } = useQuery(GET_POSTS, {
-    variables: { limit: 10, offset: 0 },
-    notifyOnNetworkStatusChange: true,
-  })
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+    isError,
+  } = usePostsOptimized()
 
-  const handleLike = (postId: string) => {
-    setLikedPosts(prev => {
-      const newSet = new Set(prev)
-      if (newSet.has(postId)) {
-        newSet.delete(postId)
-      } else {
-        newSet.add(postId)
-      }
-      return newSet
-    })
-    // TODO: Implement GraphQL mutation for liking posts
+  const likeMutation = useLikePostOptimized()
+  const posts = data?.pages.flat() || []
+
+  const handleLike = (postId: string, isLiked: boolean) => {
+    likeMutation.mutate({ postId, isLiked })
   }
 
   const handleBookmark = (postId: string) => {
@@ -58,7 +52,7 @@ export default function HomeFeed() {
       }
       return newSet
     })
-    // TODO: Implement GraphQL mutation for bookmarking posts
+    // TODO: Implement bookmark mutation
   }
 
   const formatText = (text: string) => {
@@ -82,31 +76,11 @@ export default function HomeFeed() {
     })
   }
 
-  if (loading) {
-    return (
-      <div className="space-y-6">
-        {[...Array(3)].map((_, i) => (
-          <Card key={i} className="animate-pulse">
-            <CardContent className="p-6">
-              <div className="flex items-center space-x-3 mb-4">
-                <div className="h-10 w-10 bg-muted rounded-full" />
-                <div className="space-y-2">
-                  <div className="h-4 w-32 bg-muted rounded" />
-                  <div className="h-3 w-24 bg-muted rounded" />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <div className="h-4 w-full bg-muted rounded" />
-                <div className="h-4 w-3/4 bg-muted rounded" />
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    )
+  if (isLoading) {
+    return <PostSkeleton />
   }
 
-  if (error) {
+  if (isError) {
     return (
       <div className="text-center py-12">
         <p className="text-destructive mb-4">Failed to load posts</p>
@@ -116,8 +90,6 @@ export default function HomeFeed() {
       </div>
     )
   }
-
-  const posts = data?.posts || []
 
   return (
     <div className="space-y-6">
@@ -131,7 +103,7 @@ export default function HomeFeed() {
                 {user?.email?.charAt(0).toUpperCase() || 'U'}
               </AvatarFallback>
             </Avatar>
-            <Link href="/create" className="flex-1">
+            <Link to="/create" className="flex-1">
               <Button 
                 variant="outline" 
                 className="w-full justify-start text-muted-foreground hover:text-foreground h-12 border-2 border-dashed border-primary/30 hover:border-primary/60 hover:bg-primary/5"
@@ -155,7 +127,7 @@ export default function HomeFeed() {
             <p className="text-muted-foreground mb-6">
               Be the first to share your creative work with the community.
             </p>
-            <Link href="/create">
+            <Link to="/create">
               <Button size="lg" className="shadow-blue hover:shadow-blue-lg">
                 <Plus className="h-4 w-4 mr-2" />
                 Create Your First Post
@@ -164,32 +136,32 @@ export default function HomeFeed() {
           </div>
         </div>
       ) : (
-        posts.map((post: any) => (
+        posts.map((post) => (
           <Card key={post.id} className="feed-card">
             <CardContent className="p-0">
               {/* Post Header */}
               <div className="flex items-center justify-between p-6 pb-4">
                 <div className="flex items-center space-x-3">
-                  <Link href={`/profile/${post.author?.username}`}>
+                  <Link to={`/profile/${post.profiles?.username}`}>
                     <Avatar className="h-12 w-12 cursor-pointer ring-2 ring-transparent hover:ring-primary/30 transition-all">
-                      <AvatarImage src={post.author?.avatar_url} alt={post.author?.display_name} />
+                      <AvatarImage src={post.profiles?.avatar_url} alt={post.profiles?.display_name} />
                       <AvatarFallback className="bg-gradient-blue text-primary-foreground font-semibold">
-                        {post.author?.display_name?.charAt(0)?.toUpperCase() || 'U'}
+                        {post.profiles?.display_name?.charAt(0)?.toUpperCase() || 'U'}
                       </AvatarFallback>
                     </Avatar>
                   </Link>
                   <div>
                     <div className="flex items-center space-x-2">
                       <Link 
-                        href={`/profile/${post.author?.username}`}
+                        to={`/profile/${post.profiles?.username}`}
                         className="font-semibold text-foreground hover:text-primary transition-colors"
                       >
-                        {post.author?.display_name}
+                        {post.profiles?.display_name}
                       </Link>
-                      <span className="text-muted-foreground">@{post.author?.username}</span>
+                      <span className="text-muted-foreground">@{post.profiles?.username}</span>
                     </div>
                     <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                      <span>{post.author?.role || 'Creator'}</span>
+                      <span>{post.profiles?.role || 'Creator'}</span>
                       <span>•</span>
                       <span>{formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}</span>
                     </div>
@@ -198,7 +170,7 @@ export default function HomeFeed() {
                 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-foreground">
+                    <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
                       <MoreHorizontal className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
@@ -246,12 +218,12 @@ export default function HomeFeed() {
                     variant="ghost"
                     size="sm"
                     className={`text-muted-foreground hover:text-red-500 transition-colors ${
-                      likedPosts.has(post.id) ? 'text-red-500' : ''
+                      post.user_liked ? 'text-red-500' : ''
                     }`}
-                    onClick={() => handleLike(post.id)}
+                    onClick={() => handleLike(post.id, post.user_liked)}
                   >
-                    <Heart className={`h-5 w-5 mr-2 ${likedPosts.has(post.id) ? 'fill-current' : ''}`} />
-                    {post.likes_count + (likedPosts.has(post.id) ? 1 : 0)}
+                    <Heart className={`h-5 w-5 mr-2 ${post.user_liked ? 'fill-current' : ''}`} />
+                    {post.likes_count || 0}
                   </Button>
                   
                   <Button
@@ -275,7 +247,7 @@ export default function HomeFeed() {
                 
                 <Button
                   variant="ghost"
-                  size="icon-sm"
+                  size="icon"
                   className={`text-muted-foreground hover:text-primary transition-colors ${
                     bookmarkedPosts.has(post.id) ? 'text-primary' : ''
                   }`}
@@ -289,21 +261,34 @@ export default function HomeFeed() {
         ))
       )}
 
-      {/* Load More */}
-      {posts.length > 0 && (
-        <div className="text-center py-8">
-          <Button 
-            variant="outline" 
-            size="lg" 
-            onClick={() => fetchMore({
-              variables: { offset: posts.length }
-            })}
-            className="border-primary/30 hover:border-primary hover:bg-primary/5"
-            disabled={loading}
-          >
-            {loading ? <LoadingSpinner size="sm" className="mr-2" /> : null}
-            {loading ? 'Loading...' : 'Load More Posts'}
-          </Button>
+      {/* Infinite scroll trigger */}
+      {hasNextPage && (
+        <div 
+          ref={(el) => {
+            if (el && hasNextPage && !isFetchingNextPage) {
+              const observer = new IntersectionObserver(
+                (entries) => {
+                  if (entries[0].isIntersecting) {
+                    fetchNextPage();
+                  }
+                },
+                { threshold: 0.1 }
+              );
+              observer.observe(el);
+              return () => observer.disconnect();
+            }
+          }}
+          className="h-20 flex items-center justify-center"
+        >
+          {isFetchingNextPage && (
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+          )}
+        </div>
+      )}
+      
+      {!hasNextPage && posts.length > 0 && (
+        <div className="text-center py-8 text-muted-foreground">
+          🎉 You're all caught up!
         </div>
       )}
     </div>
