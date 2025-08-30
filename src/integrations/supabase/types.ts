@@ -624,6 +624,14 @@ export type Database = {
         Args: { user1_id: string; user2_id: string }
         Returns: string
       }
+      mark_conversation_messages_read: {
+        Args: {
+          conversation_id_param: string
+          up_to_message_id: string
+          user_id_param: string
+        }
+        Returns: number
+      }
     }
     Enums: {
       artform_type:

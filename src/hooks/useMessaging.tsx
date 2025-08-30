@@ -350,7 +350,7 @@ export const useCreateOrGetConversation = () => {
         return existing.id;
       }
 
-      // Create new conversation
+      // Create new conversation - participant records will be auto-created by trigger
       const { data: newConv, error: createError } = await supabase
         .from('conversations')
         .insert({
@@ -362,20 +362,6 @@ export const useCreateOrGetConversation = () => {
 
       if (createError) throw createError;
 
-      // Create participant records
-      await supabase
-        .from('conversation_participants')
-        .insert([
-          {
-            conversation_id: newConv.id,
-            user_id: user.id
-          },
-          {
-            conversation_id: newConv.id,
-            user_id: otherUserId
-          }
-        ]);
-
       return newConv.id;
     },
     onSuccess: () => {
@@ -384,7 +370,7 @@ export const useCreateOrGetConversation = () => {
   });
 };
 
-// Hook to mark messages as read
+// Hook to mark messages as read using the new database function
 export const useMarkMessagesAsRead = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -399,21 +385,15 @@ export const useMarkMessagesAsRead = () => {
     }) => {
       if (!user) throw new Error('User not authenticated');
 
-      // Update conversation participant's last_read_message_id
-      await supabase
-        .from('conversation_participants')
-        .update({ last_read_message_id: messageId })
-        .eq('conversation_id', conversationId)
-        .eq('user_id', user.id);
+      // Use the new database function for efficient read marking
+      const { data, error } = await supabase.rpc('mark_conversation_messages_read', {
+        conversation_id_param: conversationId,
+        user_id_param: user.id,
+        up_to_message_id: messageId
+      });
 
-      // Mark messages as read up to this message
-      await supabase
-        .from('message_receipts')
-        .upsert({
-          message_id: messageId,
-          user_id: user.id,
-          status: 'read'
-        });
+      if (error) throw error;
+      return data;
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['conversations'] });

@@ -33,8 +33,11 @@ import {
   useTypingIndicator,
   useMarkMessagesAsRead,
   type Message,
-  type Conversation
+  type Conversation,
+  type MessageAttachment
 } from "@/hooks/useMessaging";
+import { useDraftMessage } from "@/hooks/useDraftMessage";
+import { OptimisticMessageComponent } from "@/components/messaging/optimistic-message";
 import { useAuth } from "@/hooks/useAuth";
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -45,10 +48,23 @@ import { MessageAttachments } from "@/components/messaging/message-attachments";
 
 const Messages = () => {
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
-  const [newMessage, setNewMessage] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+  const [optimisticMessages, setOptimisticMessages] = useState<Array<{
+    id: string;
+    body?: string;
+    attachments?: Array<{
+      file_url: string;
+      mime_type: string;
+      file_size?: number;
+      width?: number;
+      height?: number;
+      duration?: number;
+    }>;
+    status: 'sending' | 'failed';
+    retry?: () => void;
+  }>>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const { user, loading } = useAuth();
@@ -86,6 +102,7 @@ const Messages = () => {
   const { data: messages = [], isLoading: messagesLoading } = useMessages(selectedConversationId);
   const sendMessageMutation = useSendMessage();
   const markAsReadMutation = useMarkMessagesAsRead();
+  const { draftText, updateDraft, clearDraft } = useDraftMessage(selectedConversationId);
   
   const { typingUsers, sendTypingStatus } = useTypingIndicator(selectedConversationId);
   
@@ -120,25 +137,73 @@ const Messages = () => {
     }
   }, [selectedConversationId, messages, user?.id, markAsReadMutation]);
 
-  const handleSendMessage = async () => {
-    if (!newMessage.trim() || !selectedConversationId || !user) return;
+  const handleSendMessage = async (attachments: Array<{
+    file_url: string;
+    mime_type: string;
+    file_size?: number;
+    width?: number;
+    height?: number;
+    duration?: number;
+  }> = []) => {
+    if ((!draftText.trim() && attachments.length === 0) || !selectedConversationId || !user) return;
+
+    const optimisticId = `optimistic_${Date.now()}`;
+    const messageBody = draftText.trim();
+
+    // Add optimistic message for immediate UI feedback
+    const optimisticMessage = {
+      id: optimisticId,
+      body: messageBody || undefined,
+      attachments: attachments.length > 0 ? attachments : undefined,
+      status: 'sending' as const,
+    };
+
+    setOptimisticMessages(prev => [...prev, optimisticMessage]);
+    clearDraft();
+    sendTypingStatus(false);
 
     try {
+      // Convert to MessageAttachment format for the API
+      const messageAttachments: Omit<MessageAttachment, 'id' | 'message_id'>[] = attachments.map(att => ({
+        file_url: att.file_url,
+        mime_type: att.mime_type,
+        file_size: att.file_size,
+        width: att.width,
+        height: att.height,
+        duration: att.duration
+      }));
+
       await sendMessageMutation.mutateAsync({
         conversationId: selectedConversationId,
-        kind: 'text',
-        body: newMessage.trim(),
-        attachments: [] // TODO: Add attachment support
+        kind: attachments.length > 0 ? attachments[0].mime_type.split('/')[0] as Message['kind'] : 'text',
+        body: messageBody || undefined,
+        attachments: messageAttachments
       });
-      setNewMessage("");
       
-      // Stop typing indicator
-      sendTypingStatus(false);
+      // Remove optimistic message on success
+      setOptimisticMessages(prev => prev.filter(m => m.id !== optimisticId));
     } catch (error) {
       console.error('Failed to send message:', error);
+      
+      // Mark optimistic message as failed with retry
+      setOptimisticMessages(prev => 
+        prev.map(m => m.id === optimisticId 
+          ? { 
+              ...m, 
+              status: 'failed' as const,
+              retry: () => {
+                setOptimisticMessages(p => p.filter(msg => msg.id !== optimisticId));
+                updateDraft(messageBody);
+                handleSendMessage(attachments);
+              }
+            }
+          : m
+        )
+      );
+      
       toast({
-        title: "Error",
-        description: "Failed to send message. Please try again.",
+        title: "Message failed",
+        description: "Tap the error icon to retry sending.",
         variant: "destructive"
       });
     }
@@ -152,7 +217,7 @@ const Messages = () => {
   };
 
   const handleTyping = useCallback((value: string) => {
-    setNewMessage(value);
+    updateDraft(value);
     
     // Send typing indicator
     if (value.trim()) {
@@ -176,7 +241,7 @@ const Messages = () => {
         setTypingTimeout(null);
       }
     }
-  }, [sendTypingStatus, typingTimeout]);
+  }, [updateDraft, sendTypingStatus, typingTimeout]);
 
   const getInitials = (name?: string) => {
     if (!name) return '?';
@@ -412,6 +477,7 @@ const Messages = () => {
                   </div>
                 ) : (
                   <div className="space-y-4">
+                    {/* Regular messages */}
                     {messages.map((message) => {
                       const isMe = message.sender_id === user?.id;
                       return (
@@ -445,22 +511,18 @@ const Messages = () => {
                                   Replying to previous message
                                 </div>
                               )}
+                              {message.body && (
+                                <div className="whitespace-pre-wrap break-words">
+                                  {message.body}
+                                </div>
+                              )}
                               {message.attachments && message.attachments.length > 0 && (
                                 <div className="mt-2">
                                   <MessageAttachments attachments={message.attachments} />
                                 </div>
                               )}
-                              <p className="text-sm whitespace-pre-wrap break-words">{message.body}</p>
-                              <div className={cn(
-                                "flex items-center justify-between gap-2 mt-1",
-                                isMe ? "flex-row-reverse" : ""
-                              )}>
-                                <span className={cn(
-                                  "text-xs",
-                                  isMe 
-                                    ? "text-primary-foreground/70" 
-                                    : "text-muted-foreground"
-                                )}>
+                               <div className="flex items-center justify-end mt-1 space-x-1">
+                                <span className="text-xs opacity-70">
                                   {formatMessageTime(message.created_at)}
                                 </span>
                                 {getMessageStatus(message)}
@@ -469,40 +531,57 @@ const Messages = () => {
                           </div>
                         </div>
                       );
-                    })}
-                    <div ref={messagesEndRef} />
-                  </div>
-                )}
-              </ScrollArea>
+                     })}
+                     
+                     {/* Optimistic messages */}
+                     {optimisticMessages.map((message) => (
+                       <OptimisticMessageComponent 
+                         key={message.id} 
+                         message={message} 
+                         user={user!} 
+                       />
+                     ))}
+                     
+                     <div ref={messagesEndRef} />
+                   </div>
+                 )}
+               </ScrollArea>
 
               {/* Message Input */}
               <div className="p-4 border-t bg-card">
                 <div className="flex items-end space-x-2">
-                  <FileUpload
-                    onFileUploaded={(file) => {
-                      // Handle file upload - you could extend useSendMessage to support attachments
-                      console.log('File uploaded:', file);
-                    }}
-                    disabled={!selectedConversationId}
-                  />
+                   <FileUpload 
+                     onFileUploaded={(file) => {
+                       const attachment = {
+                         file_url: file.url,
+                         mime_type: file.type,
+                         file_size: file.size,
+                         // Add dimensions for images/videos if available
+                       };
+                       handleSendMessage([attachment]);
+                     }}
+                     disabled={sendMessageMutation.isPending}
+                   />
                   <div className="flex-1 relative">
                     <Input
                       placeholder="Type a message..."
-                      value={newMessage}
+                      value={draftText}
                       onChange={(e) => handleTyping(e.target.value)}
                       onKeyPress={handleKeyPress}
-                      className="resize-none"
+                      className="resize-none pr-12"
                       disabled={sendMessageMutation.isPending}
                     />
                   </div>
-
                   <Button 
-                    size="sm" 
-                    onClick={handleSendMessage}
-                    disabled={!newMessage.trim() || sendMessageMutation.isPending}
-                    className="bg-primary hover:bg-primary/90"
+                    onClick={() => handleSendMessage()} 
+                    disabled={(!draftText.trim()) || sendMessageMutation.isPending}
+                    size="sm"
                   >
-                    <Send className="h-4 w-4" />
+                    {sendMessageMutation.isPending ? (
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
+                    ) : (
+                      <Send className="h-4 w-4" />
+                    )}
                   </Button>
                 </div>
               </div>

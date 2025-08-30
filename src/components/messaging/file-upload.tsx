@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Paperclip, X } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -12,6 +13,7 @@ interface FileUploadProps {
 
 export const FileUpload = ({ onFileUploaded, disabled }: FileUploadProps) => {
   const [uploading, setUploading] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
   const { toast } = useToast();
@@ -87,6 +89,34 @@ export const FileUpload = ({ onFileUploaded, disabled }: FileUploadProps) => {
     fileInputRef.current?.click();
   };
 
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDragIn = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(true);
+  };
+
+  const handleDragOut = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    
+    const files = e.dataTransfer.files;
+    if (files && files[0]) {
+      handleFileSelect({ target: { files } } as any);
+    }
+  };
+
   return (
     <div className="relative">
       <input
@@ -98,7 +128,7 @@ export const FileUpload = ({ onFileUploaded, disabled }: FileUploadProps) => {
       />
       
       {uploading ? (
-        <div className="flex items-center space-x-2 px-3 py-2 bg-muted rounded-lg">
+        <div className="flex items-center space-x-2 px-3 py-2 bg-muted rounded-lg min-w-[200px]">
           <div className="flex-1">
             <div className="flex justify-between text-sm mb-1">
               <span>Uploading...</span>
@@ -116,15 +146,29 @@ export const FileUpload = ({ onFileUploaded, disabled }: FileUploadProps) => {
           </Button>
         </div>
       ) : (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={triggerFileSelect}
-          disabled={disabled}
-          className="hover:bg-muted"
+        <div
+          className={cn(
+            "relative",
+            dragActive && "ring-2 ring-primary ring-opacity-50 rounded-lg"
+          )}
+          onDragEnter={handleDragIn}
+          onDragLeave={handleDragOut}
+          onDragOver={handleDrag}
+          onDrop={handleDrop}
         >
-          <Paperclip className="h-4 w-4" />
-        </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={triggerFileSelect}
+            disabled={disabled}
+            className={cn(
+              "hover:bg-muted transition-colors",
+              dragActive && "bg-muted"
+            )}
+          >
+            <Paperclip className="h-4 w-4" />
+          </Button>
+        </div>
       )}
     </div>
   );
