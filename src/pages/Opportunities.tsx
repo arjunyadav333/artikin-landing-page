@@ -14,6 +14,7 @@ import { useOpportunities, useApplyToOpportunity } from "@/hooks/useOpportunitie
 import { useUserApplications, useDeleteApplication } from "@/hooks/useApplications";
 import { useCurrentProfile } from "@/hooks/useProfiles";
 import { useToast } from "@/hooks/use-toast";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Opportunities = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -26,6 +27,7 @@ const Opportunities = () => {
   const applyToOpportunity = useApplyToOpportunity();
   const deleteApplication = useDeleteApplication();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   const isArtist = currentProfile?.role === 'artist';
   const isOrganization = currentProfile?.role === 'organization';
@@ -143,24 +145,26 @@ const Opportunities = () => {
       className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 pb-20 md:pb-8"
     >
       <div className="container max-w-7xl mx-auto px-4 py-6 lg:py-8">
-        {/* Simple Search Bar */}
-        <div className="mb-6">
-          <div className="flex gap-2 md:gap-4 items-center max-w-2xl mx-auto">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="search"
-                placeholder="Search opportunities..."
-                className="pl-10 h-10 text-sm md:text-base"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
+        {/* Mobile-only Search Bar - Desktop uses header search */}
+        {isMobile && (
+          <div className="mb-6">
+            <div className="flex gap-2 items-center max-w-2xl mx-auto">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="search"
+                  placeholder="Search opportunities..."
+                  className="pl-10 h-10 text-sm"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+              <Button variant="outline" size="sm" className="p-2 h-10 w-10">
+                <Filter className="h-4 w-4" />
+              </Button>
             </div>
-            <Button variant="outline" size="sm" className="md:hidden p-2 h-10 w-10">
-              <Filter className="h-4 w-4" />
-            </Button>
           </div>
-        </div>
+        )}
 
         {/* Enhanced Tabs */}
         <motion.div
