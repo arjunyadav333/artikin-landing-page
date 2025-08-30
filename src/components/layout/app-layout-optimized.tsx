@@ -37,7 +37,7 @@ export const AppLayoutOptimized = memo(({ children }: AppLayoutProps) => {
 
   return (
     <SidebarProvider>
-      <div className={layoutClasses.container}>
+      <div className="min-h-screen flex w-full bg-background">
         <AppSidebar />
         <div className="flex-1 flex flex-col">
           <TopBar />
