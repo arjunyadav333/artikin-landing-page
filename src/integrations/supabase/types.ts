@@ -50,6 +50,13 @@ export type Database = {
             referencedRelation: "posts"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts_with_profiles_view"
+            referencedColumns: ["id"]
+          },
         ]
       }
       connections: {
@@ -108,6 +115,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "conversation_participants_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversation_list_view"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "conversation_participants_conversation_id_fkey"
             columns: ["conversation_id"]
@@ -194,6 +208,13 @@ export type Database = {
             columns: ["post_id"]
             isOneToOne: false
             referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "likes_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts_with_profiles_view"
             referencedColumns: ["id"]
           },
         ]
@@ -309,6 +330,13 @@ export type Database = {
           sender_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversation_list_view"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "messages_conversation_id_fkey"
             columns: ["conversation_id"]
@@ -617,7 +645,64 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      conversation_list_view: {
+        Row: {
+          created_at: string | null
+          id: string | null
+          last_message_body: string | null
+          last_message_created_at: string | null
+          last_message_id: string | null
+          last_message_sender_id: string | null
+          participant_a: string | null
+          participant_a_avatar: string | null
+          participant_a_name: string | null
+          participant_a_username: string | null
+          participant_b: string | null
+          participant_b_avatar: string | null
+          participant_b_name: string | null
+          participant_b_username: string | null
+          updated_at: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversations_last_message_id_fkey"
+            columns: ["last_message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_conversations_last_message"
+            columns: ["last_message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      posts_with_profiles_view: {
+        Row: {
+          comments_count: number | null
+          content: string | null
+          created_at: string | null
+          id: string | null
+          likes_count: number | null
+          media_type: string | null
+          media_urls: string[] | null
+          profile_artform: Database["public"]["Enums"]["artform_type"] | null
+          profile_avatar_url: string | null
+          profile_display_name: string | null
+          profile_role: Database["public"]["Enums"]["user_role"] | null
+          profile_username: string | null
+          saves_count: number | null
+          shares_count: number | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       get_or_create_conversation: {
