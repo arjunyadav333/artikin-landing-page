@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { FileText, Download, Play, Pause, Volume2 } from "lucide-react";
+import { FileText, Download } from "lucide-react";
 import { MessageAttachment } from "@/hooks/useMessaging";
 
 interface MessageAttachmentsProps {
@@ -10,24 +10,12 @@ interface MessageAttachmentsProps {
 
 export const MessageAttachments = ({ attachments }: MessageAttachmentsProps) => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [playingAudio, setPlayingAudio] = useState<string | null>(null);
 
   const formatFileSize = (bytes: number) => {
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     if (bytes === 0) return '0 Bytes';
     const i = Math.floor(Math.log(bytes) / Math.log(1024));
     return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
-  };
-
-  const handleAudioToggle = (url: string) => {
-    if (playingAudio === url) {
-      setPlayingAudio(null);
-      // Stop audio
-      const audioElements = document.querySelectorAll('audio');
-      audioElements.forEach(audio => audio.pause());
-    } else {
-      setPlayingAudio(url);
-    }
   };
 
   const renderAttachment = (attachment: MessageAttachment) => {
@@ -62,37 +50,6 @@ export const MessageAttachments = ({ attachments }: MessageAttachmentsProps) => 
           <source src={file_url} type={mime_type} />
           Your browser does not support video playback.
         </video>
-      );
-    }
-
-    if (mime_type.startsWith('audio/')) {
-      const isPlaying = playingAudio === file_url;
-      return (
-        <div key={attachment.id} className="flex items-center space-x-3 p-3 bg-muted rounded-lg max-w-xs">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleAudioToggle(file_url)}
-            className="h-10 w-10 p-0"
-          >
-            {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
-          </Button>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium truncate">Voice message</p>
-            <p className="text-xs text-muted-foreground">
-              {file_size ? formatFileSize(file_size) : 'Audio'}
-            </p>
-          </div>
-          <Volume2 className="h-4 w-4 text-muted-foreground" />
-          {isPlaying && (
-            <audio
-              src={file_url}
-              autoPlay
-              onEnded={() => setPlayingAudio(null)}
-              className="hidden"
-            />
-          )}
-        </div>
       );
     }
 

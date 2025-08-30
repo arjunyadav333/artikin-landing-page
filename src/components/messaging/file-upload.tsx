@@ -94,7 +94,7 @@ export const FileUpload = ({ onFileUploaded, disabled }: FileUploadProps) => {
         type="file"
         onChange={handleFileSelect}
         className="hidden"
-        accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.txt,.zip,.rar"
+        accept="image/*,video/*,.pdf,.doc,.docx,.txt,.zip,.rar"
       />
       
       {uploading ? (
