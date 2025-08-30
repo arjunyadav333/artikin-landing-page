@@ -17,12 +17,8 @@ const Home = () => {
 
   const posts = postsData?.pages.flat() || [];
 
-  // Create sample data if user is authenticated and no posts exist
-  useEffect(() => {
-    if (user && !isLoading && posts.length === 0 && !isError) {
-      createSampleData();
-    }
-  }, [user, posts.length, isLoading, isError]);
+  // Remove sample data generation for better performance
+  // Sample data should be created only once during onboarding, not on every page load
 
   // Simulate new posts available banner (in real app, this would be based on real-time updates)
   useEffect(() => {

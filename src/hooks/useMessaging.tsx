@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { useQueryPerformance } from '@/hooks/usePerformanceMonitoring';
 
 // Types for the new messaging system
 export interface Message {
@@ -83,6 +84,7 @@ export interface ConversationParticipant {
 // Hook to fetch conversations for current user
 export const useConversations = () => {
   const { user } = useAuth();
+  const { markQueryComplete } = useQueryPerformance(['conversations']);
   
   return useQuery({
     queryKey: ['conversations', user?.id],
@@ -182,6 +184,9 @@ export const useConversations = () => {
       );
 
       console.log('useConversations: Final enriched conversations:', enrichedConversations);
+      
+      // Track query performance
+      markQueryComplete();
       return enrichedConversations as Conversation[];
     },
     enabled: !!user

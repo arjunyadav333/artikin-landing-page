@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./hooks/useAuth";
 import { AppLayout } from "./components/layout/app-layout";
+import { PerformanceMonitor } from "./components/layout/performance-monitor";
 import NotFound from "./pages/NotFound";
 
 // Lazy load components for better performance and code splitting
@@ -206,6 +207,7 @@ const App = () => (
       <TooltipProvider>
         <Toaster />
         <Sonner />
+        <PerformanceMonitor />
         <AppRoutes />
       </TooltipProvider>
     </AuthProvider>

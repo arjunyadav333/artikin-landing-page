@@ -45,6 +45,8 @@ import { useToast } from "@/hooks/use-toast";
 import { FileUpload } from "@/components/messaging/file-upload";
 
 import { MessageAttachments } from "@/components/messaging/message-attachments";
+import { ConversationListSkeleton } from "@/components/ui/conversation-skeleton";
+import { MessageListSkeleton } from "@/components/ui/message-skeleton";
 
 const Messages = () => {
   const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
@@ -345,10 +347,7 @@ const Messages = () => {
 
           <ScrollArea className="flex-1">
             {conversationsLoading ? (
-              <div className="p-4 text-center text-muted-foreground">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto mb-2"></div>
-                Loading conversations...
-              </div>
+              <ConversationListSkeleton count={6} />
             ) : filteredConversations.length === 0 ? (
               <div className="p-4 text-center text-muted-foreground">
                 <div className="h-12 w-12 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
@@ -468,9 +467,7 @@ const Messages = () => {
               {/* Messages */}
               <ScrollArea className="flex-1 p-4">
                 {messagesLoading ? (
-                  <div className="text-center text-muted-foreground">
-                    Loading messages...
-                  </div>
+                  <MessageListSkeleton count={8} />
                 ) : messages.length === 0 ? (
                   <div className="text-center text-muted-foreground">
                     No messages yet. Start the conversation!
