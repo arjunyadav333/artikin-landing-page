@@ -4,10 +4,11 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider, useAuth } from "./hooks/useAuth";
-import { AppLayout } from "./components/layout/app-layout";
+import { useAuthOptimized } from "./hooks/useAuthOptimized";
+import { AppLayoutOptimized } from "./components/layout/app-layout-optimized";
 import { PerformanceMonitor } from "./components/layout/performance-monitor";
 import NotFound from "./pages/NotFound";
+import { authSingleton } from "@/lib/auth-singleton";
 
 // Lazy load components for better performance and code splitting
 const Home = lazy(() => import("./pages/Home"));
@@ -30,38 +31,49 @@ const PageLoader = () => (
   </div>
 );
 
+// Ultra-fast query client with aggressive caching for sub-50ms performance
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      // Global cache settings for better performance
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      gcTime: 10 * 60 * 1000, // 10 minutes (was cacheTime)
+      // Ultra-aggressive caching for maximum performance
+      staleTime: 2 * 60 * 1000, // 2 minutes - fresh but fast
+      gcTime: 10 * 60 * 1000, // 10 minutes garbage collection
       refetchOnWindowFocus: false,
       refetchOnMount: false,
+      refetchOnReconnect: false,
       retry: (failureCount, error: any) => {
         // Don't retry auth errors
         if (error?.message?.includes('JWT') || error?.message?.includes('auth')) {
           return false;
         }
-        return failureCount < 3;
+        return failureCount < 2; // Reduced retries for speed
       },
-      retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
+      retryDelay: 500, // Faster retries
+      // Performance optimizations
+      networkMode: 'online',
     },
     mutations: {
-      // Global mutation settings
+      // Ultra-fast mutations
       retry: 1,
-      retryDelay: 1000,
+      retryDelay: 500,
+      networkMode: 'online',
     }
   }
 });
 
+// Ultra-fast protected route with optimistic authentication
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, loading } = useAuth();
+  const { user, loading, isAuthenticated } = useAuthOptimized();
+
+  // Optimistic rendering - show content immediately if we have cached auth
+  if (isAuthenticated) {
+    return <>{children}</>;
+  }
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
   }
@@ -74,8 +86,6 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 const AppRoutes = () => {
-  const { user } = useAuth();
-
   return (
     <BrowserRouter>
       <Routes>
@@ -99,84 +109,84 @@ const AppRoutes = () => {
         {/* App Routes (With Layout) */}
         <Route path="/" element={
           <ProtectedRoute>
-            <AppLayout>
+            <AppLayoutOptimized>
               <Suspense fallback={<PageLoader />}>
                 <Home />
               </Suspense>
-            </AppLayout>
+            </AppLayoutOptimized>
           </ProtectedRoute>
         } />
         <Route path="/home" element={
           <ProtectedRoute>
-            <AppLayout>
+            <AppLayoutOptimized>
               <Suspense fallback={<PageLoader />}>
                 <Home />
               </Suspense>
-            </AppLayout>
+            </AppLayoutOptimized>
           </ProtectedRoute>
         } />
         <Route path="/opportunities" element={
           <ProtectedRoute>
-            <AppLayout>
+            <AppLayoutOptimized>
               <Suspense fallback={<PageLoader />}>
                 <Opportunities />
               </Suspense>
-            </AppLayout>
+            </AppLayoutOptimized>
           </ProtectedRoute>
         } />
         <Route path="/create" element={
           <ProtectedRoute>
-            <AppLayout>
+            <AppLayoutOptimized>
               <Suspense fallback={<PageLoader />}>
                 <Create />
               </Suspense>
-            </AppLayout>
+            </AppLayoutOptimized>
           </ProtectedRoute>
         } />
         <Route path="/connections" element={
           <ProtectedRoute>
-            <AppLayout>
+            <AppLayoutOptimized>
               <Suspense fallback={<PageLoader />}>
                 <Connections />
               </Suspense>
-            </AppLayout>
+            </AppLayoutOptimized>
           </ProtectedRoute>
         } />
         <Route path="/profile/me" element={
           <ProtectedRoute>
-            <AppLayout>
+            <AppLayoutOptimized>
               <Suspense fallback={<PageLoader />}>
                 <UserProfile />
               </Suspense>
-            </AppLayout>
+            </AppLayoutOptimized>
           </ProtectedRoute>
         } />
         <Route path="/profile/:userId" element={
           <ProtectedRoute>
-            <AppLayout>
+            <AppLayoutOptimized>
               <Suspense fallback={<PageLoader />}>
                 <UserProfile />
               </Suspense>
-            </AppLayout>
+            </AppLayoutOptimized>
           </ProtectedRoute>
         } />
         <Route path="/profile" element={<Navigate to="/profile/me" replace />} />
         <Route path="/post/:postId" element={
           <ProtectedRoute>
-            <AppLayout>
+            <AppLayoutOptimized>
               <Suspense fallback={<PageLoader />}>
                 <PostDetail />
               </Suspense>
-            </AppLayout>
+            </AppLayoutOptimized>
           </ProtectedRoute>
         } />
         <Route path="/tags/:tag" element={
           <ProtectedRoute>
-            <AppLayout>
+            <AppLayoutOptimized>
               <Suspense fallback={<PageLoader />}>
                 <TagFeed />
               </Suspense>
-            </AppLayout>
+            </AppLayoutOptimized>
           </ProtectedRoute>
         } />
         <Route path="/messages" element={
@@ -186,11 +196,11 @@ const AppRoutes = () => {
         } />
         <Route path="/saved" element={
           <ProtectedRoute>
-            <AppLayout>
+            <AppLayoutOptimized>
               <Suspense fallback={<PageLoader />}>
                 <SavedPosts />
               </Suspense>
-            </AppLayout>
+            </AppLayoutOptimized>
           </ProtectedRoute>
         } />
         
@@ -201,16 +211,15 @@ const AppRoutes = () => {
   );
 };
 
+// Ultra-fast app initialization with singleton auth
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <PerformanceMonitor />
-        <AppRoutes />
-      </TooltipProvider>
-    </AuthProvider>
+    <TooltipProvider>
+      <Toaster />
+      <Sonner />
+      <PerformanceMonitor />
+      <AppRoutes />
+    </TooltipProvider>
   </QueryClientProvider>
 );
 

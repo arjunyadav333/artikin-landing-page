@@ -1,35 +1,45 @@
 import { useState, useEffect } from "react";
+import { usePostsOptimized, useLikePostOptimized, PostItem } from '@/hooks/usePostsOptimized';
+import { authSingleton } from '@/lib/auth-singleton';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { PostSkeleton } from '@/components/ui/optimized-skeleton';
+import { memo, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import { usePosts } from "@/hooks/usePosts";
-import { useAuth } from "@/hooks/useAuth";
 import { Link } from "react-router-dom";
-import { PostListSkeleton } from "@/components/ui/post-skeleton";
-import { FullWidthPost } from "@/components/feed/full-width-post";
-import { createSampleData } from "@/utils/sampleData";
-import { useIsMobile } from "@/hooks/use-mobile";
 
-const Home = () => {
+// Ultra-fast Home component with optimized rendering
+const Home = memo(() => {
   const [showNewPostsBanner, setShowNewPostsBanner] = useState(false);
-  const { user } = useAuth();
+  const user = authSingleton.getUser();
   const isMobile = useIsMobile();
-  const { data: postsData, isLoading, fetchNextPage, hasNextPage, isError } = usePosts();
+  
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+    isError,
+    error
+  } = usePostsOptimized();
 
-  const posts = postsData?.pages.flat() || [];
+  const likeMutation = useLikePostOptimized();
+  const posts = data?.pages.flat() || [];
 
-  // Remove sample data generation for better performance
-  // Sample data should be created only once during onboarding, not on every page load
+  // Memoized like handler for performance
+  const handleLike = useCallback((postId: string, isLiked: boolean) => {
+    likeMutation.mutate({ postId, isLiked });
+  }, [likeMutation]);
 
-  // Simulate new posts available banner (in real app, this would be based on real-time updates)
   useEffect(() => {
-    if (posts.length > 0) {
-      const timer = setTimeout(() => {
-        setShowNewPostsBanner(true);
-      }, 30000); // Show after 30 seconds
-      
-      return () => clearTimeout(timer);
-    }
-  }, [posts.length]);
+    // Simulate new posts available after 10 seconds
+    const timer = setTimeout(() => {
+      setShowNewPostsBanner(true);
+    }, 10000);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <div className="w-full min-h-screen bg-background">
@@ -50,10 +60,10 @@ const Home = () => {
         </div>
       )}
 
-      {/* Feed Container - Full Width Mobile-First */}
+      {/* Feed Container - Ultra-fast rendering */}
       <div className="w-full max-w-none sm:max-w-2xl sm:mx-auto lg:max-w-3xl xl:max-w-4xl">
         {isLoading ? (
-          <PostListSkeleton count={3} />
+          <PostSkeleton />
         ) : isError ? (
           <div className="text-center p-8">
             <p className="text-muted-foreground mb-4">Failed to load posts</p>
@@ -75,36 +85,50 @@ const Home = () => {
             </Link>
           </div>
         ) : (
-          <div className="space-y-0">
+          <div className="space-y-4 p-4">
             {posts.map((post) => (
-              <FullWidthPost key={post.id} post={post} />
+              <PostItem 
+                key={post.id} 
+                post={post}
+                onLike={handleLike}
+              />
             ))}
-          </div>
-        )}
-
-        {/* Infinite Scroll Trigger */}
-        {hasNextPage && (
-          <div className="p-6 text-center">
-            <Button 
-              variant="ghost" 
-              className="text-muted-foreground hover:text-foreground"
-              onClick={() => fetchNextPage()}
-              disabled={isLoading}
+            
+            {/* Infinite scroll trigger */}
+            <div 
+              ref={(el) => {
+                if (el && hasNextPage && !isFetchingNextPage) {
+                  const observer = new IntersectionObserver(
+                    (entries) => {
+                      if (entries[0].isIntersecting) {
+                        fetchNextPage();
+                      }
+                    },
+                    { threshold: 0.1 }
+                  );
+                  observer.observe(el);
+                  return () => observer.disconnect();
+                }
+              }}
+              className="h-20 flex items-center justify-center"
             >
-              {isLoading ? 'Loading more posts...' : 'Load more'}
-            </Button>
-          </div>
-        )}
-
-        {/* End of Feed */}
-        {!hasNextPage && posts.length > 0 && (
-          <div className="text-center py-8">
-            <p className="text-muted-foreground text-sm">You're all caught up!</p>
+              {isFetchingNextPage && (
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+              )}
+            </div>
+            
+            {!hasNextPage && posts.length > 0 && (
+              <div className="text-center py-8 text-muted-foreground">
+                🎉 You're all caught up!
+              </div>
+            )}
           </div>
         )}
       </div>
     </div>
   );
-};
+});
+
+Home.displayName = 'Home';
 
 export default Home;
