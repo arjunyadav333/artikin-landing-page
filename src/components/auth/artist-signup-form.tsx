@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuthOptimized } from "@/hooks/useAuthOptimized";
 import { Eye, EyeOff, User, Mail, Lock, Phone, MapPin, Palette } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -38,7 +38,7 @@ const ArtistSignupForm = () => {
   });
   
   const navigate = useNavigate();
-  const { signUp } = useAuth();
+  const { signUp } = useAuthOptimized();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({

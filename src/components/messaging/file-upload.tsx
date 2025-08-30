@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Paperclip, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuthOptimized } from "@/hooks/useAuthOptimized";
 import { useToast } from "@/hooks/use-toast";
 
 interface FileUploadProps {
@@ -15,7 +15,7 @@ export const FileUpload = ({ onFileUploaded, disabled }: FileUploadProps) => {
   const [uploading, setUploading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { user } = useAuth();
+  const { user } = useAuthOptimized();
   const { toast } = useToast();
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {

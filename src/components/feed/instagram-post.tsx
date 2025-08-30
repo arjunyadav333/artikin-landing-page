@@ -24,7 +24,7 @@ import { CommentModal } from "@/components/feed/comment-modal";
 import { useLikePost } from "@/hooks/usePosts";
 import { useSavePost } from "@/hooks/useSaves";
 import { useFollowUser } from "@/hooks/useConnections";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuthOptimized } from "@/hooks/useAuthOptimized";
 
 interface InstagramPostProps {
   post: Post;
@@ -36,7 +36,7 @@ export function InstagramPost({ post }: InstagramPostProps) {
   const [isDoubleTapping, setIsDoubleTapping] = useState(false);
   const lastTapRef = useRef<number>(0);
   
-  const { user } = useAuth();
+  const { user } = useAuthOptimized();
   const likePostMutation = useLikePost();
   const savePostMutation = useSavePost();
   const followUserMutation = useFollowUser();

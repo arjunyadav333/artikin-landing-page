@@ -12,7 +12,7 @@ import {
   ChevronRight
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuthOptimized } from "@/hooks/useAuthOptimized";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -41,7 +41,7 @@ const navItems = [
 export function AppSidebar() {
   const { state } = useSidebar();
   const location = useLocation();
-  const { user } = useAuth();
+  const { user } = useAuthOptimized();
   const currentPath = location.pathname;
   
   const isCollapsed = state === "collapsed";

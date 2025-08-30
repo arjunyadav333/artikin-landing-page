@@ -5,11 +5,11 @@ import { FullWidthPost } from "@/components/feed/full-width-post";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Bookmark } from "lucide-react";
 import { PostListSkeleton } from "@/components/ui/post-skeleton";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuthOptimized } from "@/hooks/useAuthOptimized";
 
 const SavedPosts = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user } = useAuthOptimized();
 
   const { 
     data: postsData, 

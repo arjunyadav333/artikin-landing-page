@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Heart, Send } from "lucide-react";
 import { Post } from "@/hooks/usePosts";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuthOptimized } from "@/hooks/useAuthOptimized";
 import { useComments, useCreateComment, useLikeComment } from "@/hooks/useComments";
 import { Link } from "react-router-dom";
 
@@ -16,7 +16,7 @@ interface CommentModalProps {
 
 export function CommentModal({ post, isOpen, onClose }: CommentModalProps) {
   const [commentText, setCommentText] = useState("");
-  const { user } = useAuth();
+  const { user } = useAuthOptimized();
   const { data: comments, isLoading } = useComments(post.id);
   const createCommentMutation = useCreateComment();
   const likeCommentMutation = useLikeComment();

@@ -1,12 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from './useAuth';
+import { useAuthOptimized } from './useAuthOptimized';
 import { debounce } from 'lodash-es';
 
 // Hook for managing draft messages with auto-save
 export const useDraftMessage = (conversationId?: string) => {
   const [draftText, setDraftText] = useState("");
-  const { user } = useAuth();
+  const { user } = useAuthOptimized();
 
   // Debounced save function
   const saveDraft = useCallback(

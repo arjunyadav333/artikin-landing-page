@@ -13,7 +13,7 @@ import {
   X,
   LogOut
 } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuthOptimized } from "@/hooks/useAuthOptimized";
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -25,7 +25,7 @@ import {
 const Navigation = () => {
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { user, signOut } = useAuth();
+  const { user, signOut } = useAuthOptimized();
 
   const navItems = [
     { path: "/", label: "Home", icon: Home },

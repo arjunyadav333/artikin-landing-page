@@ -38,7 +38,7 @@ import {
 } from "@/hooks/useMessaging";
 import { useDraftMessage } from "@/hooks/useDraftMessage";
 import { OptimisticMessageComponent } from "@/components/messaging/optimistic-message";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuthOptimized } from "@/hooks/useAuthOptimized";
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
@@ -69,7 +69,7 @@ const Messages = () => {
   }>>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const { user, loading } = useAuth();
+  const { user, loading } = useAuthOptimized();
   const navigate = useNavigate();
   const { toast } = useToast();
 

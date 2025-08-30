@@ -27,7 +27,7 @@ import { CommentModal } from "@/components/feed/comment-modal";
 import { useLikePost } from "@/hooks/usePosts";
 import { useSavePost } from "@/hooks/useSaves";
 import { useFollowUser } from "@/hooks/useConnections";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuthOptimized } from "@/hooks/useAuthOptimized";
 import { useToast } from "@/hooks/use-toast";
 
 interface FullWidthPostProps {
@@ -41,7 +41,7 @@ export function FullWidthPost({ post }: FullWidthPostProps) {
   const [showFullCaption, setShowFullCaption] = useState(false);
   const lastTapRef = useRef<number>(0);
   
-  const { user } = useAuth();
+  const { user } = useAuthOptimized();
   const { toast } = useToast();
   const likePostMutation = useLikePost();
   const savePostMutation = useSavePost();
