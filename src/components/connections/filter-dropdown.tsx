@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuCheckboxItem,
 } from "@/components/ui/dropdown-menu";
-import { Filter, ChevronDown } from "lucide-react";
+import { Filter, ChevronDown, X } from "lucide-react";
 
 export interface FilterOptions {
   showArtistsOnly: boolean;
@@ -29,11 +29,26 @@ const artforms = [
   'instrumentalist', 'singer', 'drawing', 'painting'
 ];
 
+const defaultFilters: FilterOptions = {
+  showArtistsOnly: false,
+  showOrganizationsOnly: false,
+  sortBy: 'newest'
+};
+
 export function FilterDropdown({ filters, onFiltersChange, showPopularitySort = false }: FilterDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [tempFilters, setTempFilters] = useState<FilterOptions>(filters);
 
-  const updateFilter = (key: keyof FilterOptions, value: any) => {
-    const newFilters = { ...filters, [key]: value };
+  // Reset temp filters when dropdown opens
+  const handleOpenChange = (open: boolean) => {
+    if (open) {
+      setTempFilters(filters);
+    }
+    setIsOpen(open);
+  };
+
+  const updateTempFilter = (key: keyof FilterOptions, value: any) => {
+    const newFilters = { ...tempFilters, [key]: value };
     
     // Handle mutual exclusivity for artist/organization filters
     if (key === 'showArtistsOnly' && value) {
@@ -43,11 +58,25 @@ export function FilterDropdown({ filters, onFiltersChange, showPopularitySort = 
       newFilters.showArtistsOnly = false;
     }
     
-    onFiltersChange(newFilters);
+    setTempFilters(newFilters);
   };
 
-  const clearArtformFilter = () => {
-    updateFilter('artformFilter', undefined);
+  const clearTempArtformFilter = () => {
+    updateTempFilter('artformFilter', undefined);
+  };
+
+  const handleApply = () => {
+    onFiltersChange(tempFilters);
+    setIsOpen(false);
+  };
+
+  const handleCancel = () => {
+    setTempFilters(filters);
+    setIsOpen(false);
+  };
+
+  const handleClearAll = () => {
+    setTempFilters(defaultFilters);
   };
 
   const getActiveFiltersCount = () => {
@@ -60,7 +89,7 @@ export function FilterDropdown({ filters, onFiltersChange, showPopularitySort = 
   };
 
   return (
-    <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+    <DropdownMenu open={isOpen} onOpenChange={handleOpenChange}>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" className="gap-2">
           <Filter className="h-4 w-4" />
@@ -76,14 +105,14 @@ export function FilterDropdown({ filters, onFiltersChange, showPopularitySort = 
       <DropdownMenuContent align="end" className="w-56 max-h-[400px] overflow-y-auto">
         <DropdownMenuLabel>Filter by Type</DropdownMenuLabel>
         <DropdownMenuCheckboxItem
-          checked={filters.showArtistsOnly}
-          onCheckedChange={(checked) => updateFilter('showArtistsOnly', checked)}
+          checked={tempFilters.showArtistsOnly}
+          onCheckedChange={(checked) => updateTempFilter('showArtistsOnly', checked)}
         >
           Artists Only
         </DropdownMenuCheckboxItem>
         <DropdownMenuCheckboxItem
-          checked={filters.showOrganizationsOnly}
-          onCheckedChange={(checked) => updateFilter('showOrganizationsOnly', checked)}
+          checked={tempFilters.showOrganizationsOnly}
+          onCheckedChange={(checked) => updateTempFilter('showOrganizationsOnly', checked)}
         >
           Organizations Only
         </DropdownMenuCheckboxItem>
@@ -92,47 +121,80 @@ export function FilterDropdown({ filters, onFiltersChange, showPopularitySort = 
         
         <DropdownMenuLabel className="flex items-center justify-between">
           Filter by Artform
-          {filters.artformFilter && (
+          {tempFilters.artformFilter && (
             <Button
               variant="ghost"
               size="sm"
-              onClick={clearArtformFilter}
+              onClick={clearTempArtformFilter}
               className="h-6 px-2 text-xs"
             >
-              Clear
+              <X className="h-3 w-3" />
             </Button>
           )}
         </DropdownMenuLabel>
-        {artforms.map((artform) => (
-          <DropdownMenuCheckboxItem
-            key={artform}
-            checked={filters.artformFilter === artform}
-            onCheckedChange={(checked) => {
-              updateFilter('artformFilter', checked ? artform : undefined);
-            }}
-            className="capitalize"
-          >
-            {artform}
-          </DropdownMenuCheckboxItem>
-        ))}
+        <div className="max-h-32 overflow-y-auto">
+          {artforms.map((artform) => (
+            <DropdownMenuCheckboxItem
+              key={artform}
+              checked={tempFilters.artformFilter === artform}
+              onCheckedChange={(checked) => {
+                updateTempFilter('artformFilter', checked ? artform : undefined);
+              }}
+              className="capitalize"
+            >
+              {artform}
+            </DropdownMenuCheckboxItem>
+          ))}
+        </div>
         
         <DropdownMenuSeparator />
         
         <DropdownMenuLabel>Sort By</DropdownMenuLabel>
-        <DropdownMenuItem onClick={() => updateFilter('sortBy', 'newest')}>
-          Newest {filters.sortBy === 'newest' && '✓'}
+        <DropdownMenuItem onClick={() => updateTempFilter('sortBy', 'newest')}>
+          Newest {tempFilters.sortBy === 'newest' && '✓'}
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => updateFilter('sortBy', 'alphabetical-az')}>
-          A-Z {filters.sortBy === 'alphabetical-az' && '✓'}
+        <DropdownMenuItem onClick={() => updateTempFilter('sortBy', 'alphabetical-az')}>
+          A-Z {tempFilters.sortBy === 'alphabetical-az' && '✓'}
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => updateFilter('sortBy', 'alphabetical-za')}>
-          Z-A {filters.sortBy === 'alphabetical-za' && '✓'}
+        <DropdownMenuItem onClick={() => updateTempFilter('sortBy', 'alphabetical-za')}>
+          Z-A {tempFilters.sortBy === 'alphabetical-za' && '✓'}
         </DropdownMenuItem>
         {showPopularitySort && (
-          <DropdownMenuItem onClick={() => updateFilter('sortBy', 'most-popular')}>
-            Most Popular {filters.sortBy === 'most-popular' && '✓'}
+          <DropdownMenuItem onClick={() => updateTempFilter('sortBy', 'most-popular')}>
+            Most Popular {tempFilters.sortBy === 'most-popular' && '✓'}
           </DropdownMenuItem>
         )}
+        
+        <DropdownMenuSeparator />
+        
+        {/* Action Buttons */}
+        <div className="p-2 space-y-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleClearAll}
+            className="w-full justify-center text-xs"
+          >
+            Clear All
+          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleCancel}
+              className="flex-1 text-xs"
+            >
+              Cancel
+            </Button>
+            <Button
+              size="sm"
+              onClick={handleApply}
+              className="flex-1 text-xs"
+            >
+              Apply
+            </Button>
+          </div>
+        </div>
       </DropdownMenuContent>
     </DropdownMenu>
   );
