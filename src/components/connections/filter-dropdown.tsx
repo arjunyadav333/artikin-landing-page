@@ -8,9 +8,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
   DropdownMenuCheckboxItem,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Filter, ChevronDown, ChevronRight, X } from "lucide-react";
 
@@ -41,13 +38,32 @@ const defaultFilters: FilterOptions = {
 export function FilterDropdown({ filters, onFiltersChange, showPopularitySort = false }: FilterDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [tempFilters, setTempFilters] = useState<FilterOptions>(filters);
+  const [expandedSections, setExpandedSections] = useState<{
+    type: boolean;
+    artform: boolean;
+    sort: boolean;
+  }>({
+    type: false,
+    artform: false,
+    sort: false
+  });
 
   // Reset temp filters when dropdown opens
   const handleOpenChange = (open: boolean) => {
     if (open) {
       setTempFilters(filters);
+    } else {
+      // Reset expanded sections when closing
+      setExpandedSections({ type: false, artform: false, sort: false });
     }
     setIsOpen(open);
+  };
+
+  const toggleSection = (section: 'type' | 'artform' | 'sort') => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
   };
 
   const updateTempFilter = (key: keyof FilterOptions, value: any) => {
@@ -105,123 +121,168 @@ export function FilterDropdown({ filters, onFiltersChange, showPopularitySort = 
           <ChevronDown className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-64 max-h-[400px] overflow-y-auto">
+      <DropdownMenuContent align="end" className="w-64 max-h-[500px] overflow-y-auto">
         
         {/* Filter by Type */}
-        <DropdownMenuSub>
-          <DropdownMenuSubTrigger className="flex items-center justify-between">
+        <div>
+          <DropdownMenuItem 
+            onClick={() => toggleSection('type')}
+            className="flex items-center justify-between cursor-pointer"
+          >
             <span>Filter by Type</span>
-            <span className="ml-auto text-xs text-muted-foreground">
-              {tempFilters.showArtistsOnly ? 'Artists Only' : 
-               tempFilters.showOrganizationsOnly ? 'Organizations Only' : 
-               'All Types'}
-            </span>
-            <ChevronRight className="h-4 w-4" />
-          </DropdownMenuSubTrigger>
-          <DropdownMenuSubContent>
-            <DropdownMenuItem onClick={() => {
-              updateTempFilter('showArtistsOnly', false);
-              updateTempFilter('showOrganizationsOnly', false);
-            }}>
-              All Types {(!tempFilters.showArtistsOnly && !tempFilters.showOrganizationsOnly) && '✓'}
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => {
-              updateTempFilter('showArtistsOnly', true);
-              updateTempFilter('showOrganizationsOnly', false);
-            }}>
-              Artists Only {tempFilters.showArtistsOnly && '✓'}
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => {
-              updateTempFilter('showOrganizationsOnly', true);
-              updateTempFilter('showArtistsOnly', false);
-            }}>
-              Organizations Only {tempFilters.showOrganizationsOnly && '✓'}
-            </DropdownMenuItem>
-          </DropdownMenuSubContent>
-        </DropdownMenuSub>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground">
+                {tempFilters.showArtistsOnly ? 'Artists Only' : 
+                 tempFilters.showOrganizationsOnly ? 'Organizations Only' : 
+                 'All Types'}
+              </span>
+              <ChevronDown className={`h-4 w-4 transition-transform ${expandedSections.type ? 'rotate-180' : ''}`} />
+            </div>
+          </DropdownMenuItem>
+          
+          {expandedSections.type && (
+            <div className="ml-4 border-l border-border pl-2 space-y-1">
+              <DropdownMenuItem 
+                onClick={() => {
+                  updateTempFilter('showArtistsOnly', false);
+                  updateTempFilter('showOrganizationsOnly', false);
+                }}
+                className="text-sm"
+              >
+                All Types {(!tempFilters.showArtistsOnly && !tempFilters.showOrganizationsOnly) && '✓'}
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                onClick={() => {
+                  updateTempFilter('showArtistsOnly', true);
+                  updateTempFilter('showOrganizationsOnly', false);
+                }}
+                className="text-sm"
+              >
+                Artists Only {tempFilters.showArtistsOnly && '✓'}
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                onClick={() => {
+                  updateTempFilter('showOrganizationsOnly', true);
+                  updateTempFilter('showArtistsOnly', false);
+                }}
+                className="text-sm"
+              >
+                Organizations Only {tempFilters.showOrganizationsOnly && '✓'}
+              </DropdownMenuItem>
+            </div>
+          )}
+        </div>
         
         <DropdownMenuSeparator />
         
-        {/* Filter by Artform - Multiple Selection */}
-        <DropdownMenuSub>
-          <DropdownMenuSubTrigger className="flex items-center justify-between">
+        {/* Filter by Artform */}
+        <div>
+          <DropdownMenuItem 
+            onClick={() => toggleSection('artform')}
+            className="flex items-center justify-between cursor-pointer"
+          >
             <span>Filter by Artform</span>
-            <span className="ml-auto text-xs text-muted-foreground">
-              {tempFilters.artformFilter ? tempFilters.artformFilter : 'All Artforms'}
-            </span>
-            <ChevronRight className="h-4 w-4" />
-          </DropdownMenuSubTrigger>
-          <DropdownMenuSubContent className="w-48">
-            <DropdownMenuLabel className="flex items-center justify-between">
-              Select Artforms
-              {tempFilters.artformFilter && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={clearTempArtformFilter}
-                  className="h-6 px-2 text-xs"
-                >
-                  <X className="h-3 w-3" />
-                </Button>
-              )}
-            </DropdownMenuLabel>
-            <div className="max-h-40 overflow-y-auto">
-              <DropdownMenuCheckboxItem
-                checked={!tempFilters.artformFilter}
-                onCheckedChange={(checked) => {
-                  if (checked) updateTempFilter('artformFilter', undefined);
-                }}
-              >
-                All Artforms
-              </DropdownMenuCheckboxItem>
-              <DropdownMenuSeparator />
-              {artforms.map((artform) => (
-                <DropdownMenuCheckboxItem
-                  key={artform}
-                  checked={tempFilters.artformFilter === artform}
-                  onCheckedChange={(checked) => {
-                    updateTempFilter('artformFilter', checked ? artform : undefined);
-                  }}
-                  className="capitalize"
-                >
-                  {artform}
-                </DropdownMenuCheckboxItem>
-              ))}
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground">
+                {tempFilters.artformFilter ? tempFilters.artformFilter : 'All Artforms'}
+              </span>
+              <ChevronDown className={`h-4 w-4 transition-transform ${expandedSections.artform ? 'rotate-180' : ''}`} />
             </div>
-          </DropdownMenuSubContent>
-        </DropdownMenuSub>
+          </DropdownMenuItem>
+          
+          {expandedSections.artform && (
+            <div className="ml-4 border-l border-border pl-2 space-y-1">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium">Select Artforms</span>
+                {tempFilters.artformFilter && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={clearTempArtformFilter}
+                    className="h-6 px-2 text-xs"
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                )}
+              </div>
+              <div className="max-h-40 overflow-y-auto space-y-1">
+                <DropdownMenuCheckboxItem
+                  checked={!tempFilters.artformFilter}
+                  onCheckedChange={(checked) => {
+                    if (checked) updateTempFilter('artformFilter', undefined);
+                  }}
+                  className="text-sm"
+                >
+                  All Artforms
+                </DropdownMenuCheckboxItem>
+                {artforms.map((artform) => (
+                  <DropdownMenuCheckboxItem
+                    key={artform}
+                    checked={tempFilters.artformFilter === artform}
+                    onCheckedChange={(checked) => {
+                      updateTempFilter('artformFilter', checked ? artform : undefined);
+                    }}
+                    className="capitalize text-sm"
+                  >
+                    {artform}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
         
         <DropdownMenuSeparator />
         
         {/* Sort By */}
-        <DropdownMenuSub>
-          <DropdownMenuSubTrigger className="flex items-center justify-between">
+        <div>
+          <DropdownMenuItem 
+            onClick={() => toggleSection('sort')}
+            className="flex items-center justify-between cursor-pointer"
+          >
             <span>Sort By</span>
-            <span className="ml-auto text-xs text-muted-foreground capitalize">
-              {tempFilters.sortBy === 'alphabetical-az' ? 'A-Z' :
-               tempFilters.sortBy === 'alphabetical-za' ? 'Z-A' :
-               tempFilters.sortBy === 'most-popular' ? 'Most Popular' :
-               'Newest'}
-            </span>
-            <ChevronRight className="h-4 w-4" />
-          </DropdownMenuSubTrigger>
-          <DropdownMenuSubContent>
-            <DropdownMenuItem onClick={() => updateTempFilter('sortBy', 'newest')}>
-              Newest {tempFilters.sortBy === 'newest' && '✓'}
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => updateTempFilter('sortBy', 'alphabetical-az')}>
-              A-Z {tempFilters.sortBy === 'alphabetical-az' && '✓'}
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => updateTempFilter('sortBy', 'alphabetical-za')}>
-              Z-A {tempFilters.sortBy === 'alphabetical-za' && '✓'}
-            </DropdownMenuItem>
-            {showPopularitySort && (
-              <DropdownMenuItem onClick={() => updateTempFilter('sortBy', 'most-popular')}>
-                Most Popular {tempFilters.sortBy === 'most-popular' && '✓'}
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground">
+                {tempFilters.sortBy === 'alphabetical-az' ? 'A-Z' :
+                 tempFilters.sortBy === 'alphabetical-za' ? 'Z-A' :
+                 tempFilters.sortBy === 'most-popular' ? 'Most Popular' :
+                 'Newest'}
+              </span>
+              <ChevronDown className={`h-4 w-4 transition-transform ${expandedSections.sort ? 'rotate-180' : ''}`} />
+            </div>
+          </DropdownMenuItem>
+          
+          {expandedSections.sort && (
+            <div className="ml-4 border-l border-border pl-2 space-y-1">
+              <DropdownMenuItem 
+                onClick={() => updateTempFilter('sortBy', 'newest')}
+                className="text-sm"
+              >
+                Newest {tempFilters.sortBy === 'newest' && '✓'}
               </DropdownMenuItem>
-            )}
-          </DropdownMenuSubContent>
-        </DropdownMenuSub>
+              <DropdownMenuItem 
+                onClick={() => updateTempFilter('sortBy', 'alphabetical-az')}
+                className="text-sm"
+              >
+                A-Z {tempFilters.sortBy === 'alphabetical-az' && '✓'}
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                onClick={() => updateTempFilter('sortBy', 'alphabetical-za')}
+                className="text-sm"
+              >
+                Z-A {tempFilters.sortBy === 'alphabetical-za' && '✓'}
+              </DropdownMenuItem>
+              {showPopularitySort && (
+                <DropdownMenuItem 
+                  onClick={() => updateTempFilter('sortBy', 'most-popular')}
+                  className="text-sm"
+                >
+                  Most Popular {tempFilters.sortBy === 'most-popular' && '✓'}
+                </DropdownMenuItem>
+              )}
+            </div>
+          )}
+        </div>
         
         <DropdownMenuSeparator />
         
