@@ -8,8 +8,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
   DropdownMenuCheckboxItem,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Filter, ChevronDown, X } from "lucide-react";
+import { Filter, ChevronDown, ChevronRight, X } from "lucide-react";
 
 export interface FilterOptions {
   showArtistsOnly: boolean;
@@ -102,68 +105,123 @@ export function FilterDropdown({ filters, onFiltersChange, showPopularitySort = 
           <ChevronDown className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56 max-h-[400px] overflow-y-auto">
-        <DropdownMenuLabel>Filter by Type</DropdownMenuLabel>
-        <DropdownMenuCheckboxItem
-          checked={tempFilters.showArtistsOnly}
-          onCheckedChange={(checked) => updateTempFilter('showArtistsOnly', checked)}
-        >
-          Artists Only
-        </DropdownMenuCheckboxItem>
-        <DropdownMenuCheckboxItem
-          checked={tempFilters.showOrganizationsOnly}
-          onCheckedChange={(checked) => updateTempFilter('showOrganizationsOnly', checked)}
-        >
-          Organizations Only
-        </DropdownMenuCheckboxItem>
+      <DropdownMenuContent align="end" className="w-64 max-h-[400px] overflow-y-auto">
+        
+        {/* Filter by Type */}
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger className="flex items-center justify-between">
+            <span>Filter by Type</span>
+            <span className="ml-auto text-xs text-muted-foreground">
+              {tempFilters.showArtistsOnly ? 'Artists Only' : 
+               tempFilters.showOrganizationsOnly ? 'Organizations Only' : 
+               'All Types'}
+            </span>
+            <ChevronRight className="h-4 w-4" />
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent>
+            <DropdownMenuItem onClick={() => {
+              updateTempFilter('showArtistsOnly', false);
+              updateTempFilter('showOrganizationsOnly', false);
+            }}>
+              All Types {(!tempFilters.showArtistsOnly && !tempFilters.showOrganizationsOnly) && '✓'}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => {
+              updateTempFilter('showArtistsOnly', true);
+              updateTempFilter('showOrganizationsOnly', false);
+            }}>
+              Artists Only {tempFilters.showArtistsOnly && '✓'}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => {
+              updateTempFilter('showOrganizationsOnly', true);
+              updateTempFilter('showArtistsOnly', false);
+            }}>
+              Organizations Only {tempFilters.showOrganizationsOnly && '✓'}
+            </DropdownMenuItem>
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
         
         <DropdownMenuSeparator />
         
-        <DropdownMenuLabel className="flex items-center justify-between">
-          Filter by Artform
-          {tempFilters.artformFilter && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={clearTempArtformFilter}
-              className="h-6 px-2 text-xs"
-            >
-              <X className="h-3 w-3" />
-            </Button>
-          )}
-        </DropdownMenuLabel>
-        <div className="max-h-32 overflow-y-auto">
-          {artforms.map((artform) => (
-            <DropdownMenuCheckboxItem
-              key={artform}
-              checked={tempFilters.artformFilter === artform}
-              onCheckedChange={(checked) => {
-                updateTempFilter('artformFilter', checked ? artform : undefined);
-              }}
-              className="capitalize"
-            >
-              {artform}
-            </DropdownMenuCheckboxItem>
-          ))}
-        </div>
+        {/* Filter by Artform - Multiple Selection */}
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger className="flex items-center justify-between">
+            <span>Filter by Artform</span>
+            <span className="ml-auto text-xs text-muted-foreground">
+              {tempFilters.artformFilter ? tempFilters.artformFilter : 'All Artforms'}
+            </span>
+            <ChevronRight className="h-4 w-4" />
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent className="w-48">
+            <DropdownMenuLabel className="flex items-center justify-between">
+              Select Artforms
+              {tempFilters.artformFilter && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={clearTempArtformFilter}
+                  className="h-6 px-2 text-xs"
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              )}
+            </DropdownMenuLabel>
+            <div className="max-h-40 overflow-y-auto">
+              <DropdownMenuCheckboxItem
+                checked={!tempFilters.artformFilter}
+                onCheckedChange={(checked) => {
+                  if (checked) updateTempFilter('artformFilter', undefined);
+                }}
+              >
+                All Artforms
+              </DropdownMenuCheckboxItem>
+              <DropdownMenuSeparator />
+              {artforms.map((artform) => (
+                <DropdownMenuCheckboxItem
+                  key={artform}
+                  checked={tempFilters.artformFilter === artform}
+                  onCheckedChange={(checked) => {
+                    updateTempFilter('artformFilter', checked ? artform : undefined);
+                  }}
+                  className="capitalize"
+                >
+                  {artform}
+                </DropdownMenuCheckboxItem>
+              ))}
+            </div>
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
         
         <DropdownMenuSeparator />
         
-        <DropdownMenuLabel>Sort By</DropdownMenuLabel>
-        <DropdownMenuItem onClick={() => updateTempFilter('sortBy', 'newest')}>
-          Newest {tempFilters.sortBy === 'newest' && '✓'}
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => updateTempFilter('sortBy', 'alphabetical-az')}>
-          A-Z {tempFilters.sortBy === 'alphabetical-az' && '✓'}
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => updateTempFilter('sortBy', 'alphabetical-za')}>
-          Z-A {tempFilters.sortBy === 'alphabetical-za' && '✓'}
-        </DropdownMenuItem>
-        {showPopularitySort && (
-          <DropdownMenuItem onClick={() => updateTempFilter('sortBy', 'most-popular')}>
-            Most Popular {tempFilters.sortBy === 'most-popular' && '✓'}
-          </DropdownMenuItem>
-        )}
+        {/* Sort By */}
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger className="flex items-center justify-between">
+            <span>Sort By</span>
+            <span className="ml-auto text-xs text-muted-foreground capitalize">
+              {tempFilters.sortBy === 'alphabetical-az' ? 'A-Z' :
+               tempFilters.sortBy === 'alphabetical-za' ? 'Z-A' :
+               tempFilters.sortBy === 'most-popular' ? 'Most Popular' :
+               'Newest'}
+            </span>
+            <ChevronRight className="h-4 w-4" />
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent>
+            <DropdownMenuItem onClick={() => updateTempFilter('sortBy', 'newest')}>
+              Newest {tempFilters.sortBy === 'newest' && '✓'}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => updateTempFilter('sortBy', 'alphabetical-az')}>
+              A-Z {tempFilters.sortBy === 'alphabetical-az' && '✓'}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => updateTempFilter('sortBy', 'alphabetical-za')}>
+              Z-A {tempFilters.sortBy === 'alphabetical-za' && '✓'}
+            </DropdownMenuItem>
+            {showPopularitySort && (
+              <DropdownMenuItem onClick={() => updateTempFilter('sortBy', 'most-popular')}>
+                Most Popular {tempFilters.sortBy === 'most-popular' && '✓'}
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
         
         <DropdownMenuSeparator />
         
