@@ -29,29 +29,37 @@ export const useConnections = (userId?: string, type: 'following' | 'followers' 
         .from('connections')
         .select(`
           *,
-          following:following_id!inner (
+          following:profiles!connections_following_id_fkey (
             id,
+            user_id,
             username,
             display_name,
             avatar_url,
             bio,
             location,
-            role
+            role,
+            artform,
+            organization_type,
+            created_at
           ),
-          follower:follower_id!inner (
+          follower:profiles!connections_follower_id_fkey (
             id,
+            user_id,
             username,
             display_name,
             avatar_url,
             bio,
             location,
-            role
+            role,
+            artform,
+            organization_type,
+            created_at
           )
         `)
         .eq(isFollowing ? 'follower_id' : 'following_id', userId);
 
       if (error) throw error;
-      return data as any;
+      return data || [];
     },
     enabled: !!userId
   });

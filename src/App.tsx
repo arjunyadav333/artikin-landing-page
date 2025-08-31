@@ -14,6 +14,7 @@ const Home = lazy(() => import("./pages/Home"));
 const Opportunities = lazy(() => import("./pages/Opportunities"));
 const Create = lazy(() => import("./pages/Create"));
 const Connections = lazy(() => import("./pages/Connections"));
+const DiscoverPeople = lazy(() => import("./pages/DiscoverPeople"));
 const UserProfile = lazy(() => import("./pages/UserProfile"));
 const Messages = lazy(() => import("./pages/Messages"));
 const Auth = lazy(() => import("./pages/Auth"));
@@ -138,6 +139,15 @@ const AppRoutes = () => {
             <AppLayout>
               <Suspense fallback={<PageLoader />}>
                 <Connections />
+              </Suspense>
+            </AppLayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/connections/discover" element={
+          <ProtectedRoute>
+            <AppLayout>
+              <Suspense fallback={<PageLoader />}>
+                <DiscoverPeople />
               </Suspense>
             </AppLayout>
           </ProtectedRoute>
