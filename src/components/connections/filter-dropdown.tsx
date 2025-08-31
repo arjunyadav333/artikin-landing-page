@@ -121,33 +121,33 @@ export function FilterDropdown({ filters, onFiltersChange, showPopularitySort = 
           <ChevronDown className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-64 max-h-[500px] overflow-y-auto">
+      <DropdownMenuContent align="end" className="w-full sm:w-80 max-w-[calc(100vw-2rem)] max-h-[70vh] overflow-y-auto">
         
         {/* Filter by Type */}
         <div>
           <DropdownMenuItem 
             onClick={() => toggleSection('type')}
-            className="flex items-center justify-between cursor-pointer"
+            className="flex items-center justify-between cursor-pointer py-3 sm:py-2"
           >
-            <span>Filter by Type</span>
+            <span className="text-base sm:text-sm font-medium">Filter by Type</span>
             <div className="flex items-center gap-2">
-              <span className="text-xs text-muted-foreground">
+              <span className="text-sm sm:text-xs text-muted-foreground hidden sm:inline">
                 {tempFilters.showArtistsOnly ? 'Artists Only' : 
                  tempFilters.showOrganizationsOnly ? 'Organizations Only' : 
                  'All Types'}
               </span>
-              <ChevronDown className={`h-4 w-4 transition-transform ${expandedSections.type ? 'rotate-180' : ''}`} />
+              <ChevronDown className={`h-5 w-5 sm:h-4 sm:w-4 transition-transform ${expandedSections.type ? 'rotate-180' : ''}`} />
             </div>
           </DropdownMenuItem>
           
           {expandedSections.type && (
-            <div className="ml-4 border-l border-border pl-2 space-y-1">
+            <div className="ml-4 border-l border-border pl-3 sm:pl-2 space-y-1">
               <DropdownMenuItem 
                 onClick={() => {
                   updateTempFilter('showArtistsOnly', false);
                   updateTempFilter('showOrganizationsOnly', false);
                 }}
-                className="text-sm"
+                className="text-base sm:text-sm py-3 sm:py-1.5"
               >
                 All Types {(!tempFilters.showArtistsOnly && !tempFilters.showOrganizationsOnly) && '✓'}
               </DropdownMenuItem>
@@ -156,7 +156,7 @@ export function FilterDropdown({ filters, onFiltersChange, showPopularitySort = 
                   updateTempFilter('showArtistsOnly', true);
                   updateTempFilter('showOrganizationsOnly', false);
                 }}
-                className="text-sm"
+                className="text-base sm:text-sm py-3 sm:py-1.5"
               >
                 Artists Only {tempFilters.showArtistsOnly && '✓'}
               </DropdownMenuItem>
@@ -165,7 +165,7 @@ export function FilterDropdown({ filters, onFiltersChange, showPopularitySort = 
                   updateTempFilter('showOrganizationsOnly', true);
                   updateTempFilter('showArtistsOnly', false);
                 }}
-                className="text-sm"
+                className="text-base sm:text-sm py-3 sm:py-1.5"
               >
                 Organizations Only {tempFilters.showOrganizationsOnly && '✓'}
               </DropdownMenuItem>
@@ -179,39 +179,39 @@ export function FilterDropdown({ filters, onFiltersChange, showPopularitySort = 
         <div>
           <DropdownMenuItem 
             onClick={() => toggleSection('artform')}
-            className="flex items-center justify-between cursor-pointer"
+            className="flex items-center justify-between cursor-pointer py-3 sm:py-2"
           >
-            <span>Filter by Artform</span>
+            <span className="text-base sm:text-sm font-medium">Filter by Artform</span>
             <div className="flex items-center gap-2">
-              <span className="text-xs text-muted-foreground">
+              <span className="text-sm sm:text-xs text-muted-foreground hidden sm:inline truncate max-w-20">
                 {tempFilters.artformFilter ? tempFilters.artformFilter : 'All Artforms'}
               </span>
-              <ChevronDown className={`h-4 w-4 transition-transform ${expandedSections.artform ? 'rotate-180' : ''}`} />
+              <ChevronDown className={`h-5 w-5 sm:h-4 sm:w-4 transition-transform ${expandedSections.artform ? 'rotate-180' : ''}`} />
             </div>
           </DropdownMenuItem>
           
           {expandedSections.artform && (
-            <div className="ml-4 border-l border-border pl-2 space-y-1">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium">Select Artforms</span>
+            <div className="ml-4 border-l border-border pl-3 sm:pl-2 space-y-1">
+              <div className="flex items-center justify-between mb-3 sm:mb-2">
+                <span className="text-base sm:text-sm font-medium">Select Artforms</span>
                 {tempFilters.artformFilter && (
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={clearTempArtformFilter}
-                    className="h-6 px-2 text-xs"
+                    className="h-8 w-8 sm:h-6 sm:w-6 p-0"
                   >
-                    <X className="h-3 w-3" />
+                    <X className="h-4 w-4 sm:h-3 sm:w-3" />
                   </Button>
                 )}
               </div>
-              <div className="max-h-40 overflow-y-auto space-y-1">
+              <div className="max-h-48 sm:max-h-40 overflow-y-auto space-y-1">
                 <DropdownMenuCheckboxItem
                   checked={!tempFilters.artformFilter}
                   onCheckedChange={(checked) => {
                     if (checked) updateTempFilter('artformFilter', undefined);
                   }}
-                  className="text-sm"
+                  className="text-base sm:text-sm py-3 sm:py-1.5"
                 >
                   All Artforms
                 </DropdownMenuCheckboxItem>
@@ -222,7 +222,7 @@ export function FilterDropdown({ filters, onFiltersChange, showPopularitySort = 
                     onCheckedChange={(checked) => {
                       updateTempFilter('artformFilter', checked ? artform : undefined);
                     }}
-                    className="capitalize text-sm"
+                    className="capitalize text-base sm:text-sm py-3 sm:py-1.5"
                   >
                     {artform}
                   </DropdownMenuCheckboxItem>
@@ -238,44 +238,44 @@ export function FilterDropdown({ filters, onFiltersChange, showPopularitySort = 
         <div>
           <DropdownMenuItem 
             onClick={() => toggleSection('sort')}
-            className="flex items-center justify-between cursor-pointer"
+            className="flex items-center justify-between cursor-pointer py-3 sm:py-2"
           >
-            <span>Sort By</span>
+            <span className="text-base sm:text-sm font-medium">Sort By</span>
             <div className="flex items-center gap-2">
-              <span className="text-xs text-muted-foreground">
+              <span className="text-sm sm:text-xs text-muted-foreground hidden sm:inline">
                 {tempFilters.sortBy === 'alphabetical-az' ? 'A-Z' :
                  tempFilters.sortBy === 'alphabetical-za' ? 'Z-A' :
                  tempFilters.sortBy === 'most-popular' ? 'Most Popular' :
                  'Newest'}
               </span>
-              <ChevronDown className={`h-4 w-4 transition-transform ${expandedSections.sort ? 'rotate-180' : ''}`} />
+              <ChevronDown className={`h-5 w-5 sm:h-4 sm:w-4 transition-transform ${expandedSections.sort ? 'rotate-180' : ''}`} />
             </div>
           </DropdownMenuItem>
           
           {expandedSections.sort && (
-            <div className="ml-4 border-l border-border pl-2 space-y-1">
+            <div className="ml-4 border-l border-border pl-3 sm:pl-2 space-y-1">
               <DropdownMenuItem 
                 onClick={() => updateTempFilter('sortBy', 'newest')}
-                className="text-sm"
+                className="text-base sm:text-sm py-3 sm:py-1.5"
               >
                 Newest {tempFilters.sortBy === 'newest' && '✓'}
               </DropdownMenuItem>
               <DropdownMenuItem 
                 onClick={() => updateTempFilter('sortBy', 'alphabetical-az')}
-                className="text-sm"
+                className="text-base sm:text-sm py-3 sm:py-1.5"
               >
                 A-Z {tempFilters.sortBy === 'alphabetical-az' && '✓'}
               </DropdownMenuItem>
               <DropdownMenuItem 
                 onClick={() => updateTempFilter('sortBy', 'alphabetical-za')}
-                className="text-sm"
+                className="text-base sm:text-sm py-3 sm:py-1.5"
               >
                 Z-A {tempFilters.sortBy === 'alphabetical-za' && '✓'}
               </DropdownMenuItem>
               {showPopularitySort && (
                 <DropdownMenuItem 
                   onClick={() => updateTempFilter('sortBy', 'most-popular')}
-                  className="text-sm"
+                  className="text-base sm:text-sm py-3 sm:py-1.5"
                 >
                   Most Popular {tempFilters.sortBy === 'most-popular' && '✓'}
                 </DropdownMenuItem>
@@ -287,12 +287,12 @@ export function FilterDropdown({ filters, onFiltersChange, showPopularitySort = 
         <DropdownMenuSeparator />
         
         {/* Action Buttons */}
-        <div className="p-2 space-y-2">
+        <div className="p-3 sm:p-2 space-y-3 sm:space-y-2 border-t">
           <Button
             variant="outline"
             size="sm"
             onClick={handleClearAll}
-            className="w-full justify-center text-xs"
+            className="w-full justify-center text-base sm:text-xs py-3 sm:py-2"
           >
             Clear All
           </Button>
@@ -301,14 +301,14 @@ export function FilterDropdown({ filters, onFiltersChange, showPopularitySort = 
               variant="outline"
               size="sm"
               onClick={handleCancel}
-              className="flex-1 text-xs"
+              className="flex-1 text-base sm:text-xs py-3 sm:py-2"
             >
               Cancel
             </Button>
             <Button
               size="sm"
               onClick={handleApply}
-              className="flex-1 text-xs"
+              className="flex-1 text-base sm:text-xs py-3 sm:py-2"
             >
               Apply
             </Button>
