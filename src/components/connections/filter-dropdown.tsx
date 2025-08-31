@@ -73,7 +73,7 @@ export function FilterDropdown({ filters, onFiltersChange, showPopularitySort = 
           <ChevronDown className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56">
+      <DropdownMenuContent align="end" className="w-56 max-h-[400px] overflow-y-auto">
         <DropdownMenuLabel>Filter by Type</DropdownMenuLabel>
         <DropdownMenuCheckboxItem
           checked={filters.showArtistsOnly}
