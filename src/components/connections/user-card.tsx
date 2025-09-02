@@ -149,7 +149,7 @@ export function UserCard({
               variant={followButtonState.variant}
               onClick={handleFollow}
               disabled={followUser.isPending}
-              className={followButtonState.variant === 'default' ? 'bg-[#007bff] hover:bg-[#007bff]/90 text-white' : ''}
+              className={followButtonState.variant === 'default' ? 'bg-connection hover:bg-connection/90 text-white border-0' : ''}
             >
               <followButtonState.icon className="h-4 w-4 mr-1" />
               {followButtonState.text}
