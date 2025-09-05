@@ -212,21 +212,66 @@ export const useFollowUser = () => {
       // Cancel outgoing queries
       await queryClient.cancelQueries({ queryKey: ['connections'] });
       await queryClient.cancelQueries({ queryKey: ['connectionStatus'] });
+      await queryClient.cancelQueries({ queryKey: ['posts'] });
+      await queryClient.cancelQueries({ queryKey: ['homeFeed'] });
 
       // Get previous values
-      const previousData = queryClient.getQueryData(['connectionStatus', targetUserId]);
+      const previousConnectionStatus = queryClient.getQueryData(['connectionStatus', targetUserId]);
+      const previousPosts = queryClient.getQueryData(['posts']);
+      const previousHomeFeed = queryClient.getQueryData(['homeFeed']);
       
       // Optimistically update connection status
       queryClient.setQueryData(['connectionStatus', targetUserId], {
         isFollowing: !isCurrentlyFollowing,
-        isFollowedBy: previousData ? (previousData as any).isFollowedBy : false
+        isFollowedBy: previousConnectionStatus ? (previousConnectionStatus as any).isFollowedBy : false
       });
 
-      return { previousData };
+      // Optimistically update posts data
+      queryClient.setQueriesData({ queryKey: ['posts'] }, (oldData: any) => {
+        if (!oldData?.pages) return oldData;
+        
+        return {
+          ...oldData,
+          pages: oldData.pages.map((page: any) => ({
+            ...page,
+            posts: page.posts?.map((post: any) => 
+              post.user_id === targetUserId 
+                ? { ...post, is_following: !isCurrentlyFollowing }
+                : post
+            ) || []
+          }))
+        };
+      });
+
+      // Optimistically update home feed data
+      queryClient.setQueriesData({ queryKey: ['homeFeed'] }, (oldData: any) => {
+        if (!oldData?.pages) return oldData;
+        
+        return {
+          ...oldData,
+          pages: oldData.pages.map((page: any) => ({
+            ...page,
+            posts: page.posts?.map((post: any) => 
+              post.user_id === targetUserId 
+                ? { ...post, is_following: !isCurrentlyFollowing }
+                : post
+            ) || []
+          }))
+        };
+      });
+
+      return { 
+        previousConnectionStatus, 
+        previousPosts, 
+        previousHomeFeed,
+        targetUserId 
+      };
     },
     onSuccess: (_, { isCurrentlyFollowing }) => {
       queryClient.invalidateQueries({ queryKey: ['connections'] });
       queryClient.invalidateQueries({ queryKey: ['connectionStatus'] });
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
+      queryClient.invalidateQueries({ queryKey: ['homeFeed'] });
       
       toast({
         title: isCurrentlyFollowing ? "Unfollowed" : "Following",
@@ -236,9 +281,17 @@ export const useFollowUser = () => {
       });
     },
     onError: (error: any, variables, context) => {
-      // Rollback optimistic update
-      if (context?.previousData) {
-        queryClient.setQueryData(['connectionStatus', variables.targetUserId], context.previousData);
+      // Rollback optimistic updates
+      if (context?.previousConnectionStatus) {
+        queryClient.setQueryData(['connectionStatus', variables.targetUserId], context.previousConnectionStatus);
+      }
+      
+      if (context?.previousPosts) {
+        queryClient.setQueryData(['posts'], context.previousPosts);
+      }
+      
+      if (context?.previousHomeFeed) {
+        queryClient.setQueryData(['homeFeed'], context.previousHomeFeed);
       }
       
       toast({
