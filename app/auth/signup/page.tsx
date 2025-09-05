@@ -29,66 +29,68 @@ export default function SignUpPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-background to-accent/10 flex items-center justify-center p-4 overflow-hidden">
-      <div className="w-full max-w-2xl overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center p-4">
+      <div className="w-full max-w-2xl">
         {/* Logo and Brand */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center space-x-3 group">
-            <div className="h-16 w-16 rounded-2xl bg-gradient-blue flex items-center justify-center shadow-blue-glow group-hover:shadow-blue-glow-lg transition-all duration-300 group-hover:scale-105">
+            <div className="h-16 w-16 rounded-2xl bg-primary flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
               <span className="text-primary-foreground font-bold text-2xl">A</span>
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-gradient-blue">Artikin</h1>
+              <h1 className="text-3xl font-bold text-foreground">Artikin</h1>
               <p className="text-sm text-muted-foreground">Creative Network</p>
             </div>
           </Link>
         </div>
 
-        <Card className="card-blue shadow-blue-glow overflow-hidden">
+        <Card className="shadow-2xl border-0 bg-card">
           {!selectedRole ? (
             <>
-              <CardHeader className="text-center space-y-2">
+              <CardHeader className="text-center space-y-2 pb-6">
                 <CardTitle className="text-2xl font-bold text-foreground">
                   Join Artikin
                 </CardTitle>
-                <CardDescription className="text-base">
-                  Choose your role to get started
+                <CardDescription className="text-base text-muted-foreground">
+                  Choose your account type to get started
                 </CardDescription>
               </CardHeader>
 
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <CardContent className="space-y-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Button
                     onClick={() => setSelectedRole('artist')}
                     variant="outline"
-                    className="h-32 flex flex-col items-center justify-center space-y-3 border-2 border-primary/20 hover:border-primary hover:bg-primary/5 transition-all duration-200"
+                    className="h-36 sm:h-32 flex flex-col items-center justify-center space-y-3 border-2 border-input hover:border-primary hover:bg-primary/5 transition-all duration-200 rounded-lg"
                   >
-                    <div className="h-12 w-12 rounded-full bg-gradient-blue flex items-center justify-center">
+                    <div className="h-12 w-12 rounded-full bg-primary flex items-center justify-center">
                       <Palette className="h-6 w-6 text-primary-foreground" />
                     </div>
                     <div className="text-center">
-                      <h3 className="font-semibold text-lg">Artist</h3>
+                      <h3 className="font-semibold text-lg text-foreground">Artist</h3>
+                      <p className="text-sm text-muted-foreground">Showcase your creativity</p>
                     </div>
                   </Button>
 
                   <Button
                     onClick={() => setSelectedRole('organization')}
                     variant="outline"
-                    className="h-32 flex flex-col items-center justify-center space-y-3 border-2 border-primary/20 hover:border-primary hover:bg-primary/5 transition-all duration-200"
+                    className="h-36 sm:h-32 flex flex-col items-center justify-center space-y-3 border-2 border-input hover:border-primary hover:bg-primary/5 transition-all duration-200 rounded-lg"
                   >
-                    <div className="h-12 w-12 rounded-full bg-gradient-blue flex items-center justify-center">
+                    <div className="h-12 w-12 rounded-full bg-primary flex items-center justify-center">
                       <Building2 className="h-6 w-6 text-primary-foreground" />
                     </div>
                     <div className="text-center">
-                      <h3 className="font-semibold text-lg">Organization</h3>
+                      <h3 className="font-semibold text-lg text-foreground">Organization</h3>
+                      <p className="text-sm text-muted-foreground">Find creative talent</p>
                     </div>
                   </Button>
                 </div>
 
-                <div className="text-center mt-6 pt-4 border-t border-border">
+                <div className="text-center pt-4 border-t border-border">
                   <p className="text-sm text-muted-foreground">
                     Already have an account?{' '}
-                    <Link href="/auth" className="text-primary hover:text-primary/80 font-medium">
+                    <Link href="/auth" className="text-primary hover:text-primary/80 font-medium transition-colors">
                       Sign In
                     </Link>
                   </p>
@@ -97,20 +99,23 @@ export default function SignUpPage() {
             </>
           ) : (
             <>
-              <CardHeader className="text-center space-y-2">
-                <div className="flex items-center justify-center space-x-2 mb-2">
+              <CardHeader className="text-center space-y-2 pb-6">
+                <div className="flex items-center justify-center mb-4">
                   <Button
                     onClick={() => setSelectedRole(null)}
                     variant="ghost"
                     size="sm"
-                    className="text-muted-foreground hover:text-foreground"
+                    className="text-muted-foreground hover:text-foreground transition-colors"
                   >
-                    ← Back
+                    ← Back to role selection
                   </Button>
                 </div>
                 <CardTitle className="text-2xl font-bold text-foreground">
                   {selectedRole === 'artist' ? 'Artist Registration' : 'Organization Registration'}
                 </CardTitle>
+                <CardDescription className="text-base text-muted-foreground">
+                  Complete your profile to get started
+                </CardDescription>
               </CardHeader>
 
               <CardContent>

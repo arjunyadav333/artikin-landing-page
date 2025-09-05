@@ -91,7 +91,7 @@ export function ArtistSignupForm() {
       return false
     }
 
-    if (formData.password.length < 6) {
+    if (formData.password.length < 8) {
       return false
     }
 
@@ -150,7 +150,7 @@ export function ArtistSignupForm() {
               placeholder="Your full name"
               value={formData.fullName}
               onChange={handleInputChange}
-              className="pl-10 h-11 border-primary/20 focus:border-primary focus:ring-primary"
+              className="pl-10 h-11 rounded-lg border-input focus:border-primary focus:ring-primary"
               required
             />
           </div>
@@ -211,7 +211,7 @@ export function ArtistSignupForm() {
             value={formData.password}
             onChange={handleInputChange}
             className="pl-10 pr-10 h-11 border-primary/20 focus:border-primary focus:ring-primary"
-            minLength={6}
+            minLength={8}
             required
           />
           <Button
@@ -303,10 +303,10 @@ export function ArtistSignupForm() {
 
       <Button 
         type="submit" 
-        className="w-full h-12 text-base shadow-blue hover:shadow-blue-lg mt-6" 
+        className="w-full h-12 text-base font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 mt-6" 
         disabled={isLoading || !validateForm()}
       >
-        {isLoading ? 'Creating Account...' : 'Sign Up as Artist'}
+        {isLoading ? 'Creating Account...' : 'Create Artist Account'}
       </Button>
     </form>
   )
