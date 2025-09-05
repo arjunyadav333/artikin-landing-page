@@ -24,6 +24,9 @@ export interface Profile {
   stats?: Record<string, any>;
   pronouns?: string;
   contact_email?: string;
+  privacy?: 'public' | 'private';
+  is_following?: boolean;
+  can_view_full?: boolean;
   created_at: string;
   updated_at: string;
 }
