@@ -68,12 +68,12 @@ export default function UserProfile() {
     
     try {
       const { data, error } = await supabase.functions.invoke('create-or-get-conversation', {
-        body: { user1_id: user.id, user2_id: targetUserId }
+        body: { otherUserId: targetUserId }
       });
       
       if (error) throw error;
       
-      navigate(`/messages?conversation=${data.conversation_id}`);
+      navigate(`/messages/${data.conversationId}`);
     } catch (error) {
       console.error('Failed to create conversation:', error);
     }
