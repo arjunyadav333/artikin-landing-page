@@ -9,19 +9,17 @@ import { useAuth } from "@/hooks/useAuth";
 import { 
   useMessages, 
   useRealtimeMessages, 
+  useTypingIndicator, 
   useMarkMessagesAsRead,
   useConversations
 } from "@/hooks/useMessaging";
 import { useFastMessaging } from "@/hooks/useFastMessaging";
 import { useVisualViewport } from "@/hooks/useVisualViewport";
-import { useTypingIndicator } from "@/hooks/useTypingIndicator";
 import { ConversationActions } from "@/components/messaging/ConversationActions";
 import { MessageItem } from "@/components/messaging/MessageItem";
 import { MessageListSkeleton } from "@/components/ui/message-skeleton";
-import { TypingIndicator } from "@/components/messaging/TypingIndicator";
 import { FileUpload } from "@/components/messaging/file-upload";
 import { useDraftMessage } from "@/hooks/useDraftMessage";
-import { realtimeManager } from "@/lib/RealtimeManager";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { cn } from "@/lib/utils";
 
@@ -47,7 +45,7 @@ const ConversationPage = () => {
   const { draftText, updateDraft, clearDraft } = useDraftMessage(chatId);
   const { typingUsers, sendTypingStatus } = useTypingIndicator(chatId);
   
-  // Use fast messaging hook for instant send with production optimizations
+  // Use fast messaging hook for instant send
   const { 
     optimisticMessages, 
     sendMessage: fastSendMessage, 
@@ -55,33 +53,15 @@ const ConversationPage = () => {
     deleteMessage 
   } = useFastMessaging(chatId);
   
-  // Enable real-time updates using RealtimeManager
-  useEffect(() => {
-    if (!chatId) return;
-
-    const unsubscribe = realtimeManager.subscribeToConversation(chatId, {
-      onMessageInsert: (message) => {
-        console.log('📨 Real-time message received:', message);
-        // Mark as delivered automatically
-        if (message.sender_id !== user?.id) {
-          realtimeManager.markMessageDelivered(message.id);
-        }
-      },
-      onMessageUpdate: (message) => {
-        console.log('✏️ Real-time message updated:', message);
-      }
-    });
-
-    return unsubscribe;
-  }, [chatId, user?.id]);
+  // Enable real-time updates
+  useRealtimeMessages(chatId);
 
   // Find current conversation
   const conversation = conversations.find(c => c.id === chatId);
 
-  // Auto-scroll to bottom when new messages arrive (INSTANT, no smooth animation)
+  // Auto-scroll to bottom when new messages arrive or keyboard opens/closes
   useEffect(() => {
     const scrollToBottom = () => {
-      // Use instant scroll behavior as per requirements
       messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
     };
     
@@ -89,13 +69,13 @@ const ConversationPage = () => {
     scrollToBottom();
   }, [messages, optimisticMessages]);
 
-  // Handle keyboard visibility changes for mobile
+  // Handle keyboard visibility changes
   useEffect(() => {
     if (viewportInfo.isKeyboardOpen && composerRef.current) {
       // Adjust composer position for keyboard
       composerRef.current.style.bottom = `${viewportInfo.keyboardHeight}px`;
       
-      // Instant scroll to bottom when keyboard opens
+      // Scroll to bottom when keyboard opens
       setTimeout(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
       }, 100);
@@ -114,16 +94,18 @@ const ConversationPage = () => {
     }
   }, [conversation, messages.length]);
 
-  // Mark messages as seen when conversation is opened
+  // Mark messages as read when conversation is opened
   useEffect(() => {
     if (chatId && messages.length > 0) {
       const lastMessage = messages[messages.length - 1];
       if (lastMessage && lastMessage.sender_id !== user?.id) {
-        // Use RealtimeManager for marking messages as seen
-        realtimeManager.markMessagesAsSeen(chatId, lastMessage.id);
+        markAsReadMutation.mutate({
+          conversationId: chatId,
+          messageId: lastMessage.id
+        });
       }
     }
-  }, [chatId, messages, user?.id]);
+  }, [chatId, messages, user?.id, markAsReadMutation]);
 
   const handleSendMessage = async (attachments: Array<{
     file_url: string;
@@ -139,14 +121,13 @@ const ConversationPage = () => {
     
     // Clear draft immediately and wait for it to complete
     await clearDraft();
-    // Stop typing indicator
-    sendTypingStatus(false);
+    sendTypingStatus();
 
     try {
-      // Use fast send for instant UI response with production optimizations
+      // Use fast send for instant UI response
       await fastSendMessage(messageText, 'text');
       
-      // Instant scroll to show new message (no smooth animation)
+      // Auto-scroll to show new message
       setTimeout(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
       }, 50);
@@ -166,17 +147,14 @@ const ConversationPage = () => {
 
   const handleTyping = useCallback((value: string) => {
     updateDraft(value);
-    // Send typing status with debouncing
-    sendTypingStatus(true);
+    sendTypingStatus();
   }, [updateDraft, sendTypingStatus]);
 
-  // Merge server messages and optimistic messages for display (production-ready)
+  // Merge server messages and optimistic messages for display
   const allMessages = [
     ...messages,
     ...optimisticMessages.map(opt => ({
       ...opt,
-      // Use body field for display (optimistic messages use body)
-      body: opt.body,
       sender: user ? {
         user_id: user.id,
         username: user.user_metadata?.username,
@@ -214,16 +192,15 @@ const ConversationPage = () => {
   return (
     <AppLayout>
       <div className="mobile-vh bg-background flex flex-col md:h-auto">
-        {/* Chat Header with Back Button */}
+        {/* Chat Header */}
         <div className="p-4 border-b bg-card">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              {/* Back button visible on mobile and desktop */}
               <Button 
                 variant="ghost" 
                 size="sm" 
                 onClick={() => navigate('/messages')}
-                className="md:flex" // Show on all screen sizes
+                className="lg:hidden"
               >
                 <ArrowLeft className="h-4 w-4" />
               </Button>
@@ -240,14 +217,9 @@ const ConversationPage = () => {
                 <p className="font-semibold">
                   {conversation.other_participant?.display_name || 'Unknown User'}
                 </p>
-                {/* Enhanced typing indicator */}
-                {typingUsers.length > 0 ? (
-                  <TypingIndicator typingUsers={typingUsers} className="text-xs" />
-                ) : (
-                  <p className="text-sm text-muted-foreground">
-                    @{conversation.other_participant?.username || 'unknown'}
-                  </p>
-                )}
+                <p className="text-sm text-muted-foreground">
+                  {typingUsers.length > 0 ? 'typing...' : `@${conversation.other_participant?.username || 'unknown'}`}
+                </p>
               </div>
             </div>
 
@@ -260,7 +232,7 @@ const ConversationPage = () => {
           </div>
         </div>
 
-        {/* Messages with virtualized feed (latest at bottom, instant jumps) */}
+        {/* Messages */}
         <ScrollArea className="flex-1 p-4">
           {messagesLoading ? (
             <MessageListSkeleton count={8} />
@@ -302,13 +274,12 @@ const ConversationPage = () => {
                 );
               })}
               
-              {/* Scroll anchor for instant jumps */}
               <div ref={messagesEndRef} />
             </>
           )}
         </ScrollArea>
 
-        {/* Fixed Composer with mobile keyboard support */}
+        {/* Message Input */}
         <div 
           ref={composerRef}
           className="sticky bottom-0 p-4 border-t bg-card/95 backdrop-blur-sm md:relative md:bg-card md:backdrop-blur-none"
@@ -332,7 +303,6 @@ const ConversationPage = () => {
                 onKeyPress={handleKeyPress}
                 disabled={false}
               />
-              {/* Send button always visible */}
               <Button
                 size="sm"
                 className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0"
