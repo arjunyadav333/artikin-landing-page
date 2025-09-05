@@ -26,6 +26,11 @@ export const useDraftMessage = (conversationId?: string) => {
     [user]
   );
 
+  // Cancel pending saves function
+  const cancelPendingSaves = useCallback(() => {
+    saveDraft.cancel();
+  }, [saveDraft]);
+
   // Load existing draft when conversation changes
   useEffect(() => {
     if (!conversationId || !user) {
@@ -66,19 +71,27 @@ export const useDraftMessage = (conversationId?: string) => {
   }, [conversationId, saveDraft]);
 
   // Clear draft after sending message
-  const clearDraft = useCallback(() => {
+  const clearDraft = useCallback(async () => {
+    // Cancel any pending saves immediately
+    cancelPendingSaves();
+    
+    // Clear local state immediately
     setDraftText("");
+    
+    // Clear database immediately and synchronously
     if (conversationId && user) {
-      supabase
-        .from('conversation_participants')
-        .update({ drafted_text: null })
-        .eq('conversation_id', conversationId)
-        .eq('user_id', user.id)
-        .then(() => {
-          console.log('Draft cleared');
-        });
+      try {
+        await supabase
+          .from('conversation_participants')
+          .update({ drafted_text: null })
+          .eq('conversation_id', conversationId)
+          .eq('user_id', user.id);
+        console.log('Draft cleared');
+      } catch (error) {
+        console.error('Error clearing draft:', error);
+      }
     }
-  }, [conversationId, user]);
+  }, [conversationId, user, cancelPendingSaves]);
 
   return {
     draftText,

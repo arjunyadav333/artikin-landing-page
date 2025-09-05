@@ -118,7 +118,9 @@ const ConversationPage = () => {
     if ((!draftText.trim() && attachments.length === 0) || !chatId || !user) return;
 
     const messageText = draftText.trim();
-    clearDraft();
+    
+    // Clear draft immediately and wait for it to complete
+    await clearDraft();
     sendTypingStatus();
 
     try {

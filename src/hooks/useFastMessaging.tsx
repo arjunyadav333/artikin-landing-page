@@ -40,11 +40,13 @@ export const useFastMessaging = (conversationId: string) => {
           const serverMessage = payload.new as Message;
           console.log('Received server message:', serverMessage);
           
-          // Reconcile with optimistic message
+          // Reconcile with optimistic message - give time for status update first
           if (serverMessage.client_id) {
-            setOptimisticMessages(prev => 
-              prev.filter(msg => msg.client_id !== serverMessage.client_id)
-            );
+            setTimeout(() => {
+              setOptimisticMessages(prev => 
+                prev.filter(msg => msg.client_id !== serverMessage.client_id)
+              );
+            }, 100); // Small delay to allow status updates to complete
           }
           
           // Invalidate queries to refresh UI with server data
