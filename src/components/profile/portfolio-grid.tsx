@@ -1,7 +1,13 @@
-import { Plus, Heart } from "lucide-react";
+import { Plus, Heart, FileText, Image, Video, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
 
 interface PortfolioGridProps {
+  portfolios?: any[];
+  isLoading?: boolean;
   isOwnProfile: boolean;
 }
 
@@ -57,7 +63,53 @@ const portfolioPieces = [
   }
 ];
 
-export function PortfolioGrid({ isOwnProfile }: PortfolioGridProps) {
+export function PortfolioGrid({ portfolios = [], isLoading = false, isOwnProfile }: PortfolioGridProps) {
+  // Use mock data if no portfolios provided
+  const portfolioPieces = portfolios.length > 0 ? portfolios : [
+    {
+      id: 1,
+      title: "Sustainable Fashion App",
+      category: "UI/UX Design",
+      image: "/placeholder.svg",
+      likes: 145,
+      description: "Complete mobile app design for sustainable fashion marketplace"
+    },
+    {
+      id: 2,
+      title: "Urban Landscapes Series",
+      category: "Digital Art",
+      image: "/placeholder.svg",
+      likes: 203,
+      description: "Digital illustration series exploring city moods"
+    },
+    {
+      id: 3,
+      title: "Brand Identity - Tech Startup",
+      category: "Branding",
+      image: "/placeholder.svg",
+      likes: 178,
+      description: "Complete brand identity including logo, colors, and guidelines"
+    }
+  ];
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Card key={i} className="overflow-hidden">
+              <Skeleton className="aspect-[4/3] w-full" />
+              <CardContent className="p-4">
+                <Skeleton className="h-4 w-3/4 mb-2" />
+                <Skeleton className="h-3 w-1/2 mb-2" />
+                <Skeleton className="h-3 w-full" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="space-y-6">
       {/* Add Project Button (Only for own profile) */}

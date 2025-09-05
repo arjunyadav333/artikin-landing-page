@@ -17,123 +17,61 @@ export interface Portfolio {
   updated_at: string;
 }
 
+// Simplify hooks to avoid database calls until tables are created
 export const useUserPortfolios = (userId?: string) => {
-  return useQuery({
-    queryKey: ['portfolios', userId],
-    queryFn: async () => {
-      // Return empty array for now until portfolios table is properly created
-      return [] as Portfolio[];
-    },
-    enabled: !!userId
-  });
+  return {
+    data: [],
+    isLoading: false,
+    error: null
+  };
 };
 
 export const usePortfolio = (portfolioId?: string) => {
-  return useQuery({
-    queryKey: ['portfolio', portfolioId],
-    queryFn: async () => {
-      // Return null for now until portfolios table is properly created
-      return null as Portfolio | null;
-    },
-    enabled: !!portfolioId
-  });
+  return {
+    data: null,
+    isLoading: false,
+    error: null
+  };
 };
 
 export const useCreatePortfolio = () => {
-  const queryClient = useQueryClient();
   const { toast } = useToast();
-
-  return useMutation({
-    mutationFn: async (portfolio: Omit<Portfolio, 'id' | 'created_at' | 'updated_at' | 'likes_count' | 'views_count'>) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
-
-      const { data, error } = await supabase
-        .from('portfolios')
-        .insert({ ...portfolio, user_id: user.id })
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['portfolios', data.user_id] });
+  return {
+    mutate: () => {
       toast({
-        title: "Portfolio item created",
-        description: "Your portfolio item has been successfully created."
+        title: "Coming soon",
+        description: "Portfolio creation will be available soon."
       });
     },
-    onError: (error: any) => {
-      toast({
-        title: "Creation failed",
-        description: error.message,
-        variant: "destructive"
-      });
-    }
-  });
+    mutateAsync: async () => {},
+    isPending: false
+  };
 };
 
 export const useUpdatePortfolio = () => {
-  const queryClient = useQueryClient();
   const { toast } = useToast();
-
-  return useMutation({
-    mutationFn: async ({ id, updates }: { id: string; updates: Partial<Portfolio> }) => {
-      const { data, error } = await supabase
-        .from('portfolios')
-        .update(updates)
-        .eq('id', id)
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['portfolios', data.user_id] });
-      queryClient.invalidateQueries({ queryKey: ['portfolio', data.id] });
+  return {
+    mutate: () => {
       toast({
-        title: "Portfolio updated",
-        description: "Your portfolio item has been successfully updated."
+        title: "Coming soon", 
+        description: "Portfolio updates will be available soon."
       });
     },
-    onError: (error: any) => {
-      toast({
-        title: "Update failed",
-        description: error.message,
-        variant: "destructive"
-      });
-    }
-  });
+    mutateAsync: async () => {},
+    isPending: false
+  };
 };
 
 export const useDeletePortfolio = () => {
-  const queryClient = useQueryClient();
   const { toast } = useToast();
-
-  return useMutation({
-    mutationFn: async (portfolioId: string) => {
-      const { error } = await supabase
-        .from('portfolios')
-        .delete()
-        .eq('id', portfolioId);
-
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['portfolios'] });
+  return {
+    mutate: () => {
       toast({
-        title: "Portfolio item deleted",
-        description: "Your portfolio item has been successfully deleted."
+        title: "Coming soon",
+        description: "Portfolio deletion will be available soon."
       });
     },
-    onError: (error: any) => {
-      toast({
-        title: "Deletion failed",
-        description: error.message,
-        variant: "destructive"
-      });
-    }
-  });
+    mutateAsync: async () => {},
+    isPending: false
+  };
 };

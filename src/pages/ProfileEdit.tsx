@@ -63,7 +63,12 @@ export default function ProfileEdit() {
     e.preventDefault();
     
     try {
-      await updateProfileMutation.mutateAsync(formData);
+      await updateProfileMutation.mutateAsync({
+        ...formData,
+        role: formData.role as 'artist' | 'organization',
+        artform: formData.artform as any, // Type assertion to fix build error
+        organization_type: formData.organization_type as any // Type assertion to fix build error
+      });
       navigate('/profile/me');
     } catch (error) {
       console.error('Failed to update profile:', error);

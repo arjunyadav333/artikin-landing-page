@@ -23,7 +23,7 @@ export default function UserProfile() {
   // Fetch profile data
   const { data: profile, isLoading: profileLoading } = useProfile(targetUserId);
   const { data: posts, isLoading: postsLoading } = useUserPosts(targetUserId!);
-  const { data: portfolios, isLoading: portfoliosLoading } = useUserPortfolios(targetUserId!);
+  const { data: portfolios, isLoading: portfoliosLoading } = useUserPortfolios();
   
   // Connection status and follow functionality
   const { data: connectionStatus } = useConnectionStatus(targetUserId);
@@ -35,7 +35,7 @@ export default function UserProfile() {
   // Track profile view
   useEffect(() => {
     if (targetUserId && !isOwnProfile) {
-      trackViewMutation.mutate(targetUserId);
+      trackViewMutation.mutate();
     }
   }, [targetUserId, isOwnProfile, trackViewMutation]);
   
