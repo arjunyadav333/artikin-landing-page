@@ -41,7 +41,6 @@ const TagFeed = () => {
       const postIds = posts.map(p => p.id);
       
       let likedPostIds = new Set();
-      let savedPostIds = new Set();
       if (user) {
         // Get likes
         const { data: likes } = await supabase
@@ -50,21 +49,12 @@ const TagFeed = () => {
           .eq('user_id', user.id)
           .in('post_id', postIds);
         likedPostIds = new Set(likes?.map(l => l.post_id) || []);
-
-        // Get saves - using direct query
-        const { data: savedPosts } = await supabase
-          .from('posts')
-          .select('id')
-          .in('id', postIds);
-        
-        // For now, we'll assume none are saved until we fix the saves table
-        savedPostIds = new Set();
       }
 
       return posts.map(post => ({
         ...post,
         user_liked: likedPostIds.has(post.id),
-        user_saved: savedPostIds.has(post.id),
+        user_saved: false, // Saves functionality removed
         is_following: false // TODO: Implement following check
       })) as any; // Type assertion to bypass strict typing
     },

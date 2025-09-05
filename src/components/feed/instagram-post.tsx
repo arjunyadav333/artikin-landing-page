@@ -22,7 +22,7 @@ import { Post } from "@/hooks/usePosts";
 import { Link } from "react-router-dom";
 import { CommentModal } from "@/components/feed/comment-modal";
 import { useLikePost } from "@/hooks/usePosts";
-import { useSavePost } from "@/hooks/useSaves";
+
 import { useFollowUser } from "@/hooks/useConnections";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -38,7 +38,7 @@ export function InstagramPost({ post }: InstagramPostProps) {
   
   const { user } = useAuth();
   const likePostMutation = useLikePost();
-  const savePostMutation = useSavePost();
+  
   const followUserMutation = useFollowUser();
 
   const isOwnPost = user?.id === post.user_id;
@@ -51,12 +51,6 @@ export function InstagramPost({ post }: InstagramPostProps) {
     });
   };
 
-  const handleSave = () => {
-    savePostMutation.mutate({ 
-      postId: post.id, 
-      isSaved: post.user_saved || false 
-    });
-  };
 
   const handleFollow = () => {
     if (!isOwnPost) {
@@ -350,20 +344,6 @@ export function InstagramPost({ post }: InstagramPostProps) {
               <Share2 className="h-6 w-6" />
             </Button>
           </div>
-          
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-auto p-0 text-foreground hover:text-primary transition-colors"
-            onClick={handleSave}
-            disabled={savePostMutation.isPending}
-          >
-            <Bookmark 
-              className={`h-6 w-6 transition-all ${
-                post.user_saved ? 'fill-primary text-primary' : ''
-              }`} 
-            />
-          </Button>
         </div>
 
         {/* Like Count & Comments Preview */}

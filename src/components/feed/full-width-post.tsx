@@ -27,7 +27,7 @@ import { Post } from "@/hooks/usePosts";
 import { Link } from "react-router-dom";
 import { CommentModal } from "@/components/feed/comment-modal";
 import { useLikePost } from "@/hooks/usePosts";
-import { useSavePost } from "@/hooks/useSaves";
+
 import { useFollowUser } from "@/hooks/useConnections";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -46,7 +46,7 @@ export function FullWidthPost({ post }: FullWidthPostProps) {
   const { user } = useAuth();
   const { toast } = useToast();
   const likePostMutation = useLikePost();
-  const savePostMutation = useSavePost();
+  
   const followUserMutation = useFollowUser();
 
   const isOwnPost = user?.id === post.user_id;
@@ -59,12 +59,6 @@ export function FullWidthPost({ post }: FullWidthPostProps) {
     });
   };
 
-  const handleSave = () => {
-    savePostMutation.mutate({ 
-      postId: post.id, 
-      isSaved: post.user_saved || false 
-    });
-  };
 
   const handleFollow = () => {
     if (!isOwnPost) {
@@ -298,10 +292,6 @@ export function FullWidthPost({ post }: FullWidthPostProps) {
                   </>
                 ) : (
                   <>
-                    <DropdownMenuItem onClick={handleSave}>
-                      <Bookmark className="h-4 w-4 mr-2" />
-                      {post.user_saved ? 'Unsave Post' : 'Save Post'}
-                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={handleCopyLink}>
                       <LinkIcon className="h-4 w-4 mr-2" />
                       Copy Link
@@ -471,25 +461,6 @@ export function FullWidthPost({ post }: FullWidthPostProps) {
               )}
             </Button>
           </div>
-          
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-auto p-0 text-foreground hover:text-primary transition-colors flex items-center space-x-1"
-            onClick={handleSave}
-            disabled={savePostMutation.isPending}
-          >
-            <Bookmark 
-              className={`h-6 w-6 transition-all ${
-                post.user_saved ? 'fill-primary text-primary' : ''
-              }`} 
-            />
-            {post.saves_count > 0 && (
-              <span className="text-sm font-medium">
-                {post.saves_count}
-              </span>
-            )}
-          </Button>
         </div>
 
         {/* Comments Preview */}

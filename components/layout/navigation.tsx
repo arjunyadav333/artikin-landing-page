@@ -103,14 +103,6 @@ export default function Navigation() {
 
             {/* Desktop User Menu */}
             <div className="hidden md:flex items-center space-x-4">
-              {/* Notifications */}
-              <Button variant="ghost" size="icon-sm" className="relative">
-                <Bell className="h-4 w-4" />
-                <span className="absolute -top-1 -right-1 h-3 w-3 bg-primary rounded-full flex items-center justify-center">
-                  <span className="text-xs text-primary-foreground">3</span>
-                </span>
-              </Button>
-
               {/* User Profile Dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -140,12 +132,6 @@ export default function Navigation() {
                     </Link>
                   </DropdownMenuItem>
                   
-                  <DropdownMenuItem asChild>
-                    <Link href="/bookmarks" className="flex items-center">
-                      <Bookmark className="mr-3 h-4 w-4" />
-                      Saved Posts
-                    </Link>
-                  </DropdownMenuItem>
                   
                   <DropdownMenuItem asChild>
                     <Link href="/settings" className="flex items-center">
@@ -166,9 +152,6 @@ export default function Navigation() {
 
             {/* Mobile Menu Button */}
             <div className="flex md:hidden items-center space-x-2">
-              <Button variant="ghost" size="icon-sm">
-                <Bell className="h-4 w-4" />
-              </Button>
               
               <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
                 <SheetTrigger asChild>

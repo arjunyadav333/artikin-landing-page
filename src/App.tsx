@@ -21,7 +21,6 @@ const AuthNew = lazy(() => import("./pages/AuthNew"));
 const SignUp = lazy(() => import("./pages/SignUp"));
 const PostDetail = lazy(() => import("./pages/PostDetail"));
 const TagFeed = lazy(() => import("./pages/TagFeed"));
-const SavedPosts = lazy(() => import("./pages/SavedPosts"));
 const ConversationPage = lazy(() => import("./pages/ConversationPage"));
 
 // Loading component for lazy routes
@@ -201,15 +200,6 @@ const AppRoutes = () => {
             <Suspense fallback={<PageLoader />}>
               <ConversationPage />
             </Suspense>
-          </ProtectedRoute>
-        } />
-        <Route path="/saved" element={
-          <ProtectedRoute>
-            <AppLayout>
-              <Suspense fallback={<PageLoader />}>
-                <SavedPosts />
-              </Suspense>
-            </AppLayout>
           </ProtectedRoute>
         } />
         

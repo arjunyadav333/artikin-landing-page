@@ -14,7 +14,6 @@ export interface Post {
   likes_count: number;
   comments_count: number;
   shares_count: number;
-  saves_count?: number;
   created_at: string;
   updated_at: string;
   profiles?: {

@@ -40,9 +40,8 @@ const PostDetail = () => {
         userLiked = !!likeData;
       }
 
-      // Check if user saved this post
+      // Saves functionality removed
       let userSaved = false;
-      // For now, we'll skip checking saves until the saves table is properly configured
 
       // Check if user is following the post author
       let isFollowing = false;
