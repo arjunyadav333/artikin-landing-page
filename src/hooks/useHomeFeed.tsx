@@ -358,11 +358,12 @@ export const useLikePost = (limit = 20) => {
       }
     },
     onMutate: async ({ postId, isLiked }) => {
+      const queryKey = ['homeFeed', limit];
       await queryClient.cancelQueries({ queryKey: ['homeFeed'] });
       
-      const previousData = queryClient.getQueryData(['homeFeed', limit]);
+      const previousData = queryClient.getQueryData(queryKey);
       
-      queryClient.setQueryData(['homeFeed', limit], (old: any) => {
+      queryClient.setQueryData(queryKey, (old: any) => {
         if (!old) return old;
         
         return {
@@ -381,11 +382,11 @@ export const useLikePost = (limit = 20) => {
         };
       });
       
-      return { previousData };
+      return { previousData, queryKey };
     },
     onError: (error, variables, context) => {
-      if (context?.previousData) {
-        queryClient.setQueryData(['homeFeed', limit], context.previousData);
+      if (context?.previousData && context?.queryKey) {
+        queryClient.setQueryData(context.queryKey, context.previousData);
       }
       toast({
         title: "Failed to update like",
