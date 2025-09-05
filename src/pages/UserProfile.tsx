@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useProfile } from "@/hooks/useProfiles";
 import { useUserPosts } from "@/hooks/usePosts";
 import { useUserPortfolios } from "@/hooks/usePortfolios";
@@ -15,15 +15,22 @@ export default function UserProfile() {
   const { userId } = useParams<{ userId: string }>();
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   
   // Determine if viewing own profile or another user's
-  const isOwnProfile = userId === "me" || userId === user?.id;
+  // Check if we're on /profile/me route or if userId matches current user
+  const isOnProfileMeRoute = location.pathname === "/profile/me";
+  const isOwnProfile = isOnProfileMeRoute || userId === "me" || userId === user?.id;
+  
+  // Set target user ID: use current user's ID for own profile, otherwise use userId param
   const targetUserId = isOwnProfile ? user?.id : userId;
   
-  // Debug authentication state
+  // Debug authentication and routing state
   console.log('UserProfile Debug:', {
+    pathname: location.pathname,
     userId,
     user: user ? { id: user.id, email: user.email } : null,
+    isOnProfileMeRoute,
     isOwnProfile,
     targetUserId,
     authLoading
