@@ -139,19 +139,19 @@ export default function SignInPage() {
               </Button>
             </form>
 
-            <div className="text-center">
-              <Button variant="link" className="text-primary hover:text-primary/80 p-0 h-auto">
-                Forgot Password?
-              </Button>
-            </div>
-
-            <div className="text-center pt-4 border-t border-border">
+            <div className="text-center mt-6">
               <p className="text-sm text-muted-foreground">
                 Don't have an account?{' '}
-                <Link href="/auth/signup" className="text-primary hover:text-primary/80 font-medium transition-colors">
+                <Link href="/auth/signup" className="text-primary hover:text-primary/80 font-medium transition-colors underline">
                   Sign Up
                 </Link>
               </p>
+            </div>
+
+            <div className="text-center mt-4">
+              <Button variant="link" className="text-muted-foreground hover:text-foreground p-0 h-auto text-sm">
+                Forgot Password?
+              </Button>
             </div>
           </CardContent>
         </Card>
