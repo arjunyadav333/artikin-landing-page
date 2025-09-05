@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useAuth } from '@/components/providers/auth-provider'
 import { Eye, EyeOff, User, AtSign, Mail, Lock, Phone, MapPin } from 'lucide-react'
-import { supabase } from '@/lib/supabase/client'
+import { supabase } from '@/integrations/supabase/client'
 
 const artformOptions = [
   { value: 'actor', label: 'Actor' },
