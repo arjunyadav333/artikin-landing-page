@@ -1,0 +1,394 @@
+import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useEffect, useCallback } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
+
+export interface PostProfile {
+  id: string;
+  user_id: string;
+  username: string;
+  display_name: string;
+  full_name?: string;
+  handle?: string;
+  account_type?: 'artist' | 'organization';
+  art_form?: string;
+  avatar_url?: string;
+  profile_pic?: string;
+  role?: string;
+  artform?: string;
+  organization_type?: string;
+  location?: string;
+}
+
+export interface HomeFeedPost {
+  id: string;
+  user_id: string;
+  title?: string;
+  content: string;
+  media_urls?: string[];
+  media_types?: string[];
+  tags?: string[];
+  visibility?: string;
+  likes_count: number;
+  comments_count: number;
+  shares_count: number;
+  created_at: string;
+  updated_at: string;
+  profiles: PostProfile;
+  user_liked?: boolean;
+  is_following?: boolean;
+}
+
+export const useHomeFeed = (limit = 20) => {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+  const { user } = useAuth();
+
+  const fetchPosts = async ({ pageParam = 0 }) => {
+    // Fetch posts with visibility rules
+    let query = supabase
+      .from('posts_feed_optimized')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .range(pageParam * limit, (pageParam + 1) * limit - 1);
+
+    const { data: posts, error } = await query;
+    if (error) throw error;
+
+    if (!posts?.length) return [];
+
+    // Get user interactions if authenticated
+    let likedPostIds = new Set();
+    let followedUserIds = new Set();
+    
+    if (user) {
+      const postIds = posts.map(p => p.id);
+      const userIds = [...new Set(posts.map(p => p.user_id))];
+
+      const [{ data: likes }, { data: follows }] = await Promise.all([
+        supabase
+          .from('likes')
+          .select('post_id')
+          .eq('user_id', user.id)
+          .in('post_id', postIds),
+        supabase
+          .from('connections')
+          .select('following_id')
+          .eq('follower_id', user.id)
+          .in('following_id', userIds)
+      ]);
+
+      likedPostIds = new Set(likes?.map(l => l.post_id) || []);
+      followedUserIds = new Set(follows?.map(f => f.following_id) || []);
+    }
+
+    // Transform data to match interface
+    return posts.map(post => ({
+      id: post.id,
+      user_id: post.user_id,
+      title: post.title,
+      content: post.content,
+      media_urls: post.media_urls,
+      media_types: post.media_urls ? post.media_urls.map(() => 'image') : [], // Default to image type
+      tags: post.tags,
+      visibility: 'public',
+      likes_count: post.likes_count || 0,
+      comments_count: post.comments_count || 0,
+      shares_count: post.shares_count || 0,
+      created_at: post.created_at,
+      updated_at: post.updated_at,
+      profiles: {
+        id: post.user_id,
+        user_id: post.user_id,
+        username: post.profile_username || 'user',
+        display_name: post.profile_display_name || 'User',
+        full_name: post.profile_display_name,
+        handle: post.profile_username,
+        account_type: (post.profile_role === 'artist' ? 'artist' : 'organization') as 'artist' | 'organization',
+        art_form: post.profile_artform,
+        avatar_url: post.profile_avatar_url,
+        profile_pic: post.profile_avatar_url,
+        role: post.profile_role,
+        artform: post.profile_artform,
+        organization_type: post.profile_organization_type,
+        location: post.profile_location
+      },
+      user_liked: likedPostIds.has(post.id),
+      is_following: followedUserIds.has(post.user_id)
+    }));
+  };
+
+  const feedQuery = useInfiniteQuery({
+    queryKey: ['homeFeed', limit],
+    queryFn: fetchPosts,
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, pages) => {
+      return lastPage.length === limit ? pages.length : undefined;
+    },
+    staleTime: 30 * 1000, // 30 seconds
+    refetchOnWindowFocus: false,
+  });
+
+  // Realtime subscriptions
+  useEffect(() => {
+    if (!user) return;
+
+    const channels = [
+      // New posts
+      supabase
+        .channel('posts-changes')
+        .on('postgres_changes', { 
+          event: 'INSERT', 
+          schema: 'public', 
+          table: 'posts' 
+        }, (payload) => {
+          queryClient.invalidateQueries({ queryKey: ['homeFeed'] });
+        })
+        .subscribe(),
+
+      // Likes changes
+      supabase
+        .channel('likes-changes')
+        .on('postgres_changes', { 
+          event: '*', 
+          schema: 'public', 
+          table: 'likes' 
+        }, (payload) => {
+          queryClient.setQueryData(['homeFeed'], (old: any) => {
+            if (!old) return old;
+            
+            const postId = (payload.new as any)?.post_id || (payload.old as any)?.post_id;
+            const isInsert = payload.eventType === 'INSERT';
+            
+            return {
+              ...old,
+              pages: old.pages.map((page: HomeFeedPost[]) =>
+                page.map(post => 
+                  post.id === postId 
+                    ? {
+                        ...post,
+                        likes_count: Math.max(0, post.likes_count + (isInsert ? 1 : -1)),
+                        user_liked: (payload.new as any)?.user_id === user.id ? isInsert : post.user_liked
+                      }
+                    : post
+                )
+              )
+            };
+          });
+        })
+        .subscribe(),
+
+      // Comments changes
+      supabase
+        .channel('comments-changes')
+        .on('postgres_changes', { 
+          event: 'INSERT', 
+          schema: 'public', 
+          table: 'comments' 
+        }, (payload) => {
+          queryClient.setQueryData(['homeFeed'], (old: any) => {
+            if (!old) return old;
+            
+            return {
+              ...old,
+              pages: old.pages.map((page: HomeFeedPost[]) =>
+                page.map(post => 
+                  post.id === (payload.new as any).post_id 
+                    ? { ...post, comments_count: post.comments_count + 1 }
+                    : post
+                )
+              )
+            };
+          });
+        })
+        .subscribe(),
+
+      // Shares changes
+      supabase
+        .channel('shares-changes')
+        .on('postgres_changes', { 
+          event: '*', 
+          schema: 'public', 
+          table: 'shares' 
+        }, (payload) => {
+          queryClient.setQueryData(['homeFeed'], (old: any) => {
+            if (!old) return old;
+            
+            const postId = (payload.new as any)?.post_id || (payload.old as any)?.post_id;
+            const isInsert = payload.eventType === 'INSERT';
+            
+            return {
+              ...old,
+              pages: old.pages.map((page: HomeFeedPost[]) =>
+                page.map(post => 
+                  post.id === postId 
+                    ? { ...post, shares_count: Math.max(0, post.shares_count + (isInsert ? 1 : -1)) }
+                    : post
+                )
+              )
+            };
+          });
+        })
+        .subscribe()
+    ];
+
+    return () => {
+      channels.forEach(channel => supabase.removeChannel(channel));
+    };
+  }, [user, queryClient]);
+
+  return feedQuery;
+};
+
+// Like post mutation with optimistic updates
+export const useLikePost = () => {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+  const { user } = useAuth();
+
+  return useMutation({
+    mutationFn: async ({ postId, isLiked }: { postId: string; isLiked: boolean }) => {
+      if (!user) throw new Error('Not authenticated');
+
+      if (isLiked) {
+        const { error } = await supabase
+          .from('likes')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('post_id', postId);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('likes')
+          .insert({ user_id: user.id, post_id: postId });
+        if (error) throw error;
+      }
+    },
+    onMutate: async ({ postId, isLiked }) => {
+      await queryClient.cancelQueries({ queryKey: ['homeFeed'] });
+      
+      const previousData = queryClient.getQueryData(['homeFeed']);
+      
+      queryClient.setQueryData(['homeFeed'], (old: any) => {
+        if (!old) return old;
+        
+        return {
+          ...old,
+          pages: old.pages.map((page: HomeFeedPost[]) =>
+            page.map(post => 
+              post.id === postId 
+                ? {
+                    ...post,
+                    user_liked: !isLiked,
+                    likes_count: isLiked ? Math.max(0, post.likes_count - 1) : post.likes_count + 1
+                  }
+                : post
+            )
+          )
+        };
+      });
+      
+      return { previousData };
+    },
+    onError: (error, variables, context) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(['homeFeed'], context.previousData);
+      }
+      toast({
+        title: "Failed to update like",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  });
+};
+
+// Follow user mutation with optimistic updates  
+export const useFollowUser = () => {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+  const { user } = useAuth();
+
+  return useMutation({
+    mutationFn: async ({ userId, isFollowing }: { userId: string; isFollowing: boolean }) => {
+      if (!user) throw new Error('Not authenticated');
+
+      if (isFollowing) {
+        const { error } = await supabase
+          .from('connections')
+          .delete()
+          .eq('follower_id', user.id)
+          .eq('following_id', userId);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('connections')
+          .insert({ follower_id: user.id, following_id: userId });
+        if (error) throw error;
+      }
+    },
+    onMutate: async ({ userId, isFollowing }) => {
+      await queryClient.cancelQueries({ queryKey: ['homeFeed'] });
+      
+      const previousData = queryClient.getQueryData(['homeFeed']);
+      
+      queryClient.setQueryData(['homeFeed'], (old: any) => {
+        if (!old) return old;
+        
+        return {
+          ...old,
+          pages: old.pages.map((page: HomeFeedPost[]) =>
+            page.map(post => 
+              post.user_id === userId 
+                ? { ...post, is_following: !isFollowing }
+                : post
+            )
+          )
+        };
+      });
+      
+      return { previousData };
+    },
+    onError: (error, variables, context) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(['homeFeed'], context.previousData);
+      }
+      toast({
+        title: "Failed to update follow",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  });
+};
+
+// Share post mutation
+export const useSharePost = () => {
+  const { toast } = useToast();
+  const { user } = useAuth();
+
+  return useMutation({
+    mutationFn: async (postId: string) => {
+      if (!user) throw new Error('Not authenticated');
+
+      const { error } = await supabase
+        .from('shares')
+        .insert({ user_id: user.id, post_id: postId });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast({
+        title: "Post shared",
+        description: "Post has been shared successfully"
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Failed to share post",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  });
+};

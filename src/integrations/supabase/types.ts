@@ -503,6 +503,7 @@ export type Database = {
           id: string
           likes_count: number | null
           media_type: string | null
+          media_types: string[] | null
           media_urls: string[] | null
           saves_count: number | null
           shares_count: number | null
@@ -510,6 +511,7 @@ export type Database = {
           title: string | null
           updated_at: string | null
           user_id: string
+          visibility: string | null
         }
         Insert: {
           comments_count?: number | null
@@ -518,6 +520,7 @@ export type Database = {
           id?: string
           likes_count?: number | null
           media_type?: string | null
+          media_types?: string[] | null
           media_urls?: string[] | null
           saves_count?: number | null
           shares_count?: number | null
@@ -525,6 +528,7 @@ export type Database = {
           title?: string | null
           updated_at?: string | null
           user_id: string
+          visibility?: string | null
         }
         Update: {
           comments_count?: number | null
@@ -533,6 +537,7 @@ export type Database = {
           id?: string
           likes_count?: number | null
           media_type?: string | null
+          media_types?: string[] | null
           media_urls?: string[] | null
           saves_count?: number | null
           shares_count?: number | null
@@ -540,6 +545,7 @@ export type Database = {
           title?: string | null
           updated_at?: string | null
           user_id?: string
+          visibility?: string | null
         }
         Relationships: []
       }
@@ -626,6 +632,49 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      shares: {
+        Row: {
+          created_at: string | null
+          id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shares_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shares_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts_feed_optimized"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shares_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts_with_profiles_view"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       starred_messages: {
         Row: {
