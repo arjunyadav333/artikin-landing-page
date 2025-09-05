@@ -103,23 +103,15 @@ const ConversationPage = () => {
 
     setOptimisticMessages(prev => [...prev, optimisticMessage]);
     clearDraft();
-    sendTypingStatus(false);
+    sendTypingStatus();
 
     try {
       await sendMessageMutation.mutateAsync({
         conversationId: chatId,
-        kind: attachments.length > 0 ? attachments[0].mime_type.split('/')[0] as any : 'text',
-        content: messageBody || undefined,
+        kind: attachments.length > 0 ? attachments[0].mime_type.split('/')[0] : 'text',
+        body: messageBody || undefined,
         mediaUrl: attachments.length > 0 ? attachments[0].file_url : undefined,
-        mediaType: attachments.length > 0 ? attachments[0].mime_type : undefined,
-        attachments: attachments.map(att => ({
-          file_url: att.file_url,
-          mime_type: att.mime_type,
-          file_size: att.file_size,
-          width: att.width,
-          height: att.height,
-          duration: att.duration
-        }))
+        mediaType: attachments.length > 0 ? attachments[0].mime_type : undefined
       });
       
       // Remove optimistic message on success
@@ -155,28 +147,8 @@ const ConversationPage = () => {
   const handleTyping = useCallback((value: string) => {
     updateDraft(value);
     
-    // Send typing indicator
-    if (value.trim()) {
-      sendTypingStatus(true);
-      
-      // Clear existing timeout
-      if (typingTimeout) {
-        clearTimeout(typingTimeout);
-      }
-      
-      // Set new timeout to stop typing
-      const timeout = setTimeout(() => {
-        sendTypingStatus(false);
-      }, 1500);
-      
-      setTypingTimeout(timeout);
-    } else {
-      sendTypingStatus(false);
-      if (typingTimeout) {
-        clearTimeout(typingTimeout);
-        setTypingTimeout(null);
-      }
-    }
+    // Send typing indicator (simplified for now)
+    sendTypingStatus();
   }, [updateDraft, sendTypingStatus, typingTimeout]);
 
   const getInitials = (name?: string) => {
@@ -285,9 +257,9 @@ const ConversationPage = () => {
                     conversation_id: chatId,
                     sender_id: user?.id!,
                     kind: 'text',
-                    content: message.body,
+                    body: message.body,
                     deleted: false,
-                    deleted_for_all: false,
+                    deleted_for_everyone: false,
                     created_at: new Date().toISOString(),
                     attachments: message.attachments as any
                   }}

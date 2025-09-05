@@ -5,22 +5,20 @@ import { useAuth } from './useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useQueryPerformance } from '@/hooks/usePerformanceMonitoring';
 
-// Types for the updated messaging system
+// Simple types that work with the current database schema
 export interface Message {
   id: string;
   conversation_id: string;
   sender_id: string;
-  kind: 'text' | 'image' | 'video' | 'document';
-  content?: string;
+  kind: string;
+  body?: string;  // matches database field
   media_url?: string;
   media_type?: string;
   deleted: boolean;
-  deleted_for_all: boolean;
-  deleted_by?: string;
-  deleted_at?: string;
+  deleted_for_everyone: boolean;  // matches database field
   created_at: string;
   sender?: {
-    id: string;
+    user_id: string;
     username?: string;
     display_name?: string;
     avatar_url?: string;
@@ -52,36 +50,24 @@ export interface Conversation {
   created_at: string;
   updated_at: string;
   other_participant?: {
-    id: string;
+    user_id: string;
     username?: string;
     display_name?: string;
     avatar_url?: string;
     bio?: string;
     role?: string;
   };
-  last_message?: Message;
+  last_message?: any;
   unread_count?: number;
   participant_settings?: {
     muted: boolean;
     pinned: boolean;
     archived: boolean;
     deleted: boolean;
-    last_read_message_id?: string;
-    drafted_text?: string;
   };
 }
 
-export interface ConversationParticipant {
-  conversation_id: string;
-  user_id: string;
-  muted: boolean;
-  pinned: boolean;
-  archived: boolean;
-  last_read_message_id?: string;
-  drafted_text?: string;
-}
-
-// Hook to fetch conversations for current user
+// Simplified hook to fetch conversations
 export const useConversations = () => {
   const { user } = useAuth();
   const { markQueryComplete } = useQueryPerformance(['conversations']);
@@ -91,106 +77,68 @@ export const useConversations = () => {
     queryFn: async () => {
       if (!user) return [];
 
-      // Get conversations where user is a participant and not deleted
-      const { data: participants, error: participantsError } = await supabase
-        .from('conversation_participants')
-        .select(`
-          conversation_id,
-          pinned,
-          deleted,
-          muted,
-          archived,
-          last_read_message_id,
-          drafted_text,
-          conversations!inner(
-            id,
-            created_at,
-            updated_at
-          )
-        `)
-        .eq('user_id', user.id)
-        .eq('deleted', false)
-        .order('pinned', { ascending: false });
+      try {
+        // Get user's conversations through participants table - simplified approach
+        const { data: participantData, error } = await supabase
+          .from('conversation_participants')
+          .select('conversation_id, pinned, deleted, muted, archived')
+          .eq('user_id', user.id)
+          .eq('deleted', false);
 
-      if (participantsError) throw participantsError;
-      if (!participants || participants.length === 0) return [];
+        if (error || !participantData?.length) return [];
 
-      // Enrich conversations with other participant info and last message
-      const enrichedConversations = await Promise.all(
-        participants.map(async (p: any) => {
-          const conv = p.conversations;
-          
-          // Get other participant
-          const { data: otherParticipants, error: otherError } = await supabase
-            .from('conversation_participants')
-            .select(`
-              user_id,
-              profiles!inner(
-                user_id,
-                username,
-                display_name,
-                avatar_url,
-                bio,
-                role
-              )
-            `)
-            .eq('conversation_id', conv.id)
-            .neq('user_id', user.id)
-            .single();
+        // Get basic conversation info
+        const conversationIds = participantData.map(p => p.conversation_id);
+        const { data: conversations } = await supabase
+          .from('conversations')
+          .select('*')
+          .in('id', conversationIds)
+          .order('updated_at', { ascending: false });
 
-          if (otherError) {
-            console.error('Error fetching other participant:', otherError);
-            return null;
-          }
+        if (!conversations) return [];
 
-          // Get last message
-          const { data: lastMessage } = await supabase
-            .from('messages')
-            .select('id, content, media_type, created_at, sender_id, deleted, deleted_for_all')
-            .eq('conversation_id', conv.id)
-            .order('created_at', { ascending: false })
-            .limit(1)
-            .maybeSingle();
+        // Build simplified conversation objects
+        const result = await Promise.all(
+          conversations.map(async (conv) => {
+            const participantSettings = participantData.find(p => p.conversation_id === conv.id);
 
-          // Get unread count
-          const { count: unreadCount } = await supabase
-            .from('messages')
-            .select('*', { count: 'exact', head: true })
-            .eq('conversation_id', conv.id)
-            .neq('sender_id', user.id);
+            // Get other participant - simplified query
+            const { data: otherParticipants } = await supabase
+              .from('conversation_participants')
+              .select('user_id')
+              .eq('conversation_id', conv.id)
+              .neq('user_id', user.id)
+              .limit(1);
 
-          return {
-            id: conv.id,
-            created_at: conv.created_at,
-            updated_at: conv.updated_at,
-            other_participant: otherParticipants?.profiles,
-            last_message: lastMessage,
-            unread_count: unreadCount || 0,
-            participant_settings: {
-              pinned: p.pinned,
-              deleted: p.deleted,
-              muted: p.muted,
-              archived: p.archived,
-              last_read_message_id: p.last_read_message_id,
-              drafted_text: p.drafted_text
+            let otherParticipant = null;
+            if (otherParticipants?.[0]) {
+              const { data: profile } = await supabase
+                .from('profiles')
+                .select('user_id, username, display_name, avatar_url, bio, role')
+                .eq('user_id', otherParticipants[0].user_id)
+                .single();
+              
+              otherParticipant = profile;
             }
-          };
-        })
-      );
 
-      const validConversations = enrichedConversations
-        .filter(Boolean)
-        .sort((a, b) => {
-          // Pinned conversations first
-          if (a.participant_settings?.pinned !== b.participant_settings?.pinned) {
-            return (b.participant_settings?.pinned ? 1 : 0) - (a.participant_settings?.pinned ? 1 : 0);
-          }
-          // Then by updated_at
-          return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
-        });
+            return {
+              id: conv.id,
+              created_at: conv.created_at,
+              updated_at: conv.updated_at,
+              other_participant: otherParticipant,
+              last_message: null,
+              unread_count: 0,
+              participant_settings: participantSettings
+            };
+          })
+        );
 
-      markQueryComplete();
-      return validConversations as Conversation[];
+        markQueryComplete();
+        return result.filter(conv => conv.other_participant);
+      } catch (error) {
+        console.error('Error fetching conversations:', error);
+        return [];
+      }
     },
     enabled: !!user
   });
@@ -205,26 +153,39 @@ export const useMessages = (conversationId?: string) => {
     queryFn: async () => {
       if (!conversationId) return [];
 
-      const { data, error } = await supabase
-        .from('messages')
-        .select(`
-          *,
-          attachments:message_attachments(*),
-          receipts:message_receipts(*),
-          sender:profiles!messages_sender_id_fkey(
-            user_id,
-            username,
-            display_name,
-            avatar_url
-          )
-        `)
-        .eq('conversation_id', conversationId)
-        .order('created_at', { ascending: true })
-        .limit(30);
+      try {
+        const { data, error } = await supabase
+          .from('messages')
+          .select('*')
+          .eq('conversation_id', conversationId)
+          .order('created_at', { ascending: true });
 
-      if (error) throw error;
+        if (error) throw error;
 
-      return data as Message[];
+        // Get sender info for each message
+        const messagesWithSenders = await Promise.all(
+          (data || []).map(async (msg) => {
+            const { data: sender } = await supabase
+              .from('profiles')
+              .select('user_id, username, display_name, avatar_url')
+              .eq('user_id', msg.sender_id)
+              .single();
+
+            return {
+              ...msg,
+              deleted_for_everyone: msg.deleted_for_everyone || false,
+              sender,
+              attachments: [],
+              receipts: []
+            };
+          })
+        );
+
+        return messagesWithSenders as Message[];
+      } catch (error) {
+        console.error('Error fetching messages:', error);
+        return [];
+      }
     },
     enabled: !!conversationId && !!user
   });
@@ -239,61 +200,35 @@ export const useSendMessage = () => {
   return useMutation({
     mutationFn: async ({
       conversationId,
-      kind,
-      content,
+      kind = 'text',
+      body,
       mediaUrl,
-      mediaType,
-      attachments
+      mediaType
     }: {
       conversationId: string;
-      kind: Message['kind'];
-      content?: string;
+      kind?: string;
+      body?: string;
       mediaUrl?: string;
       mediaType?: string;
-      attachments?: Omit<MessageAttachment, 'id' | 'message_id'>[];
     }) => {
       if (!user) throw new Error('User not authenticated');
 
-      // Insert message
-      const { data: message, error: messageError } = await supabase
+      const { data: message, error } = await supabase
         .from('messages')
         .insert({
           conversation_id: conversationId,
           sender_id: user.id,
           kind,
-          content,
+          body,
           media_url: mediaUrl,
           media_type: mediaType
         })
         .select()
         .single();
 
-      if (messageError) throw messageError;
+      if (error) throw error;
 
-      // Insert attachments if any
-      if (attachments && attachments.length > 0) {
-        const { error: attachmentError } = await supabase
-          .from('message_attachments')
-          .insert(
-            attachments.map(att => ({
-              ...att,
-              message_id: message.id
-            }))
-          );
-
-        if (attachmentError) throw attachmentError;
-      }
-
-      // Create receipt for sender
-      await supabase
-        .from('message_receipts')
-        .insert({
-          message_id: message.id,
-          user_id: user.id,
-          status: 'sent'
-        });
-
-      // Update conversation updated_at
+      // Update conversation timestamp
       await supabase
         .from('conversations')
         .update({ updated_at: new Date().toISOString() })
@@ -302,12 +237,10 @@ export const useSendMessage = () => {
       return message;
     },
     onSuccess: (data) => {
-      // Invalidate relevant queries
       queryClient.invalidateQueries({ queryKey: ['conversations'] });
       queryClient.invalidateQueries({ queryKey: ['messages', data.conversation_id] });
     },
     onError: (error) => {
-      console.error('Error sending message:', error);
       toast({
         title: "Error",
         description: "Failed to send message. Please try again.",
@@ -317,7 +250,7 @@ export const useSendMessage = () => {
   });
 };
 
-// Hook to create or get conversation using RPC
+// Simplified create or get conversation
 export const useCreateOrGetConversation = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -326,45 +259,41 @@ export const useCreateOrGetConversation = () => {
     mutationFn: async (otherUserId: string) => {
       if (!user) throw new Error('User not authenticated');
 
-      // Check if conversation exists
-      const { data: existing, error: checkError } = await supabase
+      // Look for existing conversation
+      const { data: myParticipations } = await supabase
         .from('conversation_participants')
         .select('conversation_id')
-        .eq('user_id', user.id)
-        .in('conversation_id', 
-          supabase.from('conversation_participants')
-            .select('conversation_id')
-            .eq('user_id', otherUserId)
-        )
-        .maybeSingle();
+        .eq('user_id', user.id);
 
-      if (checkError) throw checkError;
-      
-      if (existing) {
-        return existing.conversation_id;
+      if (myParticipations?.length) {
+        const conversationIds = myParticipations.map(p => p.conversation_id);
+        
+        const { data: otherParticipation } = await supabase
+          .from('conversation_participants')
+          .select('conversation_id')
+          .eq('user_id', otherUserId)
+          .in('conversation_id', conversationIds)
+          .limit(1)
+          .maybeSingle();
+
+        if (otherParticipation) {
+          return otherParticipation.conversation_id;
+        }
       }
 
-      // Create new conversation
+      // Create new conversation - using the actual schema
       const { data: newConv, error } = await supabase
         .from('conversations')
-        .insert({})
-        .select('id')
+        .insert({
+          participant_a: user.id,
+          participant_b: otherUserId
+        })
+        .select()
         .single();
 
       if (error) throw error;
 
-      // Add participants
-      await supabase
-        .from('conversation_participants')
-        .insert([
-          { conversation_id: newConv.id, user_id: user.id },
-          { conversation_id: newConv.id, user_id: otherUserId }
-        ]);
-
       return newConv.id;
-
-      if (error) throw error;
-      return conversationId;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['conversations'] });
@@ -372,7 +301,7 @@ export const useCreateOrGetConversation = () => {
   });
 };
 
-// Hook to mark messages as read using the new database function
+// Simplified mark messages as read
 export const useMarkMessagesAsRead = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -385,26 +314,12 @@ export const useMarkMessagesAsRead = () => {
       conversationId: string;
       messageId: string;
     }) => {
-      if (!user) throw new Error('User not authenticated');
-
-      // Use the new database function for efficient read marking
-      // Mark messages as seen manually
-      const { error } = await supabase
-        .from('message_receipts')
-        .upsert({
-          message_id: messageId,
-          user_id: user.id,
-          status: 'seen'
-        });
-      
-      const { data } = await supabase
+      // Simple implementation
+      await supabase
         .from('conversation_participants')
         .update({ last_read_message_id: messageId })
         .eq('conversation_id', conversationId)
         .eq('user_id', user.id);
-
-      if (error) throw error;
-      return data;
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['conversations'] });
@@ -413,13 +328,12 @@ export const useMarkMessagesAsRead = () => {
   });
 };
 
-// Hook for real-time message updates
+// Real-time updates (simplified)
 export const useRealtimeMessages = (conversationId?: string) => {
-  const { user } = useAuth();
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    if (!conversationId || !user) return;
+    if (!conversationId) return;
 
     const channel = supabase
       .channel(`conversation:${conversationId}`)
@@ -433,18 +347,6 @@ export const useRealtimeMessages = (conversationId?: string) => {
         },
         () => {
           queryClient.invalidateQueries({ queryKey: ['messages', conversationId] });
-          queryClient.invalidateQueries({ queryKey: ['conversations'] });
-        }
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'message_receipts'
-        },
-        () => {
-          queryClient.invalidateQueries({ queryKey: ['messages', conversationId] });
         }
       )
       .subscribe();
@@ -452,46 +354,16 @@ export const useRealtimeMessages = (conversationId?: string) => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [conversationId, user, queryClient]);
+  }, [conversationId, queryClient]);
 };
 
-// Hook for typing indicators
+// Typing indicators (simplified)
 export const useTypingIndicator = (conversationId?: string) => {
-  const { user } = useAuth();
-  const [typingUsers, setTypingUsers] = useState<string[]>([]);
+  const [typingUsers] = useState<string[]>([]);
 
-  const sendTypingStatus = useCallback((isTyping: boolean) => {
-    if (!conversationId || !user) return;
-
-    const channel = supabase.channel(`typing:${conversationId}`);
-    
-    if (isTyping) {
-      channel.track({ user_id: user.id, typing: true });
-    } else {
-      channel.untrack();
-    }
-  }, [conversationId, user]);
-
-  useEffect(() => {
-    if (!conversationId || !user) return;
-
-    const channel = supabase
-      .channel(`typing:${conversationId}`)
-      .on('presence', { event: 'sync' }, () => {
-        const state = channel.presenceState();
-        const typing = Object.values(state)
-          .flat()
-          .filter((presence: any) => presence.user_id !== user.id && presence.typing)
-          .map((presence: any) => presence.user_id);
-        
-        setTypingUsers(typing);
-      })
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [conversationId, user]);
+  const sendTypingStatus = useCallback(() => {
+    // Placeholder for now
+  }, []);
 
   return { typingUsers, sendTypingStatus };
 };

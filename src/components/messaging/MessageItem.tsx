@@ -114,7 +114,7 @@ export const MessageItem = ({
   };
 
   // Show deleted message placeholder
-  if (message.deleted_for_all) {
+  if (message.deleted_for_everyone) {
     return (
       <div className={cn(
         "flex mb-4",
@@ -177,15 +177,15 @@ export const MessageItem = ({
           status === 'failed' && "bg-destructive/10 border border-destructive/20"
         )}>
           {/* Message content */}
-          {message.content && (
+          {message.body && (
             <p className="text-sm whitespace-pre-wrap break-words">
-              {message.content}
+              {message.body}
             </p>
           )}
           
           {/* Message attachments */}
           {message.attachments && message.attachments.length > 0 && (
-            <div className={cn(message.content && "mt-2")}>
+            <div className={cn(message.body && "mt-2")}>
               <MessageAttachments attachments={message.attachments} />
             </div>
           )}
@@ -193,7 +193,7 @@ export const MessageItem = ({
           {/* Message footer */}
           <div className={cn(
             "flex items-center justify-between gap-2 mt-1",
-            message.content || message.attachments?.length ? "mt-1" : ""
+            message.body || message.attachments?.length ? "mt-1" : ""
           )}>
             <span className={cn(
               "text-xs",
@@ -226,7 +226,7 @@ export const MessageItem = ({
           </div>
           
           {/* Message menu - only for own messages */}
-          {isOwn && !isOptimistic && !message.deleted_for_all && (
+          {isOwn && !isOptimistic && !message.deleted_for_everyone && (
             <div className="absolute -right-8 top-0 opacity-0 group-hover:opacity-100 transition-opacity">
               <DropdownMenu open={showMenu} onOpenChange={setShowMenu}>
                 <DropdownMenuTrigger asChild>
