@@ -78,59 +78,74 @@ export const useConversations = () => {
       if (!user) return [];
 
       try {
-        // Get user's conversations through participants table - simplified approach
-        const { data: participantData, error } = await supabase
+        // Direct approach: Get conversations where user is a participant
+        const { data: conversations, error: conversationsError } = await supabase
+          .from('conversations')
+          .select('*')
+          .or(`participant_a.eq.${user.id},participant_b.eq.${user.id}`)
+          .order('updated_at', { ascending: false });
+
+        if (conversationsError) {
+          console.error('Error fetching conversations:', conversationsError);
+          return [];
+        }
+
+        if (!conversations?.length) return [];
+
+        // Get participant settings for each conversation
+        const conversationIds = conversations.map(c => c.id);
+        const { data: participantData } = await supabase
           .from('conversation_participants')
           .select('conversation_id, pinned, deleted, muted, archived')
           .eq('user_id', user.id)
-          .eq('deleted', false);
+          .in('conversation_id', conversationIds);
 
-        if (error || !participantData?.length) return [];
-
-        // Get basic conversation info
-        const conversationIds = participantData.map(p => p.conversation_id);
-        const { data: conversations } = await supabase
-          .from('conversations')
-          .select('*')
-          .in('id', conversationIds)
-          .order('updated_at', { ascending: false });
-
-        if (!conversations) return [];
-
-        // Build simplified conversation objects
+        // Build conversation objects with other participant info
         const result = await Promise.all(
-          conversations.map(async (conv) => {
-            const participantSettings = participantData.find(p => p.conversation_id === conv.id);
+          conversations
+            .filter(conv => {
+              // Only show non-deleted conversations
+              const settings = participantData?.find(p => p.conversation_id === conv.id);
+              return !settings?.deleted;
+            })
+            .map(async (conv) => {
+              const participantSettings = participantData?.find(p => p.conversation_id === conv.id);
 
-            // Get other participant - simplified query
-            const { data: otherParticipants } = await supabase
-              .from('conversation_participants')
-              .select('user_id')
-              .eq('conversation_id', conv.id)
-              .neq('user_id', user.id)
-              .limit(1);
+              // Get other participant ID
+              const otherParticipantId = conv.participant_a === user.id 
+                ? conv.participant_b 
+                : conv.participant_a;
 
-            let otherParticipant = null;
-            if (otherParticipants?.[0]) {
+              // Get other participant profile
               const { data: profile } = await supabase
                 .from('profiles')
                 .select('user_id, username, display_name, avatar_url, bio, role')
-                .eq('user_id', otherParticipants[0].user_id)
+                .eq('user_id', otherParticipantId)
                 .single();
-              
-              otherParticipant = profile;
-            }
 
-            return {
-              id: conv.id,
-              created_at: conv.created_at,
-              updated_at: conv.updated_at,
-              other_participant: otherParticipant,
-              last_message: null,
-              unread_count: 0,
-              participant_settings: participantSettings
-            };
-          })
+              return {
+                id: conv.id,
+                created_at: conv.created_at,
+                updated_at: conv.updated_at,
+                other_participant: profile ? {
+                  id: profile.user_id,
+                  user_id: profile.user_id,
+                  username: profile.username,
+                  display_name: profile.display_name,
+                  avatar_url: profile.avatar_url,
+                  bio: profile.bio,
+                  role: profile.role
+                } : null,
+                last_message: null,
+                unread_count: 0,
+                participant_settings: participantSettings || {
+                  pinned: false,
+                  deleted: false,
+                  muted: false,
+                  archived: false
+                }
+              };
+            })
         );
 
         markQueryComplete();
