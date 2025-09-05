@@ -3,17 +3,17 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { MessageCircle } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
 
 const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { user, signIn, signUp } = useAuth();
+  const { user, signIn } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -43,116 +43,123 @@ const Auth = () => {
     }
   };
 
-  const handleSignUp = async () => {
-    if (!email || !password) {
-      toast({
-        title: 'Missing fields',
-        description: 'Please enter both email and password',
-        variant: 'destructive'
-      });
-      return;
-    }
-
-    if (password.length < 6) {
-      toast({
-        title: 'Password too short',
-        description: 'Password must be at least 6 characters long',
-        variant: 'destructive'
-      });
-      return;
-    }
-
-    setLoading(true);
-    const { error } = await signUp(email, password);
-    setLoading(false);
-
-    if (!error) {
-      toast({
-        title: 'Check your email',
-        description: 'We\'ve sent you a confirmation link to complete your registration.'
-      });
-    }
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent, action: () => void) => {
+  const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !loading) {
-      action();
+      handleSignIn();
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-muted flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="mx-auto w-12 h-12 bg-primary rounded-full flex items-center justify-center mb-4">
-            <MessageCircle className="w-6 h-6 text-primary-foreground" />
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        {/* Logo and Brand */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center space-x-3 group">
+            <div className="h-16 w-16 rounded-2xl bg-primary flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300">
+              <span className="text-primary-foreground font-bold text-2xl">A</span>
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold text-foreground">Artikin</h1>
+              <p className="text-sm text-muted-foreground">Creative Network</p>
+            </div>
           </div>
-          <CardTitle className="text-2xl">Welcome to Messages</CardTitle>
-          <CardDescription>
-            Sign in to your account or create a new one to start messaging
-          </CardDescription>
-        </CardHeader>
-        
-        <CardContent>
-          <Tabs defaultValue="signin" className="space-y-4">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="signin">Sign In</TabsTrigger>
-              <TabsTrigger value="signup">Sign Up</TabsTrigger>
-            </TabsList>
+        </div>
 
-            <div className="space-y-4">
+        <Card className="shadow-2xl border-0 bg-card">
+          <CardHeader className="text-center space-y-2 pb-6">
+            <CardTitle className="text-2xl font-bold text-foreground">
+              Welcome Back
+            </CardTitle>
+            <CardDescription className="text-base text-muted-foreground">
+              Sign in to your Artikin account
+            </CardDescription>
+          </CardHeader>
+
+          <CardContent className="space-y-6">
+            <div className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="Enter your email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  onKeyPress={(e) => handleKeyPress(e, handleSignIn)}
-                  disabled={loading}
-                />
+                <Label htmlFor="email" className="text-foreground font-medium text-sm">
+                  Email Address
+                </Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="your@email.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    className="pl-10 h-12 text-base rounded-lg border-input focus:border-primary focus:ring-primary"
+                    disabled={loading}
+                    required
+                  />
+                </div>
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="Enter your password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  onKeyPress={(e) => handleKeyPress(e, handleSignIn)}
-                  disabled={loading}
-                />
+                <Label htmlFor="password" className="text-foreground font-medium text-sm">
+                  Password
+                </Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    className="pl-10 pr-10 h-12 text-base rounded-lg border-input focus:border-primary focus:ring-primary"
+                    disabled={loading}
+                    required
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-2 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 hover:bg-transparent"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
               </div>
-            </div>
 
-            <TabsContent value="signin" className="space-y-4">
               <Button 
                 onClick={handleSignIn} 
                 disabled={loading}
-                className="w-full"
+                className="w-full h-12 text-base font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
               >
                 {loading ? 'Signing in...' : 'Sign In'}
               </Button>
-            </TabsContent>
+            </div>
 
-            <TabsContent value="signup" className="space-y-4">
-              <Button 
-                onClick={handleSignUp} 
-                disabled={loading}
-                className="w-full"
-              >
-                {loading ? 'Creating account...' : 'Sign Up'}
-              </Button>
-              <p className="text-sm text-muted-foreground text-center">
-                By creating an account, you agree to our terms of service and privacy policy.
+            <div className="text-center mt-6">
+              <p className="text-sm text-muted-foreground">
+                Don't have an account?{' '}
+                <Button
+                  variant="link"
+                  className="text-primary hover:text-primary/80 font-medium p-0 h-auto underline"
+                  onClick={() => navigate('/auth/signup')}
+                >
+                  Sign Up
+                </Button>
               </p>
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
+            </div>
+
+            <div className="text-center mt-4">
+              <Button variant="link" className="text-muted-foreground hover:text-foreground p-0 h-auto text-sm">
+                Forgot Password?
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };
