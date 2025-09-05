@@ -74,8 +74,7 @@ const Messages = () => {
       const { error } = await supabase
         .from('conversation_participants')
         .update({ 
-          deleted: true, 
-          deleted_at: new Date().toISOString() 
+          deleted: true
         })
         .eq('conversation_id', conversationId)
         .eq('user_id', user.id);
@@ -92,7 +91,7 @@ const Messages = () => {
     !searchTerm || 
     conversation.other_participant?.display_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     conversation.other_participant?.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    conversation.last_message?.content?.toLowerCase().includes(searchTerm.toLowerCase())
+    conversation.last_message?.body?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const getInitials = (name?: string) => {
@@ -112,12 +111,12 @@ const Messages = () => {
 
   const getLastMessagePreview = (message: any) => {
     if (!message) return 'No messages yet';
-    if (message.deleted || message.deleted_for_all) return 'This message was deleted';
-    if (message.content) return message.content;
-    if (message.media_type) {
-      if (message.media_type.startsWith('image/')) return '📷 Photo';
-      if (message.media_type.startsWith('video/')) return '🎥 Video';
-      if (message.media_type.includes('pdf')) return '📄 Document';
+    if (message.deleted || message.deleted_for_everyone) return 'This message was deleted';
+    if (message.body) return message.body;
+    if (message.kind !== 'text') {
+      if (message.kind === 'image') return '📷 Photo';
+      if (message.kind === 'video') return '🎥 Video';
+      if (message.kind === 'document') return '📄 Document';
     }
     return 'Attachment';
   };
