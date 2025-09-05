@@ -17,6 +17,13 @@ export interface Profile {
   phone_number?: string;
   artform?: 'actor' | 'dancer' | 'model' | 'photographer' | 'videographer' | 'instrumentalist' | 'singer' | 'drawing' | 'painting';
   organization_type?: 'director' | 'producer' | 'production_house' | 'casting_agency' | 'casting_director' | 'event_management' | 'individual_hirer' | 'institution' | 'others';
+  headline?: string;
+  social_links?: Record<string, string>;
+  portfolio_count?: number;
+  verified?: boolean;
+  stats?: Record<string, any>;
+  pronouns?: string;
+  contact_email?: string;
   created_at: string;
   updated_at: string;
 }
