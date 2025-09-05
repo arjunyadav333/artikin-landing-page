@@ -217,6 +217,7 @@ export const MessageItem = ({
                   size="sm"
                   className="h-4 w-4 p-0 text-destructive hover:text-destructive/80"
                   onClick={onRetry}
+                  title="Retry sending message"
                 >
                   <AlertCircle className="h-3 w-3" />
                 </Button>
@@ -226,7 +227,11 @@ export const MessageItem = ({
                 <div className="h-3 w-3 animate-spin rounded-full border border-current border-t-transparent" />
               )}
               
-              {getMessageStatus()}
+              {status === 'sent' && isOwn && (
+                <Check className="h-3 w-3 text-muted-foreground" />
+              )}
+              
+              {!status && getMessageStatus()}
             </div>
           </div>
           

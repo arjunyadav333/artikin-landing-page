@@ -252,6 +252,7 @@ const ConversationPage = () => {
                 );
                 
                 const isOptimisticMessage = optimisticMessages.some(opt => opt.client_id === message.client_id);
+                const optimisticMsg = optimisticMessages.find(opt => opt.client_id === message.client_id);
                 
                 return (
                   <MessageItem
@@ -260,10 +261,10 @@ const ConversationPage = () => {
                     isOwn={isOwn}
                     showSender={showSender}
                     isOptimistic={isOptimisticMessage}
-                    status={isOptimisticMessage ? (message as any).status : undefined}
+                    status={optimisticMsg?.status}
                     onRetry={() => {
-                      if (isOptimisticMessage && message.client_id) {
-                        retryMessage(message as any);
+                      if (optimisticMsg) {
+                        retryMessage(optimisticMsg);
                       }
                     }}
                     onDelete={(messageId) => deleteMessage(messageId)}

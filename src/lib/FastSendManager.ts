@@ -58,6 +58,13 @@ export class FastSendManager {
   }
 
   private async initWebSocket() {
+    // For now, disable WebSocket and use HTTP directly for reliability
+    // This can be re-enabled later when the WebSocket endpoint is properly configured
+    console.log('WebSocket disabled, using HTTP-only mode');
+    this.isConnecting = false;
+    return;
+
+    /*
     if (this.isConnecting || this.websocket?.readyState === WebSocket.OPEN) {
       return;
     }
@@ -96,6 +103,7 @@ export class FastSendManager {
       this.isConnecting = false;
       this.scheduleReconnect();
     }
+    */
   }
 
   private handleWebSocketMessage(event: MessageEvent) {
@@ -179,21 +187,21 @@ export class FastSendManager {
         timeout
       });
 
-      // Send via WebSocket if available, otherwise fallback to direct HTTP
-      this.sendViaWebSocket(clientId, conversationId, content, senderId, kind)
-        .catch((wsError) => {
-          console.log('WebSocket send failed, falling back to HTTP:', wsError);
-          this.sendViaHTTP(clientId, conversationId, content, senderId, kind)
-            .then((result) => {
-              clearTimeout(timeout);
-              this.messageCallbacks.delete(clientId);
-              resolve(result);
-            })
-            .catch((httpError) => {
-              clearTimeout(timeout);
-              this.messageCallbacks.delete(clientId);
-              reject(httpError);
-            });
+      // Use HTTP directly (WebSocket disabled for now)
+      console.log('Sending message via HTTP:', { clientId, conversationId, content });
+      
+      this.sendViaHTTP(clientId, conversationId, content, senderId, kind)
+        .then((result) => {
+          console.log('HTTP send successful:', result);
+          clearTimeout(timeout);
+          this.messageCallbacks.delete(clientId);
+          resolve(result);
+        })
+        .catch((httpError) => {
+          console.error('HTTP send failed:', httpError);
+          clearTimeout(timeout);
+          this.messageCallbacks.delete(clientId);
+          reject(httpError);
         });
     });
 
@@ -233,20 +241,51 @@ export class FastSendManager {
     senderId: string,
     kind: string
   ): Promise<{ serverId: string; serverTimestamp: string }> {
-    const { data, error } = await supabase.rpc('create_message_with_client_id', {
-      conversation_id_param: conversationId,
-      sender_id_param: senderId,
-      client_id_param: clientId,
-      kind_param: kind,
-      body_param: content
+    console.log('Attempting HTTP send:', { 
+      clientId, 
+      conversationId, 
+      senderId,
+      content: content.substring(0, 50) + (content.length > 50 ? '...' : ''),
+      kind 
     });
+    
+    try {
+      const { data, error } = await supabase.rpc('create_message_with_client_id', {
+        conversation_id_param: conversationId,
+        sender_id_param: senderId,
+        client_id_param: clientId,
+        kind_param: kind,
+        body_param: content
+      });
 
-    if (error) throw error;
+      console.log('RPC response:', { data, error });
 
-    return {
-      serverId: data[0].id,
-      serverTimestamp: data[0].server_timestamp
-    };
+      if (error) {
+        console.error('RPC error details:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
+        throw error;
+      }
+
+      if (!data || data.length === 0) {
+        console.error('No data returned from RPC');
+        throw new Error('No message created - empty response from database');
+      }
+
+      const result = data[0];
+      console.log('Message created successfully via HTTP:', result);
+      
+      return {
+        serverId: result.id,
+        serverTimestamp: result.server_timestamp || result.created_at
+      };
+    } catch (dbError) {
+      console.error('Database operation failed:', dbError);
+      throw new Error(`Database error: ${dbError.message || 'Unknown database error'}`);
+    }
   }
 
   public async retryMessage(

@@ -78,6 +78,8 @@ export const useFastMessaging = (conversationId: string) => {
         // Wait for server response
         const { serverId, serverTimestamp } = await promise;
         
+        console.log('Message sent successfully:', { serverId, serverTimestamp });
+        
         // Update optimistic message status
         setOptimisticMessages(prev => 
           prev.map(msg => 
@@ -86,8 +88,6 @@ export const useFastMessaging = (conversationId: string) => {
               : msg
           )
         );
-
-        console.log('Message sent successfully:', { serverId, serverTimestamp });
         
       } catch (sendError) {
         console.error('Message send failed:', sendError);
@@ -101,10 +101,10 @@ export const useFastMessaging = (conversationId: string) => {
           )
         );
 
-        // Show error toast
+        // Show error toast but don't throw - let user retry
         toast({
           title: "Message failed to send",
-          description: "Tap to retry",
+          description: "Tap the message to retry",
           variant: "destructive"
         });
       }
