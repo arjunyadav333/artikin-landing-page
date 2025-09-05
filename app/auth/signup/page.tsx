@@ -48,16 +48,16 @@ export default function SignUpPage() {
           {!selectedRole ? (
             <>
               <CardHeader className="text-center space-y-2 pb-6">
-                <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center justify-between mb-4 w-full">
                   <Button
                     onClick={() => router.push('/auth')}
                     variant="ghost"
                     size="sm"
-                    className="text-muted-foreground hover:text-foreground transition-colors"
+                    className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
                   >
                     ← Back to Sign In
                   </Button>
-                  <div></div> {/* Spacer for centering */}
+                  <div className="flex-1"></div> {/* Spacer for centering */}
                 </div>
                 <CardTitle className="text-2xl font-bold text-foreground">
                   Join Artikin
