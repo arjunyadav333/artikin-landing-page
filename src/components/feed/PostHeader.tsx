@@ -9,7 +9,8 @@ import {
   DropdownMenuSeparator
 } from '@/components/ui/dropdown-menu';
 import { Link } from 'react-router-dom';
-import { HomeFeedPost, useFollowUser } from '@/hooks/useHomeFeed';
+import { HomeFeedPost } from '@/hooks/useHomeFeed';
+import { useFollowUser } from '@/hooks/useConnections';
 import { useAuth } from '@/hooks/useAuth';
 
 interface PostHeaderProps {
@@ -24,8 +25,8 @@ export const PostHeader = ({ post, isOwner }: PostHeaderProps) => {
   const handleFollow = () => {
     if (!user) return;
     followMutation.mutate({ 
-      userId: post.user_id, 
-      isFollowing: post.is_following || false 
+      targetUserId: post.user_id, 
+      isCurrentlyFollowing: post.is_following || false 
     });
   };
 

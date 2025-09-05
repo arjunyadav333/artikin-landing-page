@@ -151,7 +151,7 @@ export const useHomeFeed = (limit = 20) => {
             console.log('Posts change:', payload);
             const { eventType, new: newPost, old: oldPost } = payload;
             
-            queryClient.setQueryData(['homeFeed'], (old: any) => {
+            queryClient.setQueryData(['homeFeed', limit], (old: any) => {
               if (!old?.pages) return old;
               
               const pages = [...old.pages];
@@ -201,7 +201,7 @@ export const useHomeFeed = (limit = 20) => {
             const postId = (payload.new as any)?.post_id || (payload.old as any)?.post_id;
             const isInsert = payload.eventType === 'INSERT';
             
-            queryClient.setQueryData(['homeFeed'], (old: any) => {
+            queryClient.setQueryData(['homeFeed', limit], (old: any) => {
               if (!old) return old;
               
               return {
@@ -230,7 +230,7 @@ export const useHomeFeed = (limit = 20) => {
             schema: 'public', 
             table: 'comments' 
           }, (payload) => {
-            queryClient.setQueryData(['homeFeed'], (old: any) => {
+            queryClient.setQueryData(['homeFeed', limit], (old: any) => {
               if (!old) return old;
               
               return {
@@ -255,7 +255,7 @@ export const useHomeFeed = (limit = 20) => {
             schema: 'public', 
             table: 'shares' 
           }, (payload) => {            
-            queryClient.setQueryData(['homeFeed'], (old: any) => {
+            queryClient.setQueryData(['homeFeed', limit], (old: any) => {
               if (!old) return old;
               
               return {
@@ -285,7 +285,7 @@ export const useHomeFeed = (limit = 20) => {
             if (user?.id && ((newConnection as any)?.follower_id === user.id || (oldConnection as any)?.follower_id === user.id)) {
               const targetUserId = ((newConnection || oldConnection) as any)?.following_id;
               
-              queryClient.setQueryData(['homeFeed'], (old: any) => {
+              queryClient.setQueryData(['homeFeed', limit], (old: any) => {
                 if (!old?.pages) return old;
                 
                 const pages = [...old.pages];
@@ -350,7 +350,7 @@ export const useLikePost = () => {
       
       const previousData = queryClient.getQueryData(['homeFeed']);
       
-      queryClient.setQueryData(['homeFeed'], (old: any) => {
+      queryClient.setQueryData(['homeFeed', 20], (old: any) => {
         if (!old) return old;
         
         return {
@@ -377,65 +377,6 @@ export const useLikePost = () => {
       }
       toast({
         title: "Failed to update like",
-        description: error.message,
-        variant: "destructive"
-      });
-    }
-  });
-};
-
-// Follow user mutation with optimistic updates  
-export const useFollowUser = () => {
-  const queryClient = useQueryClient();
-  const { toast } = useToast();
-  const { user } = useAuth();
-
-  return useMutation({
-    mutationFn: async ({ userId, isFollowing }: { userId: string; isFollowing: boolean }) => {
-      if (!user) throw new Error('Not authenticated');
-
-      if (isFollowing) {
-        const { error } = await supabase
-          .from('connections')
-          .delete()
-          .eq('follower_id', user.id)
-          .eq('following_id', userId);
-        if (error) throw error;
-      } else {
-        const { error } = await supabase
-          .from('connections')
-          .insert({ follower_id: user.id, following_id: userId });
-        if (error) throw error;
-      }
-    },
-    onMutate: async ({ userId, isFollowing }) => {
-      await queryClient.cancelQueries({ queryKey: ['homeFeed'] });
-      
-      const previousData = queryClient.getQueryData(['homeFeed']);
-      
-      queryClient.setQueryData(['homeFeed'], (old: any) => {
-        if (!old) return old;
-        
-        return {
-          ...old,
-          pages: old.pages.map((page: HomeFeedPost[]) =>
-            page.map(post => 
-              post.user_id === userId 
-                ? { ...post, is_following: !isFollowing }
-                : post
-            )
-          )
-        };
-      });
-      
-      return { previousData };
-    },
-    onError: (error, variables, context) => {
-      if (context?.previousData) {
-        queryClient.setQueryData(['homeFeed'], context.previousData);
-      }
-      toast({
-        title: "Failed to update follow",
         description: error.message,
         variant: "destructive"
       });

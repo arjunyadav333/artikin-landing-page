@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Heart, MessageCircle, Share2, MoreVertical, Edit, Trash2, Copy, Flag, EyeOff } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { HomeFeedPost, useLikePost, useFollowUser, useSharePost } from '@/hooks/useHomeFeed';
+import { HomeFeedPost, useLikePost, useSharePost } from '@/hooks/useHomeFeed';
+import { useFollowUser } from '@/hooks/useConnections';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { MediaCarousel } from './MediaCarousel';
@@ -36,8 +37,8 @@ export const PostRowWide = ({ post }: PostRowWideProps) => {
     }
     
     followMutation.mutate({ 
-      userId: post.user_id, 
-      isFollowing: post.is_following || false 
+      targetUserId: post.user_id, 
+      isCurrentlyFollowing: post.is_following || false 
     });
   };
 

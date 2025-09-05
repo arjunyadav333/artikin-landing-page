@@ -61,7 +61,12 @@ export const useConnections = (userId?: string, type: 'following' | 'followers' 
         `)
         .eq(isFollowing ? 'follower_id' : 'following_id', userId);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Connections query error:', error);
+        throw error;
+      }
+      
+      console.log(`${type} data:`, data);
       return data || [];
     },
     enabled: !!userId
@@ -96,9 +101,11 @@ export const useConnections = (userId?: string, type: 'following' | 'followers' 
               
               if (eventType === 'INSERT' && newConnection) {
                 // Add new connection
+                console.log('Adding new connection:', newConnection);
                 return [...old, newConnection as any];
               } else if (eventType === 'DELETE' && oldConnection) {
                 // Remove deleted connection
+                console.log('Removing connection:', oldConnection);
                 return old.filter((conn: any) => conn.id !== (oldConnection as any).id);
               }
               
@@ -186,6 +193,22 @@ export const useFollowUser = () => {
         if (error) throw error;
       }
     },
+    onMutate: async ({ targetUserId, isCurrentlyFollowing }) => {
+      // Cancel outgoing queries
+      await queryClient.cancelQueries({ queryKey: ['connections'] });
+      await queryClient.cancelQueries({ queryKey: ['connectionStatus'] });
+
+      // Get previous values
+      const previousData = queryClient.getQueryData(['connectionStatus', targetUserId]);
+      
+      // Optimistically update connection status
+      queryClient.setQueryData(['connectionStatus', targetUserId], {
+        isFollowing: !isCurrentlyFollowing,
+        isFollowedBy: previousData ? (previousData as any).isFollowedBy : false
+      });
+
+      return { previousData };
+    },
     onSuccess: (_, { isCurrentlyFollowing }) => {
       queryClient.invalidateQueries({ queryKey: ['connections'] });
       queryClient.invalidateQueries({ queryKey: ['connectionStatus'] });
@@ -197,7 +220,12 @@ export const useFollowUser = () => {
           : "You are now following this user."
       });
     },
-    onError: (error: any) => {
+    onError: (error: any, variables, context) => {
+      // Rollback optimistic update
+      if (context?.previousData) {
+        queryClient.setQueryData(['connectionStatus', variables.targetUserId], context.previousData);
+      }
+      
       toast({
         title: "Action failed",
         description: error.message,
