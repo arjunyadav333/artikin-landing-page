@@ -28,46 +28,61 @@ export const useConnections = (userId?: string, type: 'following' | 'followers' 
       if (!userId) return [];
 
       const isFollowing = type === 'following';
-      const { data, error } = await supabase
+      
+      // Since there are no foreign key relationships, we need to fetch connections and profiles separately
+      const { data: connections, error: connectionsError } = await supabase
         .from('connections')
-        .select(`
-          *,
-          following:profiles!connections_following_id_fkey (
-            id,
-            user_id,
-            username,
-            display_name,
-            avatar_url,
-            bio,
-            location,
-            role,
-            artform,
-            organization_type,
-            created_at
-          ),
-          follower:profiles!connections_follower_id_fkey (
-            id,
-            user_id,
-            username,
-            display_name,
-            avatar_url,
-            bio,
-            location,
-            role,
-            artform,
-            organization_type,
-            created_at
-          )
-        `)
+        .select('*')
         .eq(isFollowing ? 'follower_id' : 'following_id', userId);
 
-      if (error) {
-        console.error('Connections query error:', error);
-        throw error;
+      if (connectionsError) {
+        console.error('Connections query error:', connectionsError);
+        throw connectionsError;
       }
-      
-      console.log(`${type} data:`, data);
-      return data || [];
+
+      if (!connections?.length) {
+        console.log(`No ${type} connections found`);
+        return [];
+      }
+
+      // Get the user IDs we need to fetch profiles for
+      const userIds = connections.map(conn => 
+        isFollowing ? conn.following_id : conn.follower_id
+      );
+
+      // Fetch profiles separately
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select(`
+          id,
+          user_id,
+          username,
+          display_name,
+          avatar_url,
+          bio,
+          location,
+          role,
+          artform,
+          organization_type,
+          created_at
+        `)
+        .in('user_id', userIds);
+
+      if (profilesError) {
+        console.error('Profiles query error:', profilesError);
+        throw profilesError;
+      }
+
+      // Combine connections with profiles
+      const result = connections.map(conn => ({
+        ...conn,
+        [isFollowing ? 'following' : 'follower']: profiles?.find(p => 
+          p.user_id === (isFollowing ? conn.following_id : conn.follower_id)
+        )
+      }));
+
+      console.log(`${type} data:`, result);
+      return result;
     },
     enabled: !!userId
   });

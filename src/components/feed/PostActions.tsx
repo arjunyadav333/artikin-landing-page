@@ -12,7 +12,7 @@ interface PostActionsProps {
 export const PostActions = ({ post }: PostActionsProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const likeMutation = useLikePost();
+  const likeMutation = useLikePost(20);
   const shareMutation = useSharePost();
   const [showComments, setShowComments] = useState(false);
 

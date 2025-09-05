@@ -22,7 +22,7 @@ export const PostRowWide = ({ post }: PostRowWideProps) => {
   const [commentSheetOpen, setCommentSheetOpen] = useState(false);
   const [shareSheetOpen, setShareSheetOpen] = useState(false);
   
-  const likeMutation = useLikePost();
+  const likeMutation = useLikePost(20);
   const followMutation = useFollowUser();
   const shareMutation = useSharePost();
 
@@ -36,6 +36,7 @@ export const PostRowWide = ({ post }: PostRowWideProps) => {
       return;
     }
     
+    console.log('Follow button clicked for user:', post.user_id, 'Current following state:', post.is_following);
     followMutation.mutate({ 
       targetUserId: post.user_id, 
       isCurrentlyFollowing: post.is_following || false 
@@ -52,6 +53,7 @@ export const PostRowWide = ({ post }: PostRowWideProps) => {
       return;
     }
     
+    console.log('Like button clicked for post:', post.id, 'Current liked state:', post.user_liked);
     likeMutation.mutate({ 
       postId: post.id, 
       isLiked: post.user_liked || false 

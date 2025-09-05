@@ -184,6 +184,7 @@ export const useHomeFeed = (limit = 20) => {
               reconnectAttempts = 0;
             } else if (status === 'CLOSED' && isSubscribed && reconnectAttempts < maxReconnectAttempts) {
               reconnectAttempts++;
+              console.log(`Attempting to reconnect posts subscription (attempt ${reconnectAttempts})`);
               setTimeout(() => {
                 if (isSubscribed) setupSubscriptions();
               }, Math.pow(2, reconnectAttempts) * 1000);
@@ -198,8 +199,16 @@ export const useHomeFeed = (limit = 20) => {
             schema: 'public', 
             table: 'likes' 
           }, (payload) => {
+            console.log('Likes change:', payload);
             const postId = (payload.new as any)?.post_id || (payload.old as any)?.post_id;
             const isInsert = payload.eventType === 'INSERT';
+            const affectedUserId = (payload.new as any)?.user_id || (payload.old as any)?.user_id;
+            
+            // Only update if this is not the current user's action (to avoid double counting with optimistic updates)
+            if (affectedUserId === user.id) {
+              console.log('Skipping realtime update for own action');
+              return;
+            }
             
             queryClient.setQueryData(['homeFeed', limit], (old: any) => {
               if (!old) return old;
@@ -211,8 +220,7 @@ export const useHomeFeed = (limit = 20) => {
                     post.id === postId 
                       ? {
                           ...post,
-                          likes_count: Math.max(0, post.likes_count + (isInsert ? 1 : -1)),
-                          user_liked: (payload.new as any)?.user_id === user.id ? isInsert : post.user_liked
+                          likes_count: Math.max(0, post.likes_count + (isInsert ? 1 : -1))
                         }
                       : post
                   )
@@ -322,7 +330,7 @@ export const useHomeFeed = (limit = 20) => {
 };
 
 // Like post mutation with optimistic updates
-export const useLikePost = () => {
+export const useLikePost = (limit = 20) => {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { user } = useAuth();
@@ -331,6 +339,8 @@ export const useLikePost = () => {
     mutationFn: async ({ postId, isLiked }: { postId: string; isLiked: boolean }) => {
       if (!user) throw new Error('Not authenticated');
 
+      console.log('useLikePost mutation called:', { postId, isLiked, userId: user.id });
+
       if (isLiked) {
         const { error } = await supabase
           .from('likes')
@@ -338,19 +348,21 @@ export const useLikePost = () => {
           .eq('user_id', user.id)
           .eq('post_id', postId);
         if (error) throw error;
+        console.log('Like removed successfully');
       } else {
         const { error } = await supabase
           .from('likes')
           .insert({ user_id: user.id, post_id: postId });
         if (error) throw error;
+        console.log('Like added successfully');
       }
     },
     onMutate: async ({ postId, isLiked }) => {
       await queryClient.cancelQueries({ queryKey: ['homeFeed'] });
       
-      const previousData = queryClient.getQueryData(['homeFeed']);
+      const previousData = queryClient.getQueryData(['homeFeed', limit]);
       
-      queryClient.setQueryData(['homeFeed', 20], (old: any) => {
+      queryClient.setQueryData(['homeFeed', limit], (old: any) => {
         if (!old) return old;
         
         return {
@@ -373,7 +385,7 @@ export const useLikePost = () => {
     },
     onError: (error, variables, context) => {
       if (context?.previousData) {
-        queryClient.setQueryData(['homeFeed'], context.previousData);
+        queryClient.setQueryData(['homeFeed', limit], context.previousData);
       }
       toast({
         title: "Failed to update like",
