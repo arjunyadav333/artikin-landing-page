@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,21 +10,11 @@ import { Separator } from "@/components/ui/separator";
 import { 
   Search, 
   Send, 
-  Phone, 
-  Video, 
-  MoreHorizontal, 
-  Paperclip,
-  
-  Image,
   Plus,
   Filter,
-  Check,
-  CheckCheck,
-  ArrowLeft,
-  
-  FileText,
-  Download
+  ArrowLeft
 } from "lucide-react";
+import { AppLayout } from "@/components/layout/app-layout";
 import { 
   useConversations,
   useMessages,
@@ -36,23 +26,26 @@ import {
   type Conversation,
   type MessageAttachment
 } from "@/hooks/useMessaging";
-import { useDraftMessage } from "@/hooks/useDraftMessage";
+import { NewMessageModal } from "@/components/messaging/NewMessageModal";
+import { ConversationActions } from "@/components/messaging/ConversationActions";
+import { MessageItem } from "@/components/messaging/MessageItem";
 import { OptimisticMessageComponent } from "@/components/messaging/optimistic-message";
 import { useAuth } from "@/hooks/useAuth";
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { FileUpload } from "@/components/messaging/file-upload";
-
-import { MessageAttachments } from "@/components/messaging/message-attachments";
 import { ConversationListSkeleton } from "@/components/ui/conversation-skeleton";
 import { MessageListSkeleton } from "@/components/ui/message-skeleton";
+import { useDraftMessage } from "@/hooks/useDraftMessage";
 
 const Messages = () => {
-  const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
+  const { chatId } = useParams();
+  const [selectedConversationId, setSelectedConversationId] = useState<string | null>(chatId || null);
   const [searchTerm, setSearchTerm] = useState("");
   const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+  const [showNewMessageModal, setShowNewMessageModal] = useState(false);
   const [optimisticMessages, setOptimisticMessages] = useState<Array<{
     id: string;
     body?: string;
@@ -80,6 +73,13 @@ const Messages = () => {
     }
   }, [user, loading, navigate]);
 
+  // Handle URL param changes
+  useEffect(() => {
+    if (chatId && chatId !== selectedConversationId) {
+      setSelectedConversationId(chatId);
+    }
+  }, [chatId]);
+
   // Handle window resize for responsive layout
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 1024);
@@ -90,9 +90,11 @@ const Messages = () => {
   // Show loading while checking auth
   if (loading) {
     return (
-      <div className="h-screen bg-background flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
+      <AppLayout>
+        <div className="h-screen bg-background flex items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      </AppLayout>
     );
   }
 
@@ -100,6 +102,7 @@ const Messages = () => {
   if (!user) {
     return null;
   }
+
   const { data: conversations = [], isLoading: conversationsLoading, error: conversationsError } = useConversations();
   const { data: messages = [], isLoading: messagesLoading } = useMessages(selectedConversationId);
   const sendMessageMutation = useSendMessage();
@@ -250,353 +253,306 @@ const Messages = () => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   };
 
-  const formatMessageTime = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffInHours = Math.abs(now.getTime() - date.getTime()) / (1000 * 60 * 60);
-    
-    if (diffInHours < 24) {
-      return date.toLocaleTimeString('en-US', { 
-        hour: 'numeric', 
-        minute: '2-digit',
-        hour12: true 
-      });
-    } else {
-      return date.toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric'
-      });
-    }
-  };
-
-  const getMessageStatus = (message: Message) => {
-    if (message.sender_id !== user?.id) return null;
-    
-    // Check receipts for status
-    const receipts = message.receipts || [];
-    const hasDelivered = receipts.some(r => r.status === 'delivered' || r.status === 'read');
-    const hasRead = receipts.some(r => r.status === 'read');
-    
-    if (hasRead) {
-      return <CheckCheck className="h-3 w-3 text-blue-500" />;
-    } else if (hasDelivered) {
-      return <CheckCheck className="h-3 w-3 text-muted-foreground" />;
-    } else {
-      return <Check className="h-3 w-3 text-muted-foreground" />;
-    }
-  };
-
   if (conversationsError) {
     console.error('Conversations error:', conversationsError);
     return (
-      <div className="h-screen bg-background flex flex-col">
-        <div className="flex-1 flex items-center justify-center">
-          <Card className="w-96">
-            <CardContent className="p-6 text-center">
-              <div className="h-12 w-12 bg-destructive/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Send className="h-6 w-6 text-destructive" />
-              </div>
-              <h3 className="text-lg font-semibold mb-2 text-destructive">Connection Error</h3>
-              <p className="text-muted-foreground mb-4">
-                Unable to load conversations. Please check your internet connection and try again.
-              </p>
-              <Button 
-                onClick={() => window.location.reload()} 
-                variant="outline"
-                className="w-full"
-              >
-                Retry
-              </Button>
-            </CardContent>
-          </Card>
+      <AppLayout>
+        <div className="h-screen bg-background flex flex-col">
+          <div className="flex-1 flex items-center justify-center">
+            <Card className="w-96">
+              <CardContent className="p-6 text-center">
+                <div className="h-12 w-12 bg-destructive/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Send className="h-6 w-6 text-destructive" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2 text-destructive">Connection Error</h3>
+                <p className="text-muted-foreground mb-4">
+                  Unable to load conversations. Please check your internet connection and try again.
+                </p>
+                <Button 
+                  onClick={() => window.location.reload()} 
+                  variant="outline"
+                  className="w-full"
+                >
+                  Retry
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
         </div>
-      </div>
+      </AppLayout>
     );
   }
 
   return (
-    <div className="h-screen bg-background flex flex-col">
-      <div className="flex-1 flex overflow-hidden">
-        {/* Conversations List */}
-        <div className={cn(
-          "border-r bg-card flex flex-col transition-all duration-300",
-          isMobile ? (selectedConversationId ? "hidden" : "flex w-full") : "w-80 flex"
-        )}>
-          <div className="p-4 border-b">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold">Messages</h3>
-              <Button variant="ghost" size="sm">
-                <Plus className="h-4 w-4" />
-              </Button>
-            </div>
-            <div className="flex gap-2 items-center">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search conversations..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
+    <AppLayout>
+      <div className="h-screen bg-background flex flex-col">
+        <div className="flex-1 flex overflow-hidden">
+          {/* Conversations List */}
+          <div className={cn(
+            "border-r bg-card flex flex-col transition-all duration-300",
+            isMobile ? (selectedConversationId ? "hidden" : "flex w-full") : "w-80 flex"
+          )}>
+            <div className="p-4 border-b">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-semibold">Messages</h3>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => setShowNewMessageModal(true)}
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
               </div>
-              <Button variant="outline" size="icon">
-                <Filter className="h-4 w-4" />
-              </Button>
+              <div className="flex gap-2 items-center">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search conversations..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+                <Button variant="outline" size="icon">
+                  <Filter className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
+
+            <ScrollArea className="flex-1">
+              {conversationsLoading ? (
+                <ConversationListSkeleton count={6} />
+              ) : filteredConversations.length === 0 ? (
+                <div className="p-4 text-center text-muted-foreground">
+                  <div className="h-12 w-12 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Send className="h-6 w-6" />
+                  </div>
+                  <h4 className="font-medium mb-2">No conversations yet</h4>
+                  <p className="text-sm">
+                    {searchTerm 
+                      ? 'No conversations match your search' 
+                      : 'Start a conversation with someone to begin messaging'
+                    }
+                  </p>
+                </div>
+              ) : (
+                filteredConversations.map((conversation, index) => (
+                  <div key={conversation.id}>
+                    <div
+                      className={cn(
+                        "flex items-center space-x-3 p-4 cursor-pointer hover:bg-muted transition-colors",
+                        selectedConversationId === conversation.id && "bg-muted",
+                        conversation.participant_settings?.pinned && "bg-primary/5 border-l-2 border-l-primary"
+                      )}
+                      onClick={() => {
+                        setSelectedConversationId(conversation.id);
+                        navigate(`/messages/${conversation.id}`);
+                      }}
+                    >
+                      <div className="relative">
+                        <Avatar className="h-12 w-12">
+                          <AvatarImage 
+                            src={conversation.other_participant?.avatar_url} 
+                            alt={conversation.other_participant?.display_name} 
+                          />
+                          <AvatarFallback className="bg-primary text-primary-foreground">
+                            {getInitials(conversation.other_participant?.display_name)}
+                          </AvatarFallback>
+                        </Avatar>
+                      </div>
+                      
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between mb-1">
+                          <div className="flex items-center gap-2">
+                            <p className="font-semibold text-sm truncate">
+                              {conversation.other_participant?.display_name || 'Unknown User'}
+                            </p>
+                            {conversation.participant_settings?.pinned && (
+                              <Badge variant="secondary" className="text-xs px-1 py-0">
+                                Pinned
+                              </Badge>
+                            )}
+                          </div>
+                          <span className="text-xs text-muted-foreground">
+                            {conversation.last_message?.created_at && 
+                              formatDistanceToNow(new Date(conversation.last_message.created_at), { addSuffix: true })
+                            }
+                          </span>
+                        </div>
+                        <p className="text-sm text-muted-foreground truncate">
+                          {conversation.last_message?.body || 'No messages yet'}
+                        </p>
+                      </div>
+
+                      {(conversation.unread_count ?? 0) > 0 && (
+                        <Badge className="bg-primary text-primary-foreground h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs">
+                          {conversation.unread_count}
+                        </Badge>
+                      )}
+                    </div>
+                    {index < filteredConversations.length - 1 && <Separator />}
+                  </div>
+                ))
+              )}
+            </ScrollArea>
           </div>
 
-          <ScrollArea className="flex-1">
-            {conversationsLoading ? (
-              <ConversationListSkeleton count={6} />
-            ) : filteredConversations.length === 0 ? (
-              <div className="p-4 text-center text-muted-foreground">
-                <div className="h-12 w-12 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Send className="h-6 w-6" />
-                </div>
-                <h4 className="font-medium mb-2">No conversations yet</h4>
-                <p className="text-sm">
-                  {searchTerm 
-                    ? 'No conversations match your search' 
-                    : 'Start a conversation with someone to begin messaging'
-                  }
-                </p>
-              </div>
-            ) : (
-              filteredConversations.map((conversation, index) => (
-                <div key={conversation.id}>
-                  <div
-                    className={cn(
-                      "flex items-center space-x-3 p-4 cursor-pointer hover:bg-muted transition-colors",
-                      selectedConversationId === conversation.id && "bg-muted"
-                    )}
-                    onClick={() => setSelectedConversationId(conversation.id)}
-                  >
-                    <div className="relative">
-                      <Avatar className="h-12 w-12">
+          {/* Chat Area */}
+          <div className={cn(
+            "flex-1 flex flex-col bg-background transition-all duration-300",
+            isMobile && !selectedConversationId ? "hidden" : "flex"
+          )}>
+            {selectedConversation ? (
+              <>
+                {/* Chat Header */}
+                <div className="p-4 border-b bg-card">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="lg:hidden"
+                        onClick={() => setSelectedConversationId(null)}
+                      >
+                        <ArrowLeft className="h-4 w-4" />
+                      </Button>
+                      <Avatar className="h-10 w-10">
                         <AvatarImage 
-                          src={conversation.other_participant?.avatar_url} 
-                          alt={conversation.other_participant?.display_name} 
+                          src={selectedConversation.other_participant?.avatar_url} 
+                          alt={selectedConversation.other_participant?.display_name} 
                         />
                         <AvatarFallback className="bg-primary text-primary-foreground">
-                          {getInitials(conversation.other_participant?.display_name)}
+                          {getInitials(selectedConversation.other_participant?.display_name)}
                         </AvatarFallback>
                       </Avatar>
-                    </div>
-                    
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between mb-1">
-                        <p className="font-semibold text-sm truncate">
-                          {conversation.other_participant?.display_name || 'Unknown User'}
+                      <div>
+                        <p className="font-semibold">
+                          {selectedConversation.other_participant?.display_name || 'Unknown User'}
                         </p>
-                        <span className="text-xs text-muted-foreground">
-                          {conversation.last_message?.created_at && 
-                            formatDistanceToNow(new Date(conversation.last_message.created_at), { addSuffix: true })
-                          }
-                        </span>
+                        <p className="text-sm text-muted-foreground">
+                          {typingUsers.length > 0 ? 'typing...' : `@${selectedConversation.other_participant?.username || 'unknown'}`}
+                        </p>
                       </div>
-                      <p className="text-sm text-muted-foreground truncate">
-                        {conversation.last_message?.body || 'No messages yet'}
-                      </p>
                     </div>
 
-                    {(conversation.unread_count ?? 0) > 0 && (
-                      <Badge className="bg-primary text-primary-foreground h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs">
-                        {conversation.unread_count}
-                      </Badge>
-                    )}
-                  </div>
-                  {index < filteredConversations.length - 1 && <Separator />}
-                </div>
-              ))
-            )}
-          </ScrollArea>
-        </div>
-
-        {/* Chat Area */}
-        <div className={cn(
-          "flex-1 flex flex-col bg-background transition-all duration-300",
-          isMobile && !selectedConversationId ? "hidden" : "flex"
-        )}>
-          {selectedConversation ? (
-            <>
-              {/* Chat Header */}
-              <div className="p-4 border-b bg-card">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="lg:hidden"
-                      onClick={() => setSelectedConversationId(null)}
-                    >
-                      <ArrowLeft className="h-4 w-4" />
-                    </Button>
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage 
-                        src={selectedConversation.other_participant?.avatar_url} 
-                        alt={selectedConversation.other_participant?.display_name} 
-                      />
-                      <AvatarFallback className="bg-primary text-primary-foreground">
-                        {getInitials(selectedConversation.other_participant?.display_name)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="font-semibold">
-                        {selectedConversation.other_participant?.display_name || 'Unknown User'}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {typingUsers.length > 0 ? 'typing...' : `@${selectedConversation.other_participant?.username || 'unknown'}`}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex space-x-2">
-                    <Button variant="ghost" size="sm">
-                      <Phone className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="sm">
-                      <Video className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="sm">
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Messages */}
-              <ScrollArea className="flex-1 p-4">
-                {messagesLoading ? (
-                  <MessageListSkeleton count={8} />
-                ) : messages.length === 0 ? (
-                  <div className="text-center text-muted-foreground">
-                    No messages yet. Start the conversation!
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {/* Regular messages */}
-                    {messages.map((message) => {
-                      const isMe = message.sender_id === user?.id;
-                      return (
-                        <div
-                          key={message.id}
-                          className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}
-                        >
-                          <div className={`flex space-x-2 max-w-[70%] ${isMe ? 'flex-row-reverse space-x-reverse' : ''}`}>
-                            {!isMe && (
-                              <Avatar className="h-8 w-8">
-                                <AvatarImage 
-                                  src={message.sender?.avatar_url} 
-                                  alt={message.sender?.display_name} 
-                                />
-                                <AvatarFallback className="bg-primary text-primary-foreground text-xs">
-                                  {getInitials(message.sender?.display_name)}
-                                </AvatarFallback>
-                              </Avatar>
-                            )}
-                            <div className={cn(
-                              "rounded-lg px-3 py-2",
-                              isMe 
-                                ? "bg-primary text-primary-foreground" 
-                                : "bg-muted"
-                            )}>
-                              {message.reply_to && (
-                                <div className={cn(
-                                  "text-xs opacity-70 mb-1 p-1 rounded border-l-2",
-                                  isMe ? "border-primary-foreground/30" : "border-primary/30"
-                                )}>
-                                  Replying to previous message
-                                </div>
-                              )}
-                              {message.body && (
-                                <div className="whitespace-pre-wrap break-words">
-                                  {message.body}
-                                </div>
-                              )}
-                              {message.attachments && message.attachments.length > 0 && (
-                                <div className="mt-2">
-                                  <MessageAttachments attachments={message.attachments} />
-                                </div>
-                              )}
-                               <div className="flex items-center justify-end mt-1 space-x-1">
-                                <span className="text-xs opacity-70">
-                                  {formatMessageTime(message.created_at)}
-                                </span>
-                                {getMessageStatus(message)}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                     })}
-                     
-                     {/* Optimistic messages */}
-                     {optimisticMessages.map((message) => (
-                       <OptimisticMessageComponent 
-                         key={message.id} 
-                         message={message} 
-                         user={user!} 
-                       />
-                     ))}
-                     
-                     <div ref={messagesEndRef} />
-                   </div>
-                 )}
-               </ScrollArea>
-
-              {/* Message Input */}
-              <div className="p-4 border-t bg-card">
-                <div className="flex items-end space-x-2">
-                   <FileUpload 
-                     onFileUploaded={(file) => {
-                       const attachment = {
-                         file_url: file.url,
-                         mime_type: file.type,
-                         file_size: file.size,
-                         // Add dimensions for images/videos if available
-                       };
-                       handleSendMessage([attachment]);
-                     }}
-                     disabled={sendMessageMutation.isPending}
-                   />
-                  <div className="flex-1 relative">
-                    <Input
-                      placeholder="Type a message..."
-                      value={draftText}
-                      onChange={(e) => handleTyping(e.target.value)}
-                      onKeyPress={handleKeyPress}
-                      className="resize-none pr-12"
-                      disabled={sendMessageMutation.isPending}
+                    <ConversationActions
+                      conversationId={selectedConversation.id}
+                      isPinned={selectedConversation.participant_settings?.pinned || false}
+                      otherParticipant={selectedConversation.other_participant}
+                      onClose={() => {
+                        setSelectedConversationId(null);
+                        navigate('/messages');
+                      }}
                     />
                   </div>
-                  <Button 
-                    onClick={() => handleSendMessage()} 
-                    disabled={(!draftText.trim()) || sendMessageMutation.isPending}
-                    size="sm"
-                  >
-                    {sendMessageMutation.isPending ? (
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
-                    ) : (
-                      <Send className="h-4 w-4" />
-                    )}
-                  </Button>
+                </div>
+
+                {/* Messages */}
+                <ScrollArea className="flex-1 p-4">
+                  {messagesLoading ? (
+                    <MessageListSkeleton count={8} />
+                  ) : messages.length === 0 ? (
+                    <div className="text-center text-muted-foreground">
+                      <div className="h-12 w-12 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Send className="h-6 w-6" />
+                      </div>
+                      <h4 className="font-medium mb-2">No messages yet</h4>
+                      <p className="text-sm">Start the conversation with your first message</p>
+                    </div>
+                  ) : (
+                    <>
+                      {messages.map((message, index) => {
+                        const isOwn = message.sender_id === user?.id;
+                        const showSender = !isOwn && (
+                          index === 0 || 
+                          messages[index - 1].sender_id !== message.sender_id
+                        );
+                        
+                        return (
+                          <MessageItem
+                            key={message.id}
+                            message={message}
+                            isOwn={isOwn}
+                            showSender={showSender}
+                          />
+                        );
+                      })}
+
+                      {/* Optimistic messages */}
+                      {optimisticMessages.map((message) => (
+                        <MessageItem
+                          key={message.id}
+                          message={{
+                            id: message.id,
+                            conversation_id: selectedConversationId!,
+                            sender_id: user?.id!,
+                            kind: 'text',
+                            body: message.body,
+                            attachments: message.attachments as any,
+                            deleted_for_everyone: false,
+                            created_at: new Date().toISOString()
+                          }}
+                          isOwn={true}
+                          isOptimistic={true}
+                          status={message.status}
+                          onRetry={message.retry}
+                        />
+                      ))}
+                      
+                      <div ref={messagesEndRef} />
+                    </>
+                  )}
+                </ScrollArea>
+
+                {/* Message Input */}
+                <div className="p-4 border-t bg-card">
+                  <div className="flex items-end gap-2">
+                    <FileUpload
+                      onFileUploaded={(fileData) => {
+                        handleSendMessage([fileData]);
+                      }}
+                      disabled={sendMessageMutation.isPending}
+                    />
+                    
+                    <div className="flex-1 relative">
+                      <Input
+                        value={draftText}
+                        onChange={(e) => handleTyping(e.target.value)}
+                        placeholder="Type a message..."
+                        className="pr-12 resize-none min-h-[40px] max-h-32"
+                        onKeyPress={handleKeyPress}
+                        disabled={sendMessageMutation.isPending}
+                      />
+                      <Button
+                        size="sm"
+                        className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0"
+                        onClick={() => handleSendMessage()}
+                        disabled={!draftText.trim() || sendMessageMutation.isPending}
+                      >
+                        <Send className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="flex-1 flex items-center justify-center">
+                <div className="text-center">
+                  <h2 className="text-xl font-semibold mb-2">Select a conversation</h2>
+                  <p className="text-muted-foreground">Choose a conversation from the sidebar to start messaging</p>
                 </div>
               </div>
-            </>
-          ) : (
-            <div className="flex-1 flex items-center justify-center">
-              <div className="text-center">
-                <div className="h-12 w-12 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Send className="h-6 w-6 text-muted-foreground" />
-                </div>
-                <h3 className="text-lg font-semibold mb-2">Select a conversation</h3>
-                <p className="text-muted-foreground">Choose a conversation from the sidebar to start messaging</p>
-              </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
+
+        {/* New Message Modal */}
+        <NewMessageModal
+          open={showNewMessageModal}
+          onOpenChange={setShowNewMessageModal}
+        />
       </div>
-    </div>
+    </AppLayout>
   );
 };
 

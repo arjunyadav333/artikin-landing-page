@@ -92,6 +92,7 @@ export type Database = {
           archived: boolean | null
           conversation_id: string
           created_at: string | null
+          deleted: boolean | null
           drafted_text: string | null
           last_read_message_id: string | null
           muted: boolean | null
@@ -103,6 +104,7 @@ export type Database = {
           archived?: boolean | null
           conversation_id: string
           created_at?: string | null
+          deleted?: boolean | null
           drafted_text?: string | null
           last_read_message_id?: string | null
           muted?: boolean | null
@@ -114,6 +116,7 @@ export type Database = {
           archived?: boolean | null
           conversation_id?: string
           created_at?: string | null
+          deleted?: boolean | null
           drafted_text?: string | null
           last_read_message_id?: string | null
           muted?: boolean | null
@@ -318,6 +321,7 @@ export type Database = {
           body: string | null
           conversation_id: string
           created_at: string | null
+          deleted: boolean | null
           deleted_for_everyone: boolean | null
           edited_at: string | null
           id: string
@@ -330,6 +334,7 @@ export type Database = {
           body?: string | null
           conversation_id: string
           created_at?: string | null
+          deleted?: boolean | null
           deleted_for_everyone?: boolean | null
           edited_at?: string | null
           id?: string
@@ -342,6 +347,7 @@ export type Database = {
           body?: string | null
           conversation_id?: string
           created_at?: string | null
+          deleted?: boolean | null
           deleted_for_everyone?: boolean | null
           edited_at?: string | null
           id?: string
@@ -850,6 +856,20 @@ export type Database = {
       get_or_create_conversation: {
         Args: { user1_id: string; user2_id: string }
         Returns: string
+      }
+      get_user_conversations: {
+        Args: { user_id_param: string }
+        Returns: {
+          created_at: string
+          deleted: boolean
+          id: string
+          last_message_id: string
+          other_participant_id: string
+          participant_a: string
+          participant_b: string
+          pinned: boolean
+          updated_at: string
+        }[]
       }
       mark_conversation_messages_read: {
         Args: {

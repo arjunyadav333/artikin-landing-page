@@ -7,7 +7,14 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 
 interface FileUploadProps {
-  onFileUploaded: (file: { url: string; type: string; size: number; name: string }) => void;
+  onFileUploaded: (fileData: {
+    file_url: string;
+    mime_type: string;
+    file_size?: number;
+    width?: number;
+    height?: number;
+    duration?: number;
+  }) => void;
   disabled?: boolean;
 }
 
@@ -59,10 +66,9 @@ export const FileUpload = ({ onFileUploaded, disabled }: FileUploadProps) => {
         .getPublicUrl(filePath);
 
       onFileUploaded({
-        url: publicUrl,
-        type: file.type,
-        size: file.size,
-        name: file.name
+        file_url: publicUrl,
+        mime_type: file.type,
+        file_size: file.size
       });
 
       toast({

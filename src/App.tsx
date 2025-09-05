@@ -23,6 +23,7 @@ const SignUp = lazy(() => import("./pages/SignUp"));
 const PostDetail = lazy(() => import("./pages/PostDetail"));
 const TagFeed = lazy(() => import("./pages/TagFeed"));
 const SavedPosts = lazy(() => import("./pages/SavedPosts"));
+const ConversationPage = lazy(() => import("./pages/ConversationPage"));
 const ProfileEdit = lazy(() => import("./pages/ProfileEdit"));
 
 // Loading component for lazy routes
@@ -200,9 +201,18 @@ const AppRoutes = () => {
           </ProtectedRoute>
         } />
         <Route path="/messages" element={
-          <Suspense fallback={<PageLoader />}>
-            <Messages />
-          </Suspense>
+          <ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <Messages />
+            </Suspense>
+          </ProtectedRoute>
+        } />
+        <Route path="/messages/:chatId" element={
+          <ProtectedRoute>
+            <Suspense fallback={<PageLoader />}>
+              <ConversationPage />
+            </Suspense>
+          </ProtectedRoute>
         } />
         <Route path="/saved" element={
           <ProtectedRoute>
