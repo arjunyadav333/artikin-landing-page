@@ -48,12 +48,12 @@ export default function SignUpPage() {
           {!selectedRole ? (
             <>
               <CardHeader className="text-center space-y-2 pb-6">
-                <div className="flex items-start justify-start mb-4 w-full">
+                <div className="flex items-center justify-start mb-6 w-full px-2">
                   <Button
                     onClick={() => router.push('/auth')}
                     variant="ghost"
                     size="sm"
-                    className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1 -ml-2"
+                    className="text-black hover:text-gray-700 transition-colors flex items-center gap-2 font-medium text-sm px-2 py-1 hover:bg-gray-100 rounded-md"
                   >
                     ← Back to Sign In
                   </Button>
