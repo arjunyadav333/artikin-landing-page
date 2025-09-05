@@ -109,7 +109,9 @@ const ConversationPage = () => {
       await sendMessageMutation.mutateAsync({
         conversationId: chatId,
         kind: attachments.length > 0 ? attachments[0].mime_type.split('/')[0] as any : 'text',
-        body: messageBody || undefined,
+        content: messageBody || undefined,
+        mediaUrl: attachments.length > 0 ? attachments[0].file_url : undefined,
+        mediaType: attachments.length > 0 ? attachments[0].mime_type : undefined,
         attachments: attachments.map(att => ({
           file_url: att.file_url,
           mime_type: att.mime_type,
@@ -283,10 +285,11 @@ const ConversationPage = () => {
                     conversation_id: chatId,
                     sender_id: user?.id!,
                     kind: 'text',
-                    body: message.body,
-                    attachments: message.attachments as any,
-                    deleted_for_everyone: false,
-                    created_at: new Date().toISOString()
+                    content: message.body,
+                    deleted: false,
+                    deleted_for_all: false,
+                    created_at: new Date().toISOString(),
+                    attachments: message.attachments as any
                   }}
                   isOwn={true}
                   isOptimistic={true}

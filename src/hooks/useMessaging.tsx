@@ -5,17 +5,19 @@ import { useAuth } from './useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useQueryPerformance } from '@/hooks/usePerformanceMonitoring';
 
-// Types for the new messaging system
+// Types for the updated messaging system
 export interface Message {
   id: string;
   conversation_id: string;
   sender_id: string;
-  kind: 'text' | 'image' | 'video' | 'document' | 'link';
-  body?: string;
-  meta?: any;
-  reply_to?: string;
-  edited_at?: string;
-  deleted_for_everyone: boolean;
+  kind: 'text' | 'image' | 'video' | 'document';
+  content?: string;
+  media_url?: string;
+  media_type?: string;
+  deleted: boolean;
+  deleted_for_all: boolean;
+  deleted_by?: string;
+  deleted_at?: string;
   created_at: string;
   sender?: {
     id: string;
@@ -25,7 +27,6 @@ export interface Message {
   };
   attachments?: MessageAttachment[];
   receipts?: MessageReceipt[];
-  reply_message?: Message;
 }
 
 export interface MessageAttachment {
@@ -42,23 +43,21 @@ export interface MessageAttachment {
 export interface MessageReceipt {
   message_id: string;
   user_id: string;
-  status: 'sent' | 'delivered' | 'read';
+  status: 'sent' | 'delivered' | 'seen';
   updated_at: string;
 }
 
 export interface Conversation {
   id: string;
-  participant_a: string;
-  participant_b: string;
-  last_message_id?: string;
-  updated_at: string;
   created_at: string;
+  updated_at: string;
   other_participant?: {
     id: string;
     username?: string;
     display_name?: string;
     avatar_url?: string;
     bio?: string;
+    role?: string;
   };
   last_message?: Message;
   unread_count?: number;
@@ -66,6 +65,7 @@ export interface Conversation {
     muted: boolean;
     pinned: boolean;
     archived: boolean;
+    deleted: boolean;
     last_read_message_id?: string;
     drafted_text?: string;
   };
@@ -89,105 +89,108 @@ export const useConversations = () => {
   return useQuery({
     queryKey: ['conversations', user?.id],
     queryFn: async () => {
-      if (!user) {
-        console.log('useConversations: No user found');
-        return [];
-      }
+      if (!user) return [];
 
-      console.log('useConversations: Fetching conversations for user:', user.id);
-
-      const { data, error } = await supabase
-        .from('conversations')
+      // Get conversations where user is a participant and not deleted
+      const { data: participants, error: participantsError } = await supabase
+        .from('conversation_participants')
         .select(`
-          *,
-          last_message:messages!conversations_last_message_id_fkey(
+          conversation_id,
+          pinned,
+          deleted,
+          muted,
+          archived,
+          last_read_message_id,
+          drafted_text,
+          conversations!inner(
             id,
-            body,
-            kind,
             created_at,
-            sender_id,
-            deleted_for_everyone
+            updated_at
           )
         `)
-        .or(`participant_a.eq.${user.id},participant_b.eq.${user.id}`)
-        .order('updated_at', { ascending: false });
+        .eq('user_id', user.id)
+        .eq('deleted', false)
+        .order('pinned', { ascending: false });
 
-      if (error) {
-        console.error('useConversations: Error fetching conversations:', error);
-        throw error;
-      }
+      if (participantsError) throw participantsError;
+      if (!participants || participants.length === 0) return [];
 
-      console.log('useConversations: Raw conversations data:', data);
-
-      if (!data || data.length === 0) {
-        console.log('useConversations: No conversations found');
-        return [];
-      }
-
-      // Enrich conversations with other participant info and settings
+      // Enrich conversations with other participant info and last message
       const enrichedConversations = await Promise.all(
-        data.map(async (conv: any) => {
-          const otherParticipantId = conv.participant_a === user.id 
-            ? conv.participant_b 
-            : conv.participant_a;
-
-          console.log('useConversations: Getting participant info for:', otherParticipantId);
-
-          // Get other participant profile
-          const { data: profile, error: profileError } = await supabase
-            .from('profiles')
-            .select('id, user_id, username, display_name, avatar_url, bio')
-            .eq('user_id', otherParticipantId)
-            .maybeSingle();
-
-          if (profileError) {
-            console.error('useConversations: Error fetching profile:', profileError);
-          }
-
-          // Get participant settings
-          const { data: settings, error: settingsError } = await supabase
+        participants.map(async (p: any) => {
+          const conv = p.conversations;
+          
+          // Get other participant
+          const { data: otherParticipants, error: otherError } = await supabase
             .from('conversation_participants')
-            .select('muted, pinned, archived, last_read_message_id, drafted_text')
+            .select(`
+              user_id,
+              profiles!inner(
+                user_id,
+                username,
+                display_name,
+                avatar_url,
+                bio,
+                role
+              )
+            `)
             .eq('conversation_id', conv.id)
-            .eq('user_id', user.id)
-            .maybeSingle();
+            .neq('user_id', user.id)
+            .single();
 
-          if (settingsError) {
-            console.error('useConversations: Error fetching settings:', settingsError);
+          if (otherError) {
+            console.error('Error fetching other participant:', otherError);
+            return null;
           }
+
+          // Get last message
+          const { data: lastMessage } = await supabase
+            .from('messages')
+            .select('id, content, media_type, created_at, sender_id, deleted, deleted_for_all')
+            .eq('conversation_id', conv.id)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
 
           // Get unread count
-          const { count: unreadCount, error: countError } = await supabase
+          const { count: unreadCount } = await supabase
             .from('messages')
             .select('*', { count: 'exact', head: true })
             .eq('conversation_id', conv.id)
             .neq('sender_id', user.id);
 
-          if (countError) {
-            console.error('useConversations: Error fetching unread count:', countError);
-          }
-
-          console.log('useConversations: Enriched conversation:', {
-            ...conv,
-            other_participant: profile,
-            unread_count: unreadCount || 0,
-            participant_settings: settings
-          });
-
           return {
-            ...conv,
-            other_participant: profile,
+            id: conv.id,
+            created_at: conv.created_at,
+            updated_at: conv.updated_at,
+            other_participant: otherParticipants?.profiles,
+            last_message: lastMessage,
             unread_count: unreadCount || 0,
-            participant_settings: settings
+            participant_settings: {
+              pinned: p.pinned,
+              deleted: p.deleted,
+              muted: p.muted,
+              archived: p.archived,
+              last_read_message_id: p.last_read_message_id,
+              drafted_text: p.drafted_text
+            }
           };
         })
       );
 
-      console.log('useConversations: Final enriched conversations:', enrichedConversations);
-      
-      // Track query performance
+      const validConversations = enrichedConversations
+        .filter(Boolean)
+        .sort((a, b) => {
+          // Pinned conversations first
+          if (a.participant_settings?.pinned !== b.participant_settings?.pinned) {
+            return (b.participant_settings?.pinned ? 1 : 0) - (a.participant_settings?.pinned ? 1 : 0);
+          }
+          // Then by updated_at
+          return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
+        });
+
       markQueryComplete();
-      return enrichedConversations as Conversation[];
+      return validConversations as Conversation[];
     },
     enabled: !!user
   });
@@ -208,36 +211,20 @@ export const useMessages = (conversationId?: string) => {
           *,
           attachments:message_attachments(*),
           receipts:message_receipts(*),
-          reply_message:messages!messages_reply_to_fkey(
-            id,
-            body,
-            kind,
-            sender_id,
-            created_at
+          sender:profiles!messages_sender_id_fkey(
+            user_id,
+            username,
+            display_name,
+            avatar_url
           )
         `)
         .eq('conversation_id', conversationId)
-        .order('created_at', { ascending: true });
+        .order('created_at', { ascending: true })
+        .limit(30);
 
       if (error) throw error;
 
-      // Enrich with sender profiles
-      const enrichedMessages = await Promise.all(
-        data.map(async (message: any) => {
-          const { data: sender } = await supabase
-            .from('profiles')
-            .select('id, user_id, username, display_name, avatar_url')
-            .eq('user_id', message.sender_id)
-            .maybeSingle();
-
-          return {
-            ...message,
-            sender
-          };
-        })
-      );
-
-      return enrichedMessages as Message[];
+      return data as Message[];
     },
     enabled: !!conversationId && !!user
   });
@@ -253,16 +240,16 @@ export const useSendMessage = () => {
     mutationFn: async ({
       conversationId,
       kind,
-      body,
-      meta,
-      replyTo,
+      content,
+      mediaUrl,
+      mediaType,
       attachments
     }: {
       conversationId: string;
       kind: Message['kind'];
-      body?: string;
-      meta?: any;
-      replyTo?: string;
+      content?: string;
+      mediaUrl?: string;
+      mediaType?: string;
       attachments?: Omit<MessageAttachment, 'id' | 'message_id'>[];
     }) => {
       if (!user) throw new Error('User not authenticated');
@@ -274,9 +261,9 @@ export const useSendMessage = () => {
           conversation_id: conversationId,
           sender_id: user.id,
           kind,
-          body,
-          meta: meta || {},
-          reply_to: replyTo
+          content,
+          media_url: mediaUrl,
+          media_type: mediaType
         })
         .select()
         .single();
@@ -306,13 +293,10 @@ export const useSendMessage = () => {
           status: 'sent'
         });
 
-      // Update conversation's last_message_id and updated_at
+      // Update conversation updated_at
       await supabase
         .from('conversations')
-        .update({
-          last_message_id: message.id,
-          updated_at: new Date().toISOString()
-        })
+        .update({ updated_at: new Date().toISOString() })
         .eq('id', conversationId);
 
       return message;
@@ -333,7 +317,7 @@ export const useSendMessage = () => {
   });
 };
 
-// Hook to create or get conversation
+// Hook to create or get conversation using RPC
 export const useCreateOrGetConversation = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -342,32 +326,45 @@ export const useCreateOrGetConversation = () => {
     mutationFn: async (otherUserId: string) => {
       if (!user) throw new Error('User not authenticated');
 
-      // Check if conversation already exists
+      // Check if conversation exists
       const { data: existing, error: checkError } = await supabase
-        .from('conversations')
-        .select('id')
-        .or(`and(participant_a.eq.${user.id},participant_b.eq.${otherUserId}),and(participant_a.eq.${otherUserId},participant_b.eq.${user.id})`)
+        .from('conversation_participants')
+        .select('conversation_id')
+        .eq('user_id', user.id)
+        .in('conversation_id', 
+          supabase.from('conversation_participants')
+            .select('conversation_id')
+            .eq('user_id', otherUserId)
+        )
         .maybeSingle();
 
       if (checkError) throw checkError;
-
+      
       if (existing) {
-        return existing.id;
+        return existing.conversation_id;
       }
 
-      // Create new conversation - participant records will be auto-created by trigger
-      const { data: newConv, error: createError } = await supabase
+      // Create new conversation
+      const { data: newConv, error } = await supabase
         .from('conversations')
-        .insert({
-          participant_a: user.id,
-          participant_b: otherUserId
-        })
+        .insert({})
         .select('id')
         .single();
 
-      if (createError) throw createError;
+      if (error) throw error;
+
+      // Add participants
+      await supabase
+        .from('conversation_participants')
+        .insert([
+          { conversation_id: newConv.id, user_id: user.id },
+          { conversation_id: newConv.id, user_id: otherUserId }
+        ]);
 
       return newConv.id;
+
+      if (error) throw error;
+      return conversationId;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['conversations'] });
@@ -391,11 +388,20 @@ export const useMarkMessagesAsRead = () => {
       if (!user) throw new Error('User not authenticated');
 
       // Use the new database function for efficient read marking
-      const { data, error } = await supabase.rpc('mark_conversation_messages_read', {
-        conversation_id_param: conversationId,
-        user_id_param: user.id,
-        up_to_message_id: messageId
-      });
+      // Mark messages as seen manually
+      const { error } = await supabase
+        .from('message_receipts')
+        .upsert({
+          message_id: messageId,
+          user_id: user.id,
+          status: 'seen'
+        });
+      
+      const { data } = await supabase
+        .from('conversation_participants')
+        .update({ last_read_message_id: messageId })
+        .eq('conversation_id', conversationId)
+        .eq('user_id', user.id);
 
       if (error) throw error;
       return data;

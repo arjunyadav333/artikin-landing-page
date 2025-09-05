@@ -40,9 +40,13 @@ export const MessageItem = ({
 
       const { error } = await supabase
         .from('messages')
-        .update({ deleted_for_everyone: true })
-        .eq('id', message.id)
-        .eq('sender_id', user.id);
+        .update({ 
+          deleted: true,
+          deleted_for_all: true,
+          deleted_by: user.id,
+          deleted_at: new Date().toISOString()
+        })
+        .eq('id', message.id);
 
       if (error) throw error;
     },
@@ -50,7 +54,7 @@ export const MessageItem = ({
       queryClient.invalidateQueries({ queryKey: ['messages', message.conversation_id] });
       toast({
         title: "Message deleted",
-        description: "The message has been deleted"
+        description: "The message has been deleted for everyone"
       });
       setShowMenu(false);
     },
@@ -93,10 +97,10 @@ export const MessageItem = ({
     
     // Check receipts for status
     const receipts = message.receipts || [];
-    const hasDelivered = receipts.some(r => r.status === 'delivered' || r.status === 'read');
-    const hasRead = receipts.some(r => r.status === 'read');
+    const hasDelivered = receipts.some(r => r.status === 'delivered' || r.status === 'seen');
+    const hasSeen = receipts.some(r => r.status === 'seen');
     
-    if (hasRead) {
+    if (hasSeen) {
       return <CheckCheck className="h-3 w-3 text-blue-500" />;
     } else if (hasDelivered) {
       return <CheckCheck className="h-3 w-3 text-muted-foreground" />;
@@ -110,7 +114,7 @@ export const MessageItem = ({
   };
 
   // Show deleted message placeholder
-  if (message.deleted_for_everyone) {
+  if (message.deleted_for_all) {
     return (
       <div className={cn(
         "flex mb-4",
@@ -173,15 +177,15 @@ export const MessageItem = ({
           status === 'failed' && "bg-destructive/10 border border-destructive/20"
         )}>
           {/* Message content */}
-          {message.body && (
+          {message.content && (
             <p className="text-sm whitespace-pre-wrap break-words">
-              {message.body}
+              {message.content}
             </p>
           )}
           
           {/* Message attachments */}
           {message.attachments && message.attachments.length > 0 && (
-            <div className={cn(message.body && "mt-2")}>
+            <div className={cn(message.content && "mt-2")}>
               <MessageAttachments attachments={message.attachments} />
             </div>
           )}
@@ -189,7 +193,7 @@ export const MessageItem = ({
           {/* Message footer */}
           <div className={cn(
             "flex items-center justify-between gap-2 mt-1",
-            message.body || message.attachments?.length ? "mt-1" : ""
+            message.content || message.attachments?.length ? "mt-1" : ""
           )}>
             <span className={cn(
               "text-xs",
@@ -222,7 +226,7 @@ export const MessageItem = ({
           </div>
           
           {/* Message menu - only for own messages */}
-          {isOwn && !isOptimistic && !message.deleted_for_everyone && (
+          {isOwn && !isOptimistic && !message.deleted_for_all && (
             <div className="absolute -right-8 top-0 opacity-0 group-hover:opacity-100 transition-opacity">
               <DropdownMenu open={showMenu} onOpenChange={setShowMenu}>
                 <DropdownMenuTrigger asChild>

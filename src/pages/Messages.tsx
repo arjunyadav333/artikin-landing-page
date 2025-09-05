@@ -7,7 +7,8 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { Search, Send, Plus, Filter } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Search, Send, Plus, Filter, MoreVertical, Pin, Trash2 } from "lucide-react";
 import { AppLayout } from "@/components/layout/app-layout";
 import { useConversations, type Conversation } from "@/hooks/useMessaging";
 import { NewMessageModal } from "@/components/messaging/NewMessageModal";
@@ -15,6 +16,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
 import { ConversationListSkeleton } from "@/components/ui/conversation-skeleton";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 const Messages = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -22,6 +25,7 @@ const Messages = () => {
   
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   // Redirect to auth if not authenticated
   useEffect(() => {
@@ -48,12 +52,47 @@ const Messages = () => {
 
   const { data: conversations = [], isLoading: conversationsLoading, error: conversationsError } = useConversations();
 
+  // Mutation for pinning/unpinning conversations
+  const pinMutation = useMutation({
+    mutationFn: async ({ conversationId, pinned }: { conversationId: string; pinned: boolean }) => {
+      const { error } = await supabase
+        .from('conversation_participants')
+        .update({ pinned })
+        .eq('conversation_id', conversationId)
+        .eq('user_id', user.id);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['conversations'] });
+    }
+  });
+
+  // Mutation for deleting conversations
+  const deleteMutation = useMutation({
+    mutationFn: async (conversationId: string) => {
+      const { error } = await supabase
+        .from('conversation_participants')
+        .update({ 
+          deleted: true, 
+          deleted_at: new Date().toISOString() 
+        })
+        .eq('conversation_id', conversationId)
+        .eq('user_id', user.id);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['conversations'] });
+    }
+  });
+
   // Filter conversations based on search
   const filteredConversations = conversations.filter(conversation =>
     !searchTerm || 
     conversation.other_participant?.display_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     conversation.other_participant?.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    conversation.last_message?.body?.toLowerCase().includes(searchTerm.toLowerCase())
+    conversation.last_message?.content?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const getInitials = (name?: string) => {
@@ -63,6 +102,24 @@ const Messages = () => {
 
   const handleConversationClick = (conversationId: string) => {
     navigate(`/messages/${conversationId}`);
+  };
+
+  const getRoleDisplay = (participant: any) => {
+    if (participant?.role === 'artist') return 'Artist';
+    if (participant?.role === 'organization') return 'Organization';
+    return 'User';
+  };
+
+  const getLastMessagePreview = (message: any) => {
+    if (!message) return 'No messages yet';
+    if (message.deleted || message.deleted_for_all) return 'This message was deleted';
+    if (message.content) return message.content;
+    if (message.media_type) {
+      if (message.media_type.startsWith('image/')) return '📷 Photo';
+      if (message.media_type.startsWith('video/')) return '🎥 Video';
+      if (message.media_type.includes('pdf')) return '📄 Document';
+    }
+    return 'Attachment';
   };
 
   if (conversationsError) {
@@ -149,7 +206,7 @@ const Messages = () => {
                   <div key={conversation.id}>
                     <div
                       className={cn(
-                        "flex items-center space-x-3 p-4 cursor-pointer hover:bg-muted transition-colors",
+                        "flex items-center space-x-3 p-4 cursor-pointer hover:bg-muted transition-colors group",
                         conversation.participant_settings?.pinned && "bg-primary/5 border-l-2 border-l-primary"
                       )}
                       onClick={() => handleConversationClick(conversation.id)}
@@ -173,19 +230,62 @@ const Messages = () => {
                               {conversation.other_participant?.display_name || 'Unknown User'}
                             </p>
                             {conversation.participant_settings?.pinned && (
-                              <Badge variant="secondary" className="text-xs px-1 py-0">
-                                Pinned
-                              </Badge>
+                              <Pin className="h-3 w-3 text-primary" />
                             )}
                           </div>
-                          <span className="text-xs text-muted-foreground">
-                            {conversation.last_message?.created_at && 
-                              formatDistanceToNow(new Date(conversation.last_message.created_at), { addSuffix: true })
-                            }
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-muted-foreground">
+                              {conversation.last_message?.created_at && 
+                                formatDistanceToNow(new Date(conversation.last_message.created_at), { addSuffix: true })
+                              }
+                            </span>
+                            
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  className="opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 p-0"
+                                >
+                                  <MoreVertical className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem 
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    pinMutation.mutate({
+                                      conversationId: conversation.id,
+                                      pinned: !conversation.participant_settings?.pinned
+                                    });
+                                  }}
+                                >
+                                  <Pin className="h-4 w-4 mr-2" />
+                                  {conversation.participant_settings?.pinned ? 'Unpin' : 'Pin'}
+                                </DropdownMenuItem>
+                                <DropdownMenuItem 
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    deleteMutation.mutate(conversation.id);
+                                  }}
+                                  className="text-destructive"
+                                >
+                                  <Trash2 className="h-4 w-4 mr-2" />
+                                  Delete conversation
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
                         </div>
+                        
+                        <div className="flex items-center gap-2 mb-1">
+                          <Badge variant="secondary" className="text-xs px-1 py-0">
+                            {getRoleDisplay(conversation.other_participant)}
+                          </Badge>
+                        </div>
+                        
                         <p className="text-sm text-muted-foreground truncate">
-                          {conversation.last_message?.body || 'No messages yet'}
+                          {getLastMessagePreview(conversation.last_message)}
                         </p>
                       </div>
 
