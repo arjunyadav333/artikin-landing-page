@@ -10,7 +10,6 @@ import { createSampleData } from "@/utils/sampleData";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const Home = () => {
-  const [showNewPostsBanner, setShowNewPostsBanner] = useState(false);
   const { user } = useAuth();
   const isMobile = useIsMobile();
   const { data: postsData, isLoading, fetchNextPage, hasNextPage, isError } = usePosts();
@@ -20,36 +19,8 @@ const Home = () => {
   // Remove sample data generation for better performance
   // Sample data should be created only once during onboarding, not on every page load
 
-  // Simulate new posts available banner (in real app, this would be based on real-time updates)
-  useEffect(() => {
-    if (posts.length > 0) {
-      const timer = setTimeout(() => {
-        setShowNewPostsBanner(true);
-      }, 30000); // Show after 30 seconds
-      
-      return () => clearTimeout(timer);
-    }
-  }, [posts.length]);
-
   return (
     <div className="w-full min-h-screen bg-background">
-      {/* New Posts Banner - Hidden on Mobile */}
-      {showNewPostsBanner && !isMobile && (
-        <div className="sticky top-16 z-40 bg-primary/10 border-b border-primary/20 backdrop-blur-sm">
-          <div className="max-w-md mx-auto px-4 py-2">
-            <button
-              className="w-full text-primary text-sm font-medium hover:text-primary/80 transition-colors"
-              onClick={() => {
-                setShowNewPostsBanner(false);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-            >
-              New posts available • Tap to refresh
-            </button>
-          </div>
-        </div>
-      )}
-
       {/* Feed Container - Full Width Mobile-First */}
       <div className="w-full max-w-none sm:max-w-2xl sm:mx-auto lg:max-w-3xl xl:max-w-4xl">
         {isLoading ? (
