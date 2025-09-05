@@ -5,6 +5,8 @@ import { HomeFeedPost, useLikePost, useFollowUser, useSharePost } from '@/hooks/
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { MediaCarousel } from './MediaCarousel';
+import { CommentSheet } from './CommentSheet';
+import { ShareSheet } from './ShareSheet';
 
 interface PostRowWideProps {
   post: HomeFeedPost;
@@ -16,6 +18,8 @@ export const PostRowWide = ({ post }: PostRowWideProps) => {
   const isOwner = user?.id === post.user_id;
   const [menuOpen, setMenuOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [commentSheetOpen, setCommentSheetOpen] = useState(false);
+  const [shareSheetOpen, setShareSheetOpen] = useState(false);
   
   const likeMutation = useLikePost();
   const followMutation = useFollowUser();
@@ -54,21 +58,11 @@ export const PostRowWide = ({ post }: PostRowWideProps) => {
   };
 
   const handleComment = () => {
-    // Navigate to post detail for now
-    window.location.href = `/post/${post.id}`;
+    setCommentSheetOpen(true);
   };
 
   const handleShare = () => {
-    // Copy link to clipboard
-    navigator.clipboard.writeText(`${window.location.origin}/post/${post.id}`);
-    toast({
-      title: "Link copied",
-      description: "Post link copied to clipboard"
-    });
-    
-    if (user) {
-      shareMutation.mutate(post.id);
-    }
+    setShareSheetOpen(true);
   };
 
   const handleMenuAction = (action: string) => {
@@ -395,6 +389,26 @@ export const PostRowWide = ({ post }: PostRowWideProps) => {
           </button>
         </div>
       </footer>
+
+      {/* Comment Sheet */}
+      <CommentSheet
+        post={post}
+        isOpen={commentSheetOpen}
+        onClose={() => setCommentSheetOpen(false)}
+        onCommentAdded={() => {
+          // Real-time updates will handle this via subscription
+        }}
+      />
+
+      {/* Share Sheet */}
+      <ShareSheet
+        post={post}
+        isOpen={shareSheetOpen}
+        onClose={() => setShareSheetOpen(false)}
+        onShareRecorded={() => {  
+          // Real-time updates will handle this via subscription
+        }}
+      />
     </article>
   );
 };
