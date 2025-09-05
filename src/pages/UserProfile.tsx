@@ -13,12 +13,21 @@ import { supabase } from "@/integrations/supabase/client";
 
 export default function UserProfile() {
   const { userId } = useParams<{ userId: string }>();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   
   // Determine if viewing own profile or another user's
   const isOwnProfile = userId === "me" || userId === user?.id;
   const targetUserId = isOwnProfile ? user?.id : userId;
+  
+  // Debug authentication state
+  console.log('UserProfile Debug:', {
+    userId,
+    user: user ? { id: user.id, email: user.email } : null,
+    isOwnProfile,
+    targetUserId,
+    authLoading
+  });
   
   // Fetch profile data
   const { data: profile, isLoading: profileLoading } = useProfile(targetUserId);
@@ -63,6 +72,22 @@ export default function UserProfile() {
     }
   };
 
+  // Handle authentication loading
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  // Redirect to login if not authenticated and trying to access own profile
+  if (isOwnProfile && !user) {
+    navigate('/auth');
+    return null;
+  }
+
+  // Handle profile loading
   if (profileLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -71,15 +96,34 @@ export default function UserProfile() {
     );
   }
 
+  // Handle profile not found
   if (!profile) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-foreground mb-2">Profile not found</h2>
-          <p className="text-muted-foreground">This user doesn't exist or has been deactivated.</p>
+    if (isOwnProfile && user) {
+      // User is authenticated but no profile exists - create one
+      return (
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-foreground mb-2">Setting up your profile...</h2>
+            <p className="text-muted-foreground mb-4">We're creating your profile for the first time.</p>
+            <button 
+              onClick={() => navigate('/profile/edit')}
+              className="bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90"
+            >
+              Complete Profile Setup
+            </button>
+          </div>
         </div>
-      </div>
-    );
+      );
+    } else {
+      return (
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-foreground mb-2">Profile not found</h2>
+            <p className="text-muted-foreground">This user doesn't exist or has been deactivated.</p>
+          </div>
+        </div>
+      );
+    }
   }
 
   return (

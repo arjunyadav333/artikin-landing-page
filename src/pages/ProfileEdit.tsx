@@ -19,6 +19,13 @@ export default function ProfileEdit() {
   const updateProfileMutation = useUpdateProfile();
   const { toast } = useToast();
 
+  // Debug profile state
+  console.log('ProfileEdit Debug:', {
+    user: user ? { id: user.id, email: user.email } : null,
+    profile,
+    isLoading
+  });
+
   const [formData, setFormData] = useState({
     display_name: '',
     username: '',
@@ -37,6 +44,7 @@ export default function ProfileEdit() {
 
   useEffect(() => {
     if (profile) {
+      // Existing profile - populate form with current data
       setFormData({
         display_name: profile.display_name || '',
         username: profile.username || '',
@@ -52,8 +60,17 @@ export default function ProfileEdit() {
         artform: profile.artform || '',
         organization_type: profile.organization_type || ''
       });
+    } else if (!isLoading && user) {
+      // New user without profile - set sensible defaults
+      setFormData(prev => ({
+        ...prev,
+        username: user.email?.split('@')[0] || `user_${user.id.slice(0, 8)}`,
+        display_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'New User',
+        contact_email: user.email || '',
+        full_name: user.user_metadata?.full_name || ''
+      }));
     }
-  }, [profile]);
+  }, [profile, isLoading, user]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -83,12 +100,18 @@ export default function ProfileEdit() {
     );
   }
 
-  if (!profile || !user) {
+  if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-foreground mb-2">Access Denied</h2>
           <p className="text-muted-foreground">You need to be logged in to edit your profile.</p>
+          <Button 
+            onClick={() => navigate('/auth')}
+            className="mt-4"
+          >
+            Sign In
+          </Button>
         </div>
       </div>
     );
@@ -107,8 +130,12 @@ export default function ProfileEdit() {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Edit Profile</h1>
-            <p className="text-muted-foreground">Update your public profile information</p>
+            <h1 className="text-2xl font-bold text-foreground">
+              {profile ? 'Edit Profile' : 'Create Your Profile'}
+            </h1>
+            <p className="text-muted-foreground">
+              {profile ? 'Update your public profile information' : 'Set up your public profile information'}
+            </p>
           </div>
         </div>
 
@@ -121,9 +148,9 @@ export default function ProfileEdit() {
             <CardContent className="space-y-4">
               <div className="flex items-center gap-6">
                 <Avatar className="h-24 w-24">
-                  <AvatarImage src={profile.avatar_url || ""} alt={profile.display_name} />
+                  <AvatarImage src={profile?.avatar_url || ""} alt={profile?.display_name || formData.display_name} />
                   <AvatarFallback className="text-2xl">
-                    {profile.display_name?.[0]?.toUpperCase() || 'U'}
+                    {(profile?.display_name || formData.display_name)?.[0]?.toUpperCase() || 'U'}
                   </AvatarFallback>
                 </Avatar>
                 <div className="space-y-2">
