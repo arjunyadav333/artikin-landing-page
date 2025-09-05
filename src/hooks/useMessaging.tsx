@@ -201,15 +201,11 @@ export const useSendMessage = () => {
     mutationFn: async ({
       conversationId,
       kind = 'text',
-      body,
-      mediaUrl,
-      mediaType
+      body
     }: {
       conversationId: string;
       kind?: string;
       body?: string;
-      mediaUrl?: string;
-      mediaType?: string;
     }) => {
       if (!user) throw new Error('User not authenticated');
 
@@ -219,9 +215,7 @@ export const useSendMessage = () => {
           conversation_id: conversationId,
           sender_id: user.id,
           kind,
-          body,
-          media_url: mediaUrl,
-          media_type: mediaType
+          body
         })
         .select()
         .single();
@@ -250,53 +244,35 @@ export const useSendMessage = () => {
   });
 };
 
-// Simplified create or get conversation
+// Create or get conversation using edge function
 export const useCreateOrGetConversation = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   return useMutation({
     mutationFn: async (otherUserId: string) => {
       if (!user) throw new Error('User not authenticated');
 
-      // Look for existing conversation
-      const { data: myParticipations } = await supabase
-        .from('conversation_participants')
-        .select('conversation_id')
-        .eq('user_id', user.id);
-
-      if (myParticipations?.length) {
-        const conversationIds = myParticipations.map(p => p.conversation_id);
-        
-        const { data: otherParticipation } = await supabase
-          .from('conversation_participants')
-          .select('conversation_id')
-          .eq('user_id', otherUserId)
-          .in('conversation_id', conversationIds)
-          .limit(1)
-          .maybeSingle();
-
-        if (otherParticipation) {
-          return otherParticipation.conversation_id;
-        }
-      }
-
-      // Create new conversation - using the actual schema
-      const { data: newConv, error } = await supabase
-        .from('conversations')
-        .insert({
-          participant_a: user.id,
-          participant_b: otherUserId
-        })
-        .select()
-        .single();
+      // Use the edge function for reliable conversation creation
+      const { data, error } = await supabase.functions.invoke('create-or-get-conversation', {
+        body: { otherUserId }
+      });
 
       if (error) throw error;
-
-      return newConv.id;
+      
+      return data.conversationId;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['conversations'] });
+    },
+    onError: (error) => {
+      console.error('Error creating conversation:', error);
+      toast({
+        title: "Error",
+        description: "Failed to start conversation. Please try again.",
+        variant: "destructive"
+      });
     }
   });
 };

@@ -109,9 +109,7 @@ const ConversationPage = () => {
       await sendMessageMutation.mutateAsync({
         conversationId: chatId,
         kind: attachments.length > 0 ? attachments[0].mime_type.split('/')[0] : 'text',
-        body: messageBody || undefined,
-        mediaUrl: attachments.length > 0 ? attachments[0].file_url : undefined,
-        mediaType: attachments.length > 0 ? attachments[0].mime_type : undefined
+        body: messageBody || undefined
       });
       
       // Remove optimistic message on success
