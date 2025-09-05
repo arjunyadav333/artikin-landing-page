@@ -576,7 +576,6 @@ export type Database = {
             | Database["public"]["Enums"]["organization_type"]
             | null
           phone_number: string | null
-          privacy: string | null
           role: Database["public"]["Enums"]["user_role"] | null
           updated_at: string | null
           user_id: string
@@ -597,7 +596,6 @@ export type Database = {
             | Database["public"]["Enums"]["organization_type"]
             | null
           phone_number?: string | null
-          privacy?: string | null
           role?: Database["public"]["Enums"]["user_role"] | null
           updated_at?: string | null
           user_id: string
@@ -618,7 +616,6 @@ export type Database = {
             | Database["public"]["Enums"]["organization_type"]
             | null
           phone_number?: string | null
-          privacy?: string | null
           role?: Database["public"]["Enums"]["user_role"] | null
           updated_at?: string | null
           user_id?: string
@@ -870,37 +867,6 @@ export type Database = {
       get_or_create_conversation: {
         Args: { user1_id: string; user2_id: string }
         Returns: string
-      }
-      get_profile_for_viewer: {
-        Args: { profile_user_id: string; viewer_id: string }
-        Returns: {
-          artform: Database["public"]["Enums"]["artform_type"]
-          avatar_url: string
-          bio: string
-          can_view_full: boolean
-          contact_email: string
-          cover_url: string
-          created_at: string
-          display_name: string
-          full_name: string
-          headline: string
-          id: string
-          is_following: boolean
-          location: string
-          organization_type: Database["public"]["Enums"]["organization_type"]
-          phone_number: string
-          portfolio_count: number
-          privacy: string
-          pronouns: string
-          role: Database["public"]["Enums"]["user_role"]
-          social_links: Json
-          stats: Json
-          updated_at: string
-          user_id: string
-          username: string
-          verified: boolean
-          website: string
-        }[]
       }
       get_user_conversations: {
         Args: { user_id_param: string }

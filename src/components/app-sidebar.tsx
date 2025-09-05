@@ -33,7 +33,7 @@ const navItems = [
   { title: "Opportunities", url: "/opportunities", icon: Briefcase },
   { title: "Connections", url: "/connections", icon: Users },
   { title: "Messages", url: "/messages", icon: MessageCircle },
-  { title: "Settings", url: "/settings", icon: Settings },
+  { title: "Settings", url: "#", icon: Settings },
 ];
 
 export function AppSidebar() {
