@@ -192,7 +192,7 @@ const ConversationPage = () => {
 
   return (
     <AppLayout>
-      <div className="h-screen bg-background flex flex-col">
+      <div className="mobile-vh bg-background flex flex-col md:h-auto">
         {/* Chat Header */}
         <div className="p-4 border-b bg-card">
           <div className="flex items-center justify-between">
@@ -292,8 +292,8 @@ const ConversationPage = () => {
         </ScrollArea>
 
         {/* Message Input */}
-        <div className="p-4 border-t bg-card">
-          <div className="flex items-end gap-2">
+        <div className="sticky bottom-0 p-4 border-t bg-card/95 backdrop-blur-sm md:relative md:bg-card md:backdrop-blur-none">
+          <div className="flex items-end gap-2 pb-[env(safe-area-inset-bottom)] md:pb-0">
             <FileUpload
               onFileUploaded={(fileData) => {
                 handleSendMessage([fileData]);

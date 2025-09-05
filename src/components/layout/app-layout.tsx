@@ -1,4 +1,5 @@
 import React, { memo, useMemo } from "react";
+import { useLocation } from "react-router-dom";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { TopBar } from "@/components/layout/top-bar";
@@ -58,6 +59,11 @@ const FeaturedOpportunities = memo(() => (
 FeaturedOpportunities.displayName = "FeaturedOpportunities";
 
 export const AppLayout = memo(({ children }: AppLayoutProps) => {
+  const location = useLocation();
+  
+  // Hide mobile nav on conversation pages
+  const hidesMobileNav = location.pathname.startsWith('/messages/');
+  
   // Memoize sidebar content to prevent re-renders
   const sidebarContent = useMemo(() => (
     <div className="hidden xl:block w-80 sticky top-20 h-fit">
@@ -92,9 +98,11 @@ export const AppLayout = memo(({ children }: AppLayoutProps) => {
         <div className="flex-1 flex flex-col overflow-hidden">
           <TopBar />
           
-          <div className="md:hidden">
-            <MobileBottomNav />
-          </div>
+          {!hidesMobileNav && (
+            <div className="md:hidden">
+              <MobileBottomNav />
+            </div>
+          )}
           
           <main className="flex-1 overflow-auto">
             {contentStructure}
