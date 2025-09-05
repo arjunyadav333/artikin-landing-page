@@ -141,10 +141,11 @@ export const PostRowWide = ({ post }: PostRowWideProps) => {
     });
   };
 
-  const shouldTruncate = post.content.length > 200;
+  const content = post.content || '';
+  const shouldTruncate = content.length > 200;
   const displayText = shouldTruncate && !isExpanded 
-    ? post.content.slice(0, 200) + '...' 
-    : post.content;
+    ? content.slice(0, 200) + '...' 
+    : content;
 
   const getDisplayRole = () => {
     return post.profiles.account_type === 'artist' ? 'Artist' : 'Organization';
