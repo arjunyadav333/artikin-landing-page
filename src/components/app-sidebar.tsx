@@ -51,7 +51,7 @@ export function AppSidebar() {
     <Sidebar className="border-r border-border/50 bg-card/50 backdrop-blur-xl hidden md:flex" collapsible="icon">
       <SidebarHeader className="p-6">
         {/* Profile Section - Clickable */}
-        <Link to="/profile" className="flex items-center gap-3 hover:bg-muted/50 rounded-lg p-2 -m-2 transition-colors">
+        <Link to="/profile/me" className="flex items-center gap-3 hover:bg-muted/50 rounded-lg p-2 -m-2 transition-colors">
           <Avatar className="h-12 w-12">
             <AvatarImage src={user?.user_metadata?.avatar_url} />
             <AvatarFallback className="bg-primary text-primary-foreground text-lg font-semibold">
