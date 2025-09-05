@@ -31,6 +31,20 @@ export default function SignUpPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center p-4">
       <div className="w-full max-w-2xl">
+        {/* Back Button - Outside the card for better visibility */}
+        {!selectedRole && (
+          <div className="mb-4">
+            <Button
+              onClick={() => router.push('/auth')}
+              variant="ghost"
+              size="sm"
+              className="text-black hover:text-gray-700 hover:bg-gray-100 flex items-center gap-2 font-medium px-3 py-2 rounded-md border border-gray-300"
+            >
+              ← Back to Sign In
+            </Button>
+          </div>
+        )}
+        
         {/* Logo and Brand */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center space-x-3 group">
@@ -48,16 +62,6 @@ export default function SignUpPage() {
           {!selectedRole ? (
             <>
               <CardHeader className="text-center space-y-2 pb-6">
-                <div className="flex items-center justify-start mb-6 w-full px-2">
-                  <Button
-                    onClick={() => router.push('/auth')}
-                    variant="ghost"
-                    size="sm"
-                    className="text-black hover:text-gray-700 transition-colors flex items-center gap-2 font-medium text-sm px-2 py-1 hover:bg-gray-100 rounded-md"
-                  >
-                    ← Back to Sign In
-                  </Button>
-                </div>
                 <CardTitle className="text-2xl font-bold text-foreground">
                   Join Artikin
                 </CardTitle>
