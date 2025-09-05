@@ -48,6 +48,24 @@ All colors MUST be HSL.
     /* Premium Blue Theme Color Scheme */
     --background: 249 250 251;
     --foreground: 30 41 59;
+    
+    /* Artikin Design Tokens */
+    /* Typography - fluid scaling */
+    --text-name: clamp(14px, 2.0vw, 18px); /* Full name */
+    --text-meta: clamp(12px, 1.4vw, 14px); /* Username/role */
+    --text-content: clamp(13px, 1.6vw, 16px); /* Post content */
+    --text-action: clamp(12px, 1.4vw, 14px); /* Action labels */
+    
+    /* Spacing - fluid scaling */
+    --sp-xs: clamp(6px, 0.8vw, 8px);
+    --sp-sm: clamp(8px, 1.2vw, 12px);
+    --sp-md: clamp(12px, 1.6vw, 16px);
+    --sp-lg: clamp(16px, 2.4vw, 24px);
+    
+    /* Feed specific colors */
+    --artikin-blue: 210 100% 50%; /* #007bff */
+    --artikin-blue-light: 210 100% 95%; /* #E8F6FF */
+    --divider: 220 13% 91%; /* Thin dividers between posts */
     --card: 255 255 255;
     --card-foreground: 30 41 59;
     --popover: 255 255 255;
@@ -109,6 +127,9 @@ All colors MUST be HSL.
   .dark {
     --background: 240 10% 3.9%;
     --foreground: 0 0% 98%;
+    
+    /* Dark mode divider */
+    --divider: 217.2 32.6% 17.5%;
 
     --card: 240 10% 3.9%;
     --card-foreground: 0 0% 98%;
