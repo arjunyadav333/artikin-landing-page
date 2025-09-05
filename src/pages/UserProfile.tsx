@@ -10,6 +10,9 @@ import { ProfileHero } from "@/components/profile/ProfileHero";
 import { ProfileStats } from "@/components/profile/ProfileStats";
 import { ProfileTabs } from "@/components/profile/ProfileTabs";
 import { useDirectMessage } from "@/hooks/useDirectMessage";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Lock, MapPin } from "lucide-react";
 
 export default function UserProfile() {
   const { userId } = useParams<{ userId: string }>();
@@ -122,6 +125,60 @@ export default function UserProfile() {
         </div>
       );
     }
+  }
+
+  // Check if this is a private account and viewer doesn't have access
+  if (profile.privacy === 'private' && !profile.can_view_full && !isOwnProfile) {
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="max-w-2xl mx-auto px-4 py-16">
+          <div className="text-center space-y-6">
+            <div className="flex justify-center">
+              <Avatar className="h-32 w-32 border-4 border-background shadow-lg">
+                <AvatarImage src={profile.avatar_url || undefined} />
+                <AvatarFallback className="text-4xl font-bold">
+                  {profile.display_name?.charAt(0)?.toUpperCase() || profile.username?.charAt(0)?.toUpperCase() || '?'}
+                </AvatarFallback>
+              </Avatar>
+            </div>
+            
+            <div className="space-y-2">
+              <h1 className="text-2xl font-bold text-foreground">@{profile.username}</h1>
+              
+              <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">
+                {profile.artform && (
+                  <span className="capitalize">
+                    {profile.artform.replace('_', ' ')}
+                  </span>
+                )}
+                {profile.location && (
+                  <div className="flex items-center gap-1">
+                    <MapPin className="h-3 w-3" />
+                    {profile.location}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex items-center justify-center gap-2 text-muted-foreground">
+                <Lock className="h-4 w-4" />
+                <p>This account is private — follow to view posts and portfolio.</p>
+              </div>
+              
+              <Button 
+                onClick={handleFollow}
+                disabled={followMutation.isPending}
+                size="lg"
+                className="px-8"
+              >
+                {followMutation.isPending ? 'Following...' : 'Follow'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (

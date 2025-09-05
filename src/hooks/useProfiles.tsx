@@ -24,6 +24,9 @@ export interface Profile {
   stats?: Record<string, any>;
   pronouns?: string;
   contact_email?: string;
+  privacy?: 'public' | 'private';
+  is_following?: boolean;
+  can_view_full?: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -32,14 +35,20 @@ export const useProfile = (userId?: string) => {
   return useQuery({
     queryKey: ['profile', userId],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('user_id', userId!)
-        .single();
+      const { data: { user } } = await supabase.auth.getUser();
+      const viewerId = user?.id;
+      
+      if (!viewerId || !userId) {
+        throw new Error('Authentication required');
+      }
+      
+      const { data, error } = await supabase.rpc('get_profile_for_viewer', {
+        viewer_id: viewerId,
+        profile_user_id: userId
+      });
       
       if (error) throw error;
-      return data as Profile;
+      return data?.[0] as Profile;
     },
     enabled: !!userId
   });
@@ -85,6 +94,7 @@ export const useUpdateProfile = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['currentProfile'] });
+      queryClient.invalidateQueries({ queryKey: ['profile'] });
       toast({
         title: "Profile updated",
         description: "Your profile has been successfully updated."
