@@ -52,6 +52,108 @@
   .space-md { padding: var(--space-md); }
   .space-lg { padding: var(--space-lg); }
   .space-xl { padding: var(--space-xl); }
+
+  /* Post Layout CSS - Caption alignment under avatar */
+  .post__header { 
+    display: flex; 
+    align-items: flex-start; 
+    gap: 12px; 
+    padding: 12px 16px; 
+  }
+  
+  .post__avatar { 
+    width: 44px; 
+    height: 44px; 
+    border-radius: 50%; 
+    object-fit: cover; 
+    flex: 0 0 44px; 
+  }
+  
+  .post__meta { 
+    min-width: 0; 
+    flex: 1; /* allows truncation */ 
+  }
+  
+  .post__actions-header { 
+    display: flex; 
+    gap: 8px; 
+    align-items: center; 
+  }
+
+  .post__body { 
+    display: block; 
+    padding: 0 16px 12px 16px; 
+  }
+
+  /* KEY: indent content left margin = avatar width + gap */
+  .post__content {
+    margin-left: calc(44px + 12px); /* avatar width (44) + header gap (12) */
+  }
+
+  /* Media should be full column width */
+  .post__media { 
+    margin-top: 8px; 
+    width: 100%; 
+    margin-left: 0; 
+  }
+
+  .post__footer { 
+    padding: 0 16px 16px 16px; 
+    display: flex; 
+    justify-content: flex-start; 
+    gap: 20px; 
+  }
+  
+  .action { 
+    min-width: 44px; 
+    min-height: 44px; 
+    display: flex; 
+    align-items: center; 
+    gap: 8px; 
+  }
+
+  /* Three-dots menu positioning */
+  .post__actions-header .btn--menu { 
+    background: transparent; 
+    border: none; 
+    cursor: pointer; 
+    padding: 8px; 
+  }
+
+  /* Menu visibility */
+  .post__menu { 
+    position: absolute; 
+    display: none; 
+  }
+  
+  .post__menu[aria-hidden="false"] { 
+    display: block; 
+  }
+
+  /* Responsive: larger avatars on bigger screens */
+  @media (min-width: 768px) {
+    .post__avatar { 
+      width: 56px; 
+      height: 56px; 
+      flex: 0 0 56px; 
+    }
+    
+    .post__content {
+      margin-left: calc(56px + 12px); 
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .post__avatar { 
+      width: 64px; 
+      height: 64px; 
+      flex: 0 0 64px; 
+    }
+    
+    .post__content {
+      margin-left: calc(64px + 12px); 
+    }
+  }
 }
 
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
