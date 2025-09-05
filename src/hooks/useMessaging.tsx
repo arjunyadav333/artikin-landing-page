@@ -3,7 +3,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { useQueryPerformance } from '@/hooks/usePerformanceMonitoring';
 
 // Simple types that work with the current database schema
 export interface Message {
@@ -72,7 +71,6 @@ export interface Conversation {
 // Simplified hook to fetch conversations
 export const useConversations = () => {
   const { user } = useAuth();
-  const { markQueryComplete } = useQueryPerformance(['conversations']);
   
   return useQuery({
     queryKey: ['conversations', user?.id],
@@ -150,7 +148,6 @@ export const useConversations = () => {
             })
         );
 
-        markQueryComplete();
         return result.filter(conv => conv.other_participant);
       } catch (error) {
         console.error('Error fetching conversations:', error);
