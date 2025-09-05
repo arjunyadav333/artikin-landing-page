@@ -2,23 +2,25 @@ import { useState } from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Check, CheckCheck, MoreVertical, Trash2, AlertCircle, RotateCcw } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Check, CheckCheck, MoreVertical, Trash2, AlertCircle, RotateCcw, Copy } from "lucide-react";
 import { MessageAttachments } from "@/components/messaging/message-attachments";
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { useLongPress } from "@/hooks/useLongPress";
 import { useToast } from "@/hooks/use-toast";
 import type { Message } from "@/hooks/useMessaging";
+import type { OptimisticMessage } from "@/lib/FastSendManager";
 
 interface MessageItemProps {
-  message: Message;
+  message: Message | OptimisticMessage;
   isOwn: boolean;
   showSender?: boolean;
   isOptimistic?: boolean;
-  status?: 'sending' | 'failed';
+  status?: 'sending' | 'sent' | 'failed';
   onRetry?: () => void;
+  onDelete?: (messageId: string) => void;
 }
 
 export const MessageItem = ({
@@ -27,46 +29,50 @@ export const MessageItem = ({
   showSender = false,
   isOptimistic = false,
   status,
-  onRetry
+  onRetry,
+  onDelete
 }: MessageItemProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const queryClient = useQueryClient();
   const [showMenu, setShowMenu] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showLongPressMenu, setShowLongPressMenu] = useState(false);
 
-  const deleteMessageMutation = useMutation({
-    mutationFn: async () => {
-      if (!user || !isOwn) throw new Error('Cannot delete this message');
-
-      const { error } = await supabase
-        .from('messages')
-        .update({ 
-          deleted: true,
-          deleted_for_all: true,
-          deleted_by: user.id,
-          deleted_at: new Date().toISOString()
-        })
-        .eq('id', message.id);
-
-      if (error) throw error;
+  // Long press handler for mobile
+  const longPressHandlers = useLongPress(
+    () => {
+      if (isOwn && !isOptimistic && !message.deleted_for_everyone) {
+        setShowLongPressMenu(true);
+      }
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['messages', message.conversation_id] });
+    {
+      threshold: 400,
+      onStart: () => {
+        // Optional: add visual feedback on press start
+      }
+    }
+  );
+
+  const handleDelete = () => {
+    if (onDelete && !isOptimistic) {
+      onDelete(message.id);
+    }
+    setShowMenu(false);
+    setShowDeleteDialog(false);
+    setShowLongPressMenu(false);
+  };
+
+  const handleCopyText = () => {
+    if (message.body) {
+      navigator.clipboard.writeText(message.body);
       toast({
-        title: "Message deleted",
-        description: "The message has been deleted for everyone"
-      });
-      setShowMenu(false);
-    },
-    onError: (error) => {
-      console.error('Error deleting message:', error);
-      toast({
-        title: "Error",
-        description: "Failed to delete message. Please try again.",
-        variant: "destructive"
+        title: "Copied",
+        description: "Message text copied to clipboard"
       });
     }
-  });
+    setShowMenu(false);
+    setShowLongPressMenu(false);
+  };
 
   const getInitials = (name?: string) => {
     if (!name) return '?';
@@ -107,10 +113,6 @@ export const MessageItem = ({
     } else {
       return <Check className="h-3 w-3 text-muted-foreground" />;
     }
-  };
-
-  const handleDelete = () => {
-    deleteMessageMutation.mutate();
   };
 
   // Show deleted message placeholder
@@ -168,14 +170,17 @@ export const MessageItem = ({
           </Avatar>
         )}
         
-        <div className={cn(
-          "px-4 py-2 rounded-2xl relative group",
-          isOwn 
-            ? "bg-primary text-primary-foreground" 
-            : "bg-muted text-foreground",
-          isOptimistic && "opacity-70",
-          status === 'failed' && "bg-destructive/10 border border-destructive/20"
-        )}>
+        <div 
+          className={cn(
+            "px-4 py-2 rounded-2xl relative group",
+            isOwn 
+              ? "bg-primary text-primary-foreground" 
+              : "bg-muted text-foreground",
+            isOptimistic && "opacity-70",
+            status === 'failed' && "bg-destructive/10 border border-destructive/20"
+          )}
+          {...longPressHandlers}
+        >
           {/* Message content */}
           {message.body && (
             <p className="text-sm whitespace-pre-wrap break-words">
@@ -235,9 +240,12 @@ export const MessageItem = ({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-32">
+                  <DropdownMenuItem onClick={handleCopyText}>
+                    <Copy className="h-3 w-3 mr-2" />
+                    Copy
+                  </DropdownMenuItem>
                   <DropdownMenuItem 
-                    onClick={handleDelete}
-                    disabled={deleteMessageMutation.isPending}
+                    onClick={() => setShowDeleteDialog(true)}
                     className="text-destructive focus:text-destructive"
                   >
                     <Trash2 className="h-3 w-3 mr-2" />
@@ -248,6 +256,53 @@ export const MessageItem = ({
             </div>
           )}
         </div>
+
+        {/* Mobile long-press action sheet */}
+        <AlertDialog open={showLongPressMenu} onOpenChange={setShowLongPressMenu}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Message Options</AlertDialogTitle>
+            </AlertDialogHeader>
+            <div className="flex flex-col gap-2">
+              <Button variant="outline" onClick={handleCopyText} className="justify-start">
+                <Copy className="h-4 w-4 mr-2" />
+                Copy Text
+              </Button>
+              <Button 
+                variant="destructive" 
+                onClick={() => {
+                  setShowLongPressMenu(false);
+                  setShowDeleteDialog(true);
+                }}
+                className="justify-start"
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete for Everyone  
+              </Button>
+            </div>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Delete confirmation dialog */}
+        <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Message</AlertDialogTitle>
+              <AlertDialogDescription>
+                This message will be deleted for everyone in this conversation. This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                Delete for Everyone
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );

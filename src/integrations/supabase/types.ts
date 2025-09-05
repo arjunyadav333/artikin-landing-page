@@ -319,6 +319,7 @@ export type Database = {
       messages: {
         Row: {
           body: string | null
+          client_id: string | null
           conversation_id: string
           created_at: string | null
           deleted: boolean | null
@@ -327,11 +328,13 @@ export type Database = {
           id: string
           kind: string
           meta: Json | null
+          pending: boolean | null
           reply_to: string | null
           sender_id: string
         }
         Insert: {
           body?: string | null
+          client_id?: string | null
           conversation_id: string
           created_at?: string | null
           deleted?: boolean | null
@@ -340,11 +343,13 @@ export type Database = {
           id?: string
           kind: string
           meta?: Json | null
+          pending?: boolean | null
           reply_to?: string | null
           sender_id: string
         }
         Update: {
           body?: string | null
+          client_id?: string | null
           conversation_id?: string
           created_at?: string | null
           deleted?: boolean | null
@@ -353,6 +358,7 @@ export type Database = {
           id?: string
           kind?: string
           meta?: Json | null
+          pending?: boolean | null
           reply_to?: string | null
           sender_id?: string
         }
@@ -853,12 +859,31 @@ export type Database = {
       }
     }
     Functions: {
+      create_message_with_client_id: {
+        Args: {
+          body_param?: string
+          client_id_param: string
+          conversation_id_param: string
+          kind_param?: string
+          sender_id_param: string
+        }
+        Returns: {
+          client_id: string
+          created_at: string
+          id: string
+          server_timestamp: string
+        }[]
+      }
       create_or_get_conversation: {
         Args: { user_a: string; user_b: string }
         Returns: {
           conversation_id: string
           existing: boolean
         }[]
+      }
+      delete_message_for_everyone: {
+        Args: { message_id_param: string }
+        Returns: boolean
       }
       get_or_create_conversation: {
         Args: { user1_id: string; user2_id: string }

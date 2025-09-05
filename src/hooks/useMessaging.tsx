@@ -17,6 +17,8 @@ export interface Message {
   deleted: boolean;
   deleted_for_everyone: boolean;  // matches database field
   created_at: string;
+  client_id?: string;  // for optimistic UI reconciliation
+  pending?: boolean;   // for optimistic UI status
   sender?: {
     user_id: string;
     username?: string;

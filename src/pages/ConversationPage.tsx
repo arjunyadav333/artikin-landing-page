@@ -8,12 +8,13 @@ import { ArrowLeft, Send } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { 
   useMessages, 
-  useSendMessage, 
   useRealtimeMessages, 
   useTypingIndicator, 
   useMarkMessagesAsRead,
   useConversations
 } from "@/hooks/useMessaging";
+import { useFastMessaging } from "@/hooks/useFastMessaging";
+import { useVisualViewport } from "@/hooks/useVisualViewport";
 import { ConversationActions } from "@/components/messaging/ConversationActions";
 import { MessageItem } from "@/components/messaging/MessageItem";
 import { MessageListSkeleton } from "@/components/ui/message-skeleton";
@@ -27,21 +28,10 @@ const ConversationPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(null);
-  const [optimisticMessages, setOptimisticMessages] = useState<Array<{
-    id: string;
-    body?: string;
-    attachments?: Array<{
-      file_url: string;
-      mime_type: string;
-      file_size?: number;
-      width?: number;
-      height?: number;
-      duration?: number;
-    }>;
-    status: 'sending' | 'failed';
-    retry?: () => void;
-  }>>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const composerRef = useRef<HTMLDivElement>(null);
+  const viewportInfo = useVisualViewport();
 
   // Redirect if no chatId
   if (!chatId) {
@@ -51,11 +41,17 @@ const ConversationPage = () => {
 
   const { data: conversations = [] } = useConversations();
   const { data: messages = [], isLoading: messagesLoading } = useMessages(chatId);
-  const sendMessageMutation = useSendMessage();
   const markAsReadMutation = useMarkMessagesAsRead();
   const { draftText, updateDraft, clearDraft } = useDraftMessage(chatId);
   const { typingUsers, sendTypingStatus } = useTypingIndicator(chatId);
-  const inputRef = useRef<HTMLInputElement>(null);
+  
+  // Use fast messaging hook for instant send
+  const { 
+    optimisticMessages, 
+    sendMessage: fastSendMessage, 
+    retryMessage,
+    deleteMessage 
+  } = useFastMessaging(chatId);
   
   // Enable real-time updates
   useRealtimeMessages(chatId);
@@ -63,27 +59,40 @@ const ConversationPage = () => {
   // Find current conversation
   const conversation = conversations.find(c => c.id === chatId);
 
-  // Auto-scroll to bottom when new messages arrive
+  // Auto-scroll to bottom when new messages arrive or keyboard opens/closes
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+    const scrollToBottom = () => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
+    };
+    
+    // Scroll when messages change
+    scrollToBottom();
+  }, [messages, optimisticMessages]);
+
+  // Handle keyboard visibility changes
+  useEffect(() => {
+    if (viewportInfo.isKeyboardOpen && composerRef.current) {
+      // Adjust composer position for keyboard
+      composerRef.current.style.bottom = `${viewportInfo.keyboardHeight}px`;
+      
+      // Scroll to bottom when keyboard opens
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
+      }, 100);
+    } else if (composerRef.current) {
+      // Reset composer position when keyboard closes
+      composerRef.current.style.bottom = '0px';
+    }
+  }, [viewportInfo.isKeyboardOpen, viewportInfo.keyboardHeight]);
 
   // Focus input for new conversations or when conversation loads
   useEffect(() => {
     if (conversation && messages.length === 0 && inputRef.current) {
-      // Focus composer for empty conversations (likely new)
       setTimeout(() => {
         inputRef.current?.focus();
       }, 100);
     }
   }, [conversation, messages.length]);
-
-  // Jump to bottom instantly for existing conversations with messages
-  useEffect(() => {
-    if (messages.length > 0) {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'instant' });
-    }
-  }, [chatId]); // Only run when chatId changes (navigation)
 
   // Mark messages as read when conversation is opened
   useEffect(() => {
@@ -108,48 +117,22 @@ const ConversationPage = () => {
   }> = []) => {
     if ((!draftText.trim() && attachments.length === 0) || !chatId || !user) return;
 
-    const optimisticId = `optimistic_${Date.now()}`;
-    const messageBody = draftText.trim();
-
-    // Add optimistic message for immediate UI feedback
-    const optimisticMessage = {
-      id: optimisticId,
-      body: messageBody || undefined,
-      attachments: attachments.length > 0 ? attachments : undefined,
-      status: 'sending' as const,
-    };
-
-    setOptimisticMessages(prev => [...prev, optimisticMessage]);
+    const messageText = draftText.trim();
     clearDraft();
     sendTypingStatus();
 
     try {
-      await sendMessageMutation.mutateAsync({
-        conversationId: chatId,
-        kind: attachments.length > 0 ? attachments[0].mime_type.split('/')[0] : 'text',
-        body: messageBody || undefined
-      });
+      // Use fast send for instant UI response
+      await fastSendMessage(messageText, 'text');
       
-      // Remove optimistic message on success
-      setOptimisticMessages(prev => prev.filter(m => m.id !== optimisticId));
+      // Auto-scroll to show new message
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
+      }, 50);
+      
     } catch (error) {
       console.error('Failed to send message:', error);
-      
-      // Mark optimistic message as failed with retry
-      setOptimisticMessages(prev => 
-        prev.map(m => m.id === optimisticId 
-          ? { 
-              ...m, 
-              status: 'failed' as const,
-              retry: () => {
-                setOptimisticMessages(p => p.filter(msg => msg.id !== optimisticId));
-                updateDraft(messageBody);
-                handleSendMessage(attachments);
-              }
-            }
-          : m
-        )
-      );
+      // Error handling is managed by the fast messaging hook
     }
   };
 
@@ -162,10 +145,24 @@ const ConversationPage = () => {
 
   const handleTyping = useCallback((value: string) => {
     updateDraft(value);
-    
-    // Send typing indicator (simplified for now)
     sendTypingStatus();
-  }, [updateDraft, sendTypingStatus, typingTimeout]);
+  }, [updateDraft, sendTypingStatus]);
+
+  // Merge server messages and optimistic messages for display
+  const allMessages = [
+    ...messages,
+    ...optimisticMessages.map(opt => ({
+      ...opt,
+      sender: user ? {
+        user_id: user.id,
+        username: user.user_metadata?.username,
+        display_name: user.user_metadata?.display_name || user.email,
+        avatar_url: user.user_metadata?.avatar_url
+      } : undefined,
+      attachments: opt.attachments || [],
+      receipts: []
+    }))
+  ].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
 
   const getInitials = (name?: string) => {
     if (!name) return '?';
@@ -237,7 +234,7 @@ const ConversationPage = () => {
         <ScrollArea className="flex-1 p-4">
           {messagesLoading ? (
             <MessageListSkeleton count={8} />
-          ) : messages.length === 0 ? (
+          ) : allMessages.length === 0 ? (
             <div className="text-center text-muted-foreground py-8">
               <div className="h-12 w-12 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
                 <Send className="h-6 w-6" />
@@ -247,44 +244,32 @@ const ConversationPage = () => {
             </div>
           ) : (
             <>
-              {messages.map((message, index) => {
+              {allMessages.map((message, index) => {
                 const isOwn = message.sender_id === user?.id;
                 const showSender = !isOwn && (
                   index === 0 || 
-                  messages[index - 1].sender_id !== message.sender_id
+                  allMessages[index - 1].sender_id !== message.sender_id
                 );
+                
+                const isOptimisticMessage = optimisticMessages.some(opt => opt.client_id === message.client_id);
                 
                 return (
                   <MessageItem
-                    key={message.id}
+                    key={message.client_id || message.id}
                     message={message}
                     isOwn={isOwn}
                     showSender={showSender}
+                    isOptimistic={isOptimisticMessage}
+                    status={isOptimisticMessage ? (message as any).status : undefined}
+                    onRetry={() => {
+                      if (isOptimisticMessage && message.client_id) {
+                        retryMessage(message as any);
+                      }
+                    }}
+                    onDelete={(messageId) => deleteMessage(messageId)}
                   />
                 );
               })}
-
-              {/* Optimistic messages */}
-              {optimisticMessages.map((message) => (
-                <MessageItem
-                  key={message.id}
-                  message={{
-                    id: message.id,
-                    conversation_id: chatId,
-                    sender_id: user?.id!,
-                    kind: 'text',
-                    body: message.body,
-                    deleted: false,
-                    deleted_for_everyone: false,
-                    created_at: new Date().toISOString(),
-                    attachments: message.attachments as any
-                  }}
-                  isOwn={true}
-                  isOptimistic={true}
-                  status={message.status}
-                  onRetry={message.retry}
-                />
-              ))}
               
               <div ref={messagesEndRef} />
             </>
@@ -292,13 +277,17 @@ const ConversationPage = () => {
         </ScrollArea>
 
         {/* Message Input */}
-        <div className="sticky bottom-0 p-4 border-t bg-card/95 backdrop-blur-sm md:relative md:bg-card md:backdrop-blur-none">
-          <div className="flex items-end gap-2 pb-[env(safe-area-inset-bottom)] md:pb-0">
+        <div 
+          ref={composerRef}
+          className="sticky bottom-0 p-4 border-t bg-card/95 backdrop-blur-sm md:relative md:bg-card md:backdrop-blur-none"
+          style={{ paddingBottom: `max(1rem, calc(1rem + env(safe-area-inset-bottom)))` }}
+        >
+          <div className="flex items-end gap-2">
             <FileUpload
               onFileUploaded={(fileData) => {
                 handleSendMessage([fileData]);
               }}
-              disabled={sendMessageMutation.isPending}
+              disabled={false}
             />
             
             <div className="flex-1 relative">
@@ -309,13 +298,13 @@ const ConversationPage = () => {
                 placeholder="Type a message..."
                 className="pr-12 resize-none min-h-[40px] max-h-32"
                 onKeyPress={handleKeyPress}
-                disabled={sendMessageMutation.isPending}
+                disabled={false}
               />
               <Button
                 size="sm"
                 className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0"
                 onClick={() => handleSendMessage()}
-                disabled={!draftText.trim() || sendMessageMutation.isPending}
+                disabled={!draftText.trim()}
               >
                 <Send className="h-4 w-4" />
               </Button>
