@@ -17,7 +17,7 @@ import {
 import { useProfile, useCurrentProfile } from "@/hooks/useProfiles";
 import { useUserPosts } from "@/hooks/usePosts";
 import { useAuth } from "@/hooks/useAuth";
-import { useConnectionStatus, useFollowUser } from "@/hooks/useConnections";
+import { useConnectionStatus, useFollowUser, useConnections } from "@/hooks/useConnections";
 import { PostsGrid } from "@/components/profile/posts-grid";
 import { PortfolioGrid } from "@/components/profile/portfolio-grid";
 
@@ -37,6 +37,8 @@ export default function UserProfile() {
   
   // Connection status and follow functionality
   const { data: connectionStatus } = useConnectionStatus(targetUserId);
+  const { data: followers } = useConnections(targetUserId, 'followers');
+  const { data: following } = useConnections(targetUserId, 'following');
   const followMutation = useFollowUser();
   
   const handleFollow = () => {
@@ -103,9 +105,16 @@ export default function UserProfile() {
                 <h1 className="text-3xl font-bold text-foreground mb-1">
                   {profile.display_name || profile.username}
                 </h1>
-                <p className="text-lg text-muted-foreground mb-2">
-                  {profile.role === 'artist' ? (profile.artform || 'Artist') : 'Organization'}
-                </p>
+                <div className="flex items-center gap-3 mb-2">
+                  <p className="text-lg text-muted-foreground">
+                    {profile.role === 'artist' ? (profile.artform || 'Artist') : (profile.organization_type || 'Organization')}
+                  </p>
+                  {profile.role && (
+                    <Badge variant="secondary" className="capitalize">
+                      {profile.role}
+                    </Badge>
+                  )}
+                </div>
                 {profile.bio && (
                   <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
                     {profile.bio}
@@ -137,6 +146,24 @@ export default function UserProfile() {
                     Joined {new Date(profile.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                   </div>
                 </div>
+
+                {/* Additional Details */}
+                {(profile.full_name || profile.phone_number) && (
+                  <div className="space-y-2 mb-4">
+                    {profile.full_name && profile.full_name !== profile.display_name && (
+                      <div className="text-sm">
+                        <span className="text-muted-foreground">Full name: </span>
+                        <span className="text-foreground">{profile.full_name}</span>
+                      </div>
+                    )}
+                    {profile.phone_number && isOwnProfile && (
+                      <div className="text-sm">
+                        <span className="text-muted-foreground">Phone: </span>
+                        <span className="text-foreground">{profile.phone_number}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Action Buttons */}
@@ -184,11 +211,11 @@ export default function UserProfile() {
             <div className="text-sm text-muted-foreground">Posts</div>
           </div>
           <button className="text-center hover:text-primary transition-colors">
-            <div className="text-2xl font-bold text-foreground">0</div>
+            <div className="text-2xl font-bold text-foreground">{followers?.length || 0}</div>
             <div className="text-sm text-muted-foreground">Followers</div>
           </button>
           <button className="text-center hover:text-primary transition-colors">
-            <div className="text-2xl font-bold text-foreground">0</div>
+            <div className="text-2xl font-bold text-foreground">{following?.length || 0}</div>
             <div className="text-sm text-muted-foreground">Following</div>
           </button>
         </div>
