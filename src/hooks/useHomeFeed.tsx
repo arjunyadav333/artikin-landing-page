@@ -130,110 +130,190 @@ export const useHomeFeed = (limit = 20) => {
     refetchOnWindowFocus: false,
   });
 
-  // Realtime subscriptions
+  // Realtime subscriptions with reconnection and fallback
   useEffect(() => {
     if (!user) return;
 
-    const channels = [
-      // New posts
-      supabase
-        .channel('posts-changes')
-        .on('postgres_changes', { 
-          event: 'INSERT', 
-          schema: 'public', 
-          table: 'posts' 
-        }, (payload) => {
-          queryClient.invalidateQueries({ queryKey: ['homeFeed'] });
-        })
-        .subscribe(),
+    let reconnectAttempts = 0;
+    const maxReconnectAttempts = 3;
+    let isSubscribed = true;
 
-      // Likes changes
-      supabase
-        .channel('likes-changes')
-        .on('postgres_changes', { 
-          event: '*', 
-          schema: 'public', 
-          table: 'likes' 
-        }, (payload) => {
-          queryClient.setQueryData(['homeFeed'], (old: any) => {
-            if (!old) return old;
+    const setupSubscriptions = () => {
+      const channels = [
+        // New posts
+        supabase
+          .channel('posts-changes')
+          .on('postgres_changes', { 
+            event: '*', 
+            schema: 'public', 
+            table: 'posts' 
+          }, (payload) => {
+            console.log('Posts change:', payload);
+            const { eventType, new: newPost, old: oldPost } = payload;
             
+            queryClient.setQueryData(['homeFeed'], (old: any) => {
+              if (!old?.pages) return old;
+              
+              const pages = [...old.pages];
+              
+              if (eventType === 'INSERT' && newPost) {
+                // Add new post at the beginning
+                if (pages[0]) {
+                  pages[0] = [newPost, ...pages[0]];
+                }
+              } else if (eventType === 'DELETE' && oldPost) {
+                // Remove deleted post
+                pages.forEach(page => {
+                  const index = page.findIndex((p: any) => p.id === oldPost.id);
+                  if (index > -1) page.splice(index, 1);
+                });
+              } else if (eventType === 'UPDATE' && newPost) {
+                // Update existing post
+                pages.forEach(page => {
+                  const index = page.findIndex((p: any) => p.id === newPost.id);
+                  if (index > -1) page[index] = { ...page[index], ...newPost };
+                });
+              }
+              
+              return { ...old, pages };
+            });
+          })
+          .subscribe((status) => {
+            console.log('Posts subscription status:', status);
+            if (status === 'SUBSCRIBED') {
+              reconnectAttempts = 0;
+            } else if (status === 'CLOSED' && isSubscribed && reconnectAttempts < maxReconnectAttempts) {
+              reconnectAttempts++;
+              setTimeout(() => {
+                if (isSubscribed) setupSubscriptions();
+              }, Math.pow(2, reconnectAttempts) * 1000);
+            }
+          }),
+
+        // Likes changes
+        supabase
+          .channel('likes-changes')
+          .on('postgres_changes', { 
+            event: '*', 
+            schema: 'public', 
+            table: 'likes' 
+          }, (payload) => {
             const postId = (payload.new as any)?.post_id || (payload.old as any)?.post_id;
             const isInsert = payload.eventType === 'INSERT';
             
-            return {
-              ...old,
-              pages: old.pages.map((page: HomeFeedPost[]) =>
-                page.map(post => 
-                  post.id === postId 
-                    ? {
-                        ...post,
-                        likes_count: Math.max(0, post.likes_count + (isInsert ? 1 : -1)),
-                        user_liked: (payload.new as any)?.user_id === user.id ? isInsert : post.user_liked
-                      }
-                    : post
+            queryClient.setQueryData(['homeFeed'], (old: any) => {
+              if (!old) return old;
+              
+              return {
+                ...old,
+                pages: old.pages.map((page: HomeFeedPost[]) =>
+                  page.map(post => 
+                    post.id === postId 
+                      ? {
+                          ...post,
+                          likes_count: Math.max(0, post.likes_count + (isInsert ? 1 : -1)),
+                          user_liked: (payload.new as any)?.user_id === user.id ? isInsert : post.user_liked
+                        }
+                      : post
+                  )
                 )
-              )
-            };
-          });
-        })
-        .subscribe(),
+              };
+            });
+          })
+          .subscribe(),
 
-      // Comments changes
-      supabase
-        .channel('comments-changes')
-        .on('postgres_changes', { 
-          event: 'INSERT', 
-          schema: 'public', 
-          table: 'comments' 
-        }, (payload) => {
-          queryClient.setQueryData(['homeFeed'], (old: any) => {
-            if (!old) return old;
-            
-            return {
-              ...old,
-              pages: old.pages.map((page: HomeFeedPost[]) =>
-                page.map(post => 
-                  post.id === (payload.new as any).post_id 
-                    ? { ...post, comments_count: post.comments_count + 1 }
-                    : post
+        // Comments changes
+        supabase
+          .channel('comments-changes')
+          .on('postgres_changes', { 
+            event: 'INSERT', 
+            schema: 'public', 
+            table: 'comments' 
+          }, (payload) => {
+            queryClient.setQueryData(['homeFeed'], (old: any) => {
+              if (!old) return old;
+              
+              return {
+                ...old,
+                pages: old.pages.map((page: HomeFeedPost[]) =>
+                  page.map(post => 
+                    post.id === (payload.new as any).post_id 
+                      ? { ...post, comments_count: post.comments_count + 1 }
+                      : post
+                  )
                 )
-              )
-            };
-          });
-        })
-        .subscribe(),
+              };
+            });
+          })
+          .subscribe(),
 
-      // Shares changes
-      supabase
-        .channel('shares-changes')
-        .on('postgres_changes', { 
-          event: '*', 
-          schema: 'public', 
-          table: 'shares' 
-        }, (payload) => {
-          queryClient.setQueryData(['homeFeed'], (old: any) => {
-            if (!old) return old;
-            
-            const postId = (payload.new as any)?.post_id || (payload.old as any)?.post_id;
-            const isInsert = payload.eventType === 'INSERT';
-            
-            return {
-              ...old,
-              pages: old.pages.map((page: HomeFeedPost[]) =>
-                page.map(post => 
-                  post.id === postId 
-                    ? { ...post, shares_count: Math.max(0, post.shares_count + (isInsert ? 1 : -1)) }
-                    : post
+        // Shares changes
+        supabase
+          .channel('shares-changes')
+          .on('postgres_changes', { 
+            event: 'INSERT', 
+            schema: 'public', 
+            table: 'shares' 
+          }, (payload) => {            
+            queryClient.setQueryData(['homeFeed'], (old: any) => {
+              if (!old) return old;
+              
+              return {
+                ...old,
+                pages: old.pages.map((page: HomeFeedPost[]) =>
+                  page.map(post => 
+                    post.id === (payload.new as any)?.post_id 
+                      ? { ...post, shares_count: post.shares_count + 1 }
+                      : post
+                  )
                 )
-              )
-            };
-          });
-        })
-        .subscribe()
-    ];
+              };
+            });
+          })
+          .subscribe(),
+
+        // Follows changes
+        supabase
+          .channel('follows-changes')
+          .on('postgres_changes', { 
+            event: '*', 
+            schema: 'public', 
+            table: 'connections' 
+          }, (payload) => {
+            const { eventType, new: newConnection, old: oldConnection } = payload;
+            
+            if (user?.id && ((newConnection as any)?.follower_id === user.id || (oldConnection as any)?.follower_id === user.id)) {
+              const targetUserId = ((newConnection || oldConnection) as any)?.following_id;
+              
+              queryClient.setQueryData(['homeFeed'], (old: any) => {
+                if (!old?.pages) return old;
+                
+                const pages = [...old.pages];
+                pages.forEach(page => {
+                  page.forEach((post: any) => {
+                    if (post.user_id === targetUserId) {
+                      post.is_following = eventType === 'INSERT';
+                    }
+                  });
+                });
+                
+                return { ...old, pages };
+              });
+              
+              // Also invalidate connections queries
+              queryClient.invalidateQueries({ queryKey: ['connections'] });
+            }
+          })
+          .subscribe()
+      ];
+
+      return channels;
+    };
+
+    const channels = setupSubscriptions();
 
     return () => {
+      isSubscribed = false;
       channels.forEach(channel => supabase.removeChannel(channel));
     };
   }, [user, queryClient]);

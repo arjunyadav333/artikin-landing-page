@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useEffect } from 'react';
 
 export interface Connection {
   id: string;
@@ -19,7 +20,9 @@ export interface Connection {
 }
 
 export const useConnections = (userId?: string, type: 'following' | 'followers' = 'following') => {
-  return useQuery({
+  const queryClient = useQueryClient();
+  
+  const query = useQuery({
     queryKey: ['connections', userId, type],
     queryFn: async () => {
       if (!userId) return [];
@@ -63,6 +66,60 @@ export const useConnections = (userId?: string, type: 'following' | 'followers' 
     },
     enabled: !!userId
   });
+
+  // Real-time subscription for connections updates
+  useEffect(() => {
+    if (!userId) return;
+
+    const connectionsChannel = supabase
+      .channel(`connections:${userId}:${type}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'connections'
+        },
+        (payload) => {
+          console.log('Connections change:', payload);
+          const { eventType, new: newConnection, old: oldConnection } = payload;
+          
+          // Check if this change affects the current user's connections
+          const isRelevant = type === 'following' 
+            ? ((newConnection as any)?.follower_id === userId || (oldConnection as any)?.follower_id === userId)
+            : ((newConnection as any)?.following_id === userId || (oldConnection as any)?.following_id === userId);
+            
+          if (isRelevant) {
+            // Optimistically update the cache
+            queryClient.setQueryData(['connections', userId, type], (old: any) => {
+              if (!old) return old;
+              
+              if (eventType === 'INSERT' && newConnection) {
+                // Add new connection
+                return [...old, newConnection as any];
+              } else if (eventType === 'DELETE' && oldConnection) {
+                // Remove deleted connection
+                return old.filter((conn: any) => conn.id !== (oldConnection as any).id);
+              }
+              
+              return old;
+            });
+            
+            // Also invalidate to ensure consistency
+            setTimeout(() => {
+              queryClient.invalidateQueries({ queryKey: ['connections', userId] });
+            }, 500);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(connectionsChannel);
+    };
+  }, [userId, type, queryClient]);
+
+  return query;
 };
 
 export const useConnectionStatus = (targetUserId?: string) => {

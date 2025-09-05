@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronLeft, ChevronRight, Play } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Play, X, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface MediaCarouselProps {
@@ -28,49 +28,69 @@ export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselPr
     return mediaTypes?.[index] || 'image';
   };
 
-  const renderMedia = (url: string, index: number, isActive: boolean) => {
+  const handleDownload = async (url: string, index: number) => {
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = `media-${postId}-${index + 1}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(downloadUrl);
+    } catch (error) {
+      console.error('Download failed:', error);
+    }
+  };
+
+  const renderMedia = (url: string, index: number, isActive: boolean, isViewer: boolean = false) => {
     const mediaType = getMediaType(index);
     
     if (mediaType.startsWith('video/')) {
       return (
-        <div className="relative">
+        <figure className="media media--video w-full">
           <video
             src={url}
-            className="w-full h-full object-cover"
+            className={`media__video w-full ${isViewer ? 'max-h-[96vh] object-contain' : 'max-h-[70vh] object-contain'}`}
             controls={isActive}
+            preload="metadata"
             muted
             loop
             data-media-index={index}
+            style={{ background: '#000' }}
           />
           {!isActive && (
             <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30">
               <Play className="h-12 w-12 text-white" />
             </div>
           )}
-        </div>
+        </figure>
       );
     }
 
     return (
-      <img
-        src={url}
-        alt={`Media ${index + 1}`}
-        className="w-full h-full object-cover cursor-pointer"
-        onClick={openFullscreen}
-        loading="lazy"
-        data-media-index={index}
-      />
+      <figure className="media media--image w-full">
+        <img
+          src={url}
+          alt={`Media ${index + 1}`}
+          className={`media__img w-full ${isViewer ? 'max-h-[96vh] object-contain' : 'max-h-[70vh] object-contain'} ${!isViewer ? 'cursor-pointer' : ''}`}
+          onClick={!isViewer ? openFullscreen : undefined}
+          loading="lazy"
+          data-media-index={index}
+          style={{ background: 'var(--media-bg, #f8f9fa)' }}
+        />
+      </figure>
     );
   };
 
   if (mediaUrls.length === 0) return null;
 
   return (
-    <div className="post_media w-full">
+    <div className="post__media w-full" role="region" aria-label="Post media">
       <div className="relative rounded-lg overflow-hidden bg-muted">
-        <div className="aspect-video w-full">
-          {renderMedia(mediaUrls[currentIndex], currentIndex, true)}
-        </div>
+        {renderMedia(mediaUrls[currentIndex], currentIndex, true)}
 
         {mediaUrls.length > 1 && (
           <>
@@ -116,26 +136,63 @@ export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselPr
         </div>
       )}
 
-      {/* Fullscreen Modal */}
+      {/* Fullscreen Viewer */}
       {isFullscreen && (
         <div 
-          className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50"
-          onClick={() => setIsFullscreen(false)}
+          className="viewer fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setIsFullscreen(false);
+          }}
         >
-          <div className="relative max-w-full max-h-full">
-            <img
-              src={mediaUrls[currentIndex]}
-              alt={`Media ${currentIndex + 1}`}
-              className="max-w-full max-h-full object-contain"
-            />
-            <Button
-              variant="secondary"
-              size="sm"
-              className="absolute top-4 right-4 bg-black/50 hover:bg-black/70 text-white"
-              onClick={() => setIsFullscreen(false)}
-            >
-              ✕
-            </Button>
+          <div className="relative max-w-[96vw] max-h-[96vh] flex items-center justify-center">
+            {renderMedia(mediaUrls[currentIndex], currentIndex, true, true)}
+            
+            {/* Controls */}
+            <div className="absolute top-4 right-4 flex gap-2">
+              <Button
+                variant="secondary"
+                size="sm"
+                className="bg-black/50 hover:bg-black/70 text-white border-0"
+                onClick={() => handleDownload(mediaUrls[currentIndex], currentIndex)}
+                aria-label="Download media"
+              >
+                <Download className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="secondary"
+                size="sm"
+                className="bg-black/50 hover:bg-black/70 text-white border-0"
+                onClick={() => setIsFullscreen(false)}
+                aria-label="Close viewer"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+
+            {/* Navigation in fullscreen */}
+            {mediaUrls.length > 1 && (
+              <>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white border-0"
+                  onClick={prevImage}
+                  aria-label="Previous media"
+                >
+                  <ChevronLeft className="h-5 w-5" />
+                </Button>
+                
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white border-0"
+                  onClick={nextImage}
+                  aria-label="Next media"
+                >
+                  <ChevronRight className="h-5 w-5" />
+                </Button>
+              </>
+            )}
           </div>
         </div>
       )}
