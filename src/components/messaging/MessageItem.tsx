@@ -38,17 +38,23 @@ export const MessageItem = ({
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showLongPressMenu, setShowLongPressMenu] = useState(false);
 
+  // Check if user can delete this message (any participant can delete)
+  const canDelete = !isOptimistic && !message.deleted_for_everyone;
+
   // Long press handler for mobile
   const longPressHandlers = useLongPress(
     () => {
-      if (isOwn && !isOptimistic && !message.deleted_for_everyone) {
+      if (canDelete) {
         setShowLongPressMenu(true);
       }
     },
     {
       threshold: 400,
       onStart: () => {
-        // Optional: add visual feedback on press start
+        // Add haptic feedback on supported devices
+        if ('vibrate' in navigator) {
+          navigator.vibrate(50);
+        }
       }
     }
   );
@@ -155,11 +161,51 @@ export const MessageItem = ({
       isOwn ? "justify-end" : "justify-start"
     )}>
       <div className={cn(
-        "flex gap-2 max-w-[70%]",
+        "flex gap-2 max-w-[70%] items-end",
         isOwn ? "flex-row-reverse" : ""
       )}>
+        {/* Three-dots menu BEFORE message bubble (as per requirements) */}
+        {canDelete && (
+          <div className={cn(
+            "flex-shrink-0 mb-1",
+            isOwn ? "order-2" : "order-1"
+          )}>
+            <DropdownMenu open={showMenu} onOpenChange={setShowMenu}>
+              <DropdownMenuTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className={cn(
+                    "h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity",
+                    "hover:bg-muted/50 text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  <MoreVertical className="h-3 w-3" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align={isOwn ? "end" : "start"} className="w-32">
+                <DropdownMenuItem onClick={handleCopyText}>
+                  <Copy className="h-3 w-3 mr-2" />
+                  Copy
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={() => setShowDeleteDialog(true)}
+                  className="text-destructive focus:text-destructive"
+                >
+                  <Trash2 className="h-3 w-3 mr-2" />
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        )}
+
+        {/* Avatar for other user's messages */}
         {!isOwn && showSender && (
-          <Avatar className="h-8 w-8">
+          <Avatar className={cn(
+            "h-8 w-8 flex-shrink-0",
+            canDelete ? "order-3" : "order-2"
+          )}>
             <AvatarImage 
               src={message.sender?.avatar_url} 
               alt={message.sender?.display_name} 
@@ -170,14 +216,16 @@ export const MessageItem = ({
           </Avatar>
         )}
         
+        {/* Message bubble */}
         <div 
           className={cn(
-            "px-4 py-2 rounded-2xl relative group",
+            "px-4 py-2 rounded-2xl relative group flex-1 min-w-0",
             isOwn 
               ? "bg-primary text-primary-foreground" 
               : "bg-muted text-foreground",
             isOptimistic && "opacity-70",
-            status === 'failed' && "bg-destructive/10 border border-destructive/20"
+            status === 'failed' && "bg-destructive/10 border border-destructive/20",
+            canDelete ? (isOwn ? "order-1" : "order-2") : (isOwn ? "order-1" : "order-1")
           )}
           {...longPressHandlers}
         >
@@ -235,79 +283,59 @@ export const MessageItem = ({
             </div>
           </div>
           
-          {/* Message menu - only for own messages */}
-          {isOwn && !isOptimistic && !message.deleted_for_everyone && (
-            <div className="absolute -right-8 top-0 opacity-0 group-hover:opacity-100 transition-opacity">
-              <DropdownMenu open={showMenu} onOpenChange={setShowMenu}>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                    <MoreVertical className="h-3 w-3" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-32">
-                  <DropdownMenuItem onClick={handleCopyText}>
-                    <Copy className="h-3 w-3 mr-2" />
-                    Copy
-                  </DropdownMenuItem>
-                  <DropdownMenuItem 
-                    onClick={() => setShowDeleteDialog(true)}
-                    className="text-destructive focus:text-destructive"
-                  >
-                    <Trash2 className="h-3 w-3 mr-2" />
-                    Delete
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          )}
+          {/* Three-dots menu is now positioned BEFORE the message bubble */}
         </div>
 
         {/* Mobile long-press action sheet */}
-        <AlertDialog open={showLongPressMenu} onOpenChange={setShowLongPressMenu}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Message Options</AlertDialogTitle>
-            </AlertDialogHeader>
-            <div className="flex flex-col gap-2">
-              <Button variant="outline" onClick={handleCopyText} className="justify-start">
-                <Copy className="h-4 w-4 mr-2" />
-                Copy Text
-              </Button>
-              <Button 
-                variant="destructive" 
-                onClick={() => {
-                  setShowLongPressMenu(false);
-                  setShowDeleteDialog(true);
-                }}
-                className="justify-start"
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                Delete for Everyone  
-              </Button>
-            </div>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        {canDelete && (
+          <AlertDialog open={showLongPressMenu} onOpenChange={setShowLongPressMenu}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Message Options</AlertDialogTitle>
+              </AlertDialogHeader>
+              <div className="flex flex-col gap-2">
+                <Button variant="outline" onClick={handleCopyText} className="justify-start">
+                  <Copy className="h-4 w-4 mr-2" />
+                  Copy Text
+                </Button>
+                <Button 
+                  variant="destructive" 
+                  onClick={() => {
+                    setShowLongPressMenu(false);
+                    setShowDeleteDialog(true);
+                  }}
+                  className="justify-start"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete for Everyone  
+                </Button>
+              </div>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        )}
 
         {/* Delete confirmation dialog */}
-        <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Delete Message</AlertDialogTitle>
-              <AlertDialogDescription>
-                This message will be deleted for everyone in this conversation. This action cannot be undone.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                Delete for Everyone
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        {canDelete && (
+          <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete Message</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Delete this message for everyone? This will replace the message with "This message was deleted."
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        )}
       </div>
     </div>
   );
