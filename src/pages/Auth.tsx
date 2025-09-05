@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 const Auth = () => {
   const [email, setEmail] = useState('');
@@ -98,9 +99,46 @@ const Auth = () => {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-foreground font-medium text-sm">
-                  Password
-                </Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password" className="text-foreground font-medium text-sm">
+                    Password
+                  </Label>
+                  <Button 
+                    variant="link" 
+                    className="text-muted-foreground hover:text-foreground p-0 h-auto text-sm"
+                    onClick={() => {
+                      if (!email) {
+                        toast({
+                          title: 'Enter your email',
+                          description: 'Please enter your email address first to reset your password.',
+                          variant: 'destructive'
+                        });
+                        return;
+                      }
+                      
+                      setLoading(true);
+                      supabase.auth.resetPasswordForEmail(email, {
+                        redirectTo: `${window.location.origin}/auth/reset-password`
+                      }).then(({ error }) => {
+                        setLoading(false);
+                        if (error) {
+                          toast({
+                            title: 'Error',
+                            description: error.message,
+                            variant: 'destructive'
+                          });
+                        } else {
+                          toast({
+                            title: 'Reset link sent',
+                            description: 'Check your email for a password reset link.',
+                          });
+                        }
+                      });
+                    }}
+                  >
+                    Forgot Password?
+                  </Button>
+                </div>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -150,12 +188,6 @@ const Auth = () => {
                   Sign Up
                 </Button>
               </p>
-            </div>
-
-            <div className="text-center mt-4">
-              <Button variant="link" className="text-muted-foreground hover:text-foreground p-0 h-auto text-sm">
-                Forgot Password?
-              </Button>
             </div>
           </CardContent>
         </Card>
