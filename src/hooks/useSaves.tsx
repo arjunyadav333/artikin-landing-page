@@ -16,9 +16,28 @@ export const useSavedPosts = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
-      // Since saves table doesn't exist yet, return empty array
-      // This will be implemented when the saves table is created
-      return [];
+      const { data, error } = await supabase
+        .from('saves')
+        .select(`
+          *,
+          posts (
+            *,
+            profiles (
+              id,
+              username,
+              display_name,
+              avatar_url,
+              role,
+              artform,
+              organization_type
+            )
+          )
+        `)
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data || [];
     }
   });
 };
@@ -32,12 +51,26 @@ export const useSavePost = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
-      // Since saves table doesn't exist yet, just simulate the action
-      // This will be implemented when the saves table is created
-      
       if (isSaved) {
+        // Unsave the post
+        const { error } = await supabase
+          .from('saves')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('post_id', postId);
+        
+        if (error) throw error;
         return { action: 'unsaved' };
       } else {
+        // Save the post
+        const { error } = await supabase
+          .from('saves')
+          .insert({
+            user_id: user.id,
+            post_id: postId
+          });
+        
+        if (error) throw error;
         return { action: 'saved' };
       }
     },

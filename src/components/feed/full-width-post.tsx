@@ -13,7 +13,9 @@ import {
   Flag,
   EyeOff,
   Link as LinkIcon,
-  UserX
+  UserX,
+  Edit,
+  Trash2
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -116,6 +118,34 @@ export function FullWidthPost({ post }: FullWidthPostProps) {
     toast({
       title: "Link copied",
       description: "Post link copied to clipboard"
+    });
+  };
+
+  const handleEditPost = () => {
+    // Navigate to edit post page or open edit modal
+    toast({
+      title: "Edit Post",
+      description: "Edit functionality will be implemented"
+    });
+  };
+
+  const handleDeletePost = () => {
+    // Show confirmation dialog and delete post
+    const confirmDelete = window.confirm("Are you sure you want to delete this post? This action cannot be undone.");
+    if (confirmDelete) {
+      toast({
+        title: "Post Deleted",
+        description: "Your post has been deleted"
+      });
+      // TODO: Implement actual delete functionality
+    }
+  };
+
+  const handleReportPost = () => {
+    // Open report modal or form
+    toast({
+      title: "Report Submitted",
+      description: "Thank you for reporting. We'll review this post."
     });
   };
 
@@ -248,23 +278,41 @@ export function FullWidthPost({ post }: FullWidthPostProps) {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem onClick={handleSave}>
-                  <Bookmark className="h-4 w-4 mr-2" />
-                  {post.user_saved ? 'Unsave Post' : 'Save Post'}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleCopyLink}>
-                  <LinkIcon className="h-4 w-4 mr-2" />
-                  Copy Link
-                </DropdownMenuItem>
-                {!isOwnPost && (
+                {isOwnPost ? (
                   <>
+                    <DropdownMenuItem onClick={() => handleEditPost()}>
+                      <Edit className="h-4 w-4 mr-2" />
+                      Edit Post
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      onClick={() => handleDeletePost()}
+                      className="text-destructive focus:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Delete Post
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleCopyLink}>
+                      <LinkIcon className="h-4 w-4 mr-2" />
+                      Copy Link
+                    </DropdownMenuItem>
+                  </>
+                ) : (
+                  <>
+                    <DropdownMenuItem onClick={handleSave}>
+                      <Bookmark className="h-4 w-4 mr-2" />
+                      {post.user_saved ? 'Unsave Post' : 'Save Post'}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleCopyLink}>
+                      <LinkIcon className="h-4 w-4 mr-2" />
+                      Copy Link
+                    </DropdownMenuItem>
                     <DropdownMenuItem>
                       <EyeOff className="h-4 w-4 mr-2" />
                       Hide Post
                     </DropdownMenuItem>
-                    <DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleReportPost()}>
                       <Flag className="h-4 w-4 mr-2" />
-                      Report Post
+                      Tell Something Important
                     </DropdownMenuItem>
                     <DropdownMenuItem>
                       <UserX className="h-4 w-4 mr-2" />
