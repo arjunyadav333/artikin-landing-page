@@ -24,7 +24,6 @@ const PostDetail = lazy(() => import("./pages/PostDetail"));
 const TagFeed = lazy(() => import("./pages/TagFeed"));
 const SavedPosts = lazy(() => import("./pages/SavedPosts"));
 const ConversationPage = lazy(() => import("./pages/ConversationPage"));
-const ProfileEdit = lazy(() => import("./pages/ProfileEdit"));
 
 // Loading component for lazy routes
 const PageLoader = () => (
@@ -173,15 +172,6 @@ const AppRoutes = () => {
           </ProtectedRoute>
         } />
         <Route path="/profile" element={<Navigate to="/profile/me" replace />} />
-        <Route path="/profile/edit" element={
-          <ProtectedRoute>
-            <AppLayout>
-              <Suspense fallback={<PageLoader />}>
-                <ProfileEdit />
-              </Suspense>
-            </AppLayout>
-          </ProtectedRoute>
-        } />
         <Route path="/post/:postId" element={
           <ProtectedRoute>
             <AppLayout>
