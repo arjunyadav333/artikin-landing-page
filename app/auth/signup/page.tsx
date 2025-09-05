@@ -31,14 +31,14 @@ export default function SignUpPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center p-4">
       <div className="w-full max-w-2xl">
-        {/* Back Button - Outside the card for better visibility */}
+        {/* Back Button - Highly visible black button */}
         {!selectedRole && (
-          <div className="mb-4">
+          <div className="mb-6 flex justify-start">
             <Button
               onClick={() => router.push('/auth')}
-              variant="ghost"
+              variant="outline"
               size="sm"
-              className="text-black hover:text-gray-700 hover:bg-gray-100 flex items-center gap-2 font-medium px-3 py-2 rounded-md border border-gray-300"
+              className="bg-white text-black border-2 border-black hover:bg-black hover:text-white flex items-center gap-2 font-semibold px-4 py-2 rounded-lg shadow-md transition-all duration-200"
             >
               ← Back to Sign In
             </Button>
