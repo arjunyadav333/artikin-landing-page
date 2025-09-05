@@ -7,10 +7,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { UserPlus, UserCheck, MoreHorizontal, MessageCircle, Eye, UserX, Flag } from "lucide-react";
+import { UserPlus, UserCheck, MoreHorizontal, MessageCircle, Eye, UserX, Flag, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useFollowUser, useConnectionStatus } from "@/hooks/useConnections";
 import { useToast } from "@/hooks/use-toast";
+import { useDirectMessage } from "@/hooks/useDirectMessage";
+import { useAuth } from "@/hooks/useAuth";
 
 interface UserCardProps {
   user: {
@@ -42,6 +44,8 @@ export function UserCard({
   const { toast } = useToast();
   const followUser = useFollowUser();
   const { data: connectionStatus } = useConnectionStatus(user.user_id);
+  const { startDirectMessage, isLoading: isMessageLoading } = useDirectMessage();
+  const { user: currentUser } = useAuth();
   
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
@@ -50,7 +54,7 @@ export function UserCard({
   };
 
   const handleMessage = () => {
-    navigate(`/messages?user=${user.user_id}`);
+    startDirectMessage(user.user_id);
   };
 
   const handleFollow = () => {
@@ -143,7 +147,25 @@ export function UserCard({
 
         {/* Actions */}
         <div className="flex items-center gap-2">
-          {showFollowButton && (
+          {/* Message Button - visible for non-self users */}
+          {currentUser?.id !== user.user_id && (
+            <Button 
+              size="sm" 
+              variant="outline"
+              onClick={handleMessage}
+              disabled={isMessageLoading(user.user_id)}
+              className="border-primary text-primary hover:bg-primary/10"
+            >
+              {isMessageLoading(user.user_id) ? (
+                <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+              ) : (
+                <MessageCircle className="h-4 w-4 mr-1" />
+              )}
+              Message
+            </Button>
+          )}
+
+          {showFollowButton && currentUser?.id !== user.user_id && (
             <Button 
               size="sm" 
               variant={followButtonState.variant}
@@ -167,24 +189,34 @@ export function UserCard({
                 <Eye className="h-4 w-4 mr-2" />
                 View Profile
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleMessage}>
-                <MessageCircle className="h-4 w-4 mr-2" />
-                Message
-              </DropdownMenuItem>
+              {currentUser?.id !== user.user_id && (
+                <DropdownMenuItem onClick={handleMessage} disabled={isMessageLoading(user.user_id)}>
+                  {isMessageLoading(user.user_id) ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <MessageCircle className="h-4 w-4 mr-2" />
+                  )}
+                  Message
+                </DropdownMenuItem>
+              )}
               {isFollower && onRemoveFollower && (
                 <DropdownMenuItem onClick={handleRemoveFollower} className="text-destructive">
                   <UserX className="h-4 w-4 mr-2" />
                   Remove Follower
                 </DropdownMenuItem>
               )}
-              <DropdownMenuItem onClick={handleBlock} className="text-destructive">
-                <UserX className="h-4 w-4 mr-2" />
-                Block User
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleReport} className="text-destructive">
-                <Flag className="h-4 w-4 mr-2" />
-                Report
-              </DropdownMenuItem>
+              {currentUser?.id !== user.user_id && (
+                <>
+                  <DropdownMenuItem onClick={handleBlock} className="text-destructive">
+                    <UserX className="h-4 w-4 mr-2" />
+                    Block User
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleReport} className="text-destructive">
+                    <Flag className="h-4 w-4 mr-2" />
+                    Report
+                  </DropdownMenuItem>
+                </>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

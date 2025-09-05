@@ -55,6 +55,7 @@ const ConversationPage = () => {
   const markAsReadMutation = useMarkMessagesAsRead();
   const { draftText, updateDraft, clearDraft } = useDraftMessage(chatId);
   const { typingUsers, sendTypingStatus } = useTypingIndicator(chatId);
+  const inputRef = useRef<HTMLInputElement>(null);
   
   // Enable real-time updates
   useRealtimeMessages(chatId);
@@ -66,6 +67,23 @@ const ConversationPage = () => {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  // Focus input for new conversations or when conversation loads
+  useEffect(() => {
+    if (conversation && messages.length === 0 && inputRef.current) {
+      // Focus composer for empty conversations (likely new)
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 100);
+    }
+  }, [conversation, messages.length]);
+
+  // Jump to bottom instantly for existing conversations with messages
+  useEffect(() => {
+    if (messages.length > 0) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'instant' });
+    }
+  }, [chatId]); // Only run when chatId changes (navigation)
 
   // Mark messages as read when conversation is opened
   useEffect(() => {
@@ -220,12 +238,12 @@ const ConversationPage = () => {
           {messagesLoading ? (
             <MessageListSkeleton count={8} />
           ) : messages.length === 0 ? (
-            <div className="text-center text-muted-foreground">
+            <div className="text-center text-muted-foreground py-8">
               <div className="h-12 w-12 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
                 <Send className="h-6 w-6" />
               </div>
-              <h4 className="font-medium mb-2">No messages yet</h4>
-              <p className="text-sm">Start the conversation with your first message</p>
+              <h4 className="font-medium mb-2">Start the conversation</h4>
+              <p className="text-sm">Send your first message to {conversation.other_participant?.display_name}</p>
             </div>
           ) : (
             <>
@@ -285,6 +303,7 @@ const ConversationPage = () => {
             
             <div className="flex-1 relative">
               <Input
+                ref={inputRef}
                 value={draftText}
                 onChange={(e) => handleTyping(e.target.value)}
                 placeholder="Type a message..."

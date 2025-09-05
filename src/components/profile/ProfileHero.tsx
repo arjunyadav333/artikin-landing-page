@@ -13,7 +13,8 @@ import {
   MessageSquare,
   Shield,
   Mail,
-  ExternalLink
+  ExternalLink,
+  Loader2
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -26,13 +27,13 @@ import { Profile } from '@/hooks/useProfiles';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
+import { useDirectMessage } from '@/hooks/useDirectMessage';
 
 interface ProfileHeroProps {
   profile: Profile;
   isOwnProfile: boolean;
   connectionStatus?: any;
   onFollow?: () => void;
-  onMessage?: () => void;
   followMutation?: any;
 }
 
@@ -41,11 +42,11 @@ export function ProfileHero({
   isOwnProfile, 
   connectionStatus, 
   onFollow, 
-  onMessage,
   followMutation 
 }: ProfileHeroProps) {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { startDirectMessage, isLoading: isMessageLoading } = useDirectMessage();
 
   const handleShareProfile = async () => {
     const url = `${window.location.origin}/profile/${profile.user_id}`;
@@ -267,9 +268,14 @@ END:VCARD`;
                     <Button 
                       variant="outline" 
                       className="border-primary text-primary hover:bg-primary/10"
-                      onClick={onMessage}
+                      onClick={() => startDirectMessage(profile.user_id)}
+                      disabled={isMessageLoading(profile.user_id)}
                     >
-                      <MessageSquare className="h-4 w-4 mr-2" />
+                      {isMessageLoading(profile.user_id) ? (
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      ) : (
+                        <MessageSquare className="h-4 w-4 mr-2" />
+                      )}
                       Message
                     </Button>
                   </>

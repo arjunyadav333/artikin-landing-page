@@ -9,7 +9,7 @@ import { useTrackProfileView } from "@/hooks/useProfileAnalytics";
 import { ProfileHero } from "@/components/profile/ProfileHero";
 import { ProfileStats } from "@/components/profile/ProfileStats";
 import { ProfileTabs } from "@/components/profile/ProfileTabs";
-import { supabase } from "@/integrations/supabase/client";
+import { useDirectMessage } from "@/hooks/useDirectMessage";
 
 export default function UserProfile() {
   const { userId } = useParams<{ userId: string }>();
@@ -47,6 +47,7 @@ export default function UserProfile() {
   const { data: following } = useConnections(targetUserId, 'following');
   const followMutation = useFollowUser();
   const trackViewMutation = useTrackProfileView();
+  const { startDirectMessage } = useDirectMessage();
 
   // Track profile view
   useEffect(() => {
@@ -66,17 +67,7 @@ export default function UserProfile() {
   const handleMessage = async () => {
     if (!targetUserId || !user) return;
     
-    try {
-      const { data, error } = await supabase.functions.invoke('create-or-get-conversation', {
-        body: { otherUserId: targetUserId }
-      });
-      
-      if (error) throw error;
-      
-      navigate(`/messages/${data.conversationId}`);
-    } catch (error) {
-      console.error('Failed to create conversation:', error);
-    }
+    startDirectMessage(targetUserId);
   };
 
   // Handle authentication loading
@@ -140,7 +131,6 @@ export default function UserProfile() {
         isOwnProfile={isOwnProfile}
         connectionStatus={connectionStatus}
         onFollow={handleFollow}
-        onMessage={handleMessage}
         followMutation={followMutation}
       />
 

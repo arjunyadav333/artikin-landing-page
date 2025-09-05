@@ -853,6 +853,13 @@ export type Database = {
       }
     }
     Functions: {
+      create_or_get_conversation: {
+        Args: { user_a: string; user_b: string }
+        Returns: {
+          conversation_id: string
+          existing: boolean
+        }[]
+      }
       get_or_create_conversation: {
         Args: { user1_id: string; user2_id: string }
         Returns: string
