@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { useOrganizationOpportunities } from "@/hooks/useOrganizationOpportunities";
 import { ApplicantManagement } from "./applicant-management";
-import { CreateOpportunityModal } from "./create-opportunity-modal";
+import { CreateOpportunityDrawer } from "./create-opportunity-drawer";
 import { EditOpportunityModal } from "./edit-opportunity-modal";
 import { formatDistanceToNow } from "date-fns";
 
@@ -24,6 +24,7 @@ export function OrganizationDashboard() {
   const [activeTab, setActiveTab] = useState("active");
   const [selectedOpportunity, setSelectedOpportunity] = useState<string | null>(null);
   const [editingOpportunity, setEditingOpportunity] = useState<any | null>(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
   
   const { data: opportunities, isLoading } = useOrganizationOpportunities();
 
@@ -103,7 +104,10 @@ export function OrganizationDashboard() {
 
         {/* Post New Job Opportunity Button */}
         <div className="mb-6">
-          <Button className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-lg">
+          <Button 
+            className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-lg"
+            onClick={() => setShowCreateModal(true)}
+          >
             <Plus className="h-4 w-4 mr-2" />
             Post New Job Opportunity
           </Button>
@@ -283,12 +287,15 @@ export function OrganizationDashboard() {
                             : "You haven't posted any opportunities yet. Start attracting talent by posting your first job opportunity."
                         }
                       </p>
-                      {activeTab !== 'closed' && (
-                        <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
+                       {activeTab !== 'closed' && (
+                        <Button 
+                          className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                          onClick={() => setShowCreateModal(true)}
+                        >
                           <Plus className="h-4 w-4 mr-2" />
                           Post New Job Opportunity
                         </Button>
-                      )}
+                       )}
                     </div>
                   </div>
                 </Card>
@@ -297,6 +304,12 @@ export function OrganizationDashboard() {
           )}
         </div>
       </div>
+
+      {/* Create Opportunity Drawer */}
+      <CreateOpportunityDrawer 
+        open={showCreateModal} 
+        onOpenChange={setShowCreateModal}
+      />
 
       {/* Edit Modal */}
       {editingOpportunity && (

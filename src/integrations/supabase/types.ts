@@ -386,14 +386,22 @@ export type Database = {
       opportunities: {
         Row: {
           applications_count: number | null
+          art_forms: string[] | null
+          city: string | null
           company: string | null
           created_at: string | null
           deadline: string | null
           description: string
+          experience_level: string | null
+          gender_preference: string[] | null
           id: string
+          image_url: string | null
+          language_preference: string[] | null
           location: string | null
+          organization_name: string | null
           salary_max: number | null
           salary_min: number | null
+          state: string | null
           status: string | null
           tags: string[] | null
           title: string
@@ -404,14 +412,22 @@ export type Database = {
         }
         Insert: {
           applications_count?: number | null
+          art_forms?: string[] | null
+          city?: string | null
           company?: string | null
           created_at?: string | null
           deadline?: string | null
           description: string
+          experience_level?: string | null
+          gender_preference?: string[] | null
           id?: string
+          image_url?: string | null
+          language_preference?: string[] | null
           location?: string | null
+          organization_name?: string | null
           salary_max?: number | null
           salary_min?: number | null
+          state?: string | null
           status?: string | null
           tags?: string[] | null
           title: string
@@ -422,14 +438,22 @@ export type Database = {
         }
         Update: {
           applications_count?: number | null
+          art_forms?: string[] | null
+          city?: string | null
           company?: string | null
           created_at?: string | null
           deadline?: string | null
           description?: string
+          experience_level?: string | null
+          gender_preference?: string[] | null
           id?: string
+          image_url?: string | null
+          language_preference?: string[] | null
           location?: string | null
+          organization_name?: string | null
           salary_max?: number | null
           salary_min?: number | null
+          state?: string | null
           status?: string | null
           tags?: string[] | null
           title?: string
