@@ -54,14 +54,7 @@ export type Database = {
             foreignKeyName: "comments_post_id_fkey"
             columns: ["post_id"]
             isOneToOne: false
-            referencedRelation: "posts_feed_optimized"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "comments_post_id_fkey"
-            columns: ["post_id"]
-            isOneToOne: false
-            referencedRelation: "posts_with_profiles_view"
+            referencedRelation: "posts_with_profiles_secure"
             referencedColumns: ["id"]
           },
         ]
@@ -129,13 +122,6 @@ export type Database = {
             foreignKeyName: "conversation_participants_conversation_id_fkey"
             columns: ["conversation_id"]
             isOneToOne: false
-            referencedRelation: "conversation_list_view"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "conversation_participants_conversation_id_fkey"
-            columns: ["conversation_id"]
-            isOneToOne: false
             referencedRelation: "conversations"
             referencedColumns: ["id"]
           },
@@ -143,7 +129,7 @@ export type Database = {
             foreignKeyName: "conversation_participants_conversation_id_fkey"
             columns: ["conversation_id"]
             isOneToOne: false
-            referencedRelation: "conversations_optimized"
+            referencedRelation: "conversations_secure"
             referencedColumns: ["id"]
           },
         ]
@@ -249,14 +235,7 @@ export type Database = {
             foreignKeyName: "likes_post_id_fkey"
             columns: ["post_id"]
             isOneToOne: false
-            referencedRelation: "posts_feed_optimized"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "likes_post_id_fkey"
-            columns: ["post_id"]
-            isOneToOne: false
-            referencedRelation: "posts_with_profiles_view"
+            referencedRelation: "posts_with_profiles_secure"
             referencedColumns: ["id"]
           },
         ]
@@ -385,13 +364,6 @@ export type Database = {
             foreignKeyName: "messages_conversation_id_fkey"
             columns: ["conversation_id"]
             isOneToOne: false
-            referencedRelation: "conversation_list_view"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "messages_conversation_id_fkey"
-            columns: ["conversation_id"]
-            isOneToOne: false
             referencedRelation: "conversations"
             referencedColumns: ["id"]
           },
@@ -399,7 +371,7 @@ export type Database = {
             foreignKeyName: "messages_conversation_id_fkey"
             columns: ["conversation_id"]
             isOneToOne: false
-            referencedRelation: "conversations_optimized"
+            referencedRelation: "conversations_secure"
             referencedColumns: ["id"]
           },
           {
@@ -676,14 +648,7 @@ export type Database = {
             foreignKeyName: "shares_post_id_fkey"
             columns: ["post_id"]
             isOneToOne: false
-            referencedRelation: "posts_feed_optimized"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "shares_post_id_fkey"
-            columns: ["post_id"]
-            isOneToOne: false
-            referencedRelation: "posts_with_profiles_view"
+            referencedRelation: "posts_with_profiles_secure"
             referencedColumns: ["id"]
           },
         ]
@@ -734,14 +699,11 @@ export type Database = {
       }
     }
     Views: {
-      conversation_list_view: {
+      conversations_secure: {
         Row: {
           created_at: string | null
           id: string | null
-          last_message_body: string | null
-          last_message_created_at: string | null
           last_message_id: string | null
-          last_message_sender_id: string | null
           participant_a: string | null
           participant_a_avatar: string | null
           participant_a_name: string | null
@@ -769,72 +731,7 @@ export type Database = {
           },
         ]
       }
-      conversations_optimized: {
-        Row: {
-          created_at: string | null
-          id: string | null
-          last_message_body: string | null
-          last_message_created_at: string | null
-          last_message_deleted: boolean | null
-          last_message_id: string | null
-          last_message_kind: string | null
-          last_message_sender_id: string | null
-          participant_a: string | null
-          participant_a_avatar: string | null
-          participant_a_name: string | null
-          participant_a_username: string | null
-          participant_b: string | null
-          participant_b_avatar: string | null
-          participant_b_name: string | null
-          participant_b_username: string | null
-          updated_at: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "conversations_last_message_id_fkey"
-            columns: ["last_message_id"]
-            isOneToOne: false
-            referencedRelation: "messages"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_conversations_last_message"
-            columns: ["last_message_id"]
-            isOneToOne: false
-            referencedRelation: "messages"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      posts_feed_optimized: {
-        Row: {
-          comments_count: number | null
-          content: string | null
-          created_at: string | null
-          id: string | null
-          likes_count: number | null
-          media_type: string | null
-          media_urls: string[] | null
-          profile_artform: Database["public"]["Enums"]["artform_type"] | null
-          profile_avatar_url: string | null
-          profile_bio: string | null
-          profile_display_name: string | null
-          profile_location: string | null
-          profile_organization_type:
-            | Database["public"]["Enums"]["organization_type"]
-            | null
-          profile_role: Database["public"]["Enums"]["user_role"] | null
-          profile_username: string | null
-          saves_count: number | null
-          shares_count: number | null
-          tags: string[] | null
-          title: string | null
-          updated_at: string | null
-          user_id: string | null
-        }
-        Relationships: []
-      }
-      posts_with_profiles_view: {
+      posts_with_profiles_secure: {
         Row: {
           comments_count: number | null
           content: string | null

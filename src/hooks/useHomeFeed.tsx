@@ -46,9 +46,9 @@ export const useHomeFeed = (limit = 20) => {
   const { user } = useAuth();
 
   const fetchPosts = async ({ pageParam = 0 }) => {
-    // Fetch posts with visibility rules
+    // Fetch posts with visibility rules using secure view
     let query = supabase
-      .from('posts_feed_optimized')
+      .from('posts_with_profiles_secure')
       .select('*')
       .order('created_at', { ascending: false })
       .range(pageParam * limit, (pageParam + 1) * limit - 1);
