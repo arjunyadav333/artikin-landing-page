@@ -1,38 +1,21 @@
 import { useState, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Search, 
-  MoreHorizontal, 
-  Edit3, 
-  Trash2, 
   Users, 
-  Eye,
-  Calendar,
-  Clock,
-  Filter,
-  ToggleLeft,
-  ToggleRight,
-  Plus,
   TrendingUp,
-  AlertCircle
+  AlertCircle,
+  Filter,
+  Plus
 } from "lucide-react";
-import { 
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { useOrganizationOpportunities, useUpdateOpportunityStatus, useDeleteOpportunity } from "@/hooks/useOrganizationOpportunities";
+import { useOrganizationOpportunities } from "@/hooks/useOrganizationOpportunities";
 import { ApplicantManagement } from "./applicant-management";
 import { CreateOpportunityModal } from "./create-opportunity-modal";
 import { EditOpportunityModal } from "./edit-opportunity-modal";
-import { formatDistanceToNow, format } from "date-fns";
+import { formatDistanceToNow } from "date-fns";
 
 export function OrganizationDashboard() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -41,8 +24,6 @@ export function OrganizationDashboard() {
   const [editingOpportunity, setEditingOpportunity] = useState<any | null>(null);
   
   const { data: opportunities, isLoading } = useOrganizationOpportunities();
-  const updateStatus = useUpdateOpportunityStatus();
-  const deleteOpportunity = useDeleteOpportunity();
 
   // Filter and organize opportunities
   const { activeOpportunities, closedOpportunities, allOpportunities } = useMemo(() => {
@@ -79,17 +60,6 @@ export function OrganizationDashboard() {
 
   const currentOpportunities = getCurrentOpportunities();
 
-  const handleStatusToggle = async (opportunityId: string, currentStatus: string) => {
-    const newStatus = currentStatus === 'active' ? 'closed' : 'active';
-    await updateStatus.mutateAsync({ opportunityId, status: newStatus });
-  };
-
-  const handleDeleteOpportunity = async (opportunityId: string) => {
-    if (window.confirm('Are you sure you want to delete this opportunity?')) {
-      await deleteOpportunity.mutateAsync(opportunityId);
-    }
-  };
-
   if (selectedOpportunity) {
     const opportunity = allOpportunities.find(opp => opp.id === selectedOpportunity);
     return (
@@ -117,22 +87,20 @@ export function OrganizationDashboard() {
   }
 
   return (
-    <motion.div 
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="min-h-screen bg-gradient-to-br from-background via-background/95 to-accent/5"
-    >
-      <div className="container max-w-7xl mx-auto px-4 py-6 lg:py-8">
+    <div className="min-h-screen bg-background">
+      <div className="container max-w-6xl mx-auto px-4 py-8">
         {/* Header Section */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              Opportunity Dashboard
-            </h1>
-            <p className="text-muted-foreground mt-1">
-              Manage and track your job postings
-            </p>
-          </div>
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold text-foreground mb-2">
+            Opportunity Dashboard
+          </h1>
+          <p className="text-muted-foreground">
+            Manage and track your job postings
+          </p>
+        </div>
+
+        {/* Post New Job Section */}
+        <div className="bg-primary rounded-lg p-6 mb-8">
           <CreateOpportunityModal />
         </div>
 
@@ -155,36 +123,36 @@ export function OrganizationDashboard() {
 
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <Card className="p-4">
+          <Card className="p-6">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-green-100 rounded-lg">
                 <TrendingUp className="h-5 w-5 text-green-600" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Active</p>
-                <p className="text-2xl font-bold text-green-600">{activeOpportunities.length}</p>
+                <p className="text-2xl font-bold">{activeOpportunities.length}</p>
               </div>
             </div>
           </Card>
-          <Card className="p-4">
+          <Card className="p-6">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-gray-100 rounded-lg">
                 <AlertCircle className="h-5 w-5 text-gray-600" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Closed</p>
-                <p className="text-2xl font-bold text-gray-600">{closedOpportunities.length}</p>
+                <p className="text-2xl font-bold">{closedOpportunities.length}</p>
               </div>
             </div>
           </Card>
-          <Card className="p-4">
+          <Card className="p-6">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-blue-100 rounded-lg">
                 <Users className="h-5 w-5 text-blue-600" />
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Total Applications</p>
-                <p className="text-2xl font-bold text-blue-600">
+                <p className="text-2xl font-bold">
                   {allOpportunities.reduce((sum, opp) => sum + (opp.applications_count || 0), 0)}
                 </p>
               </div>
@@ -193,226 +161,151 @@ export function OrganizationDashboard() {
         </div>
 
         {/* Tabs Section */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <div className="flex justify-center mb-6">
-            <TabsList className="grid w-full max-w-md grid-cols-3 bg-muted/30 p-1 rounded-xl h-12">
-              <TabsTrigger 
-                value="active" 
-                className="data-[state=active]:bg-green-500 data-[state=active]:text-white data-[state=active]:font-bold transition-all duration-200 hover:bg-green-100"
-              >
-                Active ({activeOpportunities.length})
-              </TabsTrigger>
-              <TabsTrigger 
-                value="closed"
-                className="data-[state=active]:bg-gray-500 data-[state=active]:text-white data-[state=active]:font-bold transition-all duration-200 hover:bg-gray-100"
-              >
-                Closed ({closedOpportunities.length})
-              </TabsTrigger>
-              <TabsTrigger 
-                value="all"
-                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:font-bold transition-all duration-200 hover:bg-primary/10"
-              >
-                All ({allOpportunities.length})
-              </TabsTrigger>
-            </TabsList>
+        <div className="mb-6">
+          <div className="flex justify-start gap-2">
+            <Button
+              variant={activeTab === "active" ? "default" : "outline"}
+              onClick={() => setActiveTab("active")}
+              className={`${
+                activeTab === "active" 
+                  ? "bg-green-500 hover:bg-green-600 text-white" 
+                  : "hover:bg-green-50"
+              }`}
+            >
+              Active ({activeOpportunities.length})
+            </Button>
+            <Button
+              variant={activeTab === "closed" ? "default" : "outline"}
+              onClick={() => setActiveTab("closed")}
+              className={`${
+                activeTab === "closed" 
+                  ? "bg-gray-500 hover:bg-gray-600 text-white" 
+                  : "hover:bg-gray-50"
+              }`}
+            >
+              Closed ({closedOpportunities.length})
+            </Button>
+            <Button
+              variant={activeTab === "all" ? "default" : "outline"}
+              onClick={() => setActiveTab("all")}
+            >
+              All ({allOpportunities.length})
+            </Button>
           </div>
+        </div>
 
-          {/* Tab Content */}
-          <AnimatePresence mode="wait">
-            <TabsContent value={activeTab} className="mt-0">
-              {isLoading ? (
-                <motion.div
-                  key="loading"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="space-y-4"
-                >
-                  {Array.from({ length: 4 }).map((_, i) => (
-                    <Card key={i} className="animate-pulse p-6">
-                      <div className="flex items-center justify-between">
-                        <div className="space-y-2 flex-1">
-                          <div className="h-5 bg-muted rounded w-1/3"></div>
-                          <div className="h-4 bg-muted rounded w-1/4"></div>
-                        </div>
-                        <div className="flex gap-2">
-                          <div className="h-6 bg-muted rounded w-20"></div>
-                          <div className="h-8 bg-muted rounded w-32"></div>
-                        </div>
+        {/* Opportunities List */}
+        <div className="space-y-4">
+          {isLoading ? (
+            <>
+              {Array.from({ length: 3 }).map((_, i) => (
+                <Card key={i} className="animate-pulse p-6">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-2 flex-1">
+                      <div className="h-5 bg-muted rounded w-1/3"></div>
+                      <div className="h-4 bg-muted rounded w-1/4"></div>
+                    </div>
+                    <div className="h-8 bg-muted rounded w-32"></div>
+                  </div>
+                </Card>
+              ))}
+            </>
+          ) : (
+            <>
+              {currentOpportunities.map((opportunity) => (
+                <Card key={opportunity.id} className="p-6 hover:shadow-md transition-shadow">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1 space-y-3">
+                      <div className="flex items-center gap-3">
+                        <h3 className="text-lg font-semibold text-foreground">
+                          {opportunity.title}
+                        </h3>
+                        <Badge 
+                          className={`px-3 py-1 text-xs font-medium ${
+                            opportunity.status === 'active' 
+                              ? 'bg-green-100 text-green-800' 
+                              : 'bg-gray-100 text-gray-800'
+                          }`}
+                        >
+                          {opportunity.status === 'active' ? 'Active' : 'Closed'}
+                        </Badge>
                       </div>
-                    </Card>
-                  ))}
-                </motion.div>
-              ) : (
-                <motion.div
-                  key={activeTab}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  className="space-y-4"
-                >
-                  {currentOpportunities.map((opportunity, index) => (
-                    <motion.div
-                      key={opportunity.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.2, delay: index * 0.05 }}
-                    >
-                      <Card className="p-6 hover:shadow-lg transition-all duration-200 border-l-4 border-l-transparent hover:border-l-primary">
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="flex-1 space-y-3">
-                            <div className="flex items-center gap-3">
-                              <h3 className="text-lg font-semibold text-foreground">
-                                {opportunity.title}
-                              </h3>
-                              <Badge 
-                                className={`px-3 py-1 text-xs font-medium ${
-                                  opportunity.status === 'active' 
-                                    ? 'bg-green-100 text-green-800 border-green-200' 
-                                    : 'bg-gray-100 text-gray-800 border-gray-200'
-                                }`}
-                              >
-                                {opportunity.status === 'active' ? 'Active' : 'Closed'}
-                              </Badge>
-                            </div>
-                            
-                            <div className="flex flex-wrap items-center gap-6 text-sm text-muted-foreground">
-                              <div className="flex items-center gap-1">
-                                <Calendar className="h-4 w-4" />
-                                <span>Posted {formatDistanceToNow(new Date(opportunity.created_at))} ago</span>
-                              </div>
-                              
-                              <div className="flex items-center gap-1">
-                                <Eye className="h-4 w-4" />
-                                <span>{opportunity.views_count || 0} views</span>
-                              </div>
-                              
-                              <div className="flex items-center gap-1">
-                                <Users className="h-4 w-4" />
-                                <span>{opportunity.applications_count || 0} applications</span>
-                              </div>
-                              
-                              {opportunity.deadline && (
-                                <div className="flex items-center gap-1">
-                                  <Clock className="h-4 w-4" />
-                                  <span>Deadline: {format(new Date(opportunity.deadline), 'MMM d, yyyy')}</span>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                          
-                          <div className="flex items-center gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleStatusToggle(opportunity.id, opportunity.status || 'active')}
-                              className="flex items-center gap-2"
-                            >
-                              {opportunity.status === 'active' ? (
-                                <>
-                                  <ToggleRight className="h-4 w-4 text-green-600" />
-                                  Active
-                                </>
-                              ) : (
-                                <>
-                                  <ToggleLeft className="h-4 w-4 text-gray-400" />
-                                  Closed
-                                </>
-                              )}
-                            </Button>
-                            
-                            <Button
-                              onClick={() => setSelectedOpportunity(opportunity.id)}
-                              className="bg-primary hover:bg-primary/90 text-primary-foreground"
-                            >
-                              <Users className="h-4 w-4 mr-2" />
-                              Manage ({opportunity.applications_count || 0})
-                            </Button>
-                            
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                  <MoreHorizontal className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem>
-                                  <Eye className="h-4 w-4 mr-2" />
-                                  View Details
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  onClick={() => setEditingOpportunity(opportunity)}
-                                >
-                                  <Edit3 className="h-4 w-4 mr-2" />
-                                  Edit
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem 
-                                  className="text-red-600"
-                                  onClick={() => handleDeleteOpportunity(opportunity.id)}
-                                >
-                                  <Trash2 className="h-4 w-4 mr-2" />
-                                  Delete
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </div>
-                        </div>
-                      </Card>
-                    </motion.div>
-                  ))}
+                      
+                      <div className="flex flex-wrap items-center gap-6 text-sm text-muted-foreground">
+                        <span>Posted {formatDistanceToNow(new Date(opportunity.created_at))} ago</span>
+                        <span>{opportunity.views_count || 0} views</span>
+                        <span>{opportunity.applications_count || 0} applications</span>
+                      </div>
+                      
+                      <p className="text-sm text-muted-foreground line-clamp-2">
+                        {opportunity.description}
+                      </p>
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <Button
+                        onClick={() => setSelectedOpportunity(opportunity.id)}
+                        className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                      >
+                        <Users className="h-4 w-4 mr-2" />
+                        Manage ({opportunity.applications_count || 0})
+                      </Button>
+                    </div>
+                  </div>
+                </Card>
+              ))}
 
-                  {/* Empty State */}
-                  {currentOpportunities.length === 0 && (
-                    <Card className="p-12 text-center">
-                      <div className="max-w-md mx-auto space-y-4">
-                        <div className="mx-auto w-20 h-20 bg-muted/50 rounded-full flex items-center justify-center">
-                          {activeTab === 'active' && <TrendingUp className="h-10 w-10 text-green-600" />}
-                          {activeTab === 'closed' && <AlertCircle className="h-10 w-10 text-gray-600" />}
-                          {activeTab === 'all' && <Users className="h-10 w-10 text-primary" />}
-                        </div>
-                        <div>
-                          <h3 className="text-xl font-semibold mb-2">
-                            {searchQuery ? `No ${activeTab} opportunities found` : `No ${activeTab} opportunities`}
-                          </h3>
-                          <p className="text-muted-foreground mb-6">
-                            {searchQuery 
-                              ? `No ${activeTab} opportunities match your search criteria.` 
-                              : activeTab === 'active' 
-                                ? "You don't have any active opportunities. Create one to start receiving applications."
-                                : activeTab === 'closed'
-                                  ? "You don't have any closed opportunities yet."
-                                  : "You haven't posted any opportunities yet. Start attracting talent by posting your first job opportunity."
-                            }
-                          </p>
-                          {!searchQuery && activeTab !== 'closed' && <CreateOpportunityModal />}
-                          {searchQuery && (
-                            <Button 
-                              variant="outline" 
-                              onClick={() => setSearchQuery("")}
-                              className="mt-2"
-                            >
-                              Clear Search
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                    </Card>
-                  )}
-                </motion.div>
+              {/* Empty State */}
+              {currentOpportunities.length === 0 && (
+                <Card className="p-12 text-center">
+                  <div className="max-w-md mx-auto space-y-4">
+                    <div className="mx-auto w-20 h-20 bg-muted/50 rounded-full flex items-center justify-center">
+                      {activeTab === 'active' && <TrendingUp className="h-10 w-10 text-green-600" />}
+                      {activeTab === 'closed' && <AlertCircle className="h-10 w-10 text-gray-600" />}
+                      {activeTab === 'all' && <Users className="h-10 w-10 text-primary" />}
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-semibold mb-2">
+                        {searchQuery ? `No ${activeTab} opportunities found` : `No ${activeTab} opportunities`}
+                      </h3>
+                      <p className="text-muted-foreground mb-6">
+                        {searchQuery 
+                          ? `No ${activeTab} opportunities match your search criteria.` 
+                          : activeTab === 'active' 
+                            ? "You don't have any active opportunities. Create one to start receiving applications."
+                            : activeTab === 'closed'
+                              ? "You don't have any closed opportunities yet."
+                              : "You haven't posted any opportunities yet. Start attracting talent by posting your first job opportunity."
+                        }
+                      </p>
+                      {!searchQuery && activeTab !== 'closed' && (
+                        <CreateOpportunityModal />
+                      )}
+                      {searchQuery && (
+                        <Button 
+                          variant="outline" 
+                          onClick={() => setSearchQuery("")}
+                        >
+                          Clear Search
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </Card>
               )}
-            </TabsContent>
-          </AnimatePresence>
-        </Tabs>
-
-        {editingOpportunity && (
-          <EditOpportunityModal
-            isOpen={!!editingOpportunity}
-            onClose={() => setEditingOpportunity(null)}
-            opportunity={editingOpportunity}
-          />
-        )}
+            </>
+          )}
+        </div>
       </div>
-    </motion.div>
+
+      {/* Edit Modal */}
+      {editingOpportunity && (
+        <EditOpportunityModal
+          isOpen={!!editingOpportunity}
+          onClose={() => setEditingOpportunity(null)}
+          opportunity={editingOpportunity}
+        />
+      )}
+    </div>
   );
 }

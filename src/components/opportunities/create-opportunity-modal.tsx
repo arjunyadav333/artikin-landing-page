@@ -71,8 +71,8 @@ export function CreateOpportunityModal() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white text-lg py-6 mb-6">
-          <Plus className="h-5 w-5 mr-3" />
+        <Button size="lg" className="bg-white text-primary hover:bg-white/90 font-semibold">
+          <Plus className="h-5 w-5 mr-2" />
           Post New Job Opportunity
         </Button>
       </DialogTrigger>
