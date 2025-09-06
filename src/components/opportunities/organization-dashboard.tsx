@@ -82,51 +82,51 @@ export function OrganizationDashboard() {
   return (
     <div className="min-h-screen bg-background">
       {/* Post New Job Opportunity Section - Full Width Blue */}
-      <div className="bg-primary py-12 px-4">
+      <div className="bg-primary py-8 px-4">
         <div className="container max-w-6xl mx-auto text-center">
           <Button 
             size="lg" 
-            className="bg-white text-primary hover:bg-white/90 font-semibold px-8 py-4 text-lg"
+            className="bg-white text-primary hover:bg-white/90 font-medium px-6 py-3 rounded-lg"
           >
-            <Plus className="h-5 w-5 mr-2" />
+            <Plus className="h-4 w-4 mr-2" />
             Post New Job Opportunity
           </Button>
         </div>
       </div>
 
-      <div className="container max-w-6xl mx-auto px-4 py-8">
+      <div className="container max-w-6xl mx-auto px-4 py-6">
         {/* Tabs Section */}
-        <div className="mb-8">
-          <div className="flex justify-start gap-2">
+        <div className="mb-6">
+          <div className="flex justify-start gap-0 bg-muted p-1 rounded-lg inline-flex">
             <Button
-              variant={activeTab === "active" ? "default" : "outline"}
+              variant="ghost"
               onClick={() => setActiveTab("active")}
-              className={`${
+              className={`px-4 py-2 rounded-md font-medium transition-all ${
                 activeTab === "active" 
-                  ? "bg-primary hover:bg-primary/90 text-primary-foreground" 
-                  : "bg-background text-foreground hover:bg-muted"
+                  ? "bg-primary text-primary-foreground shadow-sm" 
+                  : "text-muted-foreground hover:text-foreground"
               }`}
             >
               Active ({activeOpportunities.length})
             </Button>
             <Button
-              variant={activeTab === "closed" ? "default" : "outline"}
+              variant="ghost"
               onClick={() => setActiveTab("closed")}
-              className={`${
+              className={`px-4 py-2 rounded-md font-medium transition-all ${
                 activeTab === "closed" 
-                  ? "bg-primary hover:bg-primary/90 text-primary-foreground" 
-                  : "bg-background text-foreground hover:bg-muted"
+                  ? "bg-primary text-primary-foreground shadow-sm" 
+                  : "text-muted-foreground hover:text-foreground"
               }`}
             >
               Closed ({closedOpportunities.length})
             </Button>
             <Button
-              variant={activeTab === "all" ? "default" : "outline"}
+              variant="ghost"
               onClick={() => setActiveTab("all")}
-              className={`${
+              className={`px-4 py-2 rounded-md font-medium transition-all ${
                 activeTab === "all" 
-                  ? "bg-primary hover:bg-primary/90 text-primary-foreground" 
-                  : "bg-background text-foreground hover:bg-muted"
+                  ? "bg-primary text-primary-foreground shadow-sm" 
+                  : "text-muted-foreground hover:text-foreground"
               }`}
             >
               All ({allOpportunities.length})
@@ -164,85 +164,109 @@ export function OrganizationDashboard() {
           ) : (
             <>
               {currentOpportunities.map((opportunity) => (
-                <Card key={opportunity.id} className="p-6 hover:shadow-md transition-all duration-200 relative">
+                <Card key={opportunity.id} className="p-4 hover:shadow-md transition-all duration-200 relative bg-card">
                   {/* More Options Menu */}
                   <div className="absolute top-4 right-4">
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground">
                       <MoreHorizontal className="h-4 w-4" />
                     </Button>
                   </div>
 
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     {/* Top Row: Title + Status Badge */}
-                    <div className="flex items-start justify-between pr-12">
-                      <h3 className="text-xl font-bold text-foreground">
+                    <div className="flex items-start justify-between pr-8">
+                      <h3 className="text-lg font-bold text-foreground leading-tight">
                         {opportunity.title}
                       </h3>
                       <Badge 
-                        className={`px-3 py-1 text-xs font-medium ${
+                        className={`px-2 py-1 text-xs font-medium rounded-md ${
                           opportunity.status === 'active' 
-                            ? 'bg-green-100 text-green-700 border-green-200' 
-                            : 'bg-red-100 text-red-700 border-red-200'
-                        } border`}
+                            ? 'bg-green-500 text-white' 
+                            : 'bg-red-500 text-white'
+                        }`}
                       >
                         {opportunity.status === 'active' ? 'Active' : 'Closed'}
                       </Badge>
                     </div>
 
                     {/* Second Row: Category + Location */}
-                    <div className="flex items-center gap-4">
-                      <Badge variant="secondary" className="px-3 py-1 text-sm bg-muted text-muted-foreground">
+                    <div className="flex items-center gap-3">
+                      <Badge variant="outline" className="px-2 py-1 text-xs bg-background text-foreground border-border rounded-full">
                         {opportunity.type || 'Acting'}
                       </Badge>
                       <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                        <MapPin className="h-4 w-4" />
+                        <MapPin className="h-3 w-3" />
                         <span>{opportunity.location || 'Location not specified'}</span>
                       </div>
                     </div>
 
                     {/* Description Preview */}
-                    <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
+                    <p className="text-sm text-muted-foreground leading-relaxed">
                       {opportunity.description}
                     </p>
 
                     {/* Footer Row */}
-                    <div className="flex items-center justify-between pt-2">
-                      <div className="flex items-center gap-6 text-sm text-muted-foreground">
+                    <div className="flex items-center justify-between text-xs text-muted-foreground pt-2">
+                      <div className="flex items-center gap-4">
                         <div className="flex items-center gap-1">
-                          <Eye className="h-4 w-4" />
+                          <Eye className="h-3 w-3" />
                           <span>{opportunity.views_count || 0} views</span>
                         </div>
                         <div className="flex items-center gap-1">
-                          <Calendar className="h-4 w-4" />
+                          <Calendar className="h-3 w-3" />
                           <span>
                             {opportunity.deadline 
-                              ? `Deadline: ${new Date(opportunity.deadline).toLocaleDateString()}`
+                              ? `Deadline: ${new Date(opportunity.deadline).toLocaleDateString('en-GB')}`
                               : 'No deadline'
                             }
                           </span>
                         </div>
                       </div>
-                      <span className="text-sm text-muted-foreground">
+                      <span>
                         Posted {formatDistanceToNow(new Date(opportunity.created_at))} ago
                       </span>
                     </div>
 
-                    {/* Action Buttons */}
-                    <div className="flex items-center justify-between pt-4 border-t border-border">
-                      <Button
-                        onClick={() => setSelectedOpportunity(opportunity.id)}
-                        className="bg-primary hover:bg-primary/90 text-primary-foreground"
-                      >
-                        Manage Applicants ({opportunity.applications_count || 0})
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        className="text-muted-foreground hover:text-foreground"
-                        onClick={() => setEditingOpportunity(opportunity)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
+                    {/* Action Buttons Row */}
+                    <div className="flex items-center justify-between pt-3 border-t border-border/50">
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 px-3 text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                        >
+                          Home
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 px-3 text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                          onClick={() => setSelectedOpportunity(opportunity.id)}
+                        >
+                          Opportunities
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 px-3 text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                        >
+                          +
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 px-3 text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                        >
+                          Connections
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 px-3 text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                        >
+                          Messages
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </Card>
