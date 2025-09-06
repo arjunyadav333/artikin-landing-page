@@ -343,6 +343,7 @@ export const CreateOpportunityFlow: React.FC<CreateOpportunityFlowProps> = ({
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
+                    type="button"
                     variant="outline"
                     role="combobox"
                     className={`w-full justify-between text-left font-normal ${
@@ -385,6 +386,7 @@ export const CreateOpportunityFlow: React.FC<CreateOpportunityFlowProps> = ({
               {errors.art_forms && <p className="text-sm text-destructive">{errors.art_forms}</p>}
             </div>
 
+            {/* Continue with rest of form fields... */}
             {/* Experience Level & Gender Preference */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -406,6 +408,7 @@ export const CreateOpportunityFlow: React.FC<CreateOpportunityFlowProps> = ({
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
+                      type="button"
                       variant="outline"
                       role="combobox"
                       className={`w-full justify-between text-left font-normal ${
@@ -448,10 +451,11 @@ export const CreateOpportunityFlow: React.FC<CreateOpportunityFlowProps> = ({
 
             {/* Language Preference */}
             <div className="space-y-2">
-              <label className="text-sm font-medium">Language Preference <span className="text-muted-foreground">(Select multiple)</span></label>
+              <label className="text-sm font-medium">Language Preference</label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
+                    type="button"
                     variant="outline"
                     role="combobox"
                     className={`w-full justify-between text-left font-normal ${
@@ -468,7 +472,7 @@ export const CreateOpportunityFlow: React.FC<CreateOpportunityFlowProps> = ({
                   <Command>
                     <CommandInput placeholder="Search languages..." />
                     <CommandEmpty>No language found.</CommandEmpty>
-                    <CommandGroup className="max-h-48 overflow-auto">
+                    <CommandGroup className="max-h-64 overflow-auto">
                       {languageOptions.map((language) => (
                         <CommandItem
                           key={language}
@@ -499,54 +503,53 @@ export const CreateOpportunityFlow: React.FC<CreateOpportunityFlowProps> = ({
                 Application Deadline <span className="text-destructive">*</span>
               </label>
               <div className="relative">
+                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="datetime-local"
                   value={formData.deadline}
                   onChange={(e) => setFormData(prev => ({ ...prev, deadline: e.target.value }))}
-                  className={`pr-10 ${errors.deadline ? 'border-destructive' : ''}`}
-                  min={isEditMode ? undefined : new Date().toISOString().slice(0, 16)}
+                  className={`pl-10 ${errors.deadline ? 'border-destructive' : ''}`}
+                  min={new Date().toISOString().slice(0, 16)}
                 />
-                <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
               </div>
               {errors.deadline && <p className="text-sm text-destructive">{errors.deadline}</p>}
             </div>
 
             {/* Image Upload */}
             <div className="space-y-2">
-              <label className="text-sm font-medium">Opportunity Image</label>
-              {imagePreview ? (
-                <div className="relative">
-                  <img src={imagePreview} alt="Preview" className="w-full h-32 object-cover rounded-lg border" />
-                  <Button 
-                    type="button"
-                    variant="destructive" 
-                    size="sm"
-                    onClick={removeImage}
-                    className="absolute top-2 right-2"
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              ) : (
-                <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center hover:border-muted-foreground/40 transition-colors">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageChange}
-                    className="hidden"
-                    id="image-upload"
-                  />
-                  <label htmlFor="image-upload" className="cursor-pointer flex flex-col items-center">
-                    <Upload className="h-8 w-8 text-muted-foreground mb-2" />
-                    <p className="text-sm text-muted-foreground">
-                      Click to upload an image
+              <label className="text-sm font-medium">Image for Opportunity</label>
+              <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
+                {imagePreview ? (
+                  <div className="space-y-4">
+                    <img 
+                      src={imagePreview} 
+                      alt="Preview" 
+                      className="mx-auto max-h-32 rounded-lg object-cover"
+                    />
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={removeImage}
+                    >
+                      Remove Image
+                    </Button>
+                  </div>
+                ) : (
+                  <div>
+                    <Upload className="mx-auto h-8 w-8 text-muted-foreground mb-2" />
+                    <p className="text-sm text-muted-foreground mb-2">
+                      Drag and drop an image here, or click to select
                     </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      PNG, JPG, WebP up to 10MB
-                    </p>
-                  </label>
-                </div>
-              )}
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      className="cursor-pointer"
+                    />
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Description */}
@@ -555,27 +558,25 @@ export const CreateOpportunityFlow: React.FC<CreateOpportunityFlowProps> = ({
                 Description <span className="text-destructive">*</span>
               </label>
               <Textarea
-                placeholder="Describe the role, responsibilities, and what you're looking for..."
+                placeholder="Describe the role, responsibilities, and expectations..."
                 value={formData.description}
                 onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                rows={4}
-                className={`resize-none ${errors.description ? 'border-destructive' : ''}`}
+                className={`min-h-32 resize-none ${errors.description ? 'border-destructive' : ''}`}
+                maxLength={2000}
               />
               <div className="flex justify-between text-xs text-muted-foreground">
                 <span>{errors.description && <span className="text-destructive">{errors.description}</span>}</span>
-                <span className={formData.description.length > 2000 ? 'text-destructive' : ''}>
-                  {formData.description.length}/2000
-                </span>
+                <span>{formData.description.length}/2000</span>
               </div>
             </div>
 
-            {/* Status (Edit mode only) */}
+            {/* Status field only shown in edit mode */}
             {isEditMode && (
               <div className="space-y-2">
                 <label className="text-sm font-medium">Status</label>
                 <Select value={formData.status} onValueChange={(value) => setFormData(prev => ({ ...prev, status: value }))}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select status" />
+                    <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="active">Active</SelectItem>
@@ -584,28 +585,29 @@ export const CreateOpportunityFlow: React.FC<CreateOpportunityFlowProps> = ({
                 </Select>
               </div>
             )}
-          </form>
-        </div>
 
-        {/* Footer Buttons */}
-        <div className={`p-6 pt-4 border-t ${isMobile ? 'pb-6' : ''}`}>
-          <div className={`flex gap-3 ${isMobile ? 'flex-col' : 'justify-end'}`}>
-            <Button 
-              variant="outline" 
-              onClick={() => onOpenChange(false)} 
-              disabled={uploading}
-              className={isMobile ? 'w-full' : ''}
-            >
-              Cancel
-            </Button>
-            <Button 
-              onClick={handleSubmit}
-              disabled={uploading || !isFormValid}
-              className={isMobile ? 'w-full' : ''}
-            >
-              {uploading ? 'Processing...' : (isEditMode ? 'Save Changes' : 'Post Opportunity')}
-            </Button>
-          </div>
+            {/* Footer Buttons - moved inside form */}
+            <div className={`pt-4 border-t ${isMobile ? 'sticky bottom-0 bg-background' : ''}`}>
+              <div className={`flex gap-3 ${isMobile ? 'flex-col' : 'justify-end'}`}>
+                <Button 
+                  type="button"
+                  variant="outline" 
+                  onClick={() => onOpenChange(false)} 
+                  disabled={uploading}
+                  className={isMobile ? 'w-full' : ''}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  type="submit"
+                  disabled={uploading || !isFormValid}
+                  className={isMobile ? 'w-full' : ''}
+                >
+                  {uploading ? 'Processing...' : (isEditMode ? 'Save Changes' : 'Post Opportunity')}
+                </Button>
+              </div>
+            </div>
+          </form>
         </div>
       </DialogContent>
     </Dialog>

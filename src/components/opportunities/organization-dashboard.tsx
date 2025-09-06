@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { useOrganizationOpportunities } from "@/hooks/useOrganizationOpportunities";
 import { ApplicantManagement } from "./applicant-management";
-import { CreateOpportunityDrawer } from "./create-opportunity-drawer";
+import { CreateOpportunityFlow } from "./create-opportunity-flow";
 import { EditOpportunityModal } from "./edit-opportunity-modal";
 import { formatDistanceToNow } from "date-fns";
 
@@ -305,8 +305,8 @@ export function OrganizationDashboard() {
         </div>
       </div>
 
-      {/* Create Opportunity Drawer */}
-      <CreateOpportunityDrawer 
+      {/* Create Opportunity Flow */}
+      <CreateOpportunityFlow 
         open={showCreateModal} 
         onOpenChange={setShowCreateModal}
       />
