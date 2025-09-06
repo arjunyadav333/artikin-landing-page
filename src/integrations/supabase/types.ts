@@ -792,6 +792,10 @@ export type Database = {
         Args: { message_id_param: string }
         Returns: boolean
       }
+      get_current_user_role: {
+        Args: Record<PropertyKey, never>
+        Returns: Database["public"]["Enums"]["user_role"]
+      }
       get_or_create_conversation: {
         Args: { user1_id: string; user2_id: string }
         Returns: string
@@ -824,6 +828,23 @@ export type Database = {
           updated_at: string
         }[]
       }
+      get_user_profile: {
+        Args: { user_uuid?: string }
+        Returns: {
+          artform: Database["public"]["Enums"]["artform_type"]
+          avatar_url: string
+          bio: string
+          display_name: string
+          full_name: string
+          id: string
+          location: string
+          organization_type: Database["public"]["Enums"]["organization_type"]
+          privacy: string
+          role: Database["public"]["Enums"]["user_role"]
+          user_id: string
+          username: string
+        }[]
+      }
       mark_conversation_messages_read: {
         Args: {
           conversation_id_param: string
@@ -831,6 +852,13 @@ export type Database = {
           user_id_param: string
         }
         Returns: number
+      }
+      user_has_role: {
+        Args: {
+          check_role: Database["public"]["Enums"]["user_role"]
+          user_uuid: string
+        }
+        Returns: boolean
       }
       username_available: {
         Args: { candidate: string }

@@ -12,7 +12,7 @@ import { OrganizationDashboard } from "@/components/opportunities/organization-d
 import { OpportunitySkeletonCard, ApplicationSkeletonCard } from "@/components/opportunities/skeleton-card";
 import { useOpportunities, useApplyToOpportunity } from "@/hooks/useOpportunities";
 import { useUserApplications, useDeleteApplication } from "@/hooks/useApplications";
-import { useCurrentProfile } from "@/hooks/useProfiles";
+import { useCurrentUserRole } from "@/hooks/useUserRole";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -21,7 +21,7 @@ const Opportunities = () => {
   const [activeTab, setActiveTab] = useState("opportunities");
   const [sortBy, setSortBy] = useState("newest");
   
-  const { data: currentProfile, isLoading: profileLoading } = useCurrentProfile();
+  const { data: userRole, isLoading: roleLoading } = useCurrentUserRole();
   const { data: opportunities, isLoading: opportunitiesLoading } = useOpportunities();
   const { data: applications, isLoading: applicationsLoading } = useUserApplications();
   const applyToOpportunity = useApplyToOpportunity();
@@ -29,8 +29,8 @@ const Opportunities = () => {
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
-  const isArtist = currentProfile?.role === 'artist';
-  const isOrganization = currentProfile?.role === 'organization';
+  const isArtist = userRole === 'artist';
+  const isOrganization = userRole === 'organization';
 
   // Filter and sort opportunities based on search query and sort preference
   const filteredOpportunities = useMemo(() => {
@@ -110,8 +110,8 @@ const Opportunities = () => {
     console.log("View opportunity:", opportunityId);
   };
 
-  // Wait for profile to load before showing role-specific content
-  if (profileLoading) {
+  // Wait for role to load before showing role-specific content
+  if (roleLoading) {
     return (
       <div className="min-h-screen bg-background pb-20 md:pb-8 flex items-center justify-center">
         <div className="text-center space-y-4">

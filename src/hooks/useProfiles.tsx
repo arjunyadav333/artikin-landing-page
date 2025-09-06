@@ -52,18 +52,12 @@ export const useCurrentProfile = () => {
   return useQuery({
     queryKey: ['currentProfile'],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
-
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('user_id', user.id)
-        .single();
+      const { data, error } = await supabase.rpc('get_user_profile');
       
       if (error) throw error;
-      return data as Profile;
-    }
+      return data?.[0] as Profile | null;
+    },
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
   });
 };
 
