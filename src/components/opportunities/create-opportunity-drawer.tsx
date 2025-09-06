@@ -6,13 +6,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useCreateOpportunity } from '@/hooks/useOpportunities';
 import { useCurrentUserProfile } from '@/hooks/useUserRole';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { useIsMobile } from '@/hooks/use-mobile';
 
 interface CreateOpportunityDrawerProps {
   open: boolean;
@@ -42,7 +40,6 @@ export const CreateOpportunityDrawer: React.FC<CreateOpportunityDrawerProps> = (
   const { toast } = useToast();
   const { data: profile } = useCurrentUserProfile();
   const createOpportunity = useCreateOpportunity();
-  const isMobile = useIsMobile();
 
   const [formData, setFormData] = useState({
     title: '',
@@ -472,34 +469,6 @@ export const CreateOpportunityDrawer: React.FC<CreateOpportunityDrawerProps> = (
       </div>
     </div>
   );
-
-  if (isMobile) {
-    return (
-      <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent className="h-[90vh] md:h-[80vh]">
-          <DrawerHeader className="border-b px-4 py-3">
-            <div className="flex items-center justify-between">
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={() => onOpenChange(false)}
-                className="p-2"
-              >
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
-              <DrawerTitle className="text-lg font-semibold">Create New Job Opportunity</DrawerTitle>
-              <div className="w-9" /> {/* Spacer for centering */}
-            </div>
-            <p className="text-sm text-muted-foreground mt-1 text-center">
-              Post a new opportunity for artists to discover and apply to.
-            </p>
-          </DrawerHeader>
-          <FormContent />
-          <ActionButtons />
-        </DrawerContent>
-      </Drawer>
-    );
-  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
