@@ -25,15 +25,45 @@ export const FileUpload = ({ onFileUploaded, disabled }: FileUploadProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
 
+  const validateFile = (file: File) => {
+    // File size validation (max 50MB)
+    if (file.size > 50 * 1024 * 1024) {
+      return "File size must be less than 50MB";
+    }
+    
+    // File type validation (whitelist approach)
+    const allowedTypes = [
+      'image/jpeg', 'image/png', 'image/gif', 'image/webp',
+      'video/mp4', 'video/webm', 'video/quicktime',
+      'application/pdf', 'text/plain',
+      'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/zip', 'application/x-rar-compressed'
+    ];
+    
+    if (!allowedTypes.includes(file.type)) {
+      return `File type "${file.type}" is not allowed. Please use images, videos, PDFs, or documents.`;
+    }
+    
+    // File name validation (prevent malicious names)
+    const fileName = file.name;
+    if (fileName.includes('..') || fileName.includes('<') || fileName.includes('>') || 
+        fileName.includes('"') || fileName.includes("'") || fileName.includes('&')) {
+      return 'Invalid file name. Please rename your file and try again.';
+    }
+    
+    return null;
+  };
+
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file || !user) return;
 
-    // Validate file size (max 50MB)
-    if (file.size > 50 * 1024 * 1024) {
+    // Validate file with enhanced security checks
+    const validationError = validateFile(file);
+    if (validationError) {
       toast({
-        title: "File too large",
-        description: "Please select a file smaller than 50MB",
+        title: "Invalid file",
+        description: validationError,
         variant: "destructive"
       });
       return;
