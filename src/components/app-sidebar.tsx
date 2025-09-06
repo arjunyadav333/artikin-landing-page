@@ -64,9 +64,6 @@ export function AppSidebar() {
               <p className="text-xs text-muted-foreground truncate">
                 @{user?.user_metadata?.username || 'user'}
               </p>
-              <p className="text-xs text-muted-foreground/80 font-normal">
-                {user?.user_metadata?.role || 'Artist'}
-              </p>
             </div>
           )}
         </Link>
