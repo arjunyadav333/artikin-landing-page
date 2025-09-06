@@ -832,6 +832,10 @@ export type Database = {
         }
         Returns: number
       }
+      username_available: {
+        Args: { candidate: string }
+        Returns: Json
+      }
     }
     Enums: {
       artform_type:
