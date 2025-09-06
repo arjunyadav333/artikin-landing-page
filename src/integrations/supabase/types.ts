@@ -796,48 +796,31 @@ export type Database = {
         Args: { user1_id: string; user2_id: string }
         Returns: string
       }
-      get_profile_for_viewer: {
-        Args: { profile_user_id: string; viewer_id: string }
+      get_profile_public_info: {
+        Args: { profile_user_id: string }
         Returns: {
           artform: Database["public"]["Enums"]["artform_type"]
           avatar_url: string
           bio: string
-          can_view_full: boolean
-          contact_email: string
-          cover_url: string
-          created_at: string
           display_name: string
           full_name: string
-          headline: string
           id: string
-          is_following: boolean
           location: string
-          organization_type: Database["public"]["Enums"]["organization_type"]
           phone_number: string
-          portfolio_count: number
           privacy: string
-          pronouns: string
           role: Database["public"]["Enums"]["user_role"]
-          social_links: Json
-          stats: Json
-          updated_at: string
           user_id: string
           username: string
-          verified: boolean
-          website: string
         }[]
       }
-      get_user_conversations: {
+      get_user_conversations_secure: {
         Args: { user_id_param: string }
         Returns: {
           created_at: string
-          deleted: boolean
           id: string
           last_message_id: string
-          other_participant_id: string
           participant_a: string
           participant_b: string
-          pinned: boolean
           updated_at: string
         }[]
       }
