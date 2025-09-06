@@ -250,95 +250,101 @@ export const CreateOpportunityFlow: React.FC<CreateOpportunityFlowProps> = ({
                      formData.description.trim() &&
                      formData.description.length <= 2000;
 
-  // Mobile and Desktop modal using Dialog with responsive behavior
+  // Slide-up panel for mobile, centered modal for desktop
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogOverlay className="bg-black/40" />
+      <DialogOverlay className="bg-black/50 backdrop-blur-sm" />
       <DialogContent className={`
         ${isMobile 
-          ? 'fixed bottom-0 left-0 right-0 top-10 rounded-t-xl animate-slide-in-right transform-gpu data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom' 
-          : 'max-w-2xl animate-scale-in'
-        } max-h-[85vh] p-0 gap-0
+          ? 'fixed bottom-0 left-0 right-0 top-16 rounded-t-2xl border-t animate-slide-in-from-bottom data-[state=closed]:animate-slide-out-to-bottom' 
+          : 'max-w-3xl max-h-[90vh] animate-scale-in'
+        } p-0 gap-0 overflow-hidden flex flex-col
       `}>
-        {/* Header */}
-        <div className="p-6 pb-4 border-b">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-xl font-semibold">
-                {isEditMode ? 'Edit Opportunity' : 'Create New Job Opportunity'}
+        {/* Header - Slide-up panel style */}
+        <div className="flex-shrink-0 p-6 pb-4 border-b bg-background">
+          <div className="flex items-center gap-4">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => onOpenChange(false)}
+              className="p-2"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <div className="flex-1">
+              <h2 className="text-xl font-semibold text-foreground">
+                {isEditMode ? 'Edit Job Opportunity' : 'Create New Job Opportunity'}
               </h2>
               <p className="text-sm text-muted-foreground mt-1">
                 {isEditMode ? 'Update your opportunity details' : 'Post a new opportunity for artists to discover and apply to'}
               </p>
             </div>
-            <Button variant="ghost" size="sm" onClick={() => onOpenChange(false)}>
-              {isMobile ? <ArrowLeft className="h-4 w-4" /> : <X className="h-4 w-4" />}
-            </Button>
           </div>
         </div>
 
         {/* Scrollable Form Content */}
-        <div className="flex-1 overflow-y-auto p-6">
-          <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="flex-1 overflow-y-auto">
+          <form onSubmit={handleSubmit} className="p-6 space-y-6">
             {/* Opportunity Title */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium">
+            <div className="space-y-3">
+              <label className="text-sm font-semibold text-foreground">
                 Opportunity Title <span className="text-destructive">*</span>
               </label>
               <Input
                 placeholder="e.g., Lead Dancer for Music Video"
                 value={formData.title}
                 onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                className={errors.title ? 'border-destructive' : ''}
+                className={`h-12 text-base ${errors.title ? 'border-destructive focus:border-destructive' : 'border-input focus:border-primary'}`}
               />
               {errors.title && <p className="text-sm text-destructive">{errors.title}</p>}
             </div>
 
             {/* Organization Name */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium">
+            <div className="space-y-3">
+              <label className="text-sm font-semibold text-foreground">
                 Organization Name <span className="text-destructive">*</span>
               </label>
               <div className="relative">
-                <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
                   placeholder="Your organization name"
                   value={formData.organization_name}
                   onChange={(e) => setFormData(prev => ({ ...prev, organization_name: e.target.value }))}
-                  className={`pl-10 ${errors.organization_name ? 'border-destructive' : ''}`}
+                  className={`h-12 text-base pl-11 ${errors.organization_name ? 'border-destructive focus:border-destructive' : 'border-input focus:border-primary'}`}
                 />
               </div>
               {errors.organization_name && <p className="text-sm text-destructive">{errors.organization_name}</p>}
             </div>
 
             {/* City & State */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">City</label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-3">
+                <label className="text-sm font-semibold text-foreground">City</label>
                 <div className="relative">
-                  <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                   <Input
                     placeholder="e.g., Mumbai"
                     value={formData.city}
                     onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))}
-                    className="pl-10"
+                    className="h-12 text-base pl-11 border-input focus:border-primary"
                   />
                 </div>
               </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">State</label>
+              <div className="space-y-3">
+                <label className="text-sm font-semibold text-foreground">State</label>
                 <Input
                   placeholder="e.g., Maharashtra"
                   value={formData.state}
                   onChange={(e) => setFormData(prev => ({ ...prev, state: e.target.value }))}
+                  className="h-12 text-base border-input focus:border-primary"
                 />
               </div>
             </div>
 
             {/* Art Forms */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium">
-                Art Forms <span className="text-destructive">*</span> <span className="text-muted-foreground">(Select multiple)</span>
+            <div className="space-y-3">
+              <label className="text-sm font-semibold text-foreground">
+                Art Forms <span className="text-destructive">*</span>
               </label>
               <Popover>
                 <PopoverTrigger asChild>
@@ -346,9 +352,9 @@ export const CreateOpportunityFlow: React.FC<CreateOpportunityFlowProps> = ({
                     type="button"
                     variant="outline"
                     role="combobox"
-                    className={`w-full justify-between text-left font-normal ${
-                      formData.art_forms.length === 0 ? 'text-muted-foreground' : ''
-                    } ${errors.art_forms ? 'border-destructive' : ''}`}
+                    className={`w-full h-12 justify-between text-left font-normal text-base ${
+                      formData.art_forms.length === 0 ? 'text-muted-foreground' : 'text-foreground'
+                    } ${errors.art_forms ? 'border-destructive' : 'border-input hover:border-primary'}`}
                   >
                     {formData.art_forms.length > 0
                       ? formData.art_forms.join(', ')
@@ -365,7 +371,7 @@ export const CreateOpportunityFlow: React.FC<CreateOpportunityFlowProps> = ({
                         <CommandItem
                           key={artForm}
                           onSelect={() => handleMultiSelect('art_forms', artForm)}
-                          className="flex items-center space-x-2 cursor-pointer"
+                          className="flex items-center space-x-3 cursor-pointer py-3"
                         >
                           <div className={`w-4 h-4 rounded border-2 flex items-center justify-center ${
                             formData.art_forms.includes(artForm) 
@@ -376,7 +382,7 @@ export const CreateOpportunityFlow: React.FC<CreateOpportunityFlowProps> = ({
                               <div className="w-2 h-2 bg-primary-foreground rounded-sm" />
                             )}
                           </div>
-                          <span>{artForm}</span>
+                          <span className="text-sm">{artForm}</span>
                         </CommandItem>
                       ))}
                     </CommandGroup>
@@ -386,85 +392,83 @@ export const CreateOpportunityFlow: React.FC<CreateOpportunityFlowProps> = ({
               {errors.art_forms && <p className="text-sm text-destructive">{errors.art_forms}</p>}
             </div>
 
-            {/* Continue with rest of form fields... */}
-            {/* Experience Level & Gender Preference */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Experience Level</label>
-                <Select value={formData.experience_level} onValueChange={(value) => setFormData(prev => ({ ...prev, experience_level: value }))}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select experience" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {experienceLevels.map(level => (
-                      <SelectItem key={level} value={level}>{level}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Gender Preference</label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      role="combobox"
-                      className={`w-full justify-between text-left font-normal ${
-                        formData.gender_preference.length === 0 ? 'text-muted-foreground' : ''
-                      }`}
-                    >
-                      {formData.gender_preference.length > 0
-                        ? formData.gender_preference.join(', ')
-                        : "Select gender"}
-                      <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-full p-0" align="start">
-                    <Command>
-                      <CommandGroup>
-                        {genderOptions.map((gender) => (
-                          <CommandItem
-                            key={gender}
-                            onSelect={() => handleMultiSelect('gender_preference', gender)}
-                            className="flex items-center space-x-2 cursor-pointer"
-                          >
-                            <div className={`w-4 h-4 rounded border-2 flex items-center justify-center ${
-                              formData.gender_preference.includes(gender) 
-                                ? 'bg-primary border-primary' 
-                                : 'border-muted-foreground'
-                            }`}>
-                              {formData.gender_preference.includes(gender) && (
-                                <div className="w-2 h-2 bg-primary-foreground rounded-sm" />
-                              )}
-                            </div>
-                            <span>{gender}</span>
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
-              </div>
+            {/* Experience Level */}
+            <div className="space-y-3">
+              <label className="text-sm font-semibold text-foreground">Experience Level</label>
+              <Select value={formData.experience_level} onValueChange={(value) => setFormData(prev => ({ ...prev, experience_level: value }))}>
+                <SelectTrigger className="h-12 text-base border-input focus:border-primary">
+                  <SelectValue placeholder="Select experience level" />
+                </SelectTrigger>
+                <SelectContent>
+                  {experienceLevels.map(level => (
+                    <SelectItem key={level} value={level} className="text-sm py-3">{level}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
-            {/* Language Preference */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Language Preference</label>
+            {/* Gender Preference */}
+            <div className="space-y-3">
+              <label className="text-sm font-semibold text-foreground">Gender Preference</label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
                     type="button"
                     variant="outline"
                     role="combobox"
-                    className={`w-full justify-between text-left font-normal ${
-                      formData.language_preference.length === 0 ? 'text-muted-foreground' : ''
-                    }`}
+                    className={`w-full h-12 justify-between text-left font-normal text-base ${
+                      formData.gender_preference.length === 0 ? 'text-muted-foreground' : 'text-foreground'
+                    } border-input hover:border-primary`}
+                  >
+                    {formData.gender_preference.length > 0
+                      ? formData.gender_preference.join(', ')
+                      : "Select gender preference"}
+                    <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-full p-0" align="start">
+                  <Command>
+                    <CommandGroup>
+                      {genderOptions.map((gender) => (
+                        <CommandItem
+                          key={gender}
+                          onSelect={() => handleMultiSelect('gender_preference', gender)}
+                          className="flex items-center space-x-3 cursor-pointer py-3"
+                        >
+                          <div className={`w-4 h-4 rounded border-2 flex items-center justify-center ${
+                            formData.gender_preference.includes(gender) 
+                              ? 'bg-primary border-primary' 
+                              : 'border-muted-foreground'
+                          }`}>
+                            {formData.gender_preference.includes(gender) && (
+                              <div className="w-2 h-2 bg-primary-foreground rounded-sm" />
+                            )}
+                          </div>
+                          <span className="text-sm">{gender}</span>
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            {/* Language Preference */}
+            <div className="space-y-3">
+              <label className="text-sm font-semibold text-foreground">Language Preference</label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    role="combobox"
+                    className={`w-full h-12 justify-between text-left font-normal text-base ${
+                      formData.language_preference.length === 0 ? 'text-muted-foreground' : 'text-foreground'
+                    } border-input hover:border-primary`}
                   >
                     {formData.language_preference.length > 0
                       ? formData.language_preference.join(', ')
-                      : "Select languages"}
+                      : "Select language preferences"}
                     <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
@@ -477,7 +481,7 @@ export const CreateOpportunityFlow: React.FC<CreateOpportunityFlowProps> = ({
                         <CommandItem
                           key={language}
                           onSelect={() => handleMultiSelect('language_preference', language)}
-                          className="flex items-center space-x-2 cursor-pointer"
+                          className="flex items-center space-x-3 cursor-pointer py-3"
                         >
                           <div className={`w-4 h-4 rounded border-2 flex items-center justify-center ${
                             formData.language_preference.includes(language) 
@@ -488,7 +492,7 @@ export const CreateOpportunityFlow: React.FC<CreateOpportunityFlowProps> = ({
                               <div className="w-2 h-2 bg-primary-foreground rounded-sm" />
                             )}
                           </div>
-                          <span>{language}</span>
+                          <span className="text-sm">{language}</span>
                         </CommandItem>
                       ))}
                     </CommandGroup>
@@ -498,17 +502,17 @@ export const CreateOpportunityFlow: React.FC<CreateOpportunityFlowProps> = ({
             </div>
 
             {/* Application Deadline */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium">
+            <div className="space-y-3">
+              <label className="text-sm font-semibold text-foreground">
                 Application Deadline <span className="text-destructive">*</span>
               </label>
               <div className="relative">
-                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
                   type="datetime-local"
                   value={formData.deadline}
                   onChange={(e) => setFormData(prev => ({ ...prev, deadline: e.target.value }))}
-                  className={`pl-10 ${errors.deadline ? 'border-destructive' : ''}`}
+                  className={`h-12 text-base pl-11 ${errors.deadline ? 'border-destructive focus:border-destructive' : 'border-input focus:border-primary'}`}
                   min={new Date().toISOString().slice(0, 16)}
                 />
               </div>
@@ -516,52 +520,55 @@ export const CreateOpportunityFlow: React.FC<CreateOpportunityFlowProps> = ({
             </div>
 
             {/* Image Upload */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Image for Opportunity</label>
-              <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
+            <div className="space-y-3">
+              <label className="text-sm font-semibold text-foreground">Image for Opportunity</label>
+              <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center bg-muted/10">
                 {imagePreview ? (
                   <div className="space-y-4">
                     <img 
                       src={imagePreview} 
                       alt="Preview" 
-                      className="mx-auto max-h-32 rounded-lg object-cover"
+                      className="mx-auto max-h-40 rounded-lg object-cover border"
                     />
                     <Button 
                       type="button" 
                       variant="outline" 
                       size="sm" 
                       onClick={removeImage}
+                      className="text-sm"
                     >
                       Remove Image
                     </Button>
                   </div>
                 ) : (
-                  <div>
-                    <Upload className="mx-auto h-8 w-8 text-muted-foreground mb-2" />
-                    <p className="text-sm text-muted-foreground mb-2">
-                      Drag and drop an image here, or click to select
-                    </p>
-                    <Input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageChange}
-                      className="cursor-pointer"
-                    />
+                  <div className="space-y-3">
+                    <Upload className="mx-auto h-10 w-10 text-muted-foreground" />
+                    <div className="space-y-2">
+                      <p className="text-sm text-muted-foreground">
+                        Drag and drop an image here, or click to select
+                      </p>
+                      <Input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageChange}
+                        className="cursor-pointer text-sm"
+                      />
+                    </div>
                   </div>
                 )}
               </div>
             </div>
 
             {/* Description */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium">
+            <div className="space-y-3">
+              <label className="text-sm font-semibold text-foreground">
                 Description <span className="text-destructive">*</span>
               </label>
               <Textarea
-                placeholder="Describe the role, responsibilities, and expectations..."
+                placeholder="Describe the role, responsibilities, and what you're looking for..."
                 value={formData.description}
                 onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                className={`min-h-32 resize-none ${errors.description ? 'border-destructive' : ''}`}
+                className={`min-h-32 text-base resize-none ${errors.description ? 'border-destructive focus:border-destructive' : 'border-input focus:border-primary'}`}
                 maxLength={2000}
               />
               <div className="flex justify-between text-xs text-muted-foreground">
@@ -572,42 +579,42 @@ export const CreateOpportunityFlow: React.FC<CreateOpportunityFlowProps> = ({
 
             {/* Status field only shown in edit mode */}
             {isEditMode && (
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Status</label>
+              <div className="space-y-3">
+                <label className="text-sm font-semibold text-foreground">Status</label>
                 <Select value={formData.status} onValueChange={(value) => setFormData(prev => ({ ...prev, status: value }))}>
-                  <SelectTrigger>
+                  <SelectTrigger className="h-12 text-base border-input focus:border-primary">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="closed">Closed</SelectItem>
+                    <SelectItem value="active" className="text-sm py-3">Active</SelectItem>
+                    <SelectItem value="closed" className="text-sm py-3">Closed</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             )}
-
-            {/* Footer Buttons - moved inside form */}
-            <div className={`pt-4 border-t ${isMobile ? 'sticky bottom-0 bg-background' : ''}`}>
-              <div className={`flex gap-3 ${isMobile ? 'flex-col' : 'justify-end'}`}>
-                <Button 
-                  type="button"
-                  variant="outline" 
-                  onClick={() => onOpenChange(false)} 
-                  disabled={uploading}
-                  className={isMobile ? 'w-full' : ''}
-                >
-                  Cancel
-                </Button>
-                <Button 
-                  type="submit"
-                  disabled={uploading || !isFormValid}
-                  className={isMobile ? 'w-full' : ''}
-                >
-                  {uploading ? 'Processing...' : (isEditMode ? 'Save Changes' : 'Post Opportunity')}
-                </Button>
-              </div>
-            </div>
           </form>
+        </div>
+
+        {/* Fixed Footer Buttons */}
+        <div className="flex-shrink-0 p-6 pt-4 border-t bg-background">
+          <div className={`flex gap-3 ${isMobile ? 'flex-col' : 'justify-end'}`}>
+            <Button 
+              type="button"
+              variant="outline" 
+              onClick={() => onOpenChange(false)} 
+              disabled={uploading}
+              className={`h-12 text-base font-medium ${isMobile ? 'w-full' : 'px-8'}`}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleSubmit}
+              disabled={uploading || !isFormValid}
+              className={`h-12 text-base font-medium bg-primary hover:bg-primary/90 text-primary-foreground ${isMobile ? 'w-full' : 'px-8'}`}
+            >
+              {uploading ? 'Processing...' : (isEditMode ? 'Save Changes' : 'Post Opportunity')}
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
