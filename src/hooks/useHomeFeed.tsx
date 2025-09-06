@@ -111,8 +111,8 @@ export const useHomeFeed = (limit = 20) => {
         profile_pic: post.profile_avatar_url,
         role: post.profile_role,
         artform: post.profile_artform,
-        organization_type: (post as any).profile_organization_type,
-        location: (post as any).profile_location
+        organization_type: post.profile_organization_type,
+        location: post.profile_location
       },
       user_liked: likedPostIds.has(post.id),
       is_following: followedUserIds.has(post.user_id)
