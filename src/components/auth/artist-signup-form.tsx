@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/hooks/useAuth";
+import { useUsernameAvailability } from "@/hooks/useUsernameAvailability";
 import { Eye, EyeOff, User, Mail, Lock, Phone, MapPin, Palette } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -25,7 +26,6 @@ const artformOptions = [
 const ArtistSignupForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [usernameError, setUsernameError] = useState('');
   const [formData, setFormData] = useState({
     fullName: '',
     username: '',
@@ -39,17 +39,15 @@ const ArtistSignupForm = () => {
   
   const navigate = useNavigate();
   const { signUp } = useAuth();
+  
+  // Use username availability hook
+  const { loading: usernameLoading, exists: usernameExists, error: usernameCheckError } = useUsernameAvailability(formData.username);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
     });
-
-    // Clear username error when user types
-    if (e.target.name === 'username') {
-      setUsernameError('');
-    }
   };
 
   const handleSelectChange = (name: string, value: string) => {
@@ -57,28 +55,6 @@ const ArtistSignupForm = () => {
       ...formData,
       [name]: value
     });
-  };
-
-  const validateUsername = async (username: string) => {
-    if (!username) return false;
-    
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('username')
-        .eq('username', username)
-        .maybeSingle();
-
-      if (error) {
-        console.error('Error checking username:', error);
-        return false;
-      }
-
-      return !data; // Username is available if no data returned
-    } catch (error) {
-      console.error('Error validating username:', error);
-      return false;
-    }
   };
 
   const validateForm = () => {
@@ -94,15 +70,24 @@ const ArtistSignupForm = () => {
     
     if (!validateForm()) return;
 
-    setIsLoading(true);
-
-    // Check if username is available
-    const isUsernameAvailable = await validateUsername(formData.username);
-    if (!isUsernameAvailable) {
-      setUsernameError('Username is already taken');
-      setIsLoading(false);
-      return;
+    // Check if username is valid and available
+    if (formData.username.length < 3) {
+      return; // Don't proceed if username is too short
     }
+
+    if (usernameExists === true) {
+      return; // Don't proceed if username is taken
+    }
+
+    if (usernameCheckError) {
+      return; // Don't proceed if there's an error checking username
+    }
+
+    if (usernameExists === null && formData.username.length >= 3) {
+      return; // Don't proceed if we haven't validated the username yet
+    }
+
+    setIsLoading(true);
 
     const { error } = await signUp(formData.email, formData.password, {
       full_name: formData.fullName,
@@ -158,9 +143,16 @@ const ArtistSignupForm = () => {
               required
             />
           </div>
-          {usernameError && (
-            <p className="text-sm text-destructive font-medium">{usernameError}</p>
-          )}
+          <div className="min-h-[1rem] mt-1">
+            {usernameLoading && <p className="text-sm text-muted-foreground">Checking...</p>}
+            {usernameCheckError && <p className="text-sm text-destructive">{usernameCheckError}</p>}
+            {usernameExists === true && !usernameLoading && (
+              <p className="text-sm text-destructive">Username is already taken</p>
+            )}
+            {usernameExists === false && !usernameLoading && (
+              <p className="text-sm text-green-600">Username is available</p>
+            )}
+          </div>
         </div>
       </div>
 

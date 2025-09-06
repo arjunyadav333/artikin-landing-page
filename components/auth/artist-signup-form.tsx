@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useAuth } from '@/components/providers/auth-provider'
+import { useUsernameAvailability } from '@/hooks/useUsernameAvailability'
 import { Eye, EyeOff, User, AtSign, Mail, Lock, Phone, MapPin } from 'lucide-react'
 import { supabase } from '@/integrations/supabase/client'
 
@@ -26,7 +27,6 @@ const artformOptions = [
 export function ArtistSignupForm() {
   const [isLoading, setIsLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
-  const [usernameError, setUsernameError] = useState('')
   const [formData, setFormData] = useState({
     fullName: '',
     username: '',
@@ -39,6 +39,9 @@ export function ArtistSignupForm() {
   })
   const router = useRouter()
   const { signUp } = useAuth()
+  
+  // Use username availability hook
+  const { loading: usernameLoading, exists: usernameExists, error: usernameCheckError } = useUsernameAvailability(formData.username)
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -46,11 +49,6 @@ export function ArtistSignupForm() {
       ...prev,
       [name]: value
     }))
-
-    // Clear username error when user types
-    if (name === 'username') {
-      setUsernameError('')
-    }
   }
 
   const handleSelectChange = (name: string, value: string) => {
@@ -58,31 +56,6 @@ export function ArtistSignupForm() {
       ...prev,
       [name]: value
     }))
-  }
-
-  const validateUsername = async (username: string): Promise<boolean> => {
-    if (!username || username.length < 3) {
-      setUsernameError('Username must be at least 3 characters long')
-      return false
-    }
-
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('username')
-        .eq('username', username.toLowerCase())
-        .single()
-
-      if (data) {
-        setUsernameError('This username is already taken. Please choose another.')
-        return false
-      }
-
-      return true
-    } catch (error) {
-      // No user found with this username, it's available
-      return true
-    }
   }
 
   const validateForm = () => {
@@ -111,9 +84,23 @@ export function ArtistSignupForm() {
 
     setIsLoading(true)
 
-    // Validate username first
-    const isUsernameValid = await validateUsername(formData.username)
-    if (!isUsernameValid) {
+    // Check if username is valid and available
+    if (formData.username.length < 3) {
+      setIsLoading(false)
+      return
+    }
+
+    if (usernameExists === true) {
+      setIsLoading(false)
+      return
+    }
+
+    if (usernameCheckError) {
+      setIsLoading(false)
+      return
+    }
+
+    if (usernameExists === null && formData.username.length >= 3) {
       setIsLoading(false)
       return
     }
@@ -168,13 +155,20 @@ export function ArtistSignupForm() {
               placeholder="username"
               value={formData.username}
               onChange={handleInputChange}
-              className={`pl-10 h-11 border-primary/20 focus:border-primary focus:ring-primary ${usernameError ? 'border-red-500' : ''}`}
+              className="pl-10 h-11 border-primary/20 focus:border-primary focus:ring-primary"
               required
             />
           </div>
-          {usernameError && (
-            <p className="text-red-500 text-sm mt-1">{usernameError}</p>
-          )}
+          <div className="min-h-[1rem] mt-1">
+            {usernameLoading && <p className="text-muted-foreground text-sm">Checking...</p>}
+            {usernameCheckError && <p className="text-red-500 text-sm">{usernameCheckError}</p>}
+            {usernameExists === true && !usernameLoading && (
+              <p className="text-red-500 text-sm">Username is already taken</p>
+            )}
+            {usernameExists === false && !usernameLoading && (
+              <p className="text-green-600 text-sm">Username is available</p>
+            )}
+          </div>
         </div>
       </div>
 
