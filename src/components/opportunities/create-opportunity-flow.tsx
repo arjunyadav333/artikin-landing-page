@@ -286,31 +286,31 @@ export const CreateOpportunityFlow: React.FC<CreateOpportunityFlowProps> = ({
         <div className="flex-1 overflow-y-auto">
           <form onSubmit={handleSubmit} className="p-6 space-y-6">
             {/* Opportunity Title */}
-            <div className="space-y-3">
-              <label className="text-sm font-semibold text-foreground">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">
                 Opportunity Title <span className="text-destructive">*</span>
               </label>
               <Input
                 placeholder="e.g., Lead Dancer for Music Video"
                 value={formData.title}
                 onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                className={`h-12 text-base ${errors.title ? 'border-destructive focus:border-destructive' : 'border-input focus:border-primary'}`}
+                className={`h-11 text-sm bg-background border-gray-300 rounded-md ${errors.title ? 'border-destructive' : 'focus:border-blue-500 focus:ring-1 focus:ring-blue-500'}`}
               />
               {errors.title && <p className="text-sm text-destructive">{errors.title}</p>}
             </div>
 
             {/* Organization Name */}
-            <div className="space-y-3">
-              <label className="text-sm font-semibold text-foreground">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">
                 Organization Name <span className="text-destructive">*</span>
               </label>
               <div className="relative">
-                <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input
                   placeholder="Your organization name"
                   value={formData.organization_name}
                   onChange={(e) => setFormData(prev => ({ ...prev, organization_name: e.target.value }))}
-                  className={`h-12 text-base pl-11 ${errors.organization_name ? 'border-destructive focus:border-destructive' : 'border-input focus:border-primary'}`}
+                  className={`h-11 text-sm bg-background border-gray-300 rounded-md pl-10 ${errors.organization_name ? 'border-destructive' : 'focus:border-blue-500 focus:ring-1 focus:ring-blue-500'}`}
                 />
               </div>
               {errors.organization_name && <p className="text-sm text-destructive">{errors.organization_name}</p>}
@@ -318,33 +318,33 @@ export const CreateOpportunityFlow: React.FC<CreateOpportunityFlowProps> = ({
 
             {/* City & State */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-3">
-                <label className="text-sm font-semibold text-foreground">City</label>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">City</label>
                 <div className="relative">
-                  <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                  <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <Input
                     placeholder="e.g., Mumbai"
                     value={formData.city}
                     onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))}
-                    className="h-12 text-base pl-11 border-input focus:border-primary"
+                    className="h-11 text-sm bg-background border-gray-300 rounded-md pl-10 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                   />
                 </div>
               </div>
-              <div className="space-y-3">
-                <label className="text-sm font-semibold text-foreground">State</label>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">State</label>
                 <Input
                   placeholder="e.g., Maharashtra"
                   value={formData.state}
                   onChange={(e) => setFormData(prev => ({ ...prev, state: e.target.value }))}
-                  className="h-12 text-base border-input focus:border-primary"
+                  className="h-11 text-sm bg-background border-gray-300 rounded-md focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                 />
               </div>
             </div>
 
             {/* Art Forms */}
-            <div className="space-y-3">
-              <label className="text-sm font-semibold text-foreground">
-                Art Forms <span className="text-destructive">*</span>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">
+                Art Forms <span className="text-destructive">*</span> <span className="text-gray-500 font-normal">(Select multiple)</span>
               </label>
               <Popover>
                 <PopoverTrigger asChild>
@@ -352,9 +352,9 @@ export const CreateOpportunityFlow: React.FC<CreateOpportunityFlowProps> = ({
                     type="button"
                     variant="outline"
                     role="combobox"
-                    className={`w-full h-12 justify-between text-left font-normal text-base ${
-                      formData.art_forms.length === 0 ? 'text-muted-foreground' : 'text-foreground'
-                    } ${errors.art_forms ? 'border-destructive' : 'border-input hover:border-primary'}`}
+                    className={`w-full h-11 justify-between text-left font-normal text-sm bg-background border-gray-300 rounded-md hover:bg-background ${
+                      formData.art_forms.length === 0 ? 'text-gray-500' : 'text-foreground'
+                    } ${errors.art_forms ? 'border-destructive' : 'focus:border-blue-500'}`}
                   >
                     {formData.art_forms.length > 0
                       ? formData.art_forms.join(', ')
@@ -362,27 +362,30 @@ export const CreateOpportunityFlow: React.FC<CreateOpportunityFlowProps> = ({
                     <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-full p-0" align="start">
-                  <Command>
-                    <CommandInput placeholder="Search art forms..." />
-                    <CommandEmpty>No art form found.</CommandEmpty>
-                    <CommandGroup className="max-h-64 overflow-auto">
+                <PopoverContent className="w-full p-0 border-gray-300" align="start">
+                  <Command className="bg-background">
+                    <CommandInput 
+                      placeholder="Search art forms..." 
+                      className="h-10 text-sm border-0 border-b border-gray-200 rounded-none"
+                    />
+                    <CommandEmpty className="py-3 text-sm text-gray-500">No art form found.</CommandEmpty>
+                    <CommandGroup className="max-h-64 overflow-auto p-0">
                       {artFormOptions.map((artForm) => (
                         <CommandItem
                           key={artForm}
                           onSelect={() => handleMultiSelect('art_forms', artForm)}
-                          className="flex items-center space-x-3 cursor-pointer py-3"
+                          className="flex items-center px-4 py-3 cursor-pointer hover:bg-blue-50 border-0"
                         >
-                          <div className={`w-4 h-4 rounded border-2 flex items-center justify-center ${
+                          <div className={`w-4 h-4 rounded border-2 flex items-center justify-center mr-3 ${
                             formData.art_forms.includes(artForm) 
-                              ? 'bg-primary border-primary' 
-                              : 'border-muted-foreground'
+                              ? 'bg-blue-500 border-blue-500' 
+                              : 'border-gray-400'
                           }`}>
                             {formData.art_forms.includes(artForm) && (
-                              <div className="w-2 h-2 bg-primary-foreground rounded-sm" />
+                              <div className="w-2 h-2 bg-white rounded-sm" />
                             )}
                           </div>
-                          <span className="text-sm">{artForm}</span>
+                          <span className="text-sm text-foreground">{artForm}</span>
                         </CommandItem>
                       ))}
                     </CommandGroup>
@@ -393,32 +396,32 @@ export const CreateOpportunityFlow: React.FC<CreateOpportunityFlowProps> = ({
             </div>
 
             {/* Experience Level */}
-            <div className="space-y-3">
-              <label className="text-sm font-semibold text-foreground">Experience Level</label>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">Experience Level</label>
               <Select value={formData.experience_level} onValueChange={(value) => setFormData(prev => ({ ...prev, experience_level: value }))}>
-                <SelectTrigger className="h-12 text-base border-input focus:border-primary">
-                  <SelectValue placeholder="Select experience level" />
+                <SelectTrigger className="h-11 text-sm bg-background border-gray-300 rounded-md focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                  <SelectValue placeholder="Select experience level" className="text-gray-500" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="border-gray-300">
                   {experienceLevels.map(level => (
-                    <SelectItem key={level} value={level} className="text-sm py-3">{level}</SelectItem>
+                    <SelectItem key={level} value={level} className="text-sm py-2 hover:bg-blue-50">{level}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
 
             {/* Gender Preference */}
-            <div className="space-y-3">
-              <label className="text-sm font-semibold text-foreground">Gender Preference</label>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">Gender Preference <span className="text-gray-500 font-normal">(Select multiple)</span></label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
                     type="button"
                     variant="outline"
                     role="combobox"
-                    className={`w-full h-12 justify-between text-left font-normal text-base ${
-                      formData.gender_preference.length === 0 ? 'text-muted-foreground' : 'text-foreground'
-                    } border-input hover:border-primary`}
+                    className={`w-full h-11 justify-between text-left font-normal text-sm bg-background border-gray-300 rounded-md hover:bg-background ${
+                      formData.gender_preference.length === 0 ? 'text-gray-500' : 'text-foreground'
+                    } focus:border-blue-500`}
                   >
                     {formData.gender_preference.length > 0
                       ? formData.gender_preference.join(', ')
@@ -426,25 +429,25 @@ export const CreateOpportunityFlow: React.FC<CreateOpportunityFlowProps> = ({
                     <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-full p-0" align="start">
-                  <Command>
-                    <CommandGroup>
+                <PopoverContent className="w-full p-0 border-gray-300" align="start">
+                  <Command className="bg-background">
+                    <CommandGroup className="p-0">
                       {genderOptions.map((gender) => (
                         <CommandItem
                           key={gender}
                           onSelect={() => handleMultiSelect('gender_preference', gender)}
-                          className="flex items-center space-x-3 cursor-pointer py-3"
+                          className="flex items-center px-4 py-3 cursor-pointer hover:bg-blue-50"
                         >
-                          <div className={`w-4 h-4 rounded border-2 flex items-center justify-center ${
+                          <div className={`w-4 h-4 rounded border-2 flex items-center justify-center mr-3 ${
                             formData.gender_preference.includes(gender) 
-                              ? 'bg-primary border-primary' 
-                              : 'border-muted-foreground'
+                              ? 'bg-blue-500 border-blue-500' 
+                              : 'border-gray-400'
                           }`}>
                             {formData.gender_preference.includes(gender) && (
-                              <div className="w-2 h-2 bg-primary-foreground rounded-sm" />
+                              <div className="w-2 h-2 bg-white rounded-sm" />
                             )}
                           </div>
-                          <span className="text-sm">{gender}</span>
+                          <span className="text-sm text-foreground">{gender}</span>
                         </CommandItem>
                       ))}
                     </CommandGroup>
@@ -454,17 +457,17 @@ export const CreateOpportunityFlow: React.FC<CreateOpportunityFlowProps> = ({
             </div>
 
             {/* Language Preference */}
-            <div className="space-y-3">
-              <label className="text-sm font-semibold text-foreground">Language Preference</label>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">Language Preference <span className="text-gray-500 font-normal">(Select multiple)</span></label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
                     type="button"
                     variant="outline"
                     role="combobox"
-                    className={`w-full h-12 justify-between text-left font-normal text-base ${
-                      formData.language_preference.length === 0 ? 'text-muted-foreground' : 'text-foreground'
-                    } border-input hover:border-primary`}
+                    className={`w-full h-11 justify-between text-left font-normal text-sm bg-background border-gray-300 rounded-md hover:bg-background ${
+                      formData.language_preference.length === 0 ? 'text-gray-500' : 'text-foreground'
+                    } focus:border-blue-500`}
                   >
                     {formData.language_preference.length > 0
                       ? formData.language_preference.join(', ')
@@ -472,27 +475,30 @@ export const CreateOpportunityFlow: React.FC<CreateOpportunityFlowProps> = ({
                     <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-full p-0" align="start">
-                  <Command>
-                    <CommandInput placeholder="Search languages..." />
-                    <CommandEmpty>No language found.</CommandEmpty>
-                    <CommandGroup className="max-h-64 overflow-auto">
+                <PopoverContent className="w-full p-0 border-gray-300" align="start">
+                  <Command className="bg-background">
+                    <CommandInput 
+                      placeholder="Search languages..." 
+                      className="h-10 text-sm border-0 border-b border-gray-200 rounded-none"
+                    />
+                    <CommandEmpty className="py-3 text-sm text-gray-500">No language found.</CommandEmpty>
+                    <CommandGroup className="max-h-64 overflow-auto p-0">
                       {languageOptions.map((language) => (
                         <CommandItem
                           key={language}
                           onSelect={() => handleMultiSelect('language_preference', language)}
-                          className="flex items-center space-x-3 cursor-pointer py-3"
+                          className="flex items-center px-4 py-3 cursor-pointer hover:bg-blue-50"
                         >
-                          <div className={`w-4 h-4 rounded border-2 flex items-center justify-center ${
+                          <div className={`w-4 h-4 rounded border-2 flex items-center justify-center mr-3 ${
                             formData.language_preference.includes(language) 
-                              ? 'bg-primary border-primary' 
-                              : 'border-muted-foreground'
+                              ? 'bg-blue-500 border-blue-500' 
+                              : 'border-gray-400'
                           }`}>
                             {formData.language_preference.includes(language) && (
-                              <div className="w-2 h-2 bg-primary-foreground rounded-sm" />
+                              <div className="w-2 h-2 bg-white rounded-sm" />
                             )}
                           </div>
-                          <span className="text-sm">{language}</span>
+                          <span className="text-sm text-foreground">{language}</span>
                         </CommandItem>
                       ))}
                     </CommandGroup>
@@ -502,17 +508,17 @@ export const CreateOpportunityFlow: React.FC<CreateOpportunityFlowProps> = ({
             </div>
 
             {/* Application Deadline */}
-            <div className="space-y-3">
-              <label className="text-sm font-semibold text-foreground">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">
                 Application Deadline <span className="text-destructive">*</span>
               </label>
               <div className="relative">
-                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input
                   type="datetime-local"
                   value={formData.deadline}
                   onChange={(e) => setFormData(prev => ({ ...prev, deadline: e.target.value }))}
-                  className={`h-12 text-base pl-11 ${errors.deadline ? 'border-destructive focus:border-destructive' : 'border-input focus:border-primary'}`}
+                  className={`h-11 text-sm bg-background border-gray-300 rounded-md pl-10 ${errors.deadline ? 'border-destructive' : 'focus:border-blue-500 focus:ring-1 focus:ring-blue-500'}`}
                   min={new Date().toISOString().slice(0, 16)}
                 />
               </div>
@@ -520,38 +526,38 @@ export const CreateOpportunityFlow: React.FC<CreateOpportunityFlowProps> = ({
             </div>
 
             {/* Image Upload */}
-            <div className="space-y-3">
-              <label className="text-sm font-semibold text-foreground">Image for Opportunity</label>
-              <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center bg-muted/10">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">Image for Opportunity</label>
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center bg-gray-50/50">
                 {imagePreview ? (
                   <div className="space-y-4">
                     <img 
                       src={imagePreview} 
                       alt="Preview" 
-                      className="mx-auto max-h-40 rounded-lg object-cover border"
+                      className="mx-auto max-h-32 rounded-lg object-cover border border-gray-200"
                     />
                     <Button 
                       type="button" 
                       variant="outline" 
                       size="sm" 
                       onClick={removeImage}
-                      className="text-sm"
+                      className="text-sm border-gray-300"
                     >
                       Remove Image
                     </Button>
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    <Upload className="mx-auto h-10 w-10 text-muted-foreground" />
+                    <Upload className="mx-auto h-8 w-8 text-gray-400" />
                     <div className="space-y-2">
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-gray-500">
                         Drag and drop an image here, or click to select
                       </p>
                       <Input
                         type="file"
                         accept="image/*"
                         onChange={handleImageChange}
-                        className="cursor-pointer text-sm"
+                        className="cursor-pointer text-sm border-gray-300"
                       />
                     </div>
                   </div>
@@ -560,18 +566,18 @@ export const CreateOpportunityFlow: React.FC<CreateOpportunityFlowProps> = ({
             </div>
 
             {/* Description */}
-            <div className="space-y-3">
-              <label className="text-sm font-semibold text-foreground">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">
                 Description <span className="text-destructive">*</span>
               </label>
               <Textarea
                 placeholder="Describe the role, responsibilities, and what you're looking for..."
                 value={formData.description}
                 onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                className={`min-h-32 text-base resize-none ${errors.description ? 'border-destructive focus:border-destructive' : 'border-input focus:border-primary'}`}
+                className={`min-h-24 text-sm bg-background border-gray-300 rounded-md resize-none ${errors.description ? 'border-destructive' : 'focus:border-blue-500 focus:ring-1 focus:ring-blue-500'}`}
                 maxLength={2000}
               />
-              <div className="flex justify-between text-xs text-muted-foreground">
+              <div className="flex justify-between text-xs text-gray-500">
                 <span>{errors.description && <span className="text-destructive">{errors.description}</span>}</span>
                 <span>{formData.description.length}/2000</span>
               </div>
@@ -579,19 +585,22 @@ export const CreateOpportunityFlow: React.FC<CreateOpportunityFlowProps> = ({
 
             {/* Status field only shown in edit mode */}
             {isEditMode && (
-              <div className="space-y-3">
-                <label className="text-sm font-semibold text-foreground">Status</label>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">Status</label>
                 <Select value={formData.status} onValueChange={(value) => setFormData(prev => ({ ...prev, status: value }))}>
-                  <SelectTrigger className="h-12 text-base border-input focus:border-primary">
+                  <SelectTrigger className="h-11 text-sm bg-background border-gray-300 rounded-md focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="active" className="text-sm py-3">Active</SelectItem>
-                    <SelectItem value="closed" className="text-sm py-3">Closed</SelectItem>
+                  <SelectContent className="border-gray-300">
+                    <SelectItem value="active" className="text-sm py-2">Active</SelectItem>
+                    <SelectItem value="closed" className="text-sm py-2">Closed</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             )}
+
+            {/* Add some bottom padding for mobile scrolling */}
+            <div className="h-20 md:h-0"></div>
           </form>
         </div>
 
@@ -603,14 +612,14 @@ export const CreateOpportunityFlow: React.FC<CreateOpportunityFlowProps> = ({
               variant="outline" 
               onClick={() => onOpenChange(false)} 
               disabled={uploading}
-              className={`h-12 text-base font-medium ${isMobile ? 'w-full' : 'px-8'}`}
+              className={`h-11 text-sm font-medium border-gray-300 ${isMobile ? 'w-full' : 'px-6'}`}
             >
               Cancel
             </Button>
             <Button 
               onClick={handleSubmit}
               disabled={uploading || !isFormValid}
-              className={`h-12 text-base font-medium bg-primary hover:bg-primary/90 text-primary-foreground ${isMobile ? 'w-full' : 'px-8'}`}
+              className={`h-11 text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white ${isMobile ? 'w-full' : 'px-6'}`}
             >
               {uploading ? 'Processing...' : (isEditMode ? 'Save Changes' : 'Post Opportunity')}
             </Button>
