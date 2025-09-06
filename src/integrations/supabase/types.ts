@@ -703,7 +703,12 @@ export type Database = {
         Row: {
           created_at: string | null
           id: string | null
+          last_message_body: string | null
+          last_message_created_at: string | null
+          last_message_deleted: boolean | null
           last_message_id: string | null
+          last_message_kind: string | null
+          last_message_sender_id: string | null
           participant_a: string | null
           participant_a_avatar: string | null
           participant_a_name: string | null
@@ -742,7 +747,12 @@ export type Database = {
           media_urls: string[] | null
           profile_artform: Database["public"]["Enums"]["artform_type"] | null
           profile_avatar_url: string | null
+          profile_bio: string | null
           profile_display_name: string | null
+          profile_location: string | null
+          profile_organization_type:
+            | Database["public"]["Enums"]["organization_type"]
+            | null
           profile_role: Database["public"]["Enums"]["user_role"] | null
           profile_username: string | null
           saves_count: number | null
