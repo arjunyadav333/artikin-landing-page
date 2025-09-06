@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
-import { X, ArrowLeft, Upload, Calendar } from 'lucide-react';
+import { X, ArrowLeft, Upload, Calendar, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
 import { useCreateOpportunity } from '@/hooks/useOpportunities';
 import { useCurrentUserProfile } from '@/hooks/useUserRole';
@@ -62,7 +65,15 @@ export const CreateOpportunityDrawer: React.FC<CreateOpportunityDrawerProps> = (
     if (!formData.title.trim()) newErrors.title = 'Opportunity title is required';
     if (!formData.organization_name.trim()) newErrors.organization_name = 'Organization name is required';
     if (formData.art_forms.length === 0) newErrors.art_forms = 'At least one art form is required';
-    if (!formData.deadline) newErrors.deadline = 'Application deadline is required';
+    if (!formData.deadline) {
+      newErrors.deadline = 'Application deadline is required';
+    } else {
+      const deadlineDate = new Date(formData.deadline);
+      const now = new Date();
+      if (deadlineDate <= now) {
+        newErrors.deadline = 'Deadline must be in the future';
+      }
+    }
     if (!formData.description.trim()) newErrors.description = 'Description is required';
 
     setErrors(newErrors);
@@ -110,7 +121,7 @@ export const CreateOpportunityDrawer: React.FC<CreateOpportunityDrawerProps> = (
         description: formData.description,
         type: formData.art_forms[0], // Use first art form as primary type
         location: formData.city && formData.state ? `${formData.city}, ${formData.state}` : formData.city || formData.state || null,
-        deadline: formData.deadline,
+        deadline: formData.deadline, // Keep as datetime-local format which will be converted in the hook
         tags: formData.art_forms,
         organization_name: formData.organization_name,
         city: formData.city,
@@ -240,19 +251,40 @@ export const CreateOpportunityDrawer: React.FC<CreateOpportunityDrawerProps> = (
               <label className="text-sm font-medium">
                 Art Forms <span className="text-destructive">*</span>
               </label>
-              <div className="grid grid-cols-2 gap-2">
-                {artFormOptions.map(artForm => (
-                  <label key={artForm} className="flex items-center space-x-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={formData.art_forms.includes(artForm)}
-                      onChange={() => handleMultiSelect('art_forms', artForm)}
-                      className="rounded border-input"
-                    />
-                    <span className="text-sm">{artForm}</span>
-                  </label>
-                ))}
-              </div>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    className={`w-full justify-between ${errors.art_forms ? 'border-destructive' : ''}`}
+                  >
+                    {formData.art_forms.length > 0
+                      ? `${formData.art_forms.length} selected`
+                      : "Select art forms..."}
+                    <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-full p-0">
+                  <Command>
+                    <CommandInput placeholder="Search art forms..." />
+                    <CommandEmpty>No art form found.</CommandEmpty>
+                    <CommandGroup className="max-h-64 overflow-auto">
+                      {artFormOptions.map((artForm) => (
+                        <CommandItem
+                          key={artForm}
+                          onSelect={() => handleMultiSelect('art_forms', artForm)}
+                        >
+                          <Checkbox
+                            checked={formData.art_forms.includes(artForm)}
+                            className="mr-2"
+                          />
+                          {artForm}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </Command>
+                </PopoverContent>
+              </Popover>
               {errors.art_forms && <p className="text-sm text-destructive">{errors.art_forms}</p>}
             </div>
 
@@ -274,37 +306,78 @@ export const CreateOpportunityDrawer: React.FC<CreateOpportunityDrawerProps> = (
             {/* Gender Preference */}
             <div className="space-y-2">
               <label className="text-sm font-medium">Gender Preference</label>
-              <div className="flex gap-4">
-                {genderOptions.map(gender => (
-                  <label key={gender} className="flex items-center space-x-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={formData.gender_preference.includes(gender)}
-                      onChange={() => handleMultiSelect('gender_preference', gender)}
-                      className="rounded border-input"
-                    />
-                    <span className="text-sm">{gender}</span>
-                  </label>
-                ))}
-              </div>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    className="w-full justify-between"
+                  >
+                    {formData.gender_preference.length > 0
+                      ? `${formData.gender_preference.length} selected`
+                      : "Select gender preference..."}
+                    <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-full p-0">
+                  <Command>
+                    <CommandEmpty>No gender option found.</CommandEmpty>
+                    <CommandGroup>
+                      {genderOptions.map((gender) => (
+                        <CommandItem
+                          key={gender}
+                          onSelect={() => handleMultiSelect('gender_preference', gender)}
+                        >
+                          <Checkbox
+                            checked={formData.gender_preference.includes(gender)}
+                            className="mr-2"
+                          />
+                          {gender}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </Command>
+                </PopoverContent>
+              </Popover>
             </div>
 
             {/* Language Preference */}
             <div className="space-y-2">
               <label className="text-sm font-medium">Language Preference</label>
-              <div className="grid grid-cols-2 gap-2">
-                {languageOptions.map(language => (
-                  <label key={language} className="flex items-center space-x-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={formData.language_preference.includes(language)}
-                      onChange={() => handleMultiSelect('language_preference', language)}
-                      className="rounded border-input"
-                    />
-                    <span className="text-sm">{language}</span>
-                  </label>
-                ))}
-              </div>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    className="w-full justify-between"
+                  >
+                    {formData.language_preference.length > 0
+                      ? `${formData.language_preference.length} selected`
+                      : "Select languages..."}
+                    <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-full p-0">
+                  <Command>
+                    <CommandInput placeholder="Search languages..." />
+                    <CommandEmpty>No language found.</CommandEmpty>
+                    <CommandGroup className="max-h-64 overflow-auto">
+                      {languageOptions.map((language) => (
+                        <CommandItem
+                          key={language}
+                          onSelect={() => handleMultiSelect('language_preference', language)}
+                        >
+                          <Checkbox
+                            checked={formData.language_preference.includes(language)}
+                            className="mr-2"
+                          />
+                          {language}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </Command>
+                </PopoverContent>
+              </Popover>
             </div>
 
             {/* Application Deadline */}
@@ -312,12 +385,16 @@ export const CreateOpportunityDrawer: React.FC<CreateOpportunityDrawerProps> = (
               <label className="text-sm font-medium">
                 Application Deadline <span className="text-destructive">*</span>
               </label>
-              <Input
-                type="datetime-local"
-                value={formData.deadline}
-                onChange={(e) => setFormData(prev => ({ ...prev, deadline: e.target.value }))}
-                className={errors.deadline ? 'border-destructive' : ''}
-              />
+              <div className="relative">
+                <Input
+                  type="datetime-local"
+                  value={formData.deadline}
+                  onChange={(e) => setFormData(prev => ({ ...prev, deadline: e.target.value }))}
+                  className={`${errors.deadline ? 'border-destructive' : ''} pr-10`}
+                  min={new Date().toISOString().slice(0, 16)}
+                />
+                <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+              </div>
               {errors.deadline && <p className="text-sm text-destructive">{errors.deadline}</p>}
             </div>
 
