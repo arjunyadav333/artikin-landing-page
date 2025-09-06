@@ -178,8 +178,8 @@ export const CreateOpportunityDrawer: React.FC<CreateOpportunityDrawerProps> = (
   };
 
   const FormContent = () => (
-    <div className="flex-1 overflow-y-auto p-4">
-      <form onSubmit={handleSubmit} className="space-y-6 max-w-lg mx-auto">
+    <div className="p-4">
+      <form onSubmit={handleSubmit} className="space-y-6">
         {/* Opportunity Title */}
         <div className="space-y-2">
           <label className="text-sm font-medium text-muted-foreground">
@@ -447,14 +447,13 @@ export const CreateOpportunityDrawer: React.FC<CreateOpportunityDrawerProps> = (
           {errors.description && <p className="text-sm text-destructive">{errors.description}</p>}
         </div>
 
-        <div className="pb-20" /> {/* Spacer for fixed buttons */}
       </form>
     </div>
   );
 
   const ActionButtons = () => (
-    <div className="border-t bg-background p-4">
-      <div className="flex gap-3 max-w-lg mx-auto">
+    <div className="p-4 pt-2">
+      <div className="flex gap-3">
         <Button 
           variant="outline" 
           onClick={() => onOpenChange(false)}
@@ -504,8 +503,8 @@ export const CreateOpportunityDrawer: React.FC<CreateOpportunityDrawerProps> = (
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
-        <DialogHeader className="border-b pb-4">
+      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogHeader className="pb-4">
           <DialogTitle className="text-xl font-semibold">Create New Job Opportunity</DialogTitle>
           <p className="text-sm text-muted-foreground">
             Post a new opportunity for artists to discover and apply to.
