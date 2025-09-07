@@ -583,15 +583,20 @@ export type Database = {
           cover_url: string | null
           created_at: string | null
           display_name: string
+          follower_count: number | null
+          following_count: number | null
           full_name: string | null
+          headline: string | null
           id: string
           location: string | null
           organization_type:
             | Database["public"]["Enums"]["organization_type"]
             | null
           phone_number: string | null
+          posts_count: number | null
           privacy: string | null
           role: Database["public"]["Enums"]["user_role"] | null
+          social_links: Json | null
           updated_at: string | null
           user_id: string
           username: string
@@ -604,15 +609,20 @@ export type Database = {
           cover_url?: string | null
           created_at?: string | null
           display_name: string
+          follower_count?: number | null
+          following_count?: number | null
           full_name?: string | null
+          headline?: string | null
           id?: string
           location?: string | null
           organization_type?:
             | Database["public"]["Enums"]["organization_type"]
             | null
           phone_number?: string | null
+          posts_count?: number | null
           privacy?: string | null
           role?: Database["public"]["Enums"]["user_role"] | null
+          social_links?: Json | null
           updated_at?: string | null
           user_id: string
           username: string
@@ -625,15 +635,20 @@ export type Database = {
           cover_url?: string | null
           created_at?: string | null
           display_name?: string
+          follower_count?: number | null
+          following_count?: number | null
           full_name?: string | null
+          headline?: string | null
           id?: string
           location?: string | null
           organization_type?:
             | Database["public"]["Enums"]["organization_type"]
             | null
           phone_number?: string | null
+          posts_count?: number | null
           privacy?: string | null
           role?: Database["public"]["Enums"]["user_role"] | null
+          social_links?: Json | null
           updated_at?: string | null
           user_id?: string
           username?: string
@@ -823,6 +838,32 @@ export type Database = {
       get_or_create_conversation: {
         Args: { user1_id: string; user2_id: string }
         Returns: string
+      }
+      get_profile_by_username: {
+        Args: { username_param: string }
+        Returns: {
+          artform: Database["public"]["Enums"]["artform_type"]
+          avatar_url: string
+          bio: string
+          cover_url: string
+          created_at: string
+          display_name: string
+          follower_count: number
+          following_count: number
+          full_name: string
+          headline: string
+          id: string
+          location: string
+          organization_type: Database["public"]["Enums"]["organization_type"]
+          posts_count: number
+          privacy: string
+          role: Database["public"]["Enums"]["user_role"]
+          social_links: Json
+          updated_at: string
+          user_id: string
+          username: string
+          website: string
+        }[]
       }
       get_profile_public_info: {
         Args: { profile_user_id: string }

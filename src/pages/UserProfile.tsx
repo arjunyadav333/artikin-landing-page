@@ -1,129 +1,122 @@
-import { useEffect } from "react";
-import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { useProfile } from "@/hooks/useProfiles";
-import { useUserPosts } from "@/hooks/usePosts";
-import { useUserPortfolios } from "@/hooks/usePortfolios";
-import { useAuth } from "@/hooks/useAuth";
-import { useConnectionStatus, useFollowUser, useConnections } from "@/hooks/useConnections";
-import { useTrackProfileView } from "@/hooks/useProfileAnalytics";
-import { ProfileHero } from "@/components/profile/ProfileHero";
-import { ProfileStats } from "@/components/profile/ProfileStats";
-import { ProfileTabs } from "@/components/profile/ProfileTabs";
-import { useDirectMessage } from "@/hooks/useDirectMessage";
+import { useEffect } from 'react';
+import { useParams, Navigate } from 'react-router-dom';
+import { ProfileHero } from '../components/profile/ProfileHero';
+import { ProfileStats } from '../components/profile/ProfileStats';
+import { ProfileTabs } from '../components/profile/ProfileTabs';
+import { useAuth } from '../hooks/useAuth';
+import { useCurrentProfile } from '../hooks/useProfiles';
+import { useProfileByUsername, useUserPosts, useUserPortfolios } from '../hooks/useProfileByUsername';
+import { useConnectionStatus, useConnections, useFollowUser } from '../hooks/useConnections';
+import { useDirectMessage } from '../hooks/useDirectMessage';
+import { useTrackProfileView } from '../hooks/useViewTracking';
 
 export default function UserProfile() {
-  const { userId } = useParams<{ userId: string }>();
+  const { username } = useParams<{ username: string }>();
   const { user, loading: authLoading } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
   
-  // Determine if viewing own profile or another user's
-  // Check if we're on /profile/me route or if userId matches current user
-  const isOnProfileMeRoute = location.pathname === "/profile/me";
-  const isOwnProfile = isOnProfileMeRoute || userId === "me" || userId === user?.id;
+  // Get current user profile for comparison
+  const { data: currentUserProfile } = useCurrentProfile();
   
-  // Set target user ID: use current user's ID for own profile, otherwise use userId param
-  const targetUserId = isOwnProfile ? user?.id : userId;
-  
-  // Debug authentication and routing state
-  console.log('UserProfile Debug:', {
-    pathname: location.pathname,
-    userId,
-    user: user ? { id: user.id, email: user.email } : null,
-    isOnProfileMeRoute,
-    isOwnProfile,
-    targetUserId,
-    authLoading
-  });
-  
-  // Fetch profile data
-  const { data: profile, isLoading: profileLoading } = useProfile(targetUserId);
-  const { data: posts, isLoading: postsLoading } = useUserPosts(targetUserId!);
-  const { data: portfolios, isLoading: portfoliosLoading } = useUserPortfolios();
-  
-  // Connection status and follow functionality
-  const { data: connectionStatus } = useConnectionStatus(targetUserId);
-  const { data: followers } = useConnections(targetUserId, 'followers');
-  const { data: following } = useConnections(targetUserId, 'following');
+  // Determine if this is the current user's profile or get by username
+  const isOwnProfile = username === 'me' || username === currentUserProfile?.username;
+  const actualUsername = isOwnProfile ? currentUserProfile?.username : username;
+
+  // Data fetching
+  const { data: profile, isLoading: profileLoading, error: profileError } = useProfileByUsername(actualUsername);
+  const { data: posts, isLoading: postsLoading } = useUserPosts(profile?.user_id);
+  const { data: portfolios, isLoading: portfoliosLoading } = useUserPortfolios(profile?.user_id);
+
+  // Connection and messaging hooks
+  const { data: connectionStatus } = useConnectionStatus(profile?.user_id);
+  const { data: connectionsData } = useConnections(profile?.user_id);
   const followMutation = useFollowUser();
-  const trackViewMutation = useTrackProfileView();
+  const { trackProfileView } = useTrackProfileView();
   const { startDirectMessage } = useDirectMessage();
 
-  // Track profile view
+  // Track profile view for non-own profiles
   useEffect(() => {
-    if (targetUserId && !isOwnProfile) {
-      trackViewMutation.mutate();
+    if (profile && !isOwnProfile && user) {
+      trackProfileView(profile.id);
     }
-  }, [targetUserId, isOwnProfile, trackViewMutation]);
-  
-  const handleFollow = () => {
-    if (!targetUserId) return;
-    followMutation.mutate({
-      targetUserId,
-      isCurrentlyFollowing: connectionStatus?.isFollowing || false
-    });
+  }, [profile, isOwnProfile, user, trackProfileView]);
+
+  const handleFollow = async () => {
+    if (!profile) return;
+    
+    try {
+      await followMutation.mutateAsync({
+        followingId: profile.user_id,
+        action: connectionStatus?.isFollowing ? 'unfollow' : 'follow'
+      });
+    } catch (error) {
+      console.error('Follow action failed:', error);
+    }
   };
 
   const handleMessage = async () => {
-    if (!targetUserId || !user) return;
+    if (!profile) return;
     
-    startDirectMessage(targetUserId);
+    try {
+      await startDirectMessage(profile.user_id);
+    } catch (error) {
+      console.error('Failed to start message:', error);
+    }
   };
 
-  // Handle authentication loading
+  // Show loading state for authentication
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
       </div>
     );
   }
 
-  // Redirect to login if not authenticated and trying to access own profile
+  // Redirect to auth if trying to access own profile without being authenticated
   if (isOwnProfile && !user) {
-    navigate('/auth');
-    return null;
+    return <Navigate to="/auth" replace />;
   }
 
-  // Handle profile loading
-  if (profileLoading) {
+  // Show loading state for profile data
+  if (profileLoading || (isOwnProfile && !currentUserProfile)) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
       </div>
     );
   }
 
-  // Handle profile not found
-  if (!profile) {
-    if (isOwnProfile && user) {
-      // User is authenticated but no profile exists - create one
+  // Handle profile not found or error states
+  if (profileError || !profile) {
+    if (isOwnProfile) {
       return (
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="text-center">
-            <h2 className="text-2xl font-bold text-foreground mb-2">Setting up your profile...</h2>
-            <p className="text-muted-foreground mb-4">We're creating your profile for the first time.</p>
-            <button 
-              onClick={() => navigate('/profile/edit')}
-              className="bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90"
-            >
-              Complete Profile Setup
+        <div className="min-h-screen flex items-center justify-center p-4">
+          <div className="text-center space-y-4">
+            <h2 className="text-2xl font-bold">Complete Your Profile</h2>
+            <p className="text-muted-foreground">
+              It looks like you haven't set up your profile yet.
+            </p>
+            <button className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90">
+              Set Up Profile
             </button>
           </div>
         </div>
       );
-    } else {
-      return (
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="text-center">
-            <h2 className="text-2xl font-bold text-foreground mb-2">Profile not found</h2>
-            <p className="text-muted-foreground">This user doesn't exist or has been deactivated.</p>
-          </div>
-        </div>
-      );
     }
+    
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="text-center space-y-4">
+          <h2 className="text-2xl font-bold">Profile Not Found</h2>
+          <p className="text-muted-foreground">
+            The profile you're looking for doesn't exist or may have been deleted.
+          </p>
+        </div>
+      </div>
+    );
   }
 
+  // Render the profile page
   return (
     <div className="min-h-screen bg-background">
       <ProfileHero
@@ -133,15 +126,14 @@ export default function UserProfile() {
         onFollow={handleFollow}
         followMutation={followMutation}
       />
-
-      <div className="max-w-7xl mx-auto px-4 md:px-6">
-        <ProfileStats
-          profile={profile}
-          postsCount={posts?.length}
-          followers={followers}
-          following={following}
-        />
-
+      
+      <ProfileStats
+        profile={profile}
+        followers={connectionsData?.followers || []}
+        following={connectionsData?.following || []}
+      />
+      
+      <div className="max-w-5xl mx-auto px-4 md:px-6 lg:px-8 py-6 md:py-8">
         <ProfileTabs
           profile={profile}
           isOwnProfile={isOwnProfile}
