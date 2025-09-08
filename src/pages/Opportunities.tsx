@@ -10,6 +10,7 @@ import { EnhancedOpportunityCard } from "@/components/opportunities/enhanced-opp
 import { ApplicationCard } from "@/components/opportunities/application-card";
 import { OrganizationDashboard } from "@/components/opportunities/organization-dashboard";
 import { OpportunitySkeletonCard, ApplicationSkeletonCard } from "@/components/opportunities/skeleton-card";
+import { RoleSelectionModal } from "@/components/auth/role-selection-modal";
 import { useOpportunities, useApplyToOpportunity } from "@/hooks/useOpportunities";
 import { useUserApplications, useDeleteApplication } from "@/hooks/useApplications";
 import { useCurrentProfile } from "@/hooks/useProfiles";
@@ -20,6 +21,7 @@ const Opportunities = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("opportunities");
   const [sortBy, setSortBy] = useState("newest");
+  const [showRoleModal, setShowRoleModal] = useState(false);
   
   const { data: currentProfile, isLoading: profileLoading } = useCurrentProfile();
   const { data: opportunities, isLoading: opportunitiesLoading } = useOpportunities();
@@ -29,8 +31,14 @@ const Opportunities = () => {
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
-  const isArtist = currentProfile?.role === 'artist';
-  const isOrganization = currentProfile?.role === 'organization';
+  // Handle role determination with null/undefined role support
+  const userRole = currentProfile?.role;
+  const hasValidRole = userRole === 'artist' || userRole === 'organization';
+  const isArtist = userRole === 'artist';
+  const isOrganization = userRole === 'organization';
+
+  // Show role selection modal if user doesn't have a valid role
+  const shouldShowRoleModal = !profileLoading && currentProfile && !hasValidRole;
 
   // Filter and sort opportunities based on search query and sort preference
   const filteredOpportunities = useMemo(() => {
@@ -119,6 +127,24 @@ const Opportunities = () => {
           <p className="text-muted-foreground">Loading...</p>
         </div>
       </div>
+    );
+  }
+
+  // Show role selection modal if user needs to select a role
+  if (shouldShowRoleModal) {
+    return (
+      <>
+        <div className="min-h-screen bg-background pb-20 md:pb-8 flex items-center justify-center">
+          <div className="text-center space-y-4">
+            <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full mx-auto"></div>
+            <p className="text-muted-foreground">Setting up your profile...</p>
+          </div>
+        </div>
+        <RoleSelectionModal 
+          open={true} 
+          onOpenChange={setShowRoleModal} 
+        />
+      </>
     );
   }
 
