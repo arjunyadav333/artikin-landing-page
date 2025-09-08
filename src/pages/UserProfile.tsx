@@ -136,7 +136,7 @@ export default function UserProfile() {
       
       <div className="max-w-5xl mx-auto px-4 md:px-6 lg:px-8 py-6 md:py-8">
         <ProfileTabs
-          profile={profile as any}
+          profile={profile}
           isOwnProfile={isOwnProfile}
           posts={posts}
           postsLoading={postsLoading}

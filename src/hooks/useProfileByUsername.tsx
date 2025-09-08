@@ -9,9 +9,9 @@ export interface ProfileWithStats {
   display_name: string;
   full_name?: string;
   bio?: string;
-  role?: Database['public']['Enums']['user_role'];
-  artform?: Database['public']['Enums']['artform_type'];
-  organization_type?: Database['public']['Enums']['organization_type'];
+  role?: 'artist' | 'organization';
+  artform?: 'actor' | 'dancer' | 'model' | 'photographer' | 'videographer' | 'instrumentalist' | 'singer' | 'drawing' | 'painting';
+  organization_type?: 'director' | 'producer' | 'production_house' | 'casting_agency' | 'casting_director' | 'event_management' | 'individual_hirer' | 'institution' | 'others';
   avatar_url?: string;
   cover_url?: string;
   location?: string;

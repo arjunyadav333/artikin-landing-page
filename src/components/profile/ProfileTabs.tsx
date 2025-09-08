@@ -2,11 +2,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PostsGrid } from '@/components/profile/posts-grid';
 import { PortfolioGrid } from '@/components/profile/portfolio-grid';
 import { AboutSection } from '@/components/profile/AboutSection';
-import { Profile } from '@/hooks/useProfiles';
+import type { ProfileWithStats } from '@/hooks/useProfileByUsername';
 import { useSearchParams } from 'react-router-dom';
 
 interface ProfileTabsProps {
-  profile: Profile;
+  profile: ProfileWithStats;
   isOwnProfile: boolean;
   posts?: any[];
   postsLoading?: boolean;

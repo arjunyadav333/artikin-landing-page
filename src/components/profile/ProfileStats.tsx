@@ -4,11 +4,12 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import type { ProfileWithStats } from '@/hooks/useProfileByUsername';
+import type { Connection } from '@/hooks/useConnections';
 
 interface ProfileStatsProps {
   profile: ProfileWithStats;
-  followers?: any[];
-  following?: any[];
+  followers?: Connection[];
+  following?: Connection[];
 }
 
 export function ProfileStats({ profile, followers = [], following = [] }: ProfileStatsProps) {
