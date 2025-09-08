@@ -96,16 +96,16 @@ export function ShareModal({ profile, children }: ShareModalProps) {
     <div className="space-y-6">
       {/* Copy Link Section */}
       <div className="space-y-3">
-        <h3 className="font-medium text-foreground">Share Profile</h3>
+        <h3 className="font-semibold text-[#111827]">Share Profile</h3>
         <div className="flex gap-2">
-          <div className="flex-1 p-3 bg-muted rounded-md text-sm text-muted-foreground truncate">
+          <div className="flex-1 p-3 bg-gray-50 rounded-lg text-sm text-gray-600 truncate border border-[#E5E7EB]">
             {profileUrl}
           </div>
           <Button
             onClick={handleCopyLink}
             variant="outline"
             size="sm"
-            className="flex-shrink-0"
+            className="flex-shrink-0 border-[#E5E7EB] hover:bg-gray-50"
           >
             {copied ? (
               <Check className="h-4 w-4 text-green-600" />
@@ -117,18 +117,18 @@ export function ShareModal({ profile, children }: ShareModalProps) {
       </div>
 
       {/* Social Share Buttons */}
-      <div className="space-y-3">
-        <h3 className="font-medium text-foreground">Share to Social Media</h3>
-        <div className={`grid ${isMobile ? 'grid-cols-2' : 'grid-cols-3'} gap-3`}>
+      <div className="space-y-4">
+        <h3 className="font-semibold text-[#111827]">Share to Social Media</h3>
+        <div className={`grid ${isMobile ? 'grid-cols-2 gap-4' : 'grid-cols-3 gap-3'}`}>
           {shareLinks.map((link) => (
             <Button
               key={link.name}
               variant="outline"
-              className={`${isMobile ? 'p-4 h-auto' : 'p-3'} flex ${isMobile ? 'flex-col' : 'flex-row'} items-center gap-2 hover:bg-muted/50`}
+              className={`${isMobile ? 'p-6 h-auto' : 'p-4'} flex ${isMobile ? 'flex-col' : 'flex-row'} items-center gap-3 hover:bg-gray-50 border-[#E5E7EB] rounded-xl transition-all duration-200`}
               onClick={() => window.open(link.url, '_blank')}
             >
-              <link.icon className={`${isMobile ? 'h-6 w-6' : 'h-4 w-4'} ${link.color}`} />
-              <span className={`${isMobile ? 'text-xs' : 'text-sm'} font-medium`}>
+              <link.icon className={`${isMobile ? 'h-8 w-8' : 'h-5 w-5'} ${link.color}`} />
+              <span className={`${isMobile ? 'text-sm' : 'text-sm'} font-semibold text-[#111827]`}>
                 {link.name}
               </span>
             </Button>
@@ -149,9 +149,9 @@ export function ShareModal({ profile, children }: ShareModalProps) {
             </Button>
           )}
         </DrawerTrigger>
-        <DrawerContent className="px-4 pb-6">
-          <DrawerHeader className="text-left">
-            <DrawerTitle>Share {profile.display_name}'s Profile</DrawerTitle>
+        <DrawerContent className="px-4 pb-6 bg-white rounded-t-2xl">
+          <DrawerHeader className="text-left pb-4">
+            <DrawerTitle className="text-[#111827] font-bold text-lg">Share {profile.display_name}'s Profile</DrawerTitle>
           </DrawerHeader>
           <ShareContent />
         </DrawerContent>
@@ -169,9 +169,9 @@ export function ShareModal({ profile, children }: ShareModalProps) {
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle>Share {profile.display_name}'s Profile</DialogTitle>
+      <DialogContent className="max-w-md bg-white border-[#E5E7EB] shadow-2xl rounded-xl">
+        <DialogHeader className="pb-4">
+          <DialogTitle className="text-[#111827] font-bold text-lg">Share {profile.display_name}'s Profile</DialogTitle>
         </DialogHeader>
         <ShareContent />
       </DialogContent>
