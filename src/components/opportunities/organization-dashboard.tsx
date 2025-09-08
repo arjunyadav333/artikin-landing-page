@@ -11,6 +11,7 @@ import { ApplicantManagement } from "./applicant-management";
 import { ComprehensivePostModal } from "./comprehensive-post-modal";
 import { EditOpportunityModal } from "./edit-opportunity-modal";
 import { formatDistanceToNow, format } from "date-fns";
+
 export function OrganizationDashboard() {
   const [selectedOpportunity, setSelectedOpportunity] = useState<string | null>(null);
   const [editingOpportunity, setEditingOpportunity] = useState<any | null>(null);
