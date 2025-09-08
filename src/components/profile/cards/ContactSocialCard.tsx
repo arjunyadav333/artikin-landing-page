@@ -88,11 +88,11 @@ export function ContactSocialCard({ profile, isOwnProfile }: ContactSocialCardPr
                 Add Link
               </Button>
             </DialogTrigger>
-            <DialogContent className="bg-white rounded-2xl p-6 max-w-2xl">
-              <DialogHeader>
+            <DialogContent className="bg-white rounded-2xl max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+              <DialogHeader className="flex-shrink-0 pb-4">
                 <DialogTitle>Add Social Link</DialogTitle>
               </DialogHeader>
-              <div className="space-y-4">
+              <div className="space-y-4 overflow-y-auto flex-1 px-1">
                 <div className="space-y-2">
                   <Label>Platform</Label>
                   <Select value={newLink.type} onValueChange={(value) => 
@@ -134,18 +134,18 @@ export function ContactSocialCard({ profile, isOwnProfile }: ContactSocialCardPr
                   </div>
                 )}
 
-                <div className="flex gap-2 pt-4">
-                  <Button onClick={handleAddLink} className="rounded-2xl">
-                    Add Link
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    onClick={() => setIsAddModalOpen(false)}
-                    className="rounded-2xl"
-                  >
-                    Cancel
-                  </Button>
-                </div>
+              </div>
+              <div className="flex gap-2 pt-4 border-t bg-white flex-shrink-0 mt-4">
+                <Button onClick={handleAddLink} className="rounded-2xl">
+                  Add Link
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setIsAddModalOpen(false)}
+                  className="rounded-2xl"
+                >
+                  Cancel
+                </Button>
               </div>
             </DialogContent>
           </Dialog>

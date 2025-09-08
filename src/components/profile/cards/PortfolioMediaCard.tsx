@@ -179,11 +179,11 @@ export function PortfolioMediaCard({
                 Add Media
               </Button>
             </DialogTrigger>
-            <DialogContent className="bg-white rounded-2xl p-6 max-w-2xl">
-              <DialogHeader>
+            <DialogContent className="bg-white rounded-2xl max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+              <DialogHeader className="flex-shrink-0 pb-4">
                 <DialogTitle>Upload Media</DialogTitle>
               </DialogHeader>
-              <div className="space-y-4">
+              <div className="space-y-4 overflow-y-auto flex-1 px-1">
                 {/* File Upload Area */}
                 <div className="space-y-2">
                   <Label>File</Label>
@@ -256,7 +256,7 @@ export function PortfolioMediaCard({
                 )}
 
                 {/* Actions */}
-                <div className="flex gap-2 pt-4">
+                <div className="flex gap-2 pt-4 border-t bg-white flex-shrink-0 mt-4">
                   <Button 
                     onClick={handleUpload} 
                     disabled={!newMedia.file || isUploading}

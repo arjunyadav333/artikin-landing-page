@@ -139,11 +139,11 @@ export function BodyFeaturesCard({ profile, isOwnProfile }: BodyFeaturesCardProp
                 Add Measurement
               </Button>
             </DialogTrigger>
-            <DialogContent className="bg-white rounded-2xl p-6 max-w-2xl">
-              <DialogHeader>
+            <DialogContent className="bg-white rounded-2xl max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+              <DialogHeader className="flex-shrink-0 pb-4">
                 <DialogTitle>Add Body Measurements</DialogTitle>
               </DialogHeader>
-              <div className="space-y-4">
+              <div className="space-y-4 overflow-y-auto flex-1 px-1">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="space-y-2">
                     <Label>Eye Color</Label>
@@ -248,18 +248,18 @@ export function BodyFeaturesCard({ profile, isOwnProfile }: BodyFeaturesCardProp
                   </div>
                 </div>
 
-                <div className="flex gap-2 pt-4">
-                  <Button onClick={handleAddMeasurement} className="rounded-2xl">
-                    Add Measurement
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    onClick={() => setIsAddModalOpen(false)}
-                    className="rounded-2xl"
-                  >
-                    Cancel
-                  </Button>
-                </div>
+              </div>
+              <div className="flex gap-2 pt-4 border-t bg-white flex-shrink-0 mt-4">
+                <Button onClick={handleAddMeasurement} className="rounded-2xl">
+                  Add Measurement
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setIsAddModalOpen(false)}
+                  className="rounded-2xl"
+                >
+                  Cancel
+                </Button>
               </div>
             </DialogContent>
           </Dialog>
