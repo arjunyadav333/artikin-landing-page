@@ -52,10 +52,26 @@ export const useCurrentProfile = () => {
   return useQuery({
     queryKey: ['currentProfile'],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc('get_user_profile');
+      // Get the current authenticated user
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError) throw authError;
+      if (!user) return null;
+
+      // Query profiles table directly using user ID
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
       
-      if (error) throw error;
-      return data?.[0] as Profile | null;
+      if (error) {
+        if (error.code === 'PGRST116') {
+          // No rows returned - profile doesn't exist yet
+          return null;
+        }
+        throw error;
+      }
+      return data as Profile;
     },
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
   });

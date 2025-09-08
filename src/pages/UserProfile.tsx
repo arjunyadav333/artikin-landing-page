@@ -14,15 +14,21 @@ export default function UserProfile() {
   const { username } = useParams<{ username: string }>();
   const { user, loading: authLoading } = useAuth();
   
-  // Get current user profile for comparison
-  const { data: currentUserProfile } = useCurrentProfile();
+  // Determine if this is the current user's profile
+  const isOwnProfile = username === 'me';
   
-  // Determine if this is the current user's profile or get by username
-  const isOwnProfile = username === 'me' || username === currentUserProfile?.username;
-  const actualUsername = isOwnProfile ? currentUserProfile?.username : username;
+  // Get current user profile if viewing own profile
+  const { data: currentUserProfile, isLoading: currentProfileLoading, error: currentProfileError } = useCurrentProfile();
+  
+  // For public profiles, get profile by username  
+  const { data: publicProfile, isLoading: publicProfileLoading, error: publicProfileError } = useProfileByUsername(
+    !isOwnProfile ? username : undefined
+  );
 
-  // Data fetching
-  const { data: profile, isLoading: profileLoading, error: profileError } = useProfileByUsername(actualUsername);
+  // Use the appropriate profile data based on the route
+  const profile = isOwnProfile ? currentUserProfile : publicProfile;
+  const profileLoading = isOwnProfile ? currentProfileLoading : publicProfileLoading;
+  const profileError = isOwnProfile ? currentProfileError : publicProfileError;
   const { data: posts, isLoading: postsLoading } = useUserPosts(profile?.user_id);
   const { data: portfolios, isLoading: portfoliosLoading } = useUserPortfolios(profile?.user_id);
 
