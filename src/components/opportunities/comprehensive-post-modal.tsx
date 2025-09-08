@@ -15,6 +15,8 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger, DropdownMenuCheckboxItem } from "@/components/ui/dropdown-menu";
 import {
   Form,
   FormControl,
@@ -30,7 +32,8 @@ import {
   Calendar as CalendarIcon,
   ArrowLeft,
   Image as ImageIcon,
-  Trash2
+  Trash2,
+  ChevronDown
 } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -233,8 +236,8 @@ export function ComprehensivePostModal({ open, onOpenChange, trigger }: Comprehe
         </Button>
       </div>
 
-      {/* Content */}
-      <div className={cn("flex-1 overflow-y-auto", isMobile ? "p-4" : "p-6")}>
+      {/* Content - Scrollable */}
+      <div className={cn("flex-1 overflow-y-auto scroll-smooth", isMobile ? "p-4" : "p-6")}>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <Card className={cn("p-6 space-y-6", isMobile && "p-4 space-y-4")}>
@@ -340,24 +343,49 @@ export function ComprehensivePostModal({ open, onOpenChange, trigger }: Comprehe
                   <FormItem>
                     <FormLabel className="text-sm font-medium">Art Forms *</FormLabel>
                     <p className="text-xs text-muted-foreground">Select all the art forms that are present in this opportunity</p>
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {artFormOptions.map((artForm) => {
-                        const isSelected = watchedValues.artForms?.includes(artForm);
-                        return (
-                          <Badge
-                            key={artForm}
-                            variant={isSelected ? "default" : "outline"}
-                            className={cn(
-                              "cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors",
-                              isSelected && "bg-primary text-primary-foreground"
-                            )}
-                            onClick={() => handleArtFormToggle(artForm, !isSelected)}
-                          >
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="w-full h-12 justify-between text-left font-normal border-border/50 focus:border-primary"
+                        >
+                          <span className="truncate">
+                            {watchedValues.artForms?.length > 0
+                              ? `${watchedValues.artForms.length} art form${watchedValues.artForms.length > 1 ? 's' : ''} selected`
+                              : "Select art forms"
+                            }
+                          </span>
+                          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent className="w-80 max-h-60 overflow-y-auto">
+                        {artFormOptions.map((artForm) => {
+                          const isSelected = watchedValues.artForms?.includes(artForm);
+                          return (
+                            <DropdownMenuCheckboxItem
+                              key={artForm}
+                              checked={isSelected}
+                              onCheckedChange={(checked) => handleArtFormToggle(artForm, checked)}
+                            >
+                              {artForm}
+                            </DropdownMenuCheckboxItem>
+                          );
+                        })}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                    {watchedValues.artForms?.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {watchedValues.artForms.map((artForm) => (
+                          <Badge key={artForm} variant="secondary" className="text-xs">
                             {artForm}
+                            <X 
+                              className="ml-1 h-3 w-3 cursor-pointer hover:text-destructive" 
+                              onClick={() => handleArtFormToggle(artForm, false)}
+                            />
                           </Badge>
-                        );
-                      })}
-                    </div>
+                        ))}
+                      </div>
+                    )}
                     <FormMessage />
                   </FormItem>
                 )}
@@ -401,24 +429,49 @@ export function ComprehensivePostModal({ open, onOpenChange, trigger }: Comprehe
                 render={() => (
                   <FormItem>
                     <FormLabel className="text-sm font-medium">Gender Preference</FormLabel>
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {genderOptions.map((gender) => {
-                        const isSelected = watchedValues.genderPreference?.includes(gender);
-                        return (
-                          <Badge
-                            key={gender}
-                            variant={isSelected ? "default" : "outline"}
-                            className={cn(
-                              "cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors",
-                              isSelected && "bg-primary text-primary-foreground"
-                            )}
-                            onClick={() => handleGenderToggle(gender, !isSelected)}
-                          >
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="w-full h-12 justify-between text-left font-normal border-border/50 focus:border-primary"
+                        >
+                          <span className="truncate">
+                            {watchedValues.genderPreference?.length > 0
+                              ? `${watchedValues.genderPreference.length} gender${watchedValues.genderPreference.length > 1 ? 's' : ''} selected`
+                              : "Select gender preference (optional)"
+                            }
+                          </span>
+                          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent className="w-64">
+                        {genderOptions.map((gender) => {
+                          const isSelected = watchedValues.genderPreference?.includes(gender);
+                          return (
+                            <DropdownMenuCheckboxItem
+                              key={gender}
+                              checked={isSelected}
+                              onCheckedChange={(checked) => handleGenderToggle(gender, checked)}
+                            >
+                              {gender}
+                            </DropdownMenuCheckboxItem>
+                          );
+                        })}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                    {watchedValues.genderPreference?.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {watchedValues.genderPreference.map((gender) => (
+                          <Badge key={gender} variant="secondary" className="text-xs">
                             {gender}
+                            <X 
+                              className="ml-1 h-3 w-3 cursor-pointer hover:text-destructive" 
+                              onClick={() => handleGenderToggle(gender, false)}
+                            />
                           </Badge>
-                        );
-                      })}
-                    </div>
+                        ))}
+                      </div>
+                    )}
                   </FormItem>
                 )}
               />
@@ -430,24 +483,49 @@ export function ComprehensivePostModal({ open, onOpenChange, trigger }: Comprehe
                 render={() => (
                   <FormItem>
                     <FormLabel className="text-sm font-medium">Language Preference</FormLabel>
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {languageOptions.map((language) => {
-                        const isSelected = watchedValues.languagePreference?.includes(language);
-                        return (
-                          <Badge
-                            key={language}
-                            variant={isSelected ? "default" : "outline"}
-                            className={cn(
-                              "cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors",
-                              isSelected && "bg-primary text-primary-foreground"
-                            )}
-                            onClick={() => handleLanguageToggle(language, !isSelected)}
-                          >
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="w-full h-12 justify-between text-left font-normal border-border/50 focus:border-primary"
+                        >
+                          <span className="truncate">
+                            {watchedValues.languagePreference?.length > 0
+                              ? `${watchedValues.languagePreference.length} language${watchedValues.languagePreference.length > 1 ? 's' : ''} selected`
+                              : "Select language preference (optional)"
+                            }
+                          </span>
+                          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent className="w-64 max-h-60 overflow-y-auto">
+                        {languageOptions.map((language) => {
+                          const isSelected = watchedValues.languagePreference?.includes(language);
+                          return (
+                            <DropdownMenuCheckboxItem
+                              key={language}
+                              checked={isSelected}
+                              onCheckedChange={(checked) => handleLanguageToggle(language, checked)}
+                            >
+                              {language}
+                            </DropdownMenuCheckboxItem>
+                          );
+                        })}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                    {watchedValues.languagePreference?.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {watchedValues.languagePreference.map((language) => (
+                          <Badge key={language} variant="secondary" className="text-xs">
                             {language}
+                            <X 
+                              className="ml-1 h-3 w-3 cursor-pointer hover:text-destructive" 
+                              onClick={() => handleLanguageToggle(language, false)}
+                            />
                           </Badge>
-                        );
-                      })}
-                    </div>
+                        ))}
+                      </div>
+                    )}
                   </FormItem>
                 )}
               />
@@ -575,7 +653,7 @@ export function ComprehensivePostModal({ open, onOpenChange, trigger }: Comprehe
         "border-t bg-background/95 backdrop-blur-sm sticky bottom-0 z-10",
         isMobile ? "p-4" : "p-6"
       )}>
-        <div className={cn("flex gap-3", isMobile ? "flex-col-reverse" : "justify-end")}>
+        <div className={cn("flex gap-3", isMobile ? "flex-row" : "justify-end")}>
           <Button
             type="button"
             variant="outline"
@@ -617,7 +695,7 @@ export function ComprehensivePostModal({ open, onOpenChange, trigger }: Comprehe
     <>
       {trigger}
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-4xl h-[90vh] p-0 overflow-hidden">
+        <DialogContent className="max-w-4xl h-[90vh] p-0 overflow-hidden flex flex-col">
           {modalContent}
         </DialogContent>
       </Dialog>
