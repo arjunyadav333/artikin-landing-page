@@ -1,7 +1,6 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PostsGrid } from '@/components/profile/posts-grid';
-import { PortfolioGrid } from '@/components/profile/portfolio-grid';
-import { AboutSection } from '@/components/profile/AboutSection';
+import { PortfolioAboutSection } from '@/components/profile/PortfolioAboutSection';
 import { Profile } from '@/hooks/useProfiles';
 import { useSearchParams } from 'react-router-dom';
 
@@ -35,33 +34,29 @@ export function ProfileTabs({
     setSearchParams(newParams);
   };
 
-  // Role-based tab configuration
-  const tabsConfig = profile.role === 'artist' 
-    ? [
-        { value: 'posts', label: 'Posts' },
-        { value: 'portfolio', label: 'Portfolio' }
-      ]
-    : [
-        { value: 'posts', label: 'Posts' },
-        { value: 'about', label: 'About' }
-      ];
+  // Two-tab configuration: Posts and Portfolio/About
+  const secondTabLabel = profile.role === 'artist' ? 'Portfolio' : 'About';
+  const secondTabValue = profile.role === 'artist' ? 'portfolio' : 'about';
 
   return (
     <div className="bg-white">
       <div className="w-full px-4 md:px-6 lg:px-8">
         <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-          {/* Clean Tab Navigation */}
+          {/* Two-Tab Navigation */}
           <div className="border-b border-[#E5E7EB] mb-6">
             <TabsList className="grid w-full grid-cols-2 bg-transparent h-auto p-0 gap-0">
-              {tabsConfig.map((tab) => (
-                <TabsTrigger 
-                  key={tab.value} 
-                  value={tab.value} 
-                  className="relative py-4 px-6 text-sm font-semibold rounded-none border-b-2 border-transparent transition-all duration-200 data-[state=active]:border-primary data-[state=active]:text-primary data-[state=inactive]:text-gray-500 data-[state=inactive]:hover:text-[#111827] hover:bg-gray-50/50"
-                >
-                  {tab.label}
-                </TabsTrigger>
-              ))}
+              <TabsTrigger 
+                value="posts" 
+                className="relative py-4 px-6 text-sm font-semibold rounded-none border-b-2 border-transparent transition-all duration-200 data-[state=active]:border-primary data-[state=active]:text-primary data-[state=inactive]:text-gray-500 data-[state=inactive]:hover:text-[#111827] hover:bg-gray-50/50"
+              >
+                Posts
+              </TabsTrigger>
+              <TabsTrigger 
+                value={secondTabValue}
+                className="relative py-4 px-6 text-sm font-semibold rounded-none border-b-2 border-transparent transition-all duration-200 data-[state=active]:border-primary data-[state=active]:text-primary data-[state=inactive]:text-gray-500 data-[state=inactive]:hover:text-[#111827] hover:bg-gray-50/50"
+              >
+                {secondTabLabel}
+              </TabsTrigger>
             </TabsList>
           </div>
 
@@ -71,21 +66,14 @@ export function ProfileTabs({
               <PostsGrid posts={posts} isLoading={postsLoading} />
             </TabsContent>
 
-            {profile.role === 'artist' && (
-              <TabsContent value="portfolio" className="space-y-6 m-0">
-                <PortfolioGrid 
-                  portfolios={portfolios}
-                  isLoading={portfoliosLoading}
-                  isOwnProfile={isOwnProfile}
-                />
-              </TabsContent>
-            )}
-
-            {profile.role === 'organization' && (
-              <TabsContent value="about" className="space-y-6 m-0">
-                <AboutSection profile={profile} isOwnProfile={isOwnProfile} />
-              </TabsContent>
-            )}
+            <TabsContent value={secondTabValue} className="space-y-6 m-0">
+              <PortfolioAboutSection 
+                profile={profile}
+                isOwnProfile={isOwnProfile}
+                portfolios={portfolios}
+                portfoliosLoading={portfoliosLoading}
+              />
+            </TabsContent>
           </div>
         </Tabs>
       </div>
