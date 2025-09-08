@@ -925,6 +925,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      user_is_following: {
+        Args: { target_user_id: string }
+        Returns: boolean
+      }
       username_available: {
         Args: { candidate: string }
         Returns: Json
