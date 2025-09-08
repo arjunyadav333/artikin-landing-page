@@ -51,15 +51,15 @@ const formSchema = z.object({
   genderPreference: z.array(z.string()).optional(),
   languagePreference: z.array(z.string()).optional(),
   deadline: z.date({ required_error: "Application deadline is required" }),
-  description: z.string().min(50, "Description must be at least 50 characters"),
+  description: z.string().min(1, "Description is required").max(1000, "Description must be less than 1000 characters"),
   image: z.any().optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
 
 const artFormOptions = [
-  "Acting", "Dancing", "Singing", "Music", "Theater", "Film", "Photography", 
-  "Painting", "Sculpture", "Writing", "Comedy", "Voice Over", "Modeling"
+  "actor", "dancer", "model", "photographer", "videographer", 
+  "instrumentalist", "singer", "drawing", "painting"
 ];
 
 const experienceLevels = [
@@ -398,25 +398,23 @@ export function ComprehensivePostModal({ open, onOpenChange, trigger }: Comprehe
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-sm font-medium">Experience Level *</FormLabel>
-                    <FormControl>
-                      <RadioGroup
-                        onValueChange={(value) => {
-                          field.onChange(value);
-                          setIsDirty(true);
-                        }}
-                        value={field.value}
-                        className="flex flex-wrap gap-4 mt-2"
-                      >
+                    <Select onValueChange={(value) => {
+                      field.onChange(value);
+                      setIsDirty(true);
+                    }} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger className="h-12 text-base border-border/50 focus:border-primary">
+                          <SelectValue placeholder="Select experience level" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
                         {experienceLevels.map((level) => (
-                          <div key={level.value} className="flex items-center space-x-2">
-                            <RadioGroupItem value={level.value} id={level.value} />
-                            <Label htmlFor={level.value} className="text-sm cursor-pointer">
-                              {level.label}
-                            </Label>
-                          </div>
+                          <SelectItem key={level.value} value={level.value}>
+                            {level.label}
+                          </SelectItem>
                         ))}
-                      </RadioGroup>
-                    </FormControl>
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -635,9 +633,9 @@ export function ComprehensivePostModal({ open, onOpenChange, trigger }: Comprehe
                       <FormMessage />
                       <span className={cn(
                         "text-xs",
-                        characterCount < 50 ? "text-muted-foreground" : "text-green-600"
+                        characterCount > 1000 ? "text-destructive" : "text-muted-foreground"
                       )}>
-                        {characterCount}/50 characters minimum
+                        {characterCount}/1000 characters
                       </span>
                     </div>
                   </FormItem>
