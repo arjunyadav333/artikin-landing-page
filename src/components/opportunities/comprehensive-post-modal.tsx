@@ -342,7 +342,7 @@ export function ComprehensivePostModal({ open, onOpenChange, trigger }: Comprehe
                 render={() => (
                   <FormItem>
                     <FormLabel className="text-sm font-medium">Art Forms *</FormLabel>
-                    <p className="text-xs text-muted-foreground">Select all the art forms that are present in this opportunity</p>
+                    <p className="text-xs text-muted-foreground">Can select multiple artforms </p>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button
