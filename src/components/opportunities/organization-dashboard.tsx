@@ -94,27 +94,18 @@ export function OrganizationDashboard() {
 
       {/* Filter Tabs */}
       <Tabs value={activeFilter} onValueChange={setActiveFilter} className="w-full">
-        <div className="flex justify-between items-center mb-6">
-          <TabsList className="grid w-fit grid-cols-3 bg-muted/30 p-1 rounded-xl h-12">
-            <TabsTrigger value="all" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:font-medium transition-all duration-200 px-6">
+        <div className="mb-6">
+          <TabsList className="grid w-full grid-cols-3 bg-muted/30 p-2 rounded-xl h-16 gap-2">
+            <TabsTrigger value="all" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:font-semibold transition-all duration-200 text-base py-4 px-6 rounded-lg">
               All ({opportunityCounts.all})
             </TabsTrigger>
-            <TabsTrigger value="active" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:font-medium transition-all duration-200 px-6">
+            <TabsTrigger value="active" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:font-semibold transition-all duration-200 text-base py-4 px-6 rounded-lg">
               Active ({opportunityCounts.active})
             </TabsTrigger>
-            <TabsTrigger value="closed" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:font-medium transition-all duration-200 px-6">
+            <TabsTrigger value="closed" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:font-semibold transition-all duration-200 text-base py-4 px-6 rounded-lg">
               Closed ({opportunityCounts.closed})
             </TabsTrigger>
           </TabsList>
-
-          {/* Search Bar */}
-          <div className="flex gap-4 items-center">
-            <div className="relative">
-              
-              
-            </div>
-            
-          </div>
         </div>
 
         {/* Opportunities Content */}
