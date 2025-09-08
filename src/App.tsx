@@ -161,33 +161,14 @@ const AppRoutes = () => {
             </AppLayout>
           </ProtectedRoute>
         } />
-        <Route path="/profile/:username" element={
-          <AppLayout>
-            <Suspense fallback={<PageLoader />}>
-              <UserProfile />
-            </Suspense>
-          </AppLayout>
-        } />
-        <Route path="/profile/:username/posts" element={
-          <AppLayout>
-            <Suspense fallback={<PageLoader />}>
-              <UserProfile />
-            </Suspense>
-          </AppLayout>
-        } />
-        <Route path="/profile/:username/followers" element={
-          <AppLayout>
-            <Suspense fallback={<PageLoader />}>
-              <UserProfile />
-            </Suspense>
-          </AppLayout>
-        } />
-        <Route path="/profile/:username/following" element={
-          <AppLayout>
-            <Suspense fallback={<PageLoader />}>
-              <UserProfile />
-            </Suspense>
-          </AppLayout>
+        <Route path="/profile/:userId" element={
+          <ProtectedRoute>
+            <AppLayout>
+              <Suspense fallback={<PageLoader />}>
+                <UserProfile />
+              </Suspense>
+            </AppLayout>
+          </ProtectedRoute>
         } />
         <Route path="/profile" element={<Navigate to="/profile/me" replace />} />
         <Route path="/post/:postId" element={

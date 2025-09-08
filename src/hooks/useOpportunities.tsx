@@ -105,14 +105,6 @@ export const useCreateOpportunity = () => {
       type: string;
       tags?: string[];
       deadline?: string;
-      organization_name?: string;
-      city?: string;
-      state?: string;
-      art_forms?: string[];
-      experience_level?: string;
-      gender_preference?: string[];
-      language_preference?: string[];
-      image_url?: string;
     }) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
@@ -120,25 +112,8 @@ export const useCreateOpportunity = () => {
       const { data, error } = await supabase
         .from('opportunities')
         .insert({
-          title: newOpportunity.title,
-          company: newOpportunity.company,
-          description: newOpportunity.description,
-          type: newOpportunity.type,
-          location: newOpportunity.location,
-          salary_min: newOpportunity.salary_min,
-          salary_max: newOpportunity.salary_max,
-          deadline: newOpportunity.deadline ? new Date(newOpportunity.deadline).toISOString() : null,
-          tags: newOpportunity.tags,
-          organization_name: newOpportunity.organization_name,
-          city: newOpportunity.city,
-          state: newOpportunity.state,
-          art_forms: newOpportunity.art_forms,
-          experience_level: newOpportunity.experience_level,
-          gender_preference: newOpportunity.gender_preference,
-          language_preference: newOpportunity.language_preference,
-          image_url: newOpportunity.image_url,
-          user_id: user.id,
-          status: 'active'
+          ...newOpportunity,
+          user_id: user.id
         })
         .select('*')
         .single();
@@ -160,7 +135,6 @@ export const useCreateOpportunity = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['opportunities'] });
-      queryClient.invalidateQueries({ queryKey: ['organization-opportunities'] });
       toast({
         title: "Opportunity posted",
         description: "Your opportunity has been successfully posted."

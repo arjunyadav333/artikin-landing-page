@@ -52,86 +52,18 @@ export const useCurrentProfile = () => {
   return useQuery({
     queryKey: ['currentProfile'],
     queryFn: async () => {
-      // Get the current authenticated user first
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
-      if (authError) {
-        console.error('Auth error in useCurrentProfile:', authError);
-        throw authError;
-      }
-      if (!user) {
-        console.log('No user found in useCurrentProfile');
-        return null;
-      }
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
 
-      console.log('User found in useCurrentProfile:', user.id);
-
-      // Use the new secure RPC function that bypasses RLS issues
-      try {
-        const { data: secureData, error: secureError } = await supabase.rpc('get_current_user_profile_secure');
-        
-        if (secureError) {
-          console.error('Secure RPC error:', secureError);
-        } else if (secureData && secureData.length > 0) {
-          console.log('Profile found via secure RPC:', secureData[0]);
-          return secureData[0] as Profile;
-        } else {
-          console.log('No profile found via secure RPC - user needs to create profile');
-          return null;
-        }
-      } catch (secureError) {
-        console.error('Secure RPC call failed:', secureError);
-      }
-
-      // Fallback: Try the original RPC function
-      try {
-        const { data: rpcData, error: rpcError } = await supabase.rpc('get_user_profile', {
-          user_uuid: user.id
-        });
-        
-        if (rpcError) {
-          console.error('RPC error:', rpcError);
-        } else if (rpcData && rpcData.length > 0) {
-          console.log('Profile found via RPC:', rpcData[0]);
-          return rpcData[0] as Profile;
-        }
-      } catch (rpcError) {
-        console.error('RPC call failed:', rpcError);
-      }
-
-      // Final fallback: Query profiles table directly using user ID
-      try {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('user_id', user.id)
-          .maybeSingle();
-        
-        if (error) {
-          console.error('Direct query error:', error);
-          // If it's just a missing profile, return null
-          if (error.code === 'PGRST116') {
-            console.log('Profile not found - needs to be created');
-            return null;
-          }
-          throw error;
-        }
-        
-        console.log('Profile found via direct query:', data);
-        return data as Profile;
-      } catch (queryError) {
-        console.error('Profile query failed:', queryError);
-        throw queryError;
-      }
-    },
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
-    retry: (failureCount, error: any) => {
-      // Retry up to 2 times for auth-related errors
-      if (failureCount < 2 && (error?.message?.includes('auth') || error?.code === 'PGRST301')) {
-        return true;
-      }
-      return false;
-    },
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+      
+      if (error) throw error;
+      return data as Profile;
+    }
   });
 };
 
@@ -164,46 +96,6 @@ export const useUpdateProfile = () => {
     onError: (error: any) => {
       toast({
         title: "Update failed",
-        description: error.message,
-        variant: "destructive"
-      });
-    }
-  });
-};
-
-export const useCreateProfile = () => {
-  const queryClient = useQueryClient();
-  const { toast } = useToast();
-
-  return useMutation({
-    mutationFn: async (profileData: Partial<Profile>) => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
-
-      const { data, error } = await supabase
-        .from('profiles')
-        .insert({
-          user_id: user.id,
-          username: `user_${user.id.slice(0, 8)}`,
-          display_name: profileData.display_name || 'New User',
-          ...profileData,
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['currentProfile'] });
-      toast({
-        title: "Profile created",
-        description: "Your profile has been successfully created."
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Profile creation failed",
         description: error.message,
         variant: "destructive"
       });

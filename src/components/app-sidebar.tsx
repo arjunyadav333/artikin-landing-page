@@ -13,7 +13,6 @@ import {
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { useCurrentUserProfile } from "@/hooks/useUserRole";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -41,7 +40,6 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const location = useLocation();
   const { user } = useAuth();
-  const { data: profile } = useCurrentUserProfile();
   const currentPath = location.pathname;
   
   const isCollapsed = state === "collapsed";
@@ -53,18 +51,18 @@ export function AppSidebar() {
         {/* Profile Section - Clickable */}
         <Link to="/profile/me" className="flex items-center gap-3 hover:bg-muted/50 rounded-lg p-2 -m-2 transition-colors">
           <Avatar className="h-12 w-12">
-            <AvatarImage src={profile?.avatar_url || user?.user_metadata?.avatar_url} />
+            <AvatarImage src={user?.user_metadata?.avatar_url} />
             <AvatarFallback className="bg-primary text-primary-foreground text-lg font-semibold">
-              {profile?.full_name?.charAt(0).toUpperCase() || profile?.display_name?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || 'U'}
+              {user?.user_metadata?.full_name?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || 'U'}
             </AvatarFallback>
           </Avatar>
           {!isCollapsed && (
             <div className="flex-1 min-w-0">
               <p className="font-semibold text-sm truncate">
-                {profile?.full_name || profile?.display_name || user?.email}
+                {user?.user_metadata?.full_name || user?.user_metadata?.display_name || user?.email}
               </p>
               <p className="text-xs text-muted-foreground truncate">
-                @{profile?.username || 'user'}
+                @{user?.user_metadata?.username || 'user'}
               </p>
             </div>
           )}
