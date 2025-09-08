@@ -132,9 +132,6 @@ export default function UserProfile() {
         connectionStatus={connectionStatus}
         onFollow={handleFollow}
         followMutation={followMutation}
-        postsCount={posts?.length}
-        followers={followers}
-        following={following}
       />
 
       <ProfileStats

@@ -1,8 +1,14 @@
 import { useState } from "react";
-import { X, Heart, MessageCircle, Share2, Bookmark, MoreHorizontal, UserPlus } from "lucide-react";
+import { X, Heart, MessageCircle, Share2, Bookmark, MoreHorizontal, UserPlus, Edit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Post } from "@/hooks/usePosts";
 import { useLikePost } from "@/hooks/usePosts";
 // import { CommentDrawer } from "@/components/post/comment-drawer";
@@ -98,9 +104,23 @@ export function PostDetailModal({ post, onClose }: PostDetailModalProps) {
                   <UserPlus className="h-4 w-4 mr-1" />
                   Follow
                 </Button>
-                <Button variant="ghost" size="icon">
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon">
+                      <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="bg-white border-gray-200 shadow-lg rounded-lg z-50">
+                    <DropdownMenuItem>
+                      <Edit className="h-4 w-4 mr-2" />
+                      Edit Post
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
+                      <Share2 className="h-4 w-4 mr-2" />
+                      Share Post
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
           </div>

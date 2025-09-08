@@ -37,9 +37,6 @@ interface ProfileHeroProps {
   connectionStatus?: any;
   onFollow?: () => void;
   followMutation?: any;
-  postsCount?: number;
-  followers?: any[];
-  following?: any[];
 }
 
 export function ProfileHero({ 
@@ -47,10 +44,7 @@ export function ProfileHero({
   isOwnProfile, 
   connectionStatus, 
   onFollow, 
-  followMutation,
-  postsCount = 0,
-  followers = [],
-  following = []
+  followMutation 
 }: ProfileHeroProps) {
   const { startDirectMessage, isLoading: isMessageLoading } = useDirectMessage();
 
@@ -76,7 +70,7 @@ END:VCARD`;
   };
 
   return (
-    <div className="relative">
+    <div className="relative bg-[#F9FAFB]">
       {/* Full-width Hero Section with 16:9 Cover */}
       <div className="relative w-full aspect-video bg-gradient-to-br from-primary/10 to-primary/5 overflow-hidden">
         {profile.cover_url && (
@@ -99,53 +93,15 @@ END:VCARD`;
         )}
       </div>
 
-      {/* Profile Section - Full Width */}
-      <div className="relative bg-white w-full">
-        {/* Three dots menu in top right corner */}
-        <div className="absolute top-4 right-4 md:top-6 md:right-6 z-10">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="icon" className="bg-white border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg shadow-sm">
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-white border-gray-200 shadow-lg rounded-lg">
-              {isOwnProfile && (
-                <>
-                  <EditProfileModal profile={profile}>
-                    <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                      <Edit className="h-4 w-4 mr-2" />
-                      Edit Profile
-                    </DropdownMenuItem>
-                  </EditProfileModal>
-                  <DropdownMenuSeparator />
-                </>
-              )}
-              <ShareModal profile={profile}>
-                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                  <Share className="h-4 w-4 mr-2" />
-                  Share Profile
-                </DropdownMenuItem>
-              </ShareModal>
-              {!isOwnProfile && (
-                <>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleExportContact}>
-                    <Mail className="h-4 w-4 mr-2" />
-                    Export Contact
-                  </DropdownMenuItem>
-                </>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-
+          {/* Profile Section */}
+      <div className="relative bg-white">
         <div className="w-full px-4 md:px-6 lg:px-8">
           {/* Profile Picture & Basic Info */}
           <div className="relative -mt-16 md:-mt-20 pb-6">
-            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
-              {/* Profile Picture */}
-              <div className="flex flex-col md:flex-row md:items-end gap-6">
+            <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
+              {/* Left Side - Profile Info */}
+              <div className="flex flex-col md:flex-row md:items-start gap-6 flex-1">
+                {/* Profile Picture */}
                 <div className="relative self-center md:self-start group">
                   <Avatar className="h-32 w-32 md:h-40 md:w-40 border-4 border-white shadow-lg ring-4 ring-white/50">
                     <AvatarImage src={profile.avatar_url || ""} alt={profile.display_name} />
@@ -163,9 +119,9 @@ END:VCARD`;
                   )}
                 </div>
 
-                {/* Name & Info */}
-                <div className="text-center md:text-left space-y-3 md:pb-4">
-                  {/* Name & Verification */}
+                {/* Info Section */}
+                <div className="text-center md:text-left space-y-3 md:pt-4 flex-1">
+                  {/* Full Name */}
                   <div className="flex items-center justify-center md:justify-start gap-2">
                     <h1 className="text-lg md:text-xl font-bold text-[#111827] tracking-tight">
                       {profile.display_name || profile.username}
@@ -180,71 +136,103 @@ END:VCARD`;
                     @{profile.username}
                   </p>
 
-                  {/* Stats - Posts | Followers | Following */}
-                  <div className="flex items-center justify-center md:justify-start gap-6 text-sm md:text-base">
-                    <div className="text-center cursor-pointer hover:text-primary transition-colors">
-                      <span className="font-bold text-[#111827]">{postsCount}</span>
-                      <span className="text-gray-500 ml-1">Posts</span>
-                    </div>
-                    <div className="text-center cursor-pointer hover:text-primary transition-colors">
-                      <span className="font-bold text-[#111827]">{followers.length}</span>
-                      <span className="text-gray-500 ml-1">Followers</span>
-                    </div>
-                    <div className="text-center cursor-pointer hover:text-primary transition-colors">
-                      <span className="font-bold text-[#111827]">{following.length}</span>
-                      <span className="text-gray-500 ml-1">Following</span>
-                    </div>
+                  {/* Role & Location - Side by Side */}
+                  <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 justify-center md:justify-start">
+                    {/* Role */}
+                    {profile.role && (
+                      <div className="flex items-center gap-1 text-xs md:text-sm text-gray-600">
+                        <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20 rounded-full px-2 py-0.5 text-xs font-medium">
+                          {profile.role === 'artist' 
+                            ? (profile.artform ? profile.artform.charAt(0).toUpperCase() + profile.artform.slice(1) : 'Artist')
+                            : (profile.organization_type ? profile.organization_type.replace('_', ' ').charAt(0).toUpperCase() + profile.organization_type.replace('_', ' ').slice(1) : 'Organization')
+                          }
+                        </Badge>
+                      </div>
+                    )}
+
+                    {/* Location */}
+                    {profile.location && (
+                      <div className="flex items-center gap-1 text-xs md:text-sm text-gray-500">
+                        <MapPin className="h-3 w-3" />
+                        <span>{profile.location}</span>
+                      </div>
+                    )}
                   </div>
 
-                  {/* Role Badge */}
-                  {profile.role && (
-                    <div className="flex justify-center md:justify-start">
-                      <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20 rounded-full px-3 py-1 text-xs font-medium">
-                        {profile.role === 'artist' 
-                          ? (profile.artform ? profile.artform.charAt(0).toUpperCase() + profile.artform.slice(1) : 'Artist')
-                          : (profile.organization_type ? profile.organization_type.replace('_', ' ').charAt(0).toUpperCase() + profile.organization_type.replace('_', ' ').slice(1) : 'Organization')
-                        }
-                      </Badge>
+                  {/* Bio */}
+                  {profile.bio && (
+                    <div className="mt-3">
+                      <p className="text-sm md:text-base text-[#111827] leading-relaxed max-w-2xl">
+                        {profile.bio}
+                      </p>
                     </div>
                   )}
 
-                  {/* Location */}
-                  {profile.location && (
-                    <div className="flex items-center justify-center md:justify-start gap-1 text-xs md:text-sm text-gray-500">
-                      <MapPin className="h-4 w-4" />
-                      {profile.location}
+                  {/* Website Link */}
+                  {profile.website && (
+                    <div className="mt-2">
+                      <a 
+                        href={profile.website.startsWith('http') ? profile.website : `https://${profile.website}`} 
+                        className="text-primary hover:underline flex items-center justify-center md:justify-start gap-1 text-sm font-medium"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <Globe className="h-4 w-4" />
+                        {profile.website.replace(/^https?:\/\//, '')}
+                        <ExternalLink className="h-3 w-3" />
+                      </a>
                     </div>
                   )}
                 </div>
               </div>
 
+              {/* Right Side - 3-Dots Menu */}
+              <div className="absolute top-0 right-0 md:relative md:top-auto md:right-auto">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="text-gray-600 hover:bg-gray-100 rounded-full">
+                      <MoreHorizontal className="h-5 w-5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="bg-white border-gray-200 shadow-lg rounded-lg z-50">
+                    {isOwnProfile ? (
+                      <>
+                        <DropdownMenuItem asChild>
+                          <EditProfileModal profile={profile}>
+                            <div className="flex items-center gap-2 cursor-pointer w-full">
+                              <Edit className="h-4 w-4" />
+                              Edit Profile
+                            </div>
+                          </EditProfileModal>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <ShareModal profile={profile}>
+                            <div className="flex items-center gap-2 cursor-pointer w-full">
+                              <Share className="h-4 w-4" />
+                              Share Profile
+                            </div>
+                          </ShareModal>
+                        </DropdownMenuItem>
+                      </>
+                    ) : (
+                      <>
+                        <DropdownMenuItem onClick={handleExportContact}>
+                          <Mail className="h-4 w-4 mr-2" />
+                          Export Contact
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem className="text-destructive">
+                          Report User
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className="text-destructive">
+                          Block User
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </div>
-
-            {/* Bio */}
-            {profile.bio && (
-              <div className="mt-4 text-center md:text-left">
-                <p className="text-sm md:text-base text-[#111827] leading-relaxed max-w-2xl">
-                  {profile.bio}
-                </p>
-              </div>
-            )}
-
-            {/* Website Link */}
-            {profile.website && (
-              <div className="mt-3 flex justify-center md:justify-start">
-                <a 
-                  href={profile.website.startsWith('http') ? profile.website : `https://${profile.website}`} 
-                  className="text-primary hover:underline flex items-center gap-1 text-sm font-medium"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <Globe className="h-4 w-4" />
-                  {profile.website.replace(/^https?:\/\//, '')}
-                  <ExternalLink className="h-3 w-3" />
-                </a>
-              </div>
-            )}
-
           </div>
         </div>
       </div>
