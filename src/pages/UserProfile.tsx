@@ -1,9 +1,15 @@
 import { useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useProfile } from "@/hooks/useProfiles";
+import { useUserPosts } from "@/hooks/usePosts";
+import { useUserPortfolios } from "@/hooks/usePortfolios";
 import { useAuth } from "@/hooks/useAuth";
-import { ProfileHeader } from "@/components/profile/ProfileHeader";
-import { ProfileContent } from "@/components/profile/ProfileContent";
+import { useConnectionStatus, useFollowUser, useConnections } from "@/hooks/useConnections";
+import { useTrackProfileView } from "@/hooks/useProfileAnalytics";
+import { ProfileHero } from "@/components/profile/ProfileHero";
+import { ProfileStats } from "@/components/profile/ProfileStats";
+import { ProfileTabs } from "@/components/profile/ProfileTabs";
+import { useDirectMessage } from "@/hooks/useDirectMessage";
 
 export default function UserProfile() {
   const { userId } = useParams<{ userId: string }>();
@@ -12,15 +18,58 @@ export default function UserProfile() {
   const location = useLocation();
   
   // Determine if viewing own profile or another user's
+  // Check if we're on /profile/me route or if userId matches current user
   const isOnProfileMeRoute = location.pathname === "/profile/me";
   const isOwnProfile = isOnProfileMeRoute || userId === "me" || userId === user?.id;
   
-  // Set target user ID
+  // Set target user ID: use current user's ID for own profile, otherwise use userId param
   const targetUserId = isOwnProfile ? user?.id : userId;
+  
+  // Debug authentication and routing state
+  console.log('UserProfile Debug:', {
+    pathname: location.pathname,
+    userId,
+    user: user ? { id: user.id, email: user.email } : null,
+    isOnProfileMeRoute,
+    isOwnProfile,
+    targetUserId,
+    authLoading
+  });
   
   // Fetch profile data
   const { data: profile, isLoading: profileLoading } = useProfile(targetUserId);
+  const { data: posts, isLoading: postsLoading } = useUserPosts(targetUserId!);
+  const { data: portfolios, isLoading: portfoliosLoading } = useUserPortfolios();
   
+  // Connection status and follow functionality
+  const { data: connectionStatus } = useConnectionStatus(targetUserId);
+  const { data: followers } = useConnections(targetUserId, 'followers');
+  const { data: following } = useConnections(targetUserId, 'following');
+  const followMutation = useFollowUser();
+  const trackViewMutation = useTrackProfileView();
+  const { startDirectMessage } = useDirectMessage();
+
+  // Track profile view
+  useEffect(() => {
+    if (targetUserId && !isOwnProfile) {
+      trackViewMutation.mutate();
+    }
+  }, [targetUserId, isOwnProfile]);
+  
+  const handleFollow = () => {
+    if (!targetUserId) return;
+    followMutation.mutate({
+      targetUserId,
+      isCurrentlyFollowing: connectionStatus?.isFollowing || false
+    });
+  };
+
+  const handleMessage = async () => {
+    if (!targetUserId || !user) return;
+    
+    startDirectMessage(targetUserId);
+  };
+
   // Handle authentication loading
   if (authLoading) {
     return (
@@ -48,6 +97,7 @@ export default function UserProfile() {
   // Handle profile not found
   if (!profile) {
     if (isOwnProfile && user) {
+      // User is authenticated but no profile exists - create one
       return (
         <div className="min-h-screen flex items-center justify-center">
           <div className="text-center">
@@ -75,27 +125,37 @@ export default function UserProfile() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Desktop: 12-column grid layout */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Profile Header Card - Left column on desktop, full width on mobile */}
-          <div className="lg:col-span-3">
-            <ProfileHeader 
-              profile={profile}
-              isOwnProfile={isOwnProfile}
-            />
-          </div>
-          
-          {/* Main Content - Right column on desktop, full width on mobile */}
-          <div className="lg:col-span-9">
-            <ProfileContent 
-              profile={profile}
-              isOwnProfile={isOwnProfile}
-            />
-          </div>
-        </div>
-      </div>
+    <div className="min-h-screen bg-background">
+      <ProfileHero
+        profile={profile}
+        isOwnProfile={isOwnProfile}
+        connectionStatus={connectionStatus}
+        onFollow={handleFollow}
+        followMutation={followMutation}
+        postsCount={posts?.length}
+        followers={followers}
+        following={following}
+      />
+
+      <ProfileStats
+        profile={profile}
+        postsCount={posts?.length}
+        followers={followers}
+        following={following}
+        isOwnProfile={isOwnProfile}
+        connectionStatus={connectionStatus}
+        onFollow={handleFollow}
+        followMutation={followMutation}
+      />
+
+      <ProfileTabs
+        profile={profile}
+        isOwnProfile={isOwnProfile}
+        posts={posts}
+        postsLoading={postsLoading}
+        portfolios={portfolios}
+        portfoliosLoading={portfoliosLoading}
+      />
     </div>
   );
 }
