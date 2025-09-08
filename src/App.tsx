@@ -6,6 +6,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./hooks/useAuth";
 import { AppLayout } from "./components/layout/app-layout";
+import { PageSpinner } from "@/components/ui/loading-spinner";
+import { HomePageSkeleton, ProfilePageSkeleton, ConnectionsPageSkeleton } from "@/components/ui/page-skeleton";
 import NotFound from "./pages/NotFound";
 
 // Lazy load components for better performance and code splitting
@@ -24,34 +26,35 @@ const TagFeed = lazy(() => import("./pages/TagFeed"));
 const ConversationPage = lazy(() => import("./pages/ConversationPage"));
 const Settings = lazy(() => import("./pages/Settings"));
 
-// Loading component for lazy routes
-const PageLoader = () => (
-  <div className="flex items-center justify-center min-h-screen">
-    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-  </div>
-);
+// Optimized loading components for different pages
+const HomeLoader = () => <HomePageSkeleton />;
+const ProfileLoader = () => <ProfilePageSkeleton />;
+const ConnectionsLoader = () => <ConnectionsPageSkeleton />;
+const DefaultLoader = () => <PageSpinner />;
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      // Global cache settings for better performance
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      gcTime: 10 * 60 * 1000, // 10 minutes (was cacheTime)
+      // Optimized cache settings for sub-300ms performance
+      staleTime: 2 * 60 * 1000, // 2 minutes - fresher data
+      gcTime: 5 * 60 * 1000, // 5 minutes - faster cleanup
       refetchOnWindowFocus: false,
       refetchOnMount: false,
+      networkMode: 'always',
       retry: (failureCount, error: any) => {
         // Don't retry auth errors
         if (error?.message?.includes('JWT') || error?.message?.includes('auth')) {
           return false;
         }
-        return failureCount < 3;
+        return failureCount < 2; // Reduced retries for speed
       },
-      retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
+      retryDelay: attemptIndex => Math.min(500 * 2 ** attemptIndex, 5000), // Faster retries
     },
     mutations: {
-      // Global mutation settings
+      // Optimized mutation settings
       retry: 1,
-      retryDelay: 1000,
+      retryDelay: 500, // Faster mutation retries
+      networkMode: 'always'
     }
   }
 });
@@ -60,11 +63,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
-      </div>
-    );
+    return <PageSpinner />;
   }
 
   if (!user) {
@@ -82,17 +81,17 @@ const AppRoutes = () => {
       <Routes>
         {/* Auth Routes (No Layout) */}
         <Route path="/auth" element={
-          <Suspense fallback={<PageLoader />}>
+          <Suspense fallback={<DefaultLoader />}>
             <Auth />
           </Suspense>
         } />
         <Route path="/signup" element={
-          <Suspense fallback={<PageLoader />}>
+          <Suspense fallback={<DefaultLoader />}>
             <SignUp />
           </Suspense>
         } />
         <Route path="/auth/signup" element={
-          <Suspense fallback={<PageLoader />}>
+          <Suspense fallback={<DefaultLoader />}>
             <SignUp />
           </Suspense>
         } />
@@ -101,7 +100,7 @@ const AppRoutes = () => {
         <Route path="/" element={
           <ProtectedRoute>
             <AppLayout>
-              <Suspense fallback={<PageLoader />}>
+              <Suspense fallback={<HomeLoader />}>
                 <Home />
               </Suspense>
             </AppLayout>
@@ -110,7 +109,7 @@ const AppRoutes = () => {
         <Route path="/home" element={
           <ProtectedRoute>
             <AppLayout>
-              <Suspense fallback={<PageLoader />}>
+              <Suspense fallback={<HomeLoader />}>
                 <Home />
               </Suspense>
             </AppLayout>
@@ -119,7 +118,7 @@ const AppRoutes = () => {
         <Route path="/opportunities" element={
           <ProtectedRoute>
             <AppLayout>
-              <Suspense fallback={<PageLoader />}>
+              <Suspense fallback={<DefaultLoader />}>
                 <Opportunities />
               </Suspense>
             </AppLayout>
@@ -128,7 +127,7 @@ const AppRoutes = () => {
         <Route path="/create" element={
           <ProtectedRoute>
             <AppLayout>
-              <Suspense fallback={<PageLoader />}>
+              <Suspense fallback={<DefaultLoader />}>
                 <Create />
               </Suspense>
             </AppLayout>
@@ -137,7 +136,7 @@ const AppRoutes = () => {
         <Route path="/connections" element={
           <ProtectedRoute>
             <AppLayout>
-              <Suspense fallback={<PageLoader />}>
+              <Suspense fallback={<ConnectionsLoader />}>
                 <Connections />
               </Suspense>
             </AppLayout>
@@ -146,7 +145,7 @@ const AppRoutes = () => {
         <Route path="/connections/discover" element={
           <ProtectedRoute>
             <AppLayout>
-              <Suspense fallback={<PageLoader />}>
+              <Suspense fallback={<ConnectionsLoader />}>
                 <DiscoverPeople />
               </Suspense>
             </AppLayout>
@@ -155,7 +154,7 @@ const AppRoutes = () => {
         <Route path="/profile/me" element={
           <ProtectedRoute>
             <AppLayout>
-              <Suspense fallback={<PageLoader />}>
+              <Suspense fallback={<ProfileLoader />}>
                 <UserProfile />
               </Suspense>
             </AppLayout>
@@ -164,7 +163,7 @@ const AppRoutes = () => {
         <Route path="/profile/:userId" element={
           <ProtectedRoute>
             <AppLayout>
-              <Suspense fallback={<PageLoader />}>
+              <Suspense fallback={<ProfileLoader />}>
                 <UserProfile />
               </Suspense>
             </AppLayout>
@@ -174,7 +173,7 @@ const AppRoutes = () => {
         <Route path="/post/:postId" element={
           <ProtectedRoute>
             <AppLayout>
-              <Suspense fallback={<PageLoader />}>
+              <Suspense fallback={<DefaultLoader />}>
                 <PostDetail />
               </Suspense>
             </AppLayout>
@@ -183,7 +182,7 @@ const AppRoutes = () => {
         <Route path="/tags/:tag" element={
           <ProtectedRoute>
             <AppLayout>
-              <Suspense fallback={<PageLoader />}>
+              <Suspense fallback={<HomeLoader />}>
                 <TagFeed />
               </Suspense>
             </AppLayout>
@@ -191,14 +190,14 @@ const AppRoutes = () => {
         } />
         <Route path="/messages" element={
           <ProtectedRoute>
-            <Suspense fallback={<PageLoader />}>
+            <Suspense fallback={<DefaultLoader />}>
               <Messages />
             </Suspense>
           </ProtectedRoute>
         } />
         <Route path="/messages/:chatId" element={
           <ProtectedRoute>
-            <Suspense fallback={<PageLoader />}>
+            <Suspense fallback={<DefaultLoader />}>
               <ConversationPage />
             </Suspense>
           </ProtectedRoute>
@@ -206,7 +205,7 @@ const AppRoutes = () => {
         <Route path="/settings" element={
           <ProtectedRoute>
             <AppLayout>
-              <Suspense fallback={<PageLoader />}>
+              <Suspense fallback={<DefaultLoader />}>
                 <Settings />
               </Suspense>
             </AppLayout>
