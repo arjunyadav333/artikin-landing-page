@@ -13,6 +13,7 @@ import NotFound from "./pages/NotFound";
 // Lazy load components for better performance and code splitting
 const Home = lazy(() => import("./pages/Home"));
 const Opportunities = lazy(() => import("./pages/Opportunities"));
+const OpportunityDetail = lazy(() => import("./pages/OpportunityDetail"));
 const Create = lazy(() => import("./pages/Create"));
 const Connections = lazy(() => import("./pages/Connections"));
 const DiscoverPeople = lazy(() => import("./pages/DiscoverPeople"));
@@ -120,6 +121,15 @@ const AppRoutes = () => {
             <AppLayout>
               <Suspense fallback={<DefaultLoader />}>
                 <Opportunities />
+              </Suspense>
+            </AppLayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/opportunities/:id" element={
+          <ProtectedRoute>
+            <AppLayout>
+              <Suspense fallback={<DefaultLoader />}>
+                <OpportunityDetail />
               </Suspense>
             </AppLayout>
           </ProtectedRoute>

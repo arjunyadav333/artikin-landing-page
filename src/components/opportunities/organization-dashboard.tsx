@@ -1,20 +1,24 @@
 import { useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MoreHorizontal, Edit3, Trash2, Users, Eye, Calendar, Clock, ToggleLeft, ToggleRight, Plus, Briefcase } from "lucide-react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Plus, Briefcase } from "lucide-react";
 import { useOrganizationOpportunities, useUpdateOpportunityStatus, useDeleteOpportunity } from "@/hooks/useOrganizationOpportunities";
 import { ApplicantManagement } from "./applicant-management";
 import { ComprehensivePostModal } from "./comprehensive-post-modal";
 import { EditOpportunityModal } from "./edit-opportunity-modal";
+import { OrganizationOpportunityCard } from "./organization-opportunity-card";
+import { ShareOpportunityModal } from "./share-opportunity-modal";
 import { formatDistanceToNow, format } from "date-fns";
 
 export function OrganizationDashboard() {
+  const navigate = useNavigate();
   const [selectedOpportunity, setSelectedOpportunity] = useState<string | null>(null);
   const [editingOpportunity, setEditingOpportunity] = useState<any | null>(null);
+  const [shareOpportunity, setShareOpportunity] = useState<any | null>(null);
   const [activeFilter, setActiveFilter] = useState("all");
   const [showPostModal, setShowPostModal] = useState(false);
   const {
@@ -62,9 +66,23 @@ export function OrganizationDashboard() {
   };
 
   const handleDeleteOpportunity = async (opportunityId: string) => {
-    if (window.confirm('Are you sure you want to delete this opportunity?')) {
-      await deleteOpportunity.mutateAsync(opportunityId);
-    }
+    await deleteOpportunity.mutateAsync(opportunityId);
+  };
+
+  const handleManageApplicants = (opportunityId: string) => {
+    setSelectedOpportunity(opportunityId);
+  };
+
+  const handleEdit = (opportunity: any) => {
+    setEditingOpportunity(opportunity);
+  };
+
+  const handleShare = (opportunity: any) => {
+    setShareOpportunity(opportunity);
+  };
+
+  const handleViewDetails = (opportunityId: string) => {
+    navigate(`/opportunities/${opportunityId}`);
   };
   if (selectedOpportunity) {
     const opportunity = filteredOpportunities.find(opp => opp.id === selectedOpportunity);
@@ -151,111 +169,18 @@ export function OrganizationDashboard() {
                   </Card>
                 ))
               ) : filteredOpportunities.length > 0 ? (
-                // Opportunities list
+                // Opportunities list with new card design
                 filteredOpportunities.map((opportunity, index) => (
-                  <motion.div 
-                    key={opportunity.id} 
-                    initial={{ opacity: 0, y: 20 }} 
-                    animate={{ opacity: 1, y: 0 }} 
-                    transition={{ duration: 0.2, delay: index * 0.05 }}
-                  >
-                    <Card className="p-6 rounded-xl hover:shadow-md transition-shadow">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1 space-y-3">
-                          <div className="flex items-center gap-3">
-                            <h3 className="text-lg font-semibold text-foreground">
-                              {opportunity.title}
-                            </h3>
-                            <Badge className={`px-2 py-1 text-xs font-medium ${
-                              opportunity.status === 'active' 
-                                ? 'bg-green-100 text-green-800 border-green-200' 
-                                : 'bg-gray-100 text-gray-800 border-gray-200'
-                            }`}>
-                              {opportunity.status === 'active' ? 'Active' : 'Closed'}
-                            </Badge>
-                          </div>
-                          
-                          <div className="flex items-center gap-6 text-sm text-muted-foreground">
-                            <div className="flex items-center gap-1">
-                              <Calendar className="h-4 w-4" />
-                              <span>Posted {formatDistanceToNow(new Date(opportunity.created_at))} ago</span>
-                            </div>
-                            
-                            <div className="flex items-center gap-1">
-                              <Eye className="h-4 w-4" />
-                              <span>{opportunity.views_count || 0} views</span>
-                            </div>
-                            
-                            <div className="flex items-center gap-1">
-                              <Users className="h-4 w-4" />
-                              <span>{opportunity.applications_count || 0} applications</span>
-                            </div>
-                            
-                            {opportunity.deadline && (
-                              <div className="flex items-center gap-1">
-                                <Clock className="h-4 w-4" />
-                                <span>Deadline: {format(new Date(opportunity.deadline), 'MMM d, yyyy')}</span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-center gap-2">
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            onClick={() => handleStatusToggle(opportunity.id, opportunity.status || 'active')} 
-                            className="flex items-center gap-2"
-                          >
-                            {opportunity.status === 'active' ? (
-                              <>
-                                <ToggleRight className="h-4 w-4 text-green-600" />
-                                Active
-                              </>
-                            ) : (
-                              <>
-                                <ToggleLeft className="h-4 w-4 text-gray-400" />
-                                Closed
-                              </>
-                            )}
-                          </Button>
-                          
-                          <Button 
-                            onClick={() => setSelectedOpportunity(opportunity.id)} 
-                            className="bg-blue-600 hover:bg-blue-700 text-white"
-                          >
-                            Manage Applicants
-                          </Button>
-                          
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem>
-                                <Eye className="h-4 w-4 mr-2" />
-                                View Details
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => setEditingOpportunity(opportunity)}>
-                                <Edit3 className="h-4 w-4 mr-2" />
-                                Edit
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem 
-                                className="text-red-600" 
-                                onClick={() => handleDeleteOpportunity(opportunity.id)}
-                              >
-                                <Trash2 className="h-4 w-4 mr-2" />
-                                Delete
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
-                      </div>
-                    </Card>
-                  </motion.div>
+                  <OrganizationOpportunityCard
+                    key={opportunity.id}
+                    opportunity={opportunity}
+                    index={index}
+                    onManageApplicants={handleManageApplicants}
+                    onEdit={handleEdit}
+                    onShare={handleShare}
+                    onDelete={handleDeleteOpportunity}
+                    onViewDetails={handleViewDetails}
+                  />
                 ))
               ) : (
                 // No opportunities found card - exact layout match
@@ -301,6 +226,14 @@ export function OrganizationDashboard() {
             isOpen={!!editingOpportunity} 
             onClose={() => setEditingOpportunity(null)} 
             opportunity={editingOpportunity} 
+          />
+        )}
+
+        {shareOpportunity && (
+          <ShareOpportunityModal
+            opportunity={shareOpportunity}
+            open={!!shareOpportunity}
+            onOpenChange={(open) => !open && setShareOpportunity(null)}
           />
         )}
       </div>
