@@ -32,6 +32,7 @@ interface Certificate {
 }
 
 export function CertificatesCard({ profile, isOwnProfile }: CertificatesCardProps) {
+  console.log('CertificatesCard rendering', { profile: profile?.id, isOwnProfile });
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);

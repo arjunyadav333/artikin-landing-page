@@ -27,6 +27,7 @@ interface Award {
 }
 
 export function AwardsCard({ profile, isOwnProfile }: AwardsCardProps) {
+  console.log('AwardsCard rendering', { profile: profile?.id, isOwnProfile });
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);

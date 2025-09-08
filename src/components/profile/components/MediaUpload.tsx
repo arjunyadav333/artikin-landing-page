@@ -16,6 +16,7 @@ export function MediaUpload({
   selectedFiles = [],
   onRemoveFile 
 }: MediaUploadProps) {
+  console.log('MediaUpload rendering', { filesCount: selectedFiles.length, multiple });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {

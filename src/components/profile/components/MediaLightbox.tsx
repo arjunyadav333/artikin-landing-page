@@ -28,6 +28,7 @@ export function MediaLightbox({
   onDelete,
   isOwner = false
 }: MediaLightboxProps) {
+  console.log('MediaLightbox rendering', { isOpen, itemsCount: items.length, currentIndex });
   const currentItem = items[currentIndex];
 
   useEffect(() => {
