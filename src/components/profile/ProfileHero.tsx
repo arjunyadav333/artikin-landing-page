@@ -46,31 +46,7 @@ export function ProfileHero({
   onFollow, 
   followMutation 
 }: ProfileHeroProps) {
-  const navigate = useNavigate();
-  const { toast } = useToast();
   const { startDirectMessage, isLoading: isMessageLoading } = useDirectMessage();
-
-  const handleShareProfile = async () => {
-    const url = `${window.location.origin}/profile/${profile.user_id}`;
-    
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: `${profile.display_name} - Artikin Profile`,
-          text: profile.bio || `Check out ${profile.display_name}'s profile on Artikin`,
-          url
-        });
-      } catch (error) {
-        // User cancelled sharing
-      }
-    } else {
-      await navigator.clipboard.writeText(url);
-      toast({
-        title: "Link copied",
-        description: "Profile link has been copied to clipboard."
-      });
-    }
-  };
 
   const handleExportContact = () => {
     const vcard = `BEGIN:VCARD
