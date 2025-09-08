@@ -19,18 +19,18 @@ interface ProfileStatsProps {
 
 export function ProfileStats({ profile, postsCount = 0, followers = [], following = [] }: ProfileStatsProps) {
   return (
-    <div className="flex gap-8 py-6 border-b border-border">
+    <div className="flex justify-center md:justify-start gap-6 md:gap-8 py-4 md:py-6 border-b border-border">
       <div className="text-center">
-        <div className="text-2xl font-bold text-foreground">{postsCount}</div>
-        <div className="text-sm text-muted-foreground">Posts</div>
+        <div className="text-[var(--fs-profile-stats)] font-bold text-foreground">{postsCount}</div>
+        <div className="text-xs md:text-sm text-muted-foreground">Posts</div>
       </div>
       
       <Dialog>
         <DialogTrigger asChild>
           <Button variant="ghost" className="text-center p-0 h-auto hover:text-primary transition-colors">
             <div>
-              <div className="text-2xl font-bold text-foreground">{followers.length}</div>
-              <div className="text-sm text-muted-foreground">Followers</div>
+              <div className="text-[var(--fs-profile-stats)] font-bold text-foreground">{followers.length}</div>
+              <div className="text-xs md:text-sm text-muted-foreground">Followers</div>
             </div>
           </Button>
         </DialogTrigger>
@@ -69,8 +69,8 @@ export function ProfileStats({ profile, postsCount = 0, followers = [], followin
         <DialogTrigger asChild>
           <Button variant="ghost" className="text-center p-0 h-auto hover:text-primary transition-colors">
             <div>
-              <div className="text-2xl font-bold text-foreground">{following.length}</div>
-              <div className="text-sm text-muted-foreground">Following</div>
+              <div className="text-[var(--fs-profile-stats)] font-bold text-foreground">{following.length}</div>
+              <div className="text-xs md:text-sm text-muted-foreground">Following</div>
             </div>
           </Button>
         </DialogTrigger>
@@ -105,16 +105,11 @@ export function ProfileStats({ profile, postsCount = 0, followers = [], followin
         </DialogContent>
       </Dialog>
 
-      {profile.role === 'organization' && (
-        <div className="text-center">
-          <div className="text-2xl font-bold text-foreground">{profile.portfolio_count || 0}</div>
-          <div className="text-sm text-muted-foreground">Opportunities</div>
-        </div>
-      )}
-
       <div className="text-center">
-        <div className="text-2xl font-bold text-foreground">{profile.portfolio_count || 0}</div>
-        <div className="text-sm text-muted-foreground">Portfolio</div>
+        <div className="text-[var(--fs-profile-stats)] font-bold text-foreground">{profile.portfolio_count || 0}</div>
+        <div className="text-xs md:text-sm text-muted-foreground">
+          {profile.role === 'artist' ? 'Portfolio' : 'Projects'}
+        </div>
       </div>
     </div>
   );

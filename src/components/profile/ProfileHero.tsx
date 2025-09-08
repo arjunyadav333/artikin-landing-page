@@ -28,6 +28,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { useDirectMessage } from '@/hooks/useDirectMessage';
+import { ShareModal } from './ShareModal';
+import { EditProfileModal } from './EditProfileModal';
 
 interface ProfileHeroProps {
   profile: Profile;
@@ -94,7 +96,7 @@ END:VCARD`;
   return (
     <div className="relative">
       {/* Cover Image */}
-      <div className="relative h-48 md:h-64 bg-gradient-to-br from-primary/20 via-primary/10 to-primary/5 overflow-hidden">
+      <div className="relative h-48 md:h-64 lg:h-72 bg-gradient-to-br from-primary/20 via-primary/10 to-primary/5 overflow-hidden">
         {profile.cover_url && (
           <img 
             src={profile.cover_url} 
@@ -103,48 +105,27 @@ END:VCARD`;
           />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-        {isOwnProfile && (
-          <Button 
-            variant="secondary" 
-            size="sm" 
-            className="absolute top-4 right-4 bg-background/80 backdrop-blur hover:bg-background"
-            onClick={() => navigate('/profile/edit')}
-          >
-            <Edit className="h-4 w-4 mr-2" />
-            Edit Cover
-          </Button>
-        )}
       </div>
 
       {/* Profile Header */}
-      <div className="max-w-7xl mx-auto px-4 md:px-6 -mt-16 relative z-10">
-        <div className="flex flex-col lg:flex-row gap-6 mb-8">
+      <div className="max-w-4xl mx-auto px-4 md:px-6 lg:px-8 -mt-16 relative z-10">
+        <div className="flex flex-col md:flex-row gap-6 mb-6">
           {/* Avatar */}
-          <div className="relative flex-shrink-0">
-            <Avatar className="h-32 w-32 md:h-40 md:w-40 border-4 border-background shadow-xl">
+          <div className="relative flex-shrink-0 self-center md:self-start">
+            <Avatar className="h-32 w-32 md:h-36 md:w-36 border-4 border-background shadow-xl">
               <AvatarImage src={profile.avatar_url || ""} alt={profile.display_name} />
               <AvatarFallback className="bg-primary text-primary-foreground text-4xl font-bold">
                 {profile.display_name?.[0]?.toUpperCase() || profile.username?.[0]?.toUpperCase() || 'U'}
               </AvatarFallback>
             </Avatar>
-            {isOwnProfile && (
-              <Button
-                size="sm"
-                variant="secondary"
-                className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 bg-background border shadow-md"
-                onClick={() => navigate('/profile/edit')}
-              >
-                <Edit className="h-3 w-3" />
-              </Button>
-            )}
           </div>
 
           {/* Profile Info */}
-          <div className="flex-1 pt-0 lg:pt-16">
-            <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+          <div className="flex-1 pt-4 md:pt-8 text-center md:text-left">
+            <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
               <div className="flex-1">
                 {/* Name and Role */}
-                <div className="flex items-center gap-3 mb-2">
+                <div className="flex items-center justify-center md:justify-start gap-3 mb-2">
                   <h1 className="text-[var(--fs-profile-name)] font-bold text-foreground">
                     {profile.display_name || profile.username}
                   </h1>
@@ -153,12 +134,9 @@ END:VCARD`;
                   )}
                 </div>
 
-                <div className="flex items-center gap-3 mb-3">
-                  <p className="text-[var(--fs-profile-role)] text-muted-foreground">
-                    {profile.role === 'artist' 
-                      ? (profile.artform || 'Artist') 
-                      : (profile.organization_type || 'Organization')
-                    }
+                <div className="flex items-center justify-center md:justify-start gap-3 mb-3">
+                  <p className="text-[var(--fs-profile-username)] text-muted-foreground">
+                    @{profile.username}
                   </p>
                   {profile.role && (
                     <Badge variant="secondary" className="capitalize text-xs">
@@ -167,22 +145,31 @@ END:VCARD`;
                   )}
                 </div>
 
+                <div className="flex items-center justify-center md:justify-start mb-3">
+                  <p className="text-[var(--fs-profile-role)] text-muted-foreground">
+                    {profile.role === 'artist' 
+                      ? (profile.artform ? profile.artform.charAt(0).toUpperCase() + profile.artform.slice(1) : 'Artist')
+                      : (profile.organization_type ? profile.organization_type.replace('_', ' ').charAt(0).toUpperCase() + profile.organization_type.replace('_', ' ').slice(1) : 'Organization')
+                    }
+                  </p>
+                </div>
+
                 {/* Headline */}
                 {profile.headline && (
-                  <p className="text-[var(--fs-profile-bio)] font-medium text-foreground mb-3">
+                  <p className="text-[var(--fs-profile-bio)] font-medium text-foreground mb-3 text-center md:text-left">
                     {profile.headline}
                   </p>
                 )}
 
                 {/* Bio */}
                 {profile.bio && (
-                  <p className="text-[var(--fs-profile-bio)] text-muted-foreground mb-4 leading-relaxed max-w-2xl">
+                  <p className="text-[var(--fs-profile-bio)] text-muted-foreground mb-4 leading-relaxed max-w-2xl text-center md:text-left">
                     {profile.bio}
                   </p>
                 )}
 
                 {/* Meta Info */}
-                <div className="flex items-center gap-4 text-[var(--fs-profile-meta)] text-muted-foreground mb-4 flex-wrap">
+                <div className="flex items-center justify-center md:justify-start gap-4 text-[var(--fs-profile-meta)] text-muted-foreground mb-4 flex-wrap">
                   {profile.location && (
                     <div className="flex items-center gap-1">
                       <MapPin className="h-4 w-4" />
@@ -241,16 +228,15 @@ END:VCARD`;
                 )}
               </div>
 
-              {/* Action Buttons */}
-              <div className="flex gap-2 flex-shrink-0">
+              {/* Action Buttons */} 
+              <div className="flex gap-2 flex-shrink-0 justify-center md:justify-start">
                 {isOwnProfile ? (
-                  <Button 
-                    variant="outline"
-                    onClick={() => navigate('/profile/edit')}
-                  >
-                    <Edit className="h-4 w-4 mr-2" />
-                    Edit Profile
-                  </Button>
+                  <EditProfileModal profile={profile}>
+                    <Button variant="outline">
+                      <Edit className="h-4 w-4 mr-2" />
+                      Edit Profile
+                    </Button>
+                  </EditProfileModal>
                 ) : (
                   <>
                     <Button 
@@ -281,34 +267,35 @@ END:VCARD`;
                   </>
                 )}
                 
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="icon">
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={handleShareProfile}>
-                      <Share className="h-4 w-4 mr-2" />
-                      Share Profile
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleExportContact}>
-                      <Mail className="h-4 w-4 mr-2" />
-                      Export Contact
-                    </DropdownMenuItem>
-                    {!isOwnProfile && (
-                      <>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem className="text-destructive">
-                          Report User
-                        </DropdownMenuItem>
-                        <DropdownMenuItem className="text-destructive">
-                          Block User
-                        </DropdownMenuItem>
-                      </>
-                    )}
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <ShareModal profile={profile}>
+                  <Button variant="outline">
+                    <Share className="h-4 w-4 mr-2" />
+                    Share
+                  </Button>
+                </ShareModal>
+
+                {!isOwnProfile && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="icon">
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={handleExportContact}>
+                        <Mail className="h-4 w-4 mr-2" />
+                        Export Contact
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem className="text-destructive">
+                        Report User
+                      </DropdownMenuItem>
+                      <DropdownMenuItem className="text-destructive">
+                        Block User
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
               </div>
             </div>
           </div>

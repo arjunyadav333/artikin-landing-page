@@ -35,45 +35,50 @@ export function ProfileTabs({
     setSearchParams(newParams);
   };
 
+  // Role-based tab configuration
+  const tabsConfig = profile.role === 'artist' 
+    ? [
+        { value: 'posts', label: 'Posts' },
+        { value: 'portfolio', label: 'Portfolio' }
+      ]
+    : [
+        { value: 'posts', label: 'Posts' },
+        { value: 'about', label: 'About' }
+      ];
+
   return (
     <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-      <TabsList className="grid w-full grid-cols-4 mb-8">
-        <TabsTrigger value="posts" className="text-sm font-medium">
-          All Posts
-        </TabsTrigger>
-        <TabsTrigger value="portfolio" className="text-sm font-medium">
-          Portfolio
-        </TabsTrigger>
-        <TabsTrigger value="about" className="text-sm font-medium">
-          About
-        </TabsTrigger>
-        <TabsTrigger value="activity" className="text-sm font-medium">
-          Activity
-        </TabsTrigger>
+      <TabsList className="grid w-full grid-cols-2 mb-6 md:mb-8">
+        {tabsConfig.map((tab) => (
+          <TabsTrigger 
+            key={tab.value} 
+            value={tab.value} 
+            className="text-sm font-medium"
+          >
+            {tab.label}
+          </TabsTrigger>
+        ))}
       </TabsList>
 
-      <TabsContent value="posts" className="space-y-6">
+      <TabsContent value="posts" className="space-y-4 md:space-y-6">
         <PostsGrid posts={posts} isLoading={postsLoading} />
       </TabsContent>
 
-      <TabsContent value="portfolio" className="space-y-6">
-        <PortfolioGrid 
-          portfolios={portfolios}
-          isLoading={portfoliosLoading}
-          isOwnProfile={isOwnProfile}
-        />
-      </TabsContent>
+      {profile.role === 'artist' && (
+        <TabsContent value="portfolio" className="space-y-4 md:space-y-6">
+          <PortfolioGrid 
+            portfolios={portfolios}
+            isLoading={portfoliosLoading}
+            isOwnProfile={isOwnProfile}
+          />
+        </TabsContent>
+      )}
 
-      <TabsContent value="about" className="space-y-6">
-        <AboutSection profile={profile} isOwnProfile={isOwnProfile} />
-      </TabsContent>
-
-      <TabsContent value="activity" className="space-y-6">
-        <div className="text-center py-12">
-          <h3 className="text-lg font-medium text-foreground mb-2">Activity Feed</h3>
-          <p className="text-muted-foreground">Recent activity will appear here</p>
-        </div>
-      </TabsContent>
+      {profile.role === 'organization' && (
+        <TabsContent value="about" className="space-y-4 md:space-y-6">
+          <AboutSection profile={profile} isOwnProfile={isOwnProfile} />
+        </TabsContent>
+      )}
     </Tabs>
   );
 }

@@ -386,14 +386,22 @@ export type Database = {
       opportunities: {
         Row: {
           applications_count: number | null
+          art_forms: string[] | null
+          city: string | null
           company: string | null
           created_at: string | null
           deadline: string | null
           description: string
+          experience_level: string | null
+          gender_preference: string[] | null
           id: string
+          image_url: string | null
+          language_preference: string[] | null
           location: string | null
+          organization_name: string | null
           salary_max: number | null
           salary_min: number | null
+          state: string | null
           status: string | null
           tags: string[] | null
           title: string
@@ -404,14 +412,22 @@ export type Database = {
         }
         Insert: {
           applications_count?: number | null
+          art_forms?: string[] | null
+          city?: string | null
           company?: string | null
           created_at?: string | null
           deadline?: string | null
           description: string
+          experience_level?: string | null
+          gender_preference?: string[] | null
           id?: string
+          image_url?: string | null
+          language_preference?: string[] | null
           location?: string | null
+          organization_name?: string | null
           salary_max?: number | null
           salary_min?: number | null
+          state?: string | null
           status?: string | null
           tags?: string[] | null
           title: string
@@ -422,14 +438,22 @@ export type Database = {
         }
         Update: {
           applications_count?: number | null
+          art_forms?: string[] | null
+          city?: string | null
           company?: string | null
           created_at?: string | null
           deadline?: string | null
           description?: string
+          experience_level?: string | null
+          gender_preference?: string[] | null
           id?: string
+          image_url?: string | null
+          language_preference?: string[] | null
           location?: string | null
+          organization_name?: string | null
           salary_max?: number | null
           salary_min?: number | null
+          state?: string | null
           status?: string | null
           tags?: string[] | null
           title?: string
@@ -559,15 +583,20 @@ export type Database = {
           cover_url: string | null
           created_at: string | null
           display_name: string
+          follower_count: number | null
+          following_count: number | null
           full_name: string | null
+          headline: string | null
           id: string
           location: string | null
           organization_type:
             | Database["public"]["Enums"]["organization_type"]
             | null
           phone_number: string | null
+          posts_count: number | null
           privacy: string | null
           role: Database["public"]["Enums"]["user_role"] | null
+          social_links: Json | null
           updated_at: string | null
           user_id: string
           username: string
@@ -580,15 +609,20 @@ export type Database = {
           cover_url?: string | null
           created_at?: string | null
           display_name: string
+          follower_count?: number | null
+          following_count?: number | null
           full_name?: string | null
+          headline?: string | null
           id?: string
           location?: string | null
           organization_type?:
             | Database["public"]["Enums"]["organization_type"]
             | null
           phone_number?: string | null
+          posts_count?: number | null
           privacy?: string | null
           role?: Database["public"]["Enums"]["user_role"] | null
+          social_links?: Json | null
           updated_at?: string | null
           user_id: string
           username: string
@@ -601,15 +635,20 @@ export type Database = {
           cover_url?: string | null
           created_at?: string | null
           display_name?: string
+          follower_count?: number | null
+          following_count?: number | null
           full_name?: string | null
+          headline?: string | null
           id?: string
           location?: string | null
           organization_type?:
             | Database["public"]["Enums"]["organization_type"]
             | null
           phone_number?: string | null
+          posts_count?: number | null
           privacy?: string | null
           role?: Database["public"]["Enums"]["user_role"] | null
+          social_links?: Json | null
           updated_at?: string | null
           user_id?: string
           username?: string
@@ -792,9 +831,68 @@ export type Database = {
         Args: { message_id_param: string }
         Returns: boolean
       }
+      get_current_user_profile_secure: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          artform: Database["public"]["Enums"]["artform_type"]
+          avatar_url: string
+          bio: string
+          contact_email: string
+          cover_url: string
+          created_at: string
+          display_name: string
+          follower_count: number
+          following_count: number
+          full_name: string
+          headline: string
+          id: string
+          location: string
+          organization_type: Database["public"]["Enums"]["organization_type"]
+          phone_number: string
+          posts_count: number
+          privacy: string
+          pronouns: string
+          role: Database["public"]["Enums"]["user_role"]
+          social_links: Json
+          updated_at: string
+          user_id: string
+          username: string
+          website: string
+        }[]
+      }
+      get_current_user_role: {
+        Args: Record<PropertyKey, never>
+        Returns: Database["public"]["Enums"]["user_role"]
+      }
       get_or_create_conversation: {
         Args: { user1_id: string; user2_id: string }
         Returns: string
+      }
+      get_profile_by_username: {
+        Args: { username_param: string }
+        Returns: {
+          artform: Database["public"]["Enums"]["artform_type"]
+          avatar_url: string
+          bio: string
+          cover_url: string
+          created_at: string
+          display_name: string
+          follower_count: number
+          following_count: number
+          full_name: string
+          headline: string
+          id: string
+          location: string
+          organization_type: Database["public"]["Enums"]["organization_type"]
+          posts_count: number
+          privacy: string
+          role: Database["public"]["Enums"]["user_role"]
+          social_links: Json
+          updated_at: string
+          user_id: string
+          username: string
+          website: string
+        }[]
       }
       get_profile_public_info: {
         Args: { profile_user_id: string }
@@ -824,6 +922,23 @@ export type Database = {
           updated_at: string
         }[]
       }
+      get_user_profile: {
+        Args: { user_uuid?: string }
+        Returns: {
+          artform: Database["public"]["Enums"]["artform_type"]
+          avatar_url: string
+          bio: string
+          display_name: string
+          full_name: string
+          id: string
+          location: string
+          organization_type: Database["public"]["Enums"]["organization_type"]
+          privacy: string
+          role: Database["public"]["Enums"]["user_role"]
+          user_id: string
+          username: string
+        }[]
+      }
       mark_conversation_messages_read: {
         Args: {
           conversation_id_param: string
@@ -831,6 +946,17 @@ export type Database = {
           user_id_param: string
         }
         Returns: number
+      }
+      user_has_role: {
+        Args: {
+          check_role: Database["public"]["Enums"]["user_role"]
+          user_uuid: string
+        }
+        Returns: boolean
+      }
+      user_is_following: {
+        Args: { target_user_id: string }
+        Returns: boolean
       }
       username_available: {
         Args: { candidate: string }

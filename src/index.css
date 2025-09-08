@@ -27,6 +27,14 @@
     --fs-body: clamp(13px, 1.6vw, 16px);
     --fs-action: clamp(12px, 1.4vw, 14px);
 
+    /* Profile-specific Typography */
+    --fs-profile-name: clamp(18px, 3vw, 24px);    /* Full name: xl desktop / lg mobile */
+    --fs-profile-username: clamp(14px, 2vw, 16px); /* Username: base */
+    --fs-profile-role: clamp(12px, 1.8vw, 14px);  /* Role-specific field: sm */
+    --fs-profile-bio: clamp(14px, 2vw, 16px);     /* Bio text */
+    --fs-profile-meta: clamp(12px, 1.6vw, 14px);  /* Location, joined date */
+    --fs-profile-stats: clamp(14px, 2.2vw, 16px); /* Stats: sm mobile / md desktop */
+
     /* Artikin Design System - Spacing */
     --sp-xs: clamp(6px, 0.8vw, 8px);
     --sp-sm: clamp(8px, 1.2vw, 12px);
