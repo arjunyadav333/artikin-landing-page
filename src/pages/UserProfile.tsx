@@ -134,25 +134,27 @@ export default function UserProfile() {
         followMutation={followMutation}
       />
 
-      <ProfileStats
-        profile={profile}
-        postsCount={posts?.length}
-        followers={followers}
-        following={following}
-        isOwnProfile={isOwnProfile}
-        connectionStatus={connectionStatus}
-        onFollow={handleFollow}
-        followMutation={followMutation}
-      />
+      <div className="w-full px-4 md:px-6 lg:px-8">
+        <ProfileStats
+          profile={profile}
+          postsCount={posts?.length}
+          followers={followers}
+          following={following}
+          isOwnProfile={isOwnProfile}
+          connectionStatus={connectionStatus}
+          onFollow={handleFollow}
+          followMutation={followMutation}
+        />
 
-      <ProfileTabs
-        profile={profile}
-        isOwnProfile={isOwnProfile}
-        posts={posts}
-        postsLoading={postsLoading}
-        portfolios={portfolios}
-        portfoliosLoading={portfoliosLoading}
-      />
+        <ProfileTabs
+          profile={profile}
+          isOwnProfile={isOwnProfile}
+          posts={posts}
+          postsLoading={postsLoading}
+          portfolios={portfolios}
+          portfoliosLoading={portfoliosLoading}
+        />
+      </div>
     </div>
   );
 }
