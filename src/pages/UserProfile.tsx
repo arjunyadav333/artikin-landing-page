@@ -134,12 +134,16 @@ export default function UserProfile() {
         followMutation={followMutation}
       />
 
-      <div className="max-w-4xl mx-auto px-4 md:px-6 lg:px-8">
+      <div className="w-full px-4 md:px-6 lg:px-8">
         <ProfileStats
           profile={profile}
           postsCount={posts?.length}
           followers={followers}
           following={following}
+          isOwnProfile={isOwnProfile}
+          connectionStatus={connectionStatus}
+          onFollow={handleFollow}
+          followMutation={followMutation}
         />
 
         <ProfileTabs

@@ -7,20 +7,135 @@ import {
   DialogTrigger
 } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { 
+  Edit, 
+  Share, 
+  MoreHorizontal,
+  UserPlus,
+  MessageSquare,
+  Mail,
+  Loader2
+} from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useConnections } from '@/hooks/useConnections';
 import { Profile } from '@/hooks/useProfiles';
+import { useDirectMessage } from '@/hooks/useDirectMessage';
+import { ShareModal } from './ShareModal';
+import { EditProfileModal } from './EditProfileModal';
 
 interface ProfileStatsProps {
   profile: Profile;
   postsCount?: number;
   followers?: any[];
   following?: any[];
+  isOwnProfile: boolean;
+  connectionStatus?: any;
+  onFollow?: () => void;
+  followMutation?: any;
 }
 
-export function ProfileStats({ profile, postsCount = 0, followers = [], following = [] }: ProfileStatsProps) {
+export function ProfileStats({ profile, postsCount = 0, followers = [], following = [], isOwnProfile, connectionStatus, onFollow, followMutation }: ProfileStatsProps) {
+  const { startDirectMessage, isLoading: isMessageLoading } = useDirectMessage();
+
+  const handleExportContact = () => {
+    const vcard = `BEGIN:VCARD
+VERSION:3.0
+FN:${profile.display_name}
+ORG:${profile.role === 'organization' ? profile.organization_type : profile.artform}
+EMAIL:${profile.contact_email || ''}
+URL:${profile.website || ''}
+NOTE:${profile.bio || ''}
+END:VCARD`;
+
+    const blob = new Blob([vcard], { type: 'text/vcard' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${profile.display_name.replace(/\s+/g, '_')}.vcf`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  };
   return (
     <div className="bg-white border-b border-[#E5E7EB]">
-      <div className="max-w-4xl mx-auto px-4 md:px-6 lg:px-8 py-6">
+      <div className="w-full px-4 md:px-6 lg:px-8 py-6">
+        {/* Action Buttons Row */}
+        <div className="flex gap-3 justify-center md:justify-start mb-6">
+          {isOwnProfile ? (
+            <EditProfileModal profile={profile}>
+              <Button className="bg-primary hover:bg-primary/90 text-white font-semibold px-6 py-2 rounded-lg shadow-sm">
+                <Edit className="h-4 w-4 mr-2" />
+                Edit Profile
+              </Button>
+            </EditProfileModal>
+          ) : (
+            <>
+              <Button 
+                variant={connectionStatus?.isFollowing ? "outline" : "default"}
+                className={connectionStatus?.isFollowing 
+                  ? "border-gray-300 text-gray-700 hover:bg-gray-50 font-semibold px-6 py-2 rounded-lg" 
+                  : "bg-primary hover:bg-primary/90 text-white font-semibold px-6 py-2 rounded-lg shadow-sm"
+                }
+                onClick={onFollow}
+                disabled={followMutation?.isPending}
+              >
+                <UserPlus className="h-4 w-4 mr-2" />
+                {connectionStatus?.isFollowing ? "Following" : "Follow"}
+              </Button>
+              <Button 
+                variant="outline" 
+                className="border-gray-300 text-gray-700 hover:bg-gray-50 font-semibold px-6 py-2 rounded-lg"
+                onClick={() => startDirectMessage(profile.user_id)}
+                disabled={isMessageLoading(profile.user_id)}
+              >
+                {isMessageLoading(profile.user_id) ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <MessageSquare className="h-4 w-4 mr-2" />
+                )}
+                Message
+              </Button>
+            </>
+          )}
+          
+          <ShareModal profile={profile}>
+            <Button variant="outline" className="border-gray-300 text-gray-700 hover:bg-gray-50 font-semibold px-4 py-2 rounded-lg">
+              <Share className="h-4 w-4 mr-2" />
+              Share
+            </Button>
+          </ShareModal>
+
+          {!isOwnProfile && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon" className="border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg">
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="bg-white border-gray-200 shadow-lg rounded-lg">
+                <DropdownMenuItem onClick={handleExportContact}>
+                  <Mail className="h-4 w-4 mr-2" />
+                  Export Contact
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="text-destructive">
+                  Report User
+                </DropdownMenuItem>
+                <DropdownMenuItem className="text-destructive">
+                  Block User
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+        </div>
+
         {/* Stats Bar - 3 Equal Columns */}
         <div className="grid grid-cols-3 gap-8 md:gap-12">
           {/* Posts */}

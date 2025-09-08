@@ -48,7 +48,7 @@ export function ProfileTabs({
 
   return (
     <div className="bg-white">
-      <div className="max-w-4xl mx-auto px-4 md:px-6 lg:px-8">
+      <div className="w-full px-4 md:px-6 lg:px-8">
         <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
           {/* Clean Tab Navigation */}
           <div className="border-b border-[#E5E7EB] mb-6">

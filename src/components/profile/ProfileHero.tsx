@@ -95,7 +95,7 @@ END:VCARD`;
 
       {/* Profile Section */}
       <div className="relative bg-white">
-        <div className="max-w-4xl mx-auto px-4 md:px-6 lg:px-8">
+        <div className="w-full px-4 md:px-6 lg:px-8">
           {/* Profile Picture & Basic Info */}
           <div className="relative -mt-16 md:-mt-20 pb-6">
             <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
@@ -157,75 +157,6 @@ END:VCARD`;
                 </div>
               </div>
 
-              {/* Action Buttons */}
-              <div className="flex gap-3 justify-center md:justify-start pb-4">
-                {isOwnProfile ? (
-                  <EditProfileModal profile={profile}>
-                    <Button className="bg-primary hover:bg-primary/90 text-white font-semibold px-6 py-2 rounded-lg shadow-sm">
-                      <Edit className="h-4 w-4 mr-2" />
-                      Edit Profile
-                    </Button>
-                  </EditProfileModal>
-                ) : (
-                  <>
-                    <Button 
-                      variant={connectionStatus?.isFollowing ? "outline" : "default"}
-                      className={connectionStatus?.isFollowing 
-                        ? "border-gray-300 text-gray-700 hover:bg-gray-50 font-semibold px-6 py-2 rounded-lg" 
-                        : "bg-primary hover:bg-primary/90 text-white font-semibold px-6 py-2 rounded-lg shadow-sm"
-                      }
-                      onClick={onFollow}
-                      disabled={followMutation?.isPending}
-                    >
-                      <UserPlus className="h-4 w-4 mr-2" />
-                      {connectionStatus?.isFollowing ? "Following" : "Follow"}
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      className="border-gray-300 text-gray-700 hover:bg-gray-50 font-semibold px-6 py-2 rounded-lg"
-                      onClick={() => startDirectMessage(profile.user_id)}
-                      disabled={isMessageLoading(profile.user_id)}
-                    >
-                      {isMessageLoading(profile.user_id) ? (
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      ) : (
-                        <MessageSquare className="h-4 w-4 mr-2" />
-                      )}
-                      Message
-                    </Button>
-                  </>
-                )}
-                
-                <ShareModal profile={profile}>
-                  <Button variant="outline" className="border-gray-300 text-gray-700 hover:bg-gray-50 font-semibold px-4 py-2 rounded-lg">
-                    <Share className="h-4 w-4 mr-2" />
-                    Share
-                  </Button>
-                </ShareModal>
-
-                {!isOwnProfile && (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="outline" size="icon" className="border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="bg-white border-gray-200 shadow-lg rounded-lg">
-                      <DropdownMenuItem onClick={handleExportContact}>
-                        <Mail className="h-4 w-4 mr-2" />
-                        Export Contact
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem className="text-destructive">
-                        Report User
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="text-destructive">
-                        Block User
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                )}
-              </div>
             </div>
 
             {/* Bio */}
@@ -253,13 +184,6 @@ END:VCARD`;
               </div>
             )}
 
-            {/* Join Date */}
-            <div className="mt-3 flex justify-center md:justify-start">
-              <div className="flex items-center gap-1 text-xs md:text-sm text-gray-500">
-                <Calendar className="h-4 w-4" />
-                Joined {new Date(profile.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-              </div>
-            </div>
           </div>
         </div>
       </div>
