@@ -37,6 +37,9 @@ interface ProfileHeroProps {
   connectionStatus?: any;
   onFollow?: () => void;
   followMutation?: any;
+  postsCount?: number;
+  followers?: any[];
+  following?: any[];
 }
 
 export function ProfileHero({ 
@@ -44,7 +47,10 @@ export function ProfileHero({
   isOwnProfile, 
   connectionStatus, 
   onFollow, 
-  followMutation 
+  followMutation,
+  postsCount = 0,
+  followers = [],
+  following = []
 }: ProfileHeroProps) {
   const { startDirectMessage, isLoading: isMessageLoading } = useDirectMessage();
 
@@ -70,7 +76,7 @@ END:VCARD`;
   };
 
   return (
-    <div className="relative bg-[#F9FAFB]">
+    <div className="relative">
       {/* Full-width Hero Section with 16:9 Cover */}
       <div className="relative w-full aspect-video bg-gradient-to-br from-primary/10 to-primary/5 overflow-hidden">
         {profile.cover_url && (
@@ -93,8 +99,47 @@ END:VCARD`;
         )}
       </div>
 
-      {/* Profile Section */}
-      <div className="relative bg-white">
+      {/* Profile Section - Full Width */}
+      <div className="relative bg-white w-full">
+        {/* Three dots menu in top right corner */}
+        <div className="absolute top-4 right-4 md:top-6 md:right-6 z-10">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="icon" className="bg-white border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg shadow-sm">
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="bg-white border-gray-200 shadow-lg rounded-lg">
+              {isOwnProfile && (
+                <>
+                  <EditProfileModal profile={profile}>
+                    <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                      <Edit className="h-4 w-4 mr-2" />
+                      Edit Profile
+                    </DropdownMenuItem>
+                  </EditProfileModal>
+                  <DropdownMenuSeparator />
+                </>
+              )}
+              <ShareModal profile={profile}>
+                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                  <Share className="h-4 w-4 mr-2" />
+                  Share Profile
+                </DropdownMenuItem>
+              </ShareModal>
+              {!isOwnProfile && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleExportContact}>
+                    <Mail className="h-4 w-4 mr-2" />
+                    Export Contact
+                  </DropdownMenuItem>
+                </>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
         <div className="w-full px-4 md:px-6 lg:px-8">
           {/* Profile Picture & Basic Info */}
           <div className="relative -mt-16 md:-mt-20 pb-6">
@@ -119,7 +164,7 @@ END:VCARD`;
                 </div>
 
                 {/* Name & Info */}
-                <div className="text-center md:text-left space-y-2 md:pb-4">
+                <div className="text-center md:text-left space-y-3 md:pb-4">
                   {/* Name & Verification */}
                   <div className="flex items-center justify-center md:justify-start gap-2">
                     <h1 className="text-lg md:text-xl font-bold text-[#111827] tracking-tight">
@@ -134,6 +179,22 @@ END:VCARD`;
                   <p className="text-sm md:text-base text-gray-500 font-medium">
                     @{profile.username}
                   </p>
+
+                  {/* Stats - Posts | Followers | Following */}
+                  <div className="flex items-center justify-center md:justify-start gap-6 text-sm md:text-base">
+                    <div className="text-center cursor-pointer hover:text-primary transition-colors">
+                      <span className="font-bold text-[#111827]">{postsCount}</span>
+                      <span className="text-gray-500 ml-1">Posts</span>
+                    </div>
+                    <div className="text-center cursor-pointer hover:text-primary transition-colors">
+                      <span className="font-bold text-[#111827]">{followers.length}</span>
+                      <span className="text-gray-500 ml-1">Followers</span>
+                    </div>
+                    <div className="text-center cursor-pointer hover:text-primary transition-colors">
+                      <span className="font-bold text-[#111827]">{following.length}</span>
+                      <span className="text-gray-500 ml-1">Following</span>
+                    </div>
+                  </div>
 
                   {/* Role Badge */}
                   {profile.role && (
