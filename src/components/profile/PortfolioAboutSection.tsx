@@ -19,7 +19,6 @@ export function PortfolioAboutSection({
   portfolios = [],
   portfoliosLoading = false 
 }: PortfolioAboutSectionProps) {
-  console.log('PortfolioAboutSection rendering', { profile: profile?.id, isOwnProfile });
   return (
     <div className="space-y-6">
       {/* Basic Information Card (includes Body Features for actors/models) */}
@@ -28,10 +27,14 @@ export function PortfolioAboutSection({
       {/* Contact & Social Card */}
       <ContactSocialCard profile={profile} isOwnProfile={isOwnProfile} />
       
-      {/* Temporarily comment out the cards with new components to isolate the issue */}
-      {/* <CertificatesCard profile={profile} isOwnProfile={isOwnProfile} />
+      {/* Certificates Card */}
+      <CertificatesCard profile={profile} isOwnProfile={isOwnProfile} />
+      
+      {/* Awards Card */}
       <AwardsCard profile={profile} isOwnProfile={isOwnProfile} />
-      <ProjectsCard profile={profile} isOwnProfile={isOwnProfile} /> */}
+      
+      {/* Past Projects Card */}
+      <ProjectsCard profile={profile} isOwnProfile={isOwnProfile} />
       
       {/* Portfolio & Media Gallery (thumbnail grid under Past Projects) */}
       <MediaGallery 

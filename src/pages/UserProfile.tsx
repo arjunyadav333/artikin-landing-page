@@ -25,16 +25,18 @@ export default function UserProfile() {
   // Set target user ID: use current user's ID for own profile, otherwise use userId param
   const targetUserId = isOwnProfile ? user?.id : userId;
   
-  // Debug authentication and routing state
-  console.log('UserProfile Debug:', {
-    pathname: location.pathname,
-    userId,
-    user: user ? { id: user.id, email: user.email } : null,
-    isOnProfileMeRoute,
-    isOwnProfile,
-    targetUserId,
-    authLoading
-  });
+  // Debug authentication and routing state (development only)
+  if (import.meta.env.DEV) {
+    console.log('UserProfile Debug:', {
+      pathname: location.pathname,
+      userId,
+      user: user ? { id: user.id, email: user.email } : null,
+      isOnProfileMeRoute,
+      isOwnProfile,
+      targetUserId,
+      authLoading
+    });
+  }
   
   // Fetch profile data
   const { data: profile, isLoading: profileLoading } = useProfile(targetUserId);

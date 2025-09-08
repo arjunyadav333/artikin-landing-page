@@ -11,8 +11,6 @@ import { Plus, CalendarIcon, Briefcase, ExternalLink, Trash2 } from 'lucide-reac
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Profile } from '@/hooks/useProfiles';
-import { MediaUpload } from '../components/MediaUpload';
-import { MediaLightbox } from '../components/MediaLightbox';
 
 interface ProjectsCardProps {
   profile: Profile;
@@ -28,17 +26,10 @@ interface Project {
   endDate?: Date;
   links: string[];
   attachmentUrl?: string;
-  mediaIds?: string[];
-  mediaUrls?: string[];
 }
 
 export function ProjectsCard({ profile, isOwnProfile }: ProjectsCardProps) {
-  console.log('ProjectsCard rendering', { profile: profile?.id, isOwnProfile });
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
-  const [lightboxIndex, setLightboxIndex] = useState(0);
-  const [lightboxProjectId, setLightboxProjectId] = useState<string>('');
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [newProject, setNewProject] = useState({
     title: '',
     role: '',
@@ -58,8 +49,7 @@ export function ProjectsCard({ profile, isOwnProfile }: ProjectsCardProps) {
       description: 'Lead role in Shakespeare\'s classic tragedy. Performed at the Metropolitan Theatre for 3 months.',
       startDate: new Date('2023-06-01'),
       endDate: new Date('2023-08-31'),
-      links: ['https://mettheatre.com/romeo-juliet'],
-      mediaUrls: ['/placeholder.svg', '/placeholder.svg']
+      links: ['https://mettheatre.com/romeo-juliet']
     },
     {
       id: '2',
@@ -68,21 +58,16 @@ export function ProjectsCard({ profile, isOwnProfile }: ProjectsCardProps) {
       description: 'Fashion modeling for summer collection campaign. Featured in print and digital advertisements.',
       startDate: new Date('2023-04-15'),
       endDate: new Date('2023-05-15'),
-      links: ['https://fashionbrand.com/campaign'],
-      mediaUrls: ['/placeholder.svg']
+      links: ['https://fashionbrand.com/campaign']
     }
   ]);
 
   const handleAddProject = () => {
     if (newProject.title && newProject.description) {
-      // Simulate file upload and get media URLs
-      const mediaUrls = selectedFiles.map(file => URL.createObjectURL(file));
-      
       const project: Project = {
         id: Date.now().toString(),
         ...newProject,
-        links: newProject.links.filter(link => link.trim() !== ''),
-        mediaUrls
+        links: newProject.links.filter(link => link.trim() !== '')
       };
       setProjects(prev => [project, ...prev]);
       setNewProject({
@@ -94,9 +79,8 @@ export function ProjectsCard({ profile, isOwnProfile }: ProjectsCardProps) {
         links: [''],
         attachmentUrl: ''
       });
-      setSelectedFiles([]);
       setIsAddModalOpen(false);
-      // TODO: Save to backend with media_ids
+      // TODO: Save to backend
     }
   };
 
@@ -125,43 +109,7 @@ export function ProjectsCard({ profile, isOwnProfile }: ProjectsCardProps) {
     }
   };
 
-  const openLightbox = (projectId: string, imageIndex: number) => {
-    setLightboxProjectId(projectId);
-    setLightboxIndex(imageIndex);
-    setIsLightboxOpen(true);
-  };
-
-  const handleLightboxNavigation = (direction: 'prev' | 'next') => {
-    const project = projects.find(p => p.id === lightboxProjectId);
-    if (!project?.mediaUrls) return;
-
-    if (direction === 'prev') {
-      setLightboxIndex(prev => prev === 0 ? project.mediaUrls!.length - 1 : prev - 1);
-    } else {
-      setLightboxIndex(prev => prev === project.mediaUrls!.length - 1 ? 0 : prev + 1);
-    }
-  };
-
-  const handleDeleteProjectMedia = (mediaId: string) => {
-    const project = projects.find(p => p.id === lightboxProjectId);
-    if (!project?.mediaUrls) return;
-
-    const updatedMediaUrls = project.mediaUrls.filter((_, index) => index !== lightboxIndex);
-    setProjects(prev => prev.map(p => 
-      p.id === lightboxProjectId 
-        ? { ...p, mediaUrls: updatedMediaUrls }
-        : p
-    ));
-
-    if (updatedMediaUrls.length === 0) {
-      setIsLightboxOpen(false);
-    } else if (lightboxIndex >= updatedMediaUrls.length) {
-      setLightboxIndex(0);
-    }
-  };
-
   return (
-    <>
     <Card className="bg-white rounded-2xl shadow-sm">
       <CardHeader className="flex flex-row items-center justify-between pb-4">
         <CardTitle className="text-xl font-semibold">Past Projects</CardTitle>
@@ -303,13 +251,6 @@ export function ProjectsCard({ profile, isOwnProfile }: ProjectsCardProps) {
                   ))}
                 </div>
 
-                {/* Media Upload */}
-                <MediaUpload
-                  onFilesSelect={setSelectedFiles}
-                  selectedFiles={selectedFiles}
-                  onRemoveFile={(index) => setSelectedFiles(prev => prev.filter((_, i) => i !== index))}
-                />
-
               </div>
               <div className="flex gap-2 pt-4 border-t bg-white flex-shrink-0 mt-4">
                 <Button onClick={handleAddProject} className="rounded-2xl">
@@ -358,26 +299,6 @@ export function ProjectsCard({ profile, isOwnProfile }: ProjectsCardProps) {
                       <p className="text-sm text-gray-700 mb-3">
                         {project.description}
                       </p>
-
-                      {/* Media thumbnails */}
-                      {project.mediaUrls && project.mediaUrls.length > 0 && (
-                        <div className="grid grid-cols-3 gap-2 mb-3">
-                          {project.mediaUrls.map((url, index) => (
-                            <div
-                              key={index}
-                              className="w-16 h-16 bg-gray-100 rounded-md overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
-                              onClick={() => openLightbox(project.id, index)}
-                            >
-                              <img
-                                src={url}
-                                alt={`Project media ${index + 1}`}
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                          ))}
-                        </div>
-                      )}
-
                       {project.links.length > 0 && (
                         <div className="space-y-1">
                           {project.links.map((link, index) => (
@@ -423,23 +344,5 @@ export function ProjectsCard({ profile, isOwnProfile }: ProjectsCardProps) {
         )}
       </CardContent>
     </Card>
-
-    {/* Media Lightbox */}
-    {isLightboxOpen && lightboxProjectId && (
-      <MediaLightbox
-        isOpen={isLightboxOpen}
-        onClose={() => setIsLightboxOpen(false)}
-        items={projects.find(p => p.id === lightboxProjectId)?.mediaUrls?.map((url, index) => ({
-          id: `${lightboxProjectId}-${index}`,
-          url,
-          caption: `Project media ${index + 1}`
-        })) || []}
-        currentIndex={lightboxIndex}
-        onNavigate={handleLightboxNavigation}
-        onDelete={isOwnProfile ? handleDeleteProjectMedia : undefined}
-        isOwner={isOwnProfile}
-      />
-    )}
-    </>
   );
 }

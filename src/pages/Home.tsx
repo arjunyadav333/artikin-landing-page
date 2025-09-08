@@ -3,7 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { PostRowWide } from "@/components/feed/PostRowWide";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { Loader2 } from "lucide-react";
+import { LoadingSpinner, ContentSpinner } from "@/components/ui/loading-spinner";
 
 const Home = () => {
   const { user } = useAuth();
@@ -15,9 +15,7 @@ const Home = () => {
     return (
       <div className="w-full min-h-screen bg-background">
         <div className="mx-auto" style={{ maxWidth: 'var(--feed-max-width)' }}>
-          <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-8 w-8 animate-spin" />
-          </div>
+          <ContentSpinner />
         </div>
       </div>
     );
@@ -62,7 +60,7 @@ const Home = () => {
             >
               {isFetchingNextPage ? (
                 <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  <LoadingSpinner size="sm" className="mr-2" />
                   Loading...
                 </>
               ) : (

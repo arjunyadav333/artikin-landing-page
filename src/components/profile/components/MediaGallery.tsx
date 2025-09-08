@@ -331,7 +331,7 @@ export function MediaGallery({
                     <input
                       ref={fileInputRef}
                       type="file"
-                      accept="image/*"
+                      accept="image/*,video/*,.pdf"
                       onChange={handleFileSelect}
                       className="hidden"
                     />
@@ -408,28 +408,8 @@ export function MediaGallery({
         
         <CardContent className="p-6 pt-0">
           {mediaItems.length > 0 ? (
-            <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-6 gap-2">
-              {mediaItems.filter(item => item.type === 'image').map((item, index) => (
-                <div key={item.id} className="group relative">
-                  <div 
-                    className="w-full h-20 md:h-20 bg-gray-100 rounded-md overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
-                    onClick={() => openCarousel(index)}
-                  >
-                    <img 
-                      src={item.url} 
-                      alt={item.caption}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      loading="lazy"
-                    />
-                    {/* Visibility indicator */}
-                    {item.visibility === 'private' && (
-                      <div className="absolute top-1 left-1 bg-black/50 rounded-full p-1">
-                        <EyeOff className="h-2 w-2 text-white" />
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
+            <div className="grid grid-cols-6 md:grid-cols-4 sm:grid-cols-2 gap-2">
+              {mediaItems.map((item, index) => renderThumbnail(item, index))}
             </div>
           ) : (
             <div className="text-center py-12 text-gray-500">
