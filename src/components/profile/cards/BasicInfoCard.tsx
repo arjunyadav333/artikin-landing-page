@@ -289,6 +289,37 @@ export function BasicInfoCard({ profile, isOwnProfile }: BasicInfoCardProps) {
                 ))}
               </div>
             </div>
+
+            {/* Body Features - Only for Actors & Models */}
+            {profile.role === 'artist' && (profile.artform === 'actor' || profile.artform === 'model') && (
+              <div className="md:col-span-2 space-y-4">
+                <div className="border-t pt-6">
+                  <h4 className="text-sm text-gray-600 font-medium mb-4">Body Features</h4>
+                  <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                    <div className="text-center p-3 bg-gray-50 rounded-lg">
+                      <div className="text-sm text-gray-600 mb-1">Eyes</div>
+                      <div className="font-medium text-gray-800">Brown</div>
+                    </div>
+                    <div className="text-center p-3 bg-gray-50 rounded-lg">
+                      <div className="text-sm text-gray-600 mb-1">Hair</div>
+                      <div className="font-medium text-gray-800">Black</div>
+                    </div>
+                    <div className="text-center p-3 bg-gray-50 rounded-lg">
+                      <div className="text-sm text-gray-600 mb-1">Skin</div>
+                      <div className="font-medium text-gray-800">Medium</div>
+                    </div>
+                    <div className="text-center p-3 bg-gray-50 rounded-lg">
+                      <div className="text-sm text-gray-600 mb-1">Height</div>
+                      <div className="font-medium text-gray-800">175 cm</div>
+                    </div>
+                    <div className="text-center p-3 bg-gray-50 rounded-lg">
+                      <div className="text-sm text-gray-600 mb-1">Weight</div>
+                      <div className="font-medium text-gray-800">68 kg</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </CardContent>

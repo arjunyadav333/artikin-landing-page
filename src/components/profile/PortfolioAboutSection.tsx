@@ -1,11 +1,10 @@
 import { Profile } from '@/hooks/useProfiles';
 import { BasicInfoCard } from './cards/BasicInfoCard';
 import { ContactSocialCard } from './cards/ContactSocialCard';
-import { PortfolioMediaCard } from './cards/PortfolioMediaCard';
 import { CertificatesCard } from './cards/CertificatesCard';
 import { AwardsCard } from './cards/AwardsCard';
 import { ProjectsCard } from './cards/ProjectsCard';
-import { BodyFeaturesCard } from './cards/BodyFeaturesCard';
+import { MediaGallery } from './components/MediaGallery';
 
 interface PortfolioAboutSectionProps {
   profile: Profile;
@@ -20,25 +19,13 @@ export function PortfolioAboutSection({
   portfolios = [],
   portfoliosLoading = false 
 }: PortfolioAboutSectionProps) {
-  // Check if user is actor or model for Body Features section
-  const showBodyFeatures = profile.role === 'artist' && 
-    (profile.artform === 'actor' || profile.artform === 'model');
-
   return (
     <div className="space-y-6">
-      {/* Basic Information Card */}
+      {/* Basic Information Card (includes Body Features for actors/models) */}
       <BasicInfoCard profile={profile} isOwnProfile={isOwnProfile} />
       
       {/* Contact & Social Card */}
       <ContactSocialCard profile={profile} isOwnProfile={isOwnProfile} />
-      
-      {/* Portfolio & Media Card */}
-      <PortfolioMediaCard 
-        profile={profile}
-        isOwnProfile={isOwnProfile}
-        portfolios={portfolios}
-        portfoliosLoading={portfoliosLoading}
-      />
       
       {/* Certificates Card */}
       <CertificatesCard profile={profile} isOwnProfile={isOwnProfile} />
@@ -49,10 +36,13 @@ export function PortfolioAboutSection({
       {/* Past Projects Card */}
       <ProjectsCard profile={profile} isOwnProfile={isOwnProfile} />
       
-      {/* Body Features Card - Only for Actors & Models */}
-      {showBodyFeatures && (
-        <BodyFeaturesCard profile={profile} isOwnProfile={isOwnProfile} />
-      )}
+      {/* Portfolio & Media Gallery (thumbnail grid under Past Projects) */}
+      <MediaGallery 
+        profile={profile}
+        isOwnProfile={isOwnProfile}
+        portfolios={portfolios}
+        portfoliosLoading={portfoliosLoading}
+      />
     </div>
   );
 }
