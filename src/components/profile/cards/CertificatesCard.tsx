@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Plus, CalendarIcon, Award, ExternalLink, Trash2, Upload } from 'lucide-react';
+import { Plus, CalendarIcon, Award, ExternalLink, Trash2, FileUp } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Profile } from '@/hooks/useProfiles';
@@ -172,7 +172,7 @@ export function CertificatesCard({ profile, isOwnProfile }: CertificatesCardProp
                       className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-primary/50 transition-colors"
                       onClick={() => {/* TODO: Open file picker */}}
                     >
-                      <Upload className="h-6 w-6 mx-auto mb-2 text-gray-400" />
+                      <FileUp className="h-6 w-6 mx-auto mb-2 text-gray-400" />
                       <p className="text-sm text-gray-600">Click to upload attachment</p>
                       <p className="text-xs text-gray-400 mt-1">Images, documents up to 10MB</p>
                     </div>

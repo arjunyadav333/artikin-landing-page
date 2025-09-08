@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { 
-  Plus, Upload, Image, Video, FileText, Trash2, Eye, EyeOff, 
+  Plus, FileUp, Image, Video, FileText, Trash2, Eye, EyeOff, 
   ExternalLink, ChevronLeft, ChevronRight, X, Download
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -320,7 +320,7 @@ export function MediaGallery({
                       className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-primary/50 transition-colors"
                       onClick={() => fileInputRef.current?.click()}
                     >
-                      <Upload className="h-8 w-8 mx-auto mb-2 text-gray-400" />
+                      <FileUp className="h-8 w-8 mx-auto mb-2 text-gray-400" />
                       <p className="text-sm text-gray-600">
                         {newMedia.file ? newMedia.file.name : "Click to upload or drag and drop"}
                       </p>

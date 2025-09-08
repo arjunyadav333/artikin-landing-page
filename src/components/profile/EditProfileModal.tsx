@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/select";
 import { 
   Edit, 
-  Upload, 
+  FileUp, 
   User, 
   MapPin, 
   Globe, 
@@ -165,7 +165,7 @@ export function EditProfileModal({ profile, children }: EditProfileModalProps) {
             <div>
               <Label htmlFor="avatar-upload" className="cursor-pointer">
                 <div className="flex items-center gap-2 text-sm text-primary hover:underline">
-                  <Upload className="h-4 w-4" />
+                  <FileUp className="h-4 w-4" />
                   Change Profile Picture
                 </div>
               </Label>
@@ -391,7 +391,7 @@ export function EditProfileModal({ profile, children }: EditProfileModalProps) {
               ) : (
                 <Label htmlFor="cover-upload" className="cursor-pointer">
                   <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                    <Upload className="h-8 w-8" />
+                    <FileUp className="h-8 w-8" />
                     <div className="text-sm">
                       <span className="text-primary hover:underline">Click to upload</span> cover image
                     </div>
