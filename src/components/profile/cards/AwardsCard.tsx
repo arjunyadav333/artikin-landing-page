@@ -7,6 +7,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Plus, Trophy, ExternalLink, Trash2 } from 'lucide-react';
 import { Profile } from '@/hooks/useProfiles';
+import { MediaUpload } from '../components/MediaUpload';
+import { MediaLightbox } from '../components/MediaLightbox';
 
 interface AwardsCardProps {
   profile: Profile;
@@ -18,12 +20,17 @@ interface Award {
   title: string;
   year: number;
   description: string;
+  media: Array<{ id: string; url: string; }>;
   attachmentUrl?: string;
   externalLink?: string;
 }
 
 export function AwardsCard({ profile, isOwnProfile }: AwardsCardProps) {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [selectedAwardMedia, setSelectedAwardMedia] = useState<Array<{ id: string; url: string; }>>([]);
+  const [selectedFiles, setSelectedFiles] = useState<Array<{ id: string; file: File; preview: string; }>>([]);
   const [newAward, setNewAward] = useState({
     title: '',
     year: new Date().getFullYear(),
@@ -39,21 +46,29 @@ export function AwardsCard({ profile, isOwnProfile }: AwardsCardProps) {
       title: 'Best Supporting Actor',
       year: 2023,
       description: 'Regional Theatre Awards for outstanding performance in "The Glass Menagerie".',
-      externalLink: 'https://theatreawards.com/winners/2023'
+      externalLink: 'https://theatreawards.com/winners/2023',
+      media: [
+        { id: '1', url: 'https://images.unsplash.com/photo-1570126646281-5ec4f8e0ee06?w=500' }
+      ]
     },
     {
       id: '2',
       title: 'Excellence in Performance',
       year: 2022,
-      description: 'Drama Academy recognition for consistent high-quality performances.'
+      description: 'Drama Academy recognition for consistent high-quality performances.',
+      media: []
     }
   ]);
 
-  const handleAddAward = () => {
+  const handleAddAward = async () => {
     if (newAward.title && newAward.year) {
+      // TODO: Upload files and get URLs
+      const mediaUrls = selectedFiles.map(f => ({ id: f.id, url: f.preview }));
+      
       const award: Award = {
         id: Date.now().toString(),
-        ...newAward
+        ...newAward,
+        media: mediaUrls
       };
       setAwards(prev => [award, ...prev]);
       setNewAward({
@@ -63,6 +78,7 @@ export function AwardsCard({ profile, isOwnProfile }: AwardsCardProps) {
         attachmentUrl: '',
         externalLink: ''
       });
+      setSelectedFiles([]);
       setIsAddModalOpen(false);
       // TODO: Save to backend
     }
@@ -71,6 +87,22 @@ export function AwardsCard({ profile, isOwnProfile }: AwardsCardProps) {
   const handleDelete = (id: string) => {
     setAwards(prev => prev.filter(award => award.id !== id));
     // TODO: Delete from backend
+  };
+
+  const handleDeleteMedia = (mediaId: string) => {
+    const updatedAwards = awards.map(award => ({
+      ...award,
+      media: award.media.filter(m => m.id !== mediaId)
+    }));
+    setAwards(updatedAwards);
+    setSelectedAwardMedia(prev => prev.filter(m => m.id !== mediaId));
+    // TODO: Delete from backend
+  };
+
+  const openLightbox = (awardMedia: Array<{ id: string; url: string; }>, index: number) => {
+    setSelectedAwardMedia(awardMedia);
+    setLightboxIndex(index);
+    setLightboxOpen(true);
   };
 
   return (
@@ -131,6 +163,13 @@ export function AwardsCard({ profile, isOwnProfile }: AwardsCardProps) {
                   />
                 </div>
 
+                {/* Media Upload */}
+                <MediaUpload
+                  selectedFiles={selectedFiles}
+                  onFilesChange={setSelectedFiles}
+                  maxFiles={5}
+                />
+
               </div>
               <div className="flex gap-2 pt-4 border-t bg-white flex-shrink-0 mt-4">
                 <Button onClick={handleAddAward} className="rounded-2xl">
@@ -184,6 +223,21 @@ export function AwardsCard({ profile, isOwnProfile }: AwardsCardProps) {
                           View Details <ExternalLink className="h-3 w-3" />
                         </a>
                       )}
+                      {award.media.length > 0 && (
+                        <div className="mt-3">
+                          <div className="flex gap-2 flex-wrap">
+                            {award.media.map((media, index) => (
+                              <img
+                                key={media.id}
+                                src={media.url}
+                                alt={`Award ${award.title} image ${index + 1}`}
+                                className="w-12 h-12 object-cover rounded cursor-pointer hover:opacity-80 transition-opacity"
+                                onClick={() => openLightbox(award.media, index)}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                   
@@ -213,6 +267,15 @@ export function AwardsCard({ profile, isOwnProfile }: AwardsCardProps) {
           </div>
         )}
       </CardContent>
+
+      <MediaLightbox
+        isOpen={lightboxOpen}
+        onClose={() => setLightboxOpen(false)}
+        media={selectedAwardMedia}
+        initialIndex={lightboxIndex}
+        canDelete={isOwnProfile}
+        onDelete={handleDeleteMedia}
+      />
     </Card>
   );
 }

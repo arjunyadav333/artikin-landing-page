@@ -7,10 +7,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Plus, CalendarIcon, Briefcase, ExternalLink, Trash2 } from 'lucide-react';
+import { Plus, CalendarIcon, Briefcase, ExternalLink, Trash2, ImageIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Profile } from '@/hooks/useProfiles';
+import { MediaUpload } from '../components/MediaUpload';
+import { MediaLightbox } from '../components/MediaLightbox';
 
 interface ProjectsCardProps {
   profile: Profile;
@@ -25,11 +27,16 @@ interface Project {
   startDate: Date;
   endDate?: Date;
   links: string[];
+  media: Array<{ id: string; url: string; }>;
   attachmentUrl?: string;
 }
 
 export function ProjectsCard({ profile, isOwnProfile }: ProjectsCardProps) {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [selectedProjectMedia, setSelectedProjectMedia] = useState<Array<{ id: string; url: string; }>>([]);
+  const [selectedFiles, setSelectedFiles] = useState<Array<{ id: string; file: File; preview: string; }>>([]);
   const [newProject, setNewProject] = useState({
     title: '',
     role: '',
@@ -49,7 +56,11 @@ export function ProjectsCard({ profile, isOwnProfile }: ProjectsCardProps) {
       description: 'Lead role in Shakespeare\'s classic tragedy. Performed at the Metropolitan Theatre for 3 months.',
       startDate: new Date('2023-06-01'),
       endDate: new Date('2023-08-31'),
-      links: ['https://mettheatre.com/romeo-juliet']
+      links: ['https://mettheatre.com/romeo-juliet'],
+      media: [
+        { id: '1', url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500' },
+        { id: '2', url: 'https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=500' }
+      ]
     },
     {
       id: '2',
@@ -58,16 +69,21 @@ export function ProjectsCard({ profile, isOwnProfile }: ProjectsCardProps) {
       description: 'Fashion modeling for summer collection campaign. Featured in print and digital advertisements.',
       startDate: new Date('2023-04-15'),
       endDate: new Date('2023-05-15'),
-      links: ['https://fashionbrand.com/campaign']
+      links: ['https://fashionbrand.com/campaign'],
+      media: []
     }
   ]);
 
-  const handleAddProject = () => {
+  const handleAddProject = async () => {
     if (newProject.title && newProject.description) {
+      // TODO: Upload files and get URLs
+      const mediaUrls = selectedFiles.map(f => ({ id: f.id, url: f.preview }));
+      
       const project: Project = {
         id: Date.now().toString(),
         ...newProject,
-        links: newProject.links.filter(link => link.trim() !== '')
+        links: newProject.links.filter(link => link.trim() !== ''),
+        media: mediaUrls
       };
       setProjects(prev => [project, ...prev]);
       setNewProject({
@@ -79,6 +95,7 @@ export function ProjectsCard({ profile, isOwnProfile }: ProjectsCardProps) {
         links: [''],
         attachmentUrl: ''
       });
+      setSelectedFiles([]);
       setIsAddModalOpen(false);
       // TODO: Save to backend
     }
@@ -87,6 +104,22 @@ export function ProjectsCard({ profile, isOwnProfile }: ProjectsCardProps) {
   const handleDelete = (id: string) => {
     setProjects(prev => prev.filter(project => project.id !== id));
     // TODO: Delete from backend
+  };
+
+  const handleDeleteMedia = (mediaId: string) => {
+    const updatedProjects = projects.map(project => ({
+      ...project,
+      media: project.media.filter(m => m.id !== mediaId)
+    }));
+    setProjects(updatedProjects);
+    setSelectedProjectMedia(prev => prev.filter(m => m.id !== mediaId));
+    // TODO: Delete from backend
+  };
+
+  const openLightbox = (projectMedia: Array<{ id: string; url: string; }>, index: number) => {
+    setSelectedProjectMedia(projectMedia);
+    setLightboxIndex(index);
+    setLightboxOpen(true);
   };
 
   const addLinkField = () => {
@@ -251,6 +284,13 @@ export function ProjectsCard({ profile, isOwnProfile }: ProjectsCardProps) {
                   ))}
                 </div>
 
+                {/* Media Upload */}
+                <MediaUpload
+                  selectedFiles={selectedFiles}
+                  onFilesChange={setSelectedFiles}
+                  maxFiles={5}
+                />
+
               </div>
               <div className="flex gap-2 pt-4 border-t bg-white flex-shrink-0 mt-4">
                 <Button onClick={handleAddProject} className="rounded-2xl">
@@ -314,6 +354,21 @@ export function ProjectsCard({ profile, isOwnProfile }: ProjectsCardProps) {
                           ))}
                         </div>
                       )}
+                      {project.media.length > 0 && (
+                        <div className="mt-3">
+                          <div className="flex gap-2 flex-wrap">
+                            {project.media.map((media, index) => (
+                              <img
+                                key={media.id}
+                                src={media.url}
+                                alt={`Project ${project.title} image ${index + 1}`}
+                                className="w-12 h-12 object-cover rounded cursor-pointer hover:opacity-80 transition-opacity"
+                                onClick={() => openLightbox(project.media, index)}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                   
@@ -343,6 +398,15 @@ export function ProjectsCard({ profile, isOwnProfile }: ProjectsCardProps) {
           </div>
         )}
       </CardContent>
+
+      <MediaLightbox
+        isOpen={lightboxOpen}
+        onClose={() => setLightboxOpen(false)}
+        media={selectedProjectMedia}
+        initialIndex={lightboxIndex}
+        canDelete={isOwnProfile}
+        onDelete={handleDeleteMedia}
+      />
     </Card>
   );
 }

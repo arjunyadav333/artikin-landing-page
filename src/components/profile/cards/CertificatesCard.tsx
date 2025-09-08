@@ -11,6 +11,8 @@ import { Plus, CalendarIcon, Award, ExternalLink, Trash2, FileUp } from 'lucide-
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Profile } from '@/hooks/useProfiles';
+import { MediaUpload } from '../components/MediaUpload';
+import { MediaLightbox } from '../components/MediaLightbox';
 
 interface CertificatesCardProps {
   profile: Profile;
@@ -23,12 +25,17 @@ interface Certificate {
   issuer: string;
   date: Date;
   description: string;
+  media: Array<{ id: string; url: string; }>;
   attachmentUrl?: string;
   externalLink?: string;
 }
 
 export function CertificatesCard({ profile, isOwnProfile }: CertificatesCardProps) {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [selectedCertMedia, setSelectedCertMedia] = useState<Array<{ id: string; url: string; }>>([]);
+  const [selectedFiles, setSelectedFiles] = useState<Array<{ id: string; file: File; preview: string; }>>([]);
   const [newCertificate, setNewCertificate] = useState({
     title: '',
     issuer: '',
@@ -46,22 +53,30 @@ export function CertificatesCard({ profile, isOwnProfile }: CertificatesCardProp
       issuer: 'National Theatre Academy',
       date: new Date('2023-08-15'),
       description: 'Completed intensive 6-month program in method acting and character development.',
-      externalLink: 'https://certificate-verify.com/abc123'
+      externalLink: 'https://certificate-verify.com/abc123',
+      media: [
+        { id: '1', url: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=500' }
+      ]
     },
     {
       id: '2',
       title: 'Voice & Diction Certification',
       issuer: 'Speech & Drama Institute',
       date: new Date('2023-03-20'),
-      description: 'Professional certification in voice modulation and clear speech for performers.'
+      description: 'Professional certification in voice modulation and clear speech for performers.',
+      media: []
     }
   ]);
 
-  const handleAddCertificate = () => {
+  const handleAddCertificate = async () => {
     if (newCertificate.title && newCertificate.issuer) {
+      // TODO: Upload files and get URLs
+      const mediaUrls = selectedFiles.map(f => ({ id: f.id, url: f.preview }));
+      
       const certificate: Certificate = {
         id: Date.now().toString(),
-        ...newCertificate
+        ...newCertificate,
+        media: mediaUrls
       };
       setCertificates(prev => [certificate, ...prev]);
       setNewCertificate({
@@ -72,6 +87,7 @@ export function CertificatesCard({ profile, isOwnProfile }: CertificatesCardProp
         attachmentUrl: '',
         externalLink: ''
       });
+      setSelectedFiles([]);
       setIsAddModalOpen(false);
       // TODO: Save to backend
     }
@@ -80,6 +96,22 @@ export function CertificatesCard({ profile, isOwnProfile }: CertificatesCardProp
   const handleDelete = (id: string) => {
     setCertificates(prev => prev.filter(cert => cert.id !== id));
     // TODO: Delete from backend
+  };
+
+  const handleDeleteMedia = (mediaId: string) => {
+    const updatedCertificates = certificates.map(cert => ({
+      ...cert,
+      media: cert.media.filter(m => m.id !== mediaId)
+    }));
+    setCertificates(updatedCertificates);
+    setSelectedCertMedia(prev => prev.filter(m => m.id !== mediaId));
+    // TODO: Delete from backend
+  };
+
+  const openLightbox = (certMedia: Array<{ id: string; url: string; }>, index: number) => {
+    setSelectedCertMedia(certMedia);
+    setLightboxIndex(index);
+    setLightboxOpen(true);
   };
 
   return (
@@ -166,17 +198,12 @@ export function CertificatesCard({ profile, isOwnProfile }: CertificatesCardProp
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <Label>Attachment (optional)</Label>
-                    <div 
-                      className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-primary/50 transition-colors"
-                      onClick={() => {/* TODO: Open file picker */}}
-                    >
-                      <FileUp className="h-6 w-6 mx-auto mb-2 text-gray-400" />
-                      <p className="text-sm text-gray-600">Click to upload attachment</p>
-                      <p className="text-xs text-gray-400 mt-1">Images, documents up to 10MB</p>
-                    </div>
-                  </div>
+                  {/* Media Upload */}
+                  <MediaUpload
+                    selectedFiles={selectedFiles}
+                    onFilesChange={setSelectedFiles}
+                    maxFiles={5}
+                  />
 
               </div>
               <div className="flex gap-2 pt-4 border-t bg-white flex-shrink-0 mt-4">
@@ -234,6 +261,21 @@ export function CertificatesCard({ profile, isOwnProfile }: CertificatesCardProp
                           Verify Certificate <ExternalLink className="h-3 w-3" />
                         </a>
                       )}
+                      {certificate.media.length > 0 && (
+                        <div className="mt-3">
+                          <div className="flex gap-2 flex-wrap">
+                            {certificate.media.map((media, index) => (
+                              <img
+                                key={media.id}
+                                src={media.url}
+                                alt={`Certificate ${certificate.title} image ${index + 1}`}
+                                className="w-12 h-12 object-cover rounded cursor-pointer hover:opacity-80 transition-opacity"
+                                onClick={() => openLightbox(certificate.media, index)}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                   
@@ -263,6 +305,15 @@ export function CertificatesCard({ profile, isOwnProfile }: CertificatesCardProp
           </div>
         )}
       </CardContent>
+
+      <MediaLightbox
+        isOpen={lightboxOpen}
+        onClose={() => setLightboxOpen(false)}
+        media={selectedCertMedia}
+        initialIndex={lightboxIndex}
+        canDelete={isOwnProfile}
+        onDelete={handleDeleteMedia}
+      />
     </Card>
   );
 }
