@@ -28,25 +28,26 @@ export default function UserProfile() {
 
   // Connection and messaging hooks
   const { data: connectionStatus } = useConnectionStatus(profile?.user_id);
-  const { data: connectionsData } = useConnections(profile?.user_id);
+  const { data: followersData } = useConnections(profile?.user_id, 'followers');
+  const { data: followingData } = useConnections(profile?.user_id, 'following');
   const followMutation = useFollowUser();
-  const { trackProfileView } = useTrackProfileView();
+  const trackProfileViewMutation = useTrackProfileView();
   const { startDirectMessage } = useDirectMessage();
 
   // Track profile view for non-own profiles
   useEffect(() => {
     if (profile && !isOwnProfile && user) {
-      trackProfileView(profile.id);
+      trackProfileViewMutation.mutate(profile.id);
     }
-  }, [profile, isOwnProfile, user, trackProfileView]);
+  }, [profile, isOwnProfile, user, trackProfileViewMutation]);
 
   const handleFollow = async () => {
     if (!profile) return;
     
     try {
       await followMutation.mutateAsync({
-        followingId: profile.user_id,
-        action: connectionStatus?.isFollowing ? 'unfollow' : 'follow'
+        targetUserId: profile.user_id,
+        isCurrentlyFollowing: connectionStatus?.isFollowing || false
       });
     } catch (error) {
       console.error('Follow action failed:', error);
@@ -129,13 +130,13 @@ export default function UserProfile() {
       
       <ProfileStats
         profile={profile}
-        followers={connectionsData?.followers || []}
-        following={connectionsData?.following || []}
+        followers={followersData || []}
+        following={followingData || []}
       />
       
       <div className="max-w-5xl mx-auto px-4 md:px-6 lg:px-8 py-6 md:py-8">
         <ProfileTabs
-          profile={profile}
+          profile={profile as any}
           isOwnProfile={isOwnProfile}
           posts={posts}
           postsLoading={postsLoading}

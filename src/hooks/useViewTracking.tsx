@@ -26,3 +26,16 @@ export const useTrackOpportunityView = () => {
     // Silent mutation - no error handling needed for view tracking
   });
 };
+
+export const useTrackProfileView = () => {
+  return useMutation({
+    mutationFn: async (profileId: string) => {
+      // For now, just log the profile view - could extend to track in analytics table
+      console.log('Profile viewed:', profileId);
+      
+      // Could add profile view tracking to database if needed
+      // For now, this is a no-op that satisfies the interface
+    },
+    // Silent mutation - no error handling needed for view tracking
+  });
+};

@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import type { Database } from '@/integrations/supabase/types';
 
 export interface ProfileWithStats {
   id: string;
@@ -8,9 +9,9 @@ export interface ProfileWithStats {
   display_name: string;
   full_name?: string;
   bio?: string;
-  role?: 'artist' | 'organization';
-  artform?: string;
-  organization_type?: string;
+  role?: Database['public']['Enums']['user_role'];
+  artform?: Database['public']['Enums']['artform_type'];
+  organization_type?: Database['public']['Enums']['organization_type'];
   avatar_url?: string;
   cover_url?: string;
   location?: string;
