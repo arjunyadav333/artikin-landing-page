@@ -831,6 +831,35 @@ export type Database = {
         Args: { message_id_param: string }
         Returns: boolean
       }
+      get_current_user_profile_secure: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          artform: Database["public"]["Enums"]["artform_type"]
+          avatar_url: string
+          bio: string
+          contact_email: string
+          cover_url: string
+          created_at: string
+          display_name: string
+          follower_count: number
+          following_count: number
+          full_name: string
+          headline: string
+          id: string
+          location: string
+          organization_type: Database["public"]["Enums"]["organization_type"]
+          phone_number: string
+          posts_count: number
+          privacy: string
+          pronouns: string
+          role: Database["public"]["Enums"]["user_role"]
+          social_links: Json
+          updated_at: string
+          user_id: string
+          username: string
+          website: string
+        }[]
+      }
       get_current_user_role: {
         Args: Record<PropertyKey, never>
         Returns: Database["public"]["Enums"]["user_role"]

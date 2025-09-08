@@ -4,7 +4,7 @@ import { ProfileHero } from '../components/profile/ProfileHero';
 import { ProfileStats } from '../components/profile/ProfileStats';
 import { ProfileTabs } from '../components/profile/ProfileTabs';
 import { useAuth } from '../hooks/useAuth';
-import { useCurrentProfile } from '../hooks/useProfiles';
+import { useCurrentProfile, useCreateProfile } from '../hooks/useProfiles';
 import { useProfileByUsername, useUserPosts, useUserPortfolios } from '../hooks/useProfileByUsername';
 import { useConnectionStatus, useConnections, useFollowUser } from '../hooks/useConnections';
 import { useDirectMessage } from '../hooks/useDirectMessage';
@@ -19,6 +19,7 @@ export default function UserProfile() {
   
   // Get current user profile if viewing own profile
   const { data: currentUserProfile, isLoading: currentProfileLoading, error: currentProfileError } = useCurrentProfile();
+  const createProfileMutation = useCreateProfile();
   
   // For public profiles, get profile by username  
   const { data: publicProfile, isLoading: publicProfileLoading, error: publicProfileError } = useProfileByUsername(
@@ -113,12 +114,20 @@ export default function UserProfile() {
             )}
             <button 
               className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
-              onClick={() => {
-                // For now, just refresh to retry
-                window.location.reload();
+              onClick={async () => {
+                try {
+                  await createProfileMutation.mutateAsync({
+                    display_name: user?.user_metadata?.full_name || 'New User',
+                    full_name: user?.user_metadata?.full_name,
+                    bio: 'Welcome to my profile!',
+                  });
+                } catch (error) {
+                  console.error('Failed to create profile:', error);
+                }
               }}
+              disabled={createProfileMutation.isPending}
             >
-              Retry Loading Profile
+              {createProfileMutation.isPending ? 'Creating Profile...' : 'Create My Profile'}
             </button>
           </div>
         </div>
