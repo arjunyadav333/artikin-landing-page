@@ -52,28 +52,69 @@ export const useCurrentProfile = () => {
   return useQuery({
     queryKey: ['currentProfile'],
     queryFn: async () => {
-      // Get the current authenticated user
+      // Get the current authenticated user first
       const { data: { user }, error: authError } = await supabase.auth.getUser();
-      if (authError) throw authError;
-      if (!user) return null;
-
-      // Query profiles table directly using user ID
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('user_id', user.id)
-        .single();
-      
-      if (error) {
-        if (error.code === 'PGRST116') {
-          // No rows returned - profile doesn't exist yet
-          return null;
-        }
-        throw error;
+      if (authError) {
+        console.error('Auth error in useCurrentProfile:', authError);
+        throw authError;
       }
-      return data as Profile;
+      if (!user) {
+        console.log('No user found in useCurrentProfile');
+        return null;
+      }
+
+      console.log('User found in useCurrentProfile:', user.id);
+
+      // Try using the RPC function first (works better with auth context)
+      try {
+        const { data: rpcData, error: rpcError } = await supabase.rpc('get_user_profile', {
+          user_uuid: user.id
+        });
+        
+        if (rpcError) {
+          console.error('RPC error:', rpcError);
+        } else if (rpcData && rpcData.length > 0) {
+          console.log('Profile found via RPC:', rpcData[0]);
+          return rpcData[0] as Profile;
+        }
+      } catch (rpcError) {
+        console.error('RPC call failed:', rpcError);
+      }
+
+      // Fallback: Query profiles table directly using user ID with explicit session
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('user_id', user.id)
+          .maybeSingle();
+        
+        if (error) {
+          console.error('Direct query error:', error);
+          // If it's just a missing profile, return null
+          if (error.code === 'PGRST116') {
+            console.log('Profile not found - needs to be created');
+            return null;
+          }
+          throw error;
+        }
+        
+        console.log('Profile found via direct query:', data);
+        return data as Profile;
+      } catch (queryError) {
+        console.error('Profile query failed:', queryError);
+        throw queryError;
+      }
     },
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    retry: (failureCount, error: any) => {
+      // Retry up to 2 times for auth-related errors
+      if (failureCount < 2 && (error?.message?.includes('auth') || error?.code === 'PGRST301')) {
+        return true;
+      }
+      return false;
+    },
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 };
 

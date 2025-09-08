@@ -95,16 +95,30 @@ export default function UserProfile() {
 
   // Handle profile not found or error states
   if (profileError || !profile) {
+    console.error('Profile error or missing:', { profileError, profile, isOwnProfile, user });
+    
     if (isOwnProfile) {
+      // For own profile, show profile creation screen
       return (
         <div className="min-h-screen flex items-center justify-center p-4">
-          <div className="text-center space-y-4">
-            <h2 className="text-2xl font-bold">Complete Your Profile</h2>
+          <div className="text-center space-y-4 max-w-md">
+            <h2 className="text-2xl font-bold">Welcome to Your Profile</h2>
             <p className="text-muted-foreground">
-              It looks like you haven't set up your profile yet.
+              Let's set up your profile to get started. You'll be able to customize it later.
             </p>
-            <button className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90">
-              Set Up Profile
+            {profileError && (
+              <p className="text-sm text-red-600">
+                Debug: {JSON.stringify(profileError, null, 2)}
+              </p>
+            )}
+            <button 
+              className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+              onClick={() => {
+                // For now, just refresh to retry
+                window.location.reload();
+              }}
+            >
+              Retry Loading Profile
             </button>
           </div>
         </div>
@@ -118,6 +132,11 @@ export default function UserProfile() {
           <p className="text-muted-foreground">
             The profile you're looking for doesn't exist or may have been deleted.
           </p>
+          {profileError && (
+            <p className="text-sm text-red-600">
+              Debug: {JSON.stringify(profileError, null, 2)}
+            </p>
+          )}
         </div>
       </div>
     );
