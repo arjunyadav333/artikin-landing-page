@@ -54,7 +54,7 @@ export default function UserProfile() {
     if (targetUserId && !isOwnProfile) {
       trackViewMutation.mutate();
     }
-  }, [targetUserId, isOwnProfile, trackViewMutation]);
+  }, [targetUserId, isOwnProfile]);
   
   const handleFollow = () => {
     if (!targetUserId) return;
