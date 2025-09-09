@@ -10,7 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Search, Send, Plus, Filter, MoreVertical, Pin, Trash2 } from "lucide-react";
 import { AppLayout } from "@/components/layout/app-layout";
-import { useEnhancedConversations, type EnhancedConversation } from "@/hooks/useEnhancedMessaging";
+import { useEnhancedConversations } from "@/hooks/useEnhancedMessaging";
 import { NewMessageModal } from "@/components/messaging/NewMessageModal";
 import { useAuth } from "@/hooks/useAuth";
 import { formatDistanceToNow } from "date-fns";
@@ -19,7 +19,7 @@ import { ConversationListSkeleton } from "@/components/ui/conversation-skeleton"
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
-const Messages = () => {
+const EnhancedMessages = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showNewMessageModal, setShowNewMessageModal] = useState(false);
   
@@ -64,7 +64,7 @@ const Messages = () => {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['conversations'] });
+      queryClient.invalidateQueries({ queryKey: ['enhanced-conversations'] });
     }
   });
 
@@ -82,7 +82,7 @@ const Messages = () => {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['conversations'] });
+      queryClient.invalidateQueries({ queryKey: ['enhanced-conversations'] });
     }
   });
 
@@ -100,7 +100,7 @@ const Messages = () => {
   };
 
   const handleConversationClick = (conversationId: string) => {
-    navigate(`/messages/${conversationId}`);
+    navigate(`/messages/enhanced/${conversationId}`);
   };
 
   const getRoleDisplay = (participant: any) => {
@@ -112,10 +112,10 @@ const Messages = () => {
   const getLastMessagePreview = (message: any) => {
     if (!message) return 'No messages yet';
     if (message.deleted || message.deleted_for_everyone) return 'This message was deleted';
-    if (message.body) return message.body;
-    if (message.kind !== 'text') {
-      if (message.kind === 'image') return '📷 Photo';
-      if (message.kind === 'video') return '🎥 Video';
+    if (message.body || message.content) return message.body || message.content;
+    if (message.kind !== 'text' || message.message_type !== 'text') {
+      if (message.kind === 'image' || message.message_type === 'image') return '📷 Photo';
+      if (message.kind === 'video' || message.message_type === 'video') return '🎥 Video';
       if (message.kind === 'document') return '📄 Document';
     }
     return 'Attachment';
@@ -155,7 +155,7 @@ const Messages = () => {
     <AppLayout>
       <div className="h-screen bg-background flex flex-col">
         <div className="flex-1 flex overflow-hidden">
-          {/* Conversations List */}
+          {/* Enhanced Conversations List */}
           <div className="w-full max-w-4xl mx-auto border-r bg-card flex flex-col">
             <div className="p-4 border-b">
               <div className="flex items-center justify-between mb-4">
@@ -203,93 +203,93 @@ const Messages = () => {
               ) : (
                 filteredConversations.map((conversation, index) => (
                   <div key={conversation.id}>
-        <div className="flex items-center space-x-3 p-4 cursor-pointer hover:bg-muted transition-colors group"
-          onClick={() => handleConversationClick(conversation.id)}
-        >
-          <div className="relative">
-            <Avatar className="h-12 w-12">
-              <AvatarImage 
-                src={conversation.other_participant?.avatar_url} 
-                alt={conversation.other_participant?.display_name} 
-              />
-              <AvatarFallback className="bg-primary text-primary-foreground">
-                {getInitials(conversation.other_participant?.display_name)}
-              </AvatarFallback>
-            </Avatar>
-          </div>
-          
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between mb-1">
-              <div className="flex items-center gap-2">
-                <p className="font-semibold text-sm truncate">
-                  {conversation.other_participant?.display_name || 'Unknown User'}
-                </p>
-                {conversation.participant_settings?.pinned && (
-                  <Pin className="h-3 w-3 text-primary" />
-                )}
+            <div className="flex items-center space-x-3 p-4 cursor-pointer hover:bg-muted transition-colors group"
+              onClick={() => handleConversationClick(conversation.id)}
+            >
+              <div className="relative">
+                <Avatar className="h-12 w-12">
+                  <AvatarImage 
+                    src={conversation.other_participant?.avatar_url} 
+                    alt={conversation.other_participant?.display_name} 
+                  />
+                  <AvatarFallback className="bg-primary text-primary-foreground">
+                    {getInitials(conversation.other_participant?.display_name)}
+                  </AvatarFallback>
+                </Avatar>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-muted-foreground">
-                  {conversation.last_message?.created_at && 
-                    formatDistanceToNow(new Date(conversation.last_message.created_at), { addSuffix: true })
-                  }
-                </span>
+              
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center gap-2">
+                    <p className="font-semibold text-sm truncate">
+                      {conversation.other_participant?.display_name || 'Unknown User'}
+                    </p>
+                    {conversation.participant_settings?.pinned && (
+                      <Pin className="h-3 w-3 text-primary" />
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground">
+                      {conversation.last_message_at && 
+                        formatDistanceToNow(new Date(conversation.last_message_at), { addSuffix: true })
+                      }
+                    </span>
+                    
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 p-0"
+                        >
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            pinMutation.mutate({
+                              conversationId: conversation.id,
+                              pinned: !conversation.participant_settings?.pinned
+                            });
+                          }}
+                        >
+                          <Pin className="h-4 w-4 mr-2" />
+                          {conversation.participant_settings?.pinned ? 'Unpin' : 'Pin'}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteMutation.mutate(conversation.id);
+                          }}
+                          className="text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Delete conversation
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </div>
                 
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 p-0"
-                    >
-                      <MoreVertical className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        pinMutation.mutate({
-                          conversationId: conversation.id,
-                          pinned: !conversation.participant_settings?.pinned
-                        });
-                      }}
-                    >
-                      <Pin className="h-4 w-4 mr-2" />
-                      {conversation.participant_settings?.pinned ? 'Unpin' : 'Pin'}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        deleteMutation.mutate(conversation.id);
-                      }}
-                      className="text-destructive"
-                    >
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Delete conversation
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <div className="flex items-center gap-2 mb-1">
+                  <Badge variant="secondary" className="text-xs px-1 py-0">
+                    {getRoleDisplay(conversation.other_participant)}
+                  </Badge>
+                </div>
+                
+                <p className="text-sm text-muted-foreground truncate">
+                  {getLastMessagePreview(conversation.last_message)}
+                </p>
               </div>
-            </div>
-            
-            <div className="flex items-center gap-2 mb-1">
-              <Badge variant="secondary" className="text-xs px-1 py-0">
-                {getRoleDisplay(conversation.other_participant)}
-              </Badge>
-            </div>
-            
-            <p className="text-sm text-muted-foreground truncate">
-              {getLastMessagePreview(conversation.last_message)}
-            </p>
-          </div>
 
-          {(conversation.unread_count ?? 0) > 0 && (
-            <Badge className="bg-primary text-primary-foreground h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs">
-              {conversation.unread_count}
-            </Badge>
-          )}
-        </div>
+              {(conversation.unread_count ?? 0) > 0 && (
+                <Badge className="bg-primary text-primary-foreground h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs">
+                  {conversation.unread_count}
+                </Badge>
+              )}
+            </div>
                     {index < filteredConversations.length - 1 && <Separator />}
                   </div>
                 ))
@@ -307,4 +307,4 @@ const Messages = () => {
   );
 };
 
-export default Messages;
+export default EnhancedMessages;
