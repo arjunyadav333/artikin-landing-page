@@ -9,6 +9,10 @@ export interface Application {
   cover_letter?: string;
   status: 'pending' | 'accepted' | 'rejected';
   created_at: string;
+  accepted_at?: string;
+  accepted_by_org_id?: string;
+  rejected_at?: string;
+  rejected_by_org_id?: string;
   opportunities?: {
     id: string;
     title: string;
