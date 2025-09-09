@@ -364,64 +364,23 @@ export default function ManageApplicants() {
                           {/* All tab - Accept/Reject buttons */}
                           {tab === 'all' && application.status === 'pending' && (
                             <>
-                              <div className="hidden sm:flex gap-2">
-                                <Button
-                                  onClick={() => handleAccept(application.id)}
-                                  disabled={updateStatus.isPending}
-                                  className="h-9 px-3 text-sm font-medium bg-[#2563EB] hover:bg-[#1E40AF] text-white rounded-lg"
-                                  aria-label={`Accept ${fullname}`}
-                                >
-                                  Accept
-                                </Button>
-                                <Button
-                                  onClick={() => handleReject(application.id)}
-                                  disabled={updateStatus.isPending}
-                                  variant="outline"
-                                  className="h-9 px-3 text-sm font-medium border border-[#FCA5A5] text-[#DC2626] hover:bg-[#FEF2F2] rounded-lg"
-                                  aria-label={`Reject ${fullname}`}
-                                >
-                                  Reject
-                                </Button>
-                              </div>
-                              {/* Mobile - show three-dots only */}
-                              <div className="sm:hidden">
-                                <DropdownMenu>
-                                  <DropdownMenuTrigger asChild>
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      className="h-9 w-9 p-0 rounded-full"
-                                      aria-label={`More options for ${fullname}`}
-                                    >
-                                      <MoreHorizontal className="h-3.5 w-3.5" />
-                                    </Button>
-                                  </DropdownMenuTrigger>
-                                  <DropdownMenuContent align="end" role="menu">
-                                    <DropdownMenuItem 
-                                      onClick={() => handleAccept(application.id)}
-                                      disabled={updateStatus.isPending}
-                                    >
-                                      Accept
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem 
-                                      onClick={() => handleReject(application.id)}
-                                      disabled={updateStatus.isPending}
-                                    >
-                                      Reject
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem 
-                                      onClick={() => profile?.id && handleMessage(profile.id)}
-                                    >
-                                      Message
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem 
-                                      onClick={() => profile?.id && handleViewProfile(profile.id)}
-                                    >
-                                      View Profile
-                                    </DropdownMenuItem>
-                                  </DropdownMenuContent>
-                                </DropdownMenu>
-                              </div>
+                              <Button
+                                onClick={() => handleAccept(application.id)}
+                                disabled={updateStatus.isPending}
+                                className="h-9 px-3 text-sm font-medium bg-[#2563EB] hover:bg-[#1E40AF] text-white rounded-lg"
+                                aria-label={`Accept ${fullname}`}
+                              >
+                                Accept
+                              </Button>
+                              <Button
+                                onClick={() => handleReject(application.id)}
+                                disabled={updateStatus.isPending}
+                                variant="outline"
+                                className="h-9 px-3 text-sm font-medium border border-[#FCA5A5] text-[#DC2626] hover:bg-[#FEF2F2] rounded-lg"
+                                aria-label={`Reject ${fullname}`}
+                              >
+                                Reject
+                              </Button>
                             </>
                           )}
 
