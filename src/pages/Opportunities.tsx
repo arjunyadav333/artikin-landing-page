@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -30,6 +31,7 @@ const Opportunities = () => {
   const deleteApplication = useDeleteApplication();
   const { toast } = useToast();
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
 
   // Handle role determination with null/undefined role support
   const userRole = currentProfile?.role;
@@ -116,6 +118,10 @@ const Opportunities = () => {
   const handleViewOpportunity = (opportunityId: string) => {
     // TODO: Navigate to opportunity detail page
     console.log("View opportunity:", opportunityId);
+  };
+
+  const handleManageApplicants = (opportunityId: string) => {
+    navigate(`/opportunities/${opportunityId}/applicants`);
   };
 
   // Wait for profile to load before showing role-specific content
@@ -250,19 +256,20 @@ const Opportunities = () => {
                     <div className="grid gap-3 md:gap-6 mb-4 md:mb-8 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
                       <AnimatePresence>
                         {filteredOpportunities.map((opportunity, index) => (
-                          <OpportunityCard
-                            key={opportunity.id}
-                          opportunity={{
-                            ...opportunity,
-                            user_id: opportunity.user_id,
-                            created_at: opportunity.created_at,
-                            applications_count: opportunity.applications_count,
-                            views_count: opportunity.views_count || 0
-                          }}
-                          currentUserRole={currentProfile?.role}
-                          currentUserId={currentProfile?.user_id}
-                          onApply={handleApply}
-                          />
+                           <OpportunityCard
+                             key={opportunity.id}
+                           opportunity={{
+                             ...opportunity,
+                             user_id: opportunity.user_id,
+                             created_at: opportunity.created_at,
+                             applications_count: opportunity.applications_count,
+                             views_count: opportunity.views_count || 0
+                           }}
+                           currentUserRole={currentProfile?.role}
+                           currentUserId={currentProfile?.user_id}
+                           onApply={handleApply}
+                           onManageApplicants={handleManageApplicants}
+                           />
                         ))}
                       </AnimatePresence>
                     </div>
