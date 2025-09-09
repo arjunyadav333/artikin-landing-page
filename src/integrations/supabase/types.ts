@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      applicant_history: {
+        Row: {
+          application_id: string
+          changed_at: string
+          changed_by_user_id: string
+          created_at: string
+          id: string
+          new_status: string
+          old_status: string | null
+          reason: string | null
+        }
+        Insert: {
+          application_id: string
+          changed_at?: string
+          changed_by_user_id: string
+          created_at?: string
+          id?: string
+          new_status: string
+          old_status?: string | null
+          reason?: string | null
+        }
+        Update: {
+          application_id?: string
+          changed_at?: string
+          changed_by_user_id?: string
+          created_at?: string
+          id?: string
+          new_status?: string
+          old_status?: string | null
+          reason?: string | null
+        }
+        Relationships: []
+      }
       comments: {
         Row: {
           content: string
@@ -474,26 +507,38 @@ export type Database = {
       }
       opportunity_applications: {
         Row: {
+          accepted_at: string | null
+          accepted_by_org_id: string | null
           cover_letter: string | null
           created_at: string | null
           id: string
           opportunity_id: string
+          rejected_at: string | null
+          rejected_by_org_id: string | null
           status: string | null
           user_id: string
         }
         Insert: {
+          accepted_at?: string | null
+          accepted_by_org_id?: string | null
           cover_letter?: string | null
           created_at?: string | null
           id?: string
           opportunity_id: string
+          rejected_at?: string | null
+          rejected_by_org_id?: string | null
           status?: string | null
           user_id: string
         }
         Update: {
+          accepted_at?: string | null
+          accepted_by_org_id?: string | null
           cover_letter?: string | null
           created_at?: string | null
           id?: string
           opportunity_id?: string
+          rejected_at?: string | null
+          rejected_by_org_id?: string | null
           status?: string | null
           user_id?: string
         }
