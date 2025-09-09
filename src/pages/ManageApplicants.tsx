@@ -2,38 +2,42 @@ import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import {
   ArrowLeft,
-  User,
   Clock,
   Check,
   X,
   Users,
   Search,
-  MoreVertical,
-  MessageSquare,
-  Download
+  Info,
+  MessageSquare
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
-import { useOpportunityApplications, useUpdateApplicationStatus } from "@/hooks/useApplications";
+import { useOpportunityApplications, useUpdateApplicationStatus, useDeleteApplication } from "@/hooks/useApplications";
 import { useOrganizationOpportunities } from "@/hooks/useOrganizationOpportunities";
+import { ApplicantDetailsModal } from "@/components/manage-applicants/applicant-details-modal";
+import { ApplicantActionsMenu } from "@/components/manage-applicants/applicant-actions-menu";
+import type { Application } from "@/hooks/useApplications";
 
 export default function ManageApplicants() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
+  const [undoTimeout, setUndoTimeout] = useState<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
 
   const { data: opportunities } = useOrganizationOpportunities();
   const { data: applications = [], isLoading } = useOpportunityApplications(id || '');
   const updateStatus = useUpdateApplicationStatus();
+  const deleteApplication = useDeleteApplication();
 
   const opportunity = opportunities?.find(opp => opp.id === id);
 
@@ -44,10 +48,7 @@ export default function ManageApplicants() {
   const handleAccept = async (applicationId: string) => {
     try {
       await updateStatus.mutateAsync({ applicationId, status: 'accepted' });
-      toast({
-        title: "Application accepted",
-        description: "The applicant has been notified of their acceptance."
-      });
+      showUndoToast("Application accepted", () => handleRevoke(applicationId));
     } catch (error) {
       console.error('Failed to accept application:', error);
     }
@@ -56,18 +57,70 @@ export default function ManageApplicants() {
   const handleReject = async (applicationId: string) => {
     try {
       await updateStatus.mutateAsync({ applicationId, status: 'rejected' });
-      toast({
-        title: "Application rejected", 
-        description: "The applicant has been notified of the decision."
-      });
+      showUndoToast("Application rejected", () => handleRevoke(applicationId));
     } catch (error) {
       console.error('Failed to reject application:', error);
     }
   };
 
+  const handleRevoke = async (applicationId: string) => {
+    try {
+      await updateStatus.mutateAsync({ applicationId, status: 'pending' });
+      toast({
+        title: "Status reverted",
+        description: "Application status has been reset to pending."
+      });
+    } catch (error) {
+      console.error('Failed to revoke status:', error);
+    }
+  };
+
+  const handleRemove = async (applicationId: string) => {
+    try {
+      await deleteApplication.mutateAsync(applicationId);
+    } catch (error) {
+      console.error('Failed to remove application:', error);
+    }
+  };
+
   const handleViewProfile = (userId: string) => {
-    // Navigate to user profile - you can implement this route as needed
     navigate(`/profile/${userId}`);
+  };
+
+  const handleMessage = (userId: string) => {
+    // Navigate to messaging - implement based on your messaging routes
+    navigate(`/messages?user=${userId}`);
+  };
+
+  const showUndoToast = (message: string, undoFn: () => void) => {
+    if (undoTimeout) {
+      clearTimeout(undoTimeout);
+    }
+
+    const { dismiss } = toast({
+      title: message,
+      description: "Undo within 5 seconds",
+      action: (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            undoFn();
+            dismiss();
+            if (undoTimeout) clearTimeout(undoTimeout);
+          }}
+        >
+          Undo
+        </Button>
+      ),
+      duration: 5000
+    });
+
+    const timeout = setTimeout(() => {
+      dismiss();
+    }, 5000);
+    
+    setUndoTimeout(timeout);
   };
 
   const filteredApplications = applications.filter(app => {
@@ -102,222 +155,262 @@ export default function ManageApplicants() {
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="min-h-screen bg-background w-full"
-    >
-      {/* Full-width header */}
-      <div className="w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40">
-        <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4">
-          <Button 
-            variant="ghost" 
-            onClick={handleBack}
-            className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            <span className="hidden sm:inline">Back</span>
-          </Button>
-          {opportunity && (
-            <div className="flex items-center gap-3">
-              <div className="text-right">
-                <h1 className="text-sm font-medium text-foreground truncate max-w-48 sm:max-w-none">
-                  {opportunity.title}
-                </h1>
-                <p className="text-xs text-muted-foreground">{opportunity.organization_name}</p>
+    <>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="min-h-screen bg-background w-full"
+      >
+        {/* Header */}
+        <div className="w-full border-b bg-background/95 backdrop-blur sticky top-0 z-40">
+          <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4">
+            <Button 
+              variant="ghost" 
+              onClick={handleBack}
+              className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              <span className="hidden sm:inline">Back</span>
+            </Button>
+            
+            {opportunity && (
+              <div className="flex items-center gap-3">
+                <div className="text-right">
+                  <h1 className="text-lg font-semibold text-foreground truncate max-w-48 sm:max-w-none">
+                    {opportunity.title}
+                  </h1>
+                  <p className="text-sm text-muted-foreground">
+                    {opportunity.organization_name} • {opportunity.location}
+                  </p>
+                </div>
               </div>
-              {opportunity.image_url && (
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src={opportunity.image_url} />
-                  <AvatarFallback className="text-xs">
-                    {opportunity.organization_name?.charAt(0) || 'O'}
-                  </AvatarFallback>
-                </Avatar>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Main content */}
-      <div className="w-full px-4 sm:px-6 lg:px-8 py-6">
-        {/* Search bar */}
-        <div className="mb-6">
-          <div className="relative max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search applicants..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
+            )}
           </div>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3 sm:grid-cols-3 max-w-md">
-            <TabsTrigger value="all" className="text-xs sm:text-sm">All ({stats.total})</TabsTrigger>
-            <TabsTrigger value="accepted" className="text-xs sm:text-sm">Accepted ({stats.accepted})</TabsTrigger>
-            <TabsTrigger value="rejected" className="text-xs sm:text-sm">Rejected ({stats.rejected})</TabsTrigger>
-          </TabsList>
+        {/* Main Content */}
+        <div className="w-full px-4 sm:px-6 lg:px-8 py-6">
+          {/* Search */}
+          <div className="mb-6">
+            <div className="relative max-w-md">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search applicants..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+          </div>
 
-          {['all', 'accepted', 'rejected'].map(tab => (
-            <TabsContent key={tab} value={tab}>
-              {filteredApplications.length === 0 ? (
-                <Card>
-                  <CardContent className="p-12 text-center">
+          {/* Tabs */}
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+            <TabsList className="grid w-full grid-cols-3 max-w-md">
+              <TabsTrigger value="all">All ({stats.total})</TabsTrigger>
+              <TabsTrigger value="accepted">Accepted ({stats.accepted})</TabsTrigger>
+              <TabsTrigger value="rejected">Rejected ({stats.rejected})</TabsTrigger>
+            </TabsList>
+
+            {/* Tab Content */}
+            {['all', 'accepted', 'rejected'].map(tab => (
+              <TabsContent key={tab} value={tab}>
+                {filteredApplications.length === 0 ? (
+                  <div className="text-center py-12">
                     <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                    <h3 className="text-lg font-medium mb-2">No applications</h3>
+                    <h3 className="text-lg font-medium mb-2">
+                      {tab === 'all' ? 'No applicants yet' : 
+                       tab === 'accepted' ? 'No accepted applicants' : 
+                       'No rejected applicants'}
+                    </h3>
                     <p className="text-muted-foreground">
-                      {tab === 'all' ? 'No applications yet.' : `No ${tab} applications.`}
+                      {tab === 'all' ? 'Applications will appear here when submitted.' : 
+                       `No applicants have been ${tab} yet.`}
                     </p>
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="space-y-3">
-                  {filteredApplications.map((application) => (
-                    <Card key={application.id} className="hover:shadow-md transition-all duration-200">
-                      <CardContent className="p-4 sm:p-6">
-                        <div className="flex items-start gap-3 sm:gap-4">
-                          {/* Avatar */}
-                          <Avatar 
-                            className="h-10 w-10 sm:h-12 sm:w-12 cursor-pointer hover:opacity-80 transition-opacity"
-                            onClick={() => application.profiles?.id && handleViewProfile(application.profiles.id)}
-                          >
-                            <AvatarImage src={application.profiles?.avatar_url} />
-                            <AvatarFallback className="bg-primary/10 text-primary font-medium">
-                              {(application.profiles?.display_name || application.profiles?.username || 'U')
-                                .split(' ')
-                                .map(n => n[0])
-                                .join('')
-                                .toUpperCase()
-                                .slice(0, 2)}
-                            </AvatarFallback>
-                          </Avatar>
-                          
-                          {/* Content */}
-                          <div className="flex-1 min-w-0">
-                            {/* Name & Status Row */}
-                            <div className="flex items-start justify-between gap-2 mb-1">
-                              <div className="min-w-0 flex-1">
-                                <button
-                                  onClick={() => application.profiles?.id && handleViewProfile(application.profiles.id)}
-                                  className="font-medium text-foreground hover:text-primary transition-colors text-left truncate block"
-                                >
-                                  {application.profiles?.display_name || application.profiles?.username || 'Unknown User'}
-                                </button>
-                                <p className="text-xs sm:text-sm text-muted-foreground">
-                                  @{application.profiles?.username || 'unknown'}
-                                </p>
-                              </div>
-                              
-                              {/* Actions for desktop */}
-                              <div className="hidden sm:flex items-center gap-2">
-                                {(activeTab === 'all' || application.status === 'pending') && (
-                                  <>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {filteredApplications.map((application) => {
+                      const profile = application.profiles;
+                      return (
+                        <div key={application.id} className="w-full p-4 border rounded-lg hover:shadow-sm transition-shadow bg-background">
+                          <div className="flex items-center gap-4">
+                            {/* Avatar */}
+                            <Avatar 
+                              className="h-12 w-12 sm:h-16 sm:w-16 cursor-pointer hover:opacity-80 transition-opacity"
+                              onClick={() => profile?.id && handleViewProfile(profile.id)}
+                            >
+                              <AvatarImage src={profile?.avatar_url} />
+                              <AvatarFallback className="bg-primary/10 text-primary font-medium">
+                                {(profile?.display_name || profile?.username || 'U')
+                                  .split(' ')
+                                  .map(n => n[0])
+                                  .join('')
+                                  .toUpperCase()
+                                  .slice(0, 2)}
+                              </AvatarFallback>
+                            </Avatar>
+
+                            {/* Content */}
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-start justify-between gap-2">
+                                <div className="min-w-0 flex-1">
+                                  {/* Name */}
+                                  <button
+                                    onClick={() => profile?.id && handleViewProfile(profile.id)}
+                                    className="font-semibold text-foreground hover:text-primary transition-colors text-left"
+                                  >
+                                    {profile?.display_name || profile?.username || 'Unknown User'}
+                                  </button>
+                                  {/* Username */}
+                                  <button
+                                    onClick={() => profile?.id && handleViewProfile(profile.id)} 
+                                    className="block text-sm text-muted-foreground hover:text-primary transition-colors"
+                                  >
+                                    @{profile?.username || 'unknown'}
+                                  </button>
+                                  
+                                  {/* Metadata badges */}
+                                  <div className="flex flex-wrap items-center gap-2 mt-1">
+                                    {profile?.artform && (
+                                      <Badge variant="secondary" className="text-xs">
+                                        {profile.artform}
+                                      </Badge>
+                                    )}
+                                    {profile?.location && (
+                                      <Badge variant="outline" className="text-xs">
+                                        {profile.location}
+                                      </Badge>
+                                    )}
+                                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                      <Clock className="h-3 w-3" />
+                                      Applied {formatDistanceToNow(new Date(application.created_at), { addSuffix: true })}
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Desktop Actions */}
+                                <div className="hidden sm:flex items-center gap-2">
+                                  {application.status === 'pending' && (
                                     <Button
                                       size="sm"
                                       variant="ghost"
                                       onClick={() => handleAccept(application.id)}
-                                      disabled={updateStatus.isPending || application.status !== 'pending'}
+                                      disabled={updateStatus.isPending}
                                       className="h-8 w-8 p-0 text-green-600 hover:text-green-700 hover:bg-green-50"
-                                      aria-label="Accept application"
+                                      title="Accept"
                                     >
                                       <Check className="h-4 w-4" />
                                     </Button>
+                                  )}
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => setSelectedApplication(application)}
+                                    className="h-8 w-8 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                    title="View details"
+                                  >
+                                    <Info className="h-4 w-4" />
+                                  </Button>
+                                  <ApplicantActionsMenu
+                                    application={application}
+                                    onViewProfile={handleViewProfile}
+                                    onMessage={handleMessage}
+                                    onAccept={handleAccept}
+                                    onReject={handleReject}
+                                    onRevoke={handleRevoke}
+                                    onRemove={handleRemove}
+                                    disabled={updateStatus.isPending || deleteApplication.isPending}
+                                  />
+                                </div>
+                              </div>
+
+                              {/* Status for Accepted/Rejected */}
+                              {application.status !== 'pending' && (
+                                <div className="mt-2">
+                                  <Badge 
+                                    variant={application.status === 'accepted' ? 'default' : 'destructive'}
+                                    className="text-xs"
+                                  >
+                                    {application.status === 'accepted' ? 'Accepted' : 'Rejected'}
+                                  </Badge>
+                                  {application.status === 'accepted' && (
                                     <Button
                                       size="sm"
-                                      variant="ghost"
-                                      onClick={() => handleReject(application.id)}
-                                      disabled={updateStatus.isPending || application.status !== 'pending'}
-                                      className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
-                                      aria-label="Reject application"
+                                      variant="outline"
+                                      onClick={() => profile?.id && handleMessage(profile.id)}
+                                      className="ml-2 h-7 text-xs"
                                     >
-                                      <X className="h-4 w-4" />
+                                      <MessageSquare className="h-3 w-3 mr-1" />
+                                      Message
                                     </Button>
-                                  </>
-                                )}
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  className="h-8 w-8 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                                  aria-label="More options"
-                                >
-                                  <MoreVertical className="h-4 w-4" />
-                                </Button>
-                              </div>
+                                  )}
+                                </div>
+                              )}
                             </div>
-                            
-                            {/* Status & Time */}
-                            <div className="flex items-center gap-2 mb-2 text-xs sm:text-sm text-muted-foreground">
-                              <Badge 
-                                variant={
-                                  application.status === 'accepted' ? 'default' :
-                                  application.status === 'rejected' ? 'destructive' :
-                                  'secondary'
-                                }
-                                className="text-xs"
-                              >
-                                {application.status}
-                              </Badge>
-                              <Clock className="h-3 w-3" />
-                              <span>Applied {formatDistanceToNow(new Date(application.created_at), { addSuffix: true })}</span>
-                            </div>
-                            
-                            {/* Cover Letter Preview */}
-                            {application.cover_letter && (
-                              <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2 bg-muted/50 p-2 rounded">
-                                {application.cover_letter}
-                              </p>
-                            )}
-                            
+
                             {/* Mobile Actions */}
-                            <div className="sm:hidden flex items-center justify-end gap-2 mt-3">
-                              {(activeTab === 'all' || application.status === 'pending') && (
-                                <>
+                            <div className="sm:hidden flex flex-col gap-2">
+                              {application.status === 'pending' && (
+                                <div className="flex gap-2">
                                   <Button
                                     size="sm"
                                     variant="outline"
                                     onClick={() => handleReject(application.id)}
-                                    disabled={updateStatus.isPending || application.status !== 'pending'}
-                                    className="text-red-600 border-red-200 hover:bg-red-50 min-h-[44px]"
+                                    disabled={updateStatus.isPending}
+                                    className="text-red-600 border-red-200 hover:bg-red-50"
                                   >
-                                    <X className="h-4 w-4 mr-1" />
-                                    Reject
+                                    <X className="h-4 w-4" />
                                   </Button>
                                   <Button
                                     size="sm"
                                     onClick={() => handleAccept(application.id)}
-                                    disabled={updateStatus.isPending || application.status !== 'pending'}
-                                    className="bg-green-600 hover:bg-green-700 min-h-[44px]"
+                                    disabled={updateStatus.isPending}
+                                    className="bg-green-600 hover:bg-green-700"
                                   >
-                                    <Check className="h-4 w-4 mr-1" />
-                                    Accept
+                                    <Check className="h-4 w-4" />
                                   </Button>
-                                </>
+                                </div>
                               )}
-                              {application.status !== 'pending' && (
+                              <div className="flex gap-2">
                                 <Button
                                   size="sm"
                                   variant="outline"
-                                  className="min-h-[44px]"
+                                  onClick={() => setSelectedApplication(application)}
+                                  className="flex-1"
                                 >
-                                  <MessageSquare className="h-4 w-4 mr-1" />
-                                  Message
+                                  <Info className="h-4 w-4" />
                                 </Button>
-                              )}
+                                <ApplicantActionsMenu
+                                  application={application}
+                                  onViewProfile={handleViewProfile}
+                                  onMessage={handleMessage}
+                                  onAccept={handleAccept}
+                                  onReject={handleReject}
+                                  onRevoke={handleRevoke}
+                                  onRemove={handleRemove}
+                                  disabled={updateStatus.isPending || deleteApplication.isPending}
+                                />
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
-            </TabsContent>
-          ))}
-        </Tabs>
-      </div>
-    </motion.div>
+                      );
+                    })}
+                  </div>
+                )}
+              </TabsContent>
+            ))}
+          </Tabs>
+        </div>
+      </motion.div>
+
+      {/* Application Details Modal */}
+      <ApplicantDetailsModal
+        application={selectedApplication}
+        isOpen={!!selectedApplication}
+        onClose={() => setSelectedApplication(null)}
+        onViewProfile={handleViewProfile}
+      />
+    </>
   );
 }

@@ -98,7 +98,7 @@ export const useUpdateApplicationStatus = () => {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async ({ applicationId, status }: { applicationId: string; status: 'accepted' | 'rejected' }) => {
+    mutationFn: async ({ applicationId, status }: { applicationId: string; status: 'pending' | 'accepted' | 'rejected' }) => {
       const { data, error } = await supabase
         .from('opportunity_applications')
         .update({ status })
