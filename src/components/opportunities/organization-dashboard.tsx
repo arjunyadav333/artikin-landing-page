@@ -10,7 +10,7 @@ import { useOrganizationOpportunities, useUpdateOpportunityStatus, useDeleteOppo
 import { ApplicantManagement } from "./applicant-management";
 import { ComprehensivePostModal } from "./comprehensive-post-modal";
 import { EditOpportunityModal } from "./edit-opportunity-modal";
-import { OrganizationOpportunityCard } from "./organization-opportunity-card";
+import { OpportunityCard } from "./opportunity-card";
 import { ShareOpportunityModal } from "./share-opportunity-modal";
 import { formatDistanceToNow, format } from "date-fns";
 
@@ -171,15 +171,29 @@ export function OrganizationDashboard() {
               ) : filteredOpportunities.length > 0 ? (
                 // Opportunities list with new card design
                 filteredOpportunities.map((opportunity, index) => (
-                  <OrganizationOpportunityCard
+                  <OpportunityCard
                     key={opportunity.id}
-                    opportunity={opportunity}
-                    index={index}
+                    opportunity={{
+                      id: opportunity.id,
+                      title: opportunity.title,
+                      organization: {
+                        id: opportunity.profiles?.user_id || '',
+                        name: opportunity.profiles?.display_name || opportunity.company || 'Unknown Organization',
+                        logo_url: opportunity.profiles?.avatar_url
+                      },
+                      gender: "Any", // Default or map from your data structure
+                      artform: opportunity.tags?.[0] || "General", // Use first tag as artform
+                      location: opportunity.location,
+                      deadline: opportunity.deadline,
+                      description: opportunity.description,
+                      posted_at: opportunity.created_at,
+                      views_count: opportunity.views_count || 0,
+                      applicants_count: opportunity.applications_count || 0,
+                      is_owner: true // Organizations are owners of their opportunities
+                    }}
+                    onEdit={() => handleEdit(opportunity)}
                     onManageApplicants={handleManageApplicants}
-                    onEdit={handleEdit}
-                    onShare={handleShare}
                     onDelete={handleDeleteOpportunity}
-                    onViewDetails={handleViewDetails}
                   />
                 ))
               ) : (

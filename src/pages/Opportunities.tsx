@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Plus, Search, Filter } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { EnhancedOpportunityCard } from "@/components/opportunities/enhanced-opportunity-card";
+import { OpportunityCard } from "@/components/opportunities/opportunity-card";
 import { ApplicationCard } from "@/components/opportunities/application-card";
 import { OrganizationDashboard } from "@/components/opportunities/organization-dashboard";
 import { OpportunitySkeletonCard, ApplicationSkeletonCard } from "@/components/opportunities/skeleton-card";
@@ -250,17 +250,27 @@ const Opportunities = () => {
                     <div className="grid gap-3 md:gap-6 mb-4 md:mb-8 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
                       <AnimatePresence>
                         {filteredOpportunities.map((opportunity, index) => (
-                          <EnhancedOpportunityCard
+                          <OpportunityCard
                             key={opportunity.id}
-                            opportunity={opportunity}
-                            index={index}
-                            onApply={handleApply}
-                            onSave={(id) => {
-                              toast({
-                                title: "Feature coming soon",
-                                description: "Save functionality will be available in the next update."
-                              });
+                            opportunity={{
+                              id: opportunity.id,
+                              title: opportunity.title,
+                              organization: {
+                                id: opportunity.profiles?.user_id || '',
+                                name: opportunity.profiles?.display_name || opportunity.company || 'Unknown Organization',
+                                logo_url: opportunity.profiles?.avatar_url
+                              },
+                              gender: "Any", // Default or map from your data
+                              artform: opportunity.tags?.[0] || "General", // Use first tag as artform
+                              location: opportunity.location,
+                              deadline: opportunity.deadline,
+                              description: opportunity.description,
+                              posted_at: opportunity.created_at,
+                              views_count: Math.floor(Math.random() * 200) + 100, // Placeholder until you have real data
+                              applicants_count: opportunity.applications_count || 0,
+                              is_owner: false // Artists are not owners
                             }}
+                            onApply={handleApply}
                           />
                         ))}
                       </AnimatePresence>
