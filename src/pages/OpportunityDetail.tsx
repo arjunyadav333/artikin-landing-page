@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { 
   ArrowLeft, 
@@ -17,35 +16,37 @@ import {
   Share2,
   Edit3,
   Trash2,
-  MoreHorizontal,
+  User,
   Briefcase,
   Building,
-  Globe,
-  DollarSign
+  DollarSign,
+  FileText,
+  Languages,
+  Award,
+  Image as ImageIcon
 } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { formatDistanceToNow, format } from "date-fns";
 import { ShareOpportunityModal } from "@/components/opportunities/share-opportunity-modal";
-import { EditOpportunityModal } from "@/components/opportunities/edit-opportunity-modal";
+import { ConfirmDeleteModal } from "@/components/opportunities/confirm-delete-modal";
 import { useOrganizationOpportunities, useDeleteOpportunity } from "@/hooks/useOrganizationOpportunities";
+import { useCurrentProfile } from "@/hooks/useProfiles";
 
 function OpportunityDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [showShareModal, setShowShareModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   
   const { data: opportunities } = useOrganizationOpportunities();
+  const { data: currentProfile } = useCurrentProfile();
   const deleteOpportunity = useDeleteOpportunity();
   
   const opportunity = opportunities?.find(opp => opp.id === id);
+  
+  // Check if current user is the owner
+  const isOwner = opportunity && currentProfile && opportunity.user_id === currentProfile.user_id;
+  const isArtist = currentProfile?.role === 'artist';
 
   useEffect(() => {
     if (!id) {
@@ -61,21 +62,31 @@ function OpportunityDetail() {
     navigate(`/opportunities?action=manage&id=${id}`);
   };
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
     if (!opportunity) return;
     
-    if (window.confirm(`Are you sure you want to delete "${opportunity.title}"? This will archive the opportunity.`)) {
-      try {
-        await deleteOpportunity.mutateAsync(opportunity.id);
-        toast({
-          title: "Opportunity deleted",
-          description: "The opportunity has been successfully deleted."
-        });
-        navigate("/opportunities");
-      } catch (error) {
-        // Error handling is done in the mutation
-      }
+    try {
+      await deleteOpportunity.mutateAsync(opportunity.id);
+      toast({
+        title: "Opportunity deleted",
+        description: "The opportunity has been successfully deleted."
+      });
+      navigate("/opportunities");
+    } catch (error) {
+      // Error handling is done in the mutation
     }
+  };
+
+  const handleApply = () => {
+    // TODO: Implement apply logic
+    toast({
+      title: "Application submitted",
+      description: "Your application has been submitted successfully."
+    });
   };
 
   const formatSalary = (min?: number, max?: number) => {
@@ -110,246 +121,321 @@ function OpportunityDetail() {
       animate={{ opacity: 1 }}
       className="min-h-screen bg-background pb-20 md:pb-8"
     >
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-4">
-            <Button 
-              variant="ghost" 
-              onClick={handleBack}
-              className="p-2 h-10 w-10"
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <div>
-              <h1 className="text-xl md:text-2xl font-bold text-foreground">
-                {opportunity.title}
-              </h1>
-              <p className="text-sm text-muted-foreground">Opportunity Details</p>
-            </div>
-          </div>
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {/* Header - Back button and Action buttons */}
+        <div className="flex items-center justify-between mb-8">
+          <Button 
+            variant="ghost" 
+            onClick={handleBack}
+            className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span className="hidden sm:inline">Back to Opportunities</span>
+            <span className="sm:hidden">Back</span>
+          </Button>
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-10 w-10 p-0">
-                <MoreHorizontal className="h-5 w-5" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem onClick={() => setShowShareModal(true)}>
-                <Share2 className="h-4 w-4 mr-2" />
-                Share
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem 
-                className="text-destructive" 
-                onClick={handleDelete}
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Hero Image/Card */}
-            <Card className="overflow-hidden">
-              {opportunity.image_url ? (
-                <div className="aspect-video w-full">
-                  <img 
-                    src={opportunity.image_url} 
-                    alt={opportunity.title}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              ) : (
-                <div className="aspect-video w-full bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
-                  <Briefcase className="w-16 h-16 text-primary/50" />
-                </div>
-              )}
-              
-              <CardContent className="p-6">
-                <div className="flex items-start gap-4">
-                  <Avatar className="w-16 h-16 rounded-lg">
-                    <AvatarImage src={opportunity.image_url} alt={opportunity.title} />
-                    <AvatarFallback className="rounded-lg bg-primary/10">
-                      <Building className="w-6 h-6 text-primary" />
-                    </AvatarFallback>
-                  </Avatar>
-                  
-                  <div className="flex-1 space-y-2">
-                    <h2 className="text-xl font-semibold">{opportunity.title}</h2>
-                    <p className="text-lg text-muted-foreground font-medium">
-                      {opportunity.company || opportunity.organization_name}
-                    </p>
-                    
-                    <div className="flex flex-wrap gap-2">
-                      {opportunity.art_forms?.map((artform: string, index: number) => (
-                        <Badge 
-                          key={index}
-                          className="bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100"
-                        >
-                          {artform}
-                        </Badge>
-                      ))}
-                      <Badge variant={opportunity.status === 'active' ? 'default' : 'secondary'}>
-                        {opportunity.status === 'active' ? 'Active' : 'Closed'}
-                      </Badge>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Description */}
-            <Card>
-              <CardContent className="p-6">
-                <h3 className="text-lg font-semibold mb-4">Description</h3>
-                <div className="prose prose-sm max-w-none">
-                  <p className="text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                    {opportunity.description}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Requirements & Details */}
-            <Card>
-              <CardContent className="p-6">
-                <h3 className="text-lg font-semibold mb-4">Requirements</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {opportunity.experience_level && (
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground mb-1">Experience Level</p>
-                      <p className="text-sm">{opportunity.experience_level}</p>
-                    </div>
-                  )}
-                  
-                  {opportunity.gender_preference && opportunity.gender_preference.length > 0 && (
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground mb-1">Gender Preference</p>
-                      <p className="text-sm">{opportunity.gender_preference.join(", ")}</p>
-                    </div>
-                  )}
-                  
-                  {opportunity.language_preference && opportunity.language_preference.length > 0 && (
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground mb-1">Languages</p>
-                      <p className="text-sm">{opportunity.language_preference.join(", ")}</p>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Actions */}
-            <Card>
-              <CardContent className="p-6 space-y-3">
+          {/* Role-based action buttons */}
+          <div className="flex items-center gap-2">
+            {isOwner ? (
+              <>
                 <Button 
                   onClick={handleManageApplicants}
-                  className="w-full h-12 bg-primary hover:bg-primary/90"
+                  size="sm"
+                  className="hidden sm:flex"
                 >
                   <Users className="w-4 h-4 mr-2" />
                   Manage Applicants
                 </Button>
-                
-                <Button 
-                  variant="outline" 
-                  onClick={() => setShowEditModal(true)}
-                  className="w-full h-10"
-                >
-                  <Edit3 className="w-4 h-4 mr-2" />
-                  Edit Opportunity
-                </Button>
-                
                 <Button 
                   variant="outline" 
                   onClick={() => setShowShareModal(true)}
-                  className="w-full h-10"
+                  size="sm"
                 >
                   <Share2 className="w-4 h-4 mr-2" />
-                  Share
+                  <span className="hidden sm:inline">Share</span>
                 </Button>
-              </CardContent>
-            </Card>
-
-            {/* Quick Info */}
-            <Card>
-              <CardContent className="p-6 space-y-4">
-                <h3 className="font-semibold">Quick Info</h3>
-                
-                <div className="space-y-3 text-sm">
-                  <div className="flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-muted-foreground" />
-                    <span>{formatLocation()}</span>
-                  </div>
-                  
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-muted-foreground" />
-                    <span>Posted {formatDistanceToNow(new Date(opportunity.created_at))} ago</span>
-                  </div>
-                  
-                  {opportunity.deadline && (
-                    <div className="flex items-center gap-2">
-                      <Clock className="w-4 h-4 text-muted-foreground" />
-                      <span>Deadline: {format(new Date(opportunity.deadline), 'MMM d, yyyy')}</span>
-                    </div>
-                  )}
-                  
-                  {formatSalary(opportunity.salary_min, opportunity.salary_max) && (
-                    <div className="flex items-center gap-2">
-                      <DollarSign className="w-4 h-4 text-muted-foreground" />
-                      <span>{formatSalary(opportunity.salary_min, opportunity.salary_max)}</span>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Stats */}
-            <Card>
-              <CardContent className="p-6">
-                <h3 className="font-semibold mb-4">Statistics</h3>
-                <div className="grid grid-cols-2 gap-4 text-center">
-                  <div>
-                    <div className="text-2xl font-bold text-primary">
-                      {opportunity.views_count || 0}
-                    </div>
-                    <div className="text-sm text-muted-foreground">Views</div>
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold text-primary">
-                      {opportunity.applications_count || 0}
-                    </div>
-                    <div className="text-sm text-muted-foreground">Applications</div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+              </>
+            ) : isArtist && (
+              <>
+                <Button 
+                  variant="outline"
+                  onClick={() => setShowShareModal(true)}
+                  size="sm"
+                >
+                  <Share2 className="w-4 w-4 mr-2" />
+                  <span className="hidden sm:inline">Share</span>
+                </Button>
+                <Button 
+                  onClick={handleApply}
+                  size="sm"
+                >
+                  Apply Now
+                </Button>
+              </>
+            )}
           </div>
         </div>
+
+        {/* Single Section Layout */}
+        <Card className="overflow-hidden">
+          {/* Hero Banner */}
+          <div className="relative">
+            {opportunity.image_url ? (
+              <div className="w-full h-48 md:h-64 lg:h-80">
+                <img 
+                  src={opportunity.image_url} 
+                  alt={opportunity.title}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            ) : (
+              <div className="w-full h-48 md:h-64 lg:h-80 bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
+                <Briefcase className="w-16 h-16 md:w-20 md:h-20 text-primary/50" />
+              </div>
+            )}
+            
+            {/* Organization logo overlay */}
+            {opportunity.image_url && (
+              <div className="absolute bottom-4 left-4">
+                <Avatar className="w-16 h-16 md:w-20 md:h-20 border-4 border-background shadow-lg">
+                  <AvatarImage src={opportunity.image_url} alt={opportunity.organization_name} />
+                  <AvatarFallback className="bg-primary/10">
+                    <Building className="w-8 h-8 text-primary" />
+                  </AvatarFallback>
+                </Avatar>
+              </div>
+            )}
+          </div>
+          
+          <CardContent className="p-6 md:p-8 space-y-8">
+            {/* Title and Organization */}
+            <div className="space-y-4">
+              <div>
+                <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground mb-2">
+                  {opportunity.title}
+                </h1>
+                <p className="text-lg md:text-xl text-muted-foreground font-medium">
+                  {opportunity.company || opportunity.organization_name}
+                </p>
+              </div>
+              
+              {/* Key metadata pills */}
+              <div className="flex flex-wrap items-center gap-3">
+                {opportunity.art_forms?.map((artform: string, index: number) => (
+                  <Badge 
+                    key={index}
+                    className="bg-primary/10 text-primary border-primary/20 hover:bg-primary/15"
+                  >
+                    {artform}
+                  </Badge>
+                ))}
+                <Badge variant={opportunity.status === 'active' ? 'default' : 'secondary'}>
+                  {opportunity.status === 'active' ? 'Active' : 'Closed'}
+                </Badge>
+              </div>
+            </div>
+
+            {/* All Details in Single Section */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* Main Content */}
+              <div className="lg:col-span-2 space-y-6">
+                {/* Description */}
+                <div>
+                  <div className="flex items-center gap-2 mb-4">
+                    <FileText className="h-5 w-5 text-primary" />
+                    <h2 className="text-lg font-semibold">Description</h2>
+                  </div>
+                  <div className="prose prose-sm max-w-none">
+                    <p className="text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                      {opportunity.description}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Requirements */}
+                {(opportunity.experience_level || opportunity.gender_preference?.length > 0 || opportunity.language_preference?.length > 0) && (
+                  <div>
+                    <div className="flex items-center gap-2 mb-4">
+                      <Award className="h-5 w-5 text-primary" />
+                      <h2 className="text-lg font-semibold">Requirements</h2>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {opportunity.experience_level && (
+                        <div className="flex items-center gap-3">
+                          <Briefcase className="h-4 w-4 text-muted-foreground" />
+                          <div>
+                            <p className="text-sm font-medium">Experience Level</p>
+                            <p className="text-sm text-muted-foreground">{opportunity.experience_level}</p>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {opportunity.gender_preference && opportunity.gender_preference.length > 0 && (
+                        <div className="flex items-center gap-3">
+                          <User className="h-4 w-4 text-muted-foreground" />
+                          <div>
+                            <p className="text-sm font-medium">Gender Preference</p>
+                            <p className="text-sm text-muted-foreground">{opportunity.gender_preference.join(", ")}</p>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {opportunity.language_preference && opportunity.language_preference.length > 0 && (
+                        <div className="flex items-center gap-3">
+                          <Languages className="h-4 w-4 text-muted-foreground" />
+                          <div>
+                            <p className="text-sm font-medium">Languages</p>
+                            <p className="text-sm text-muted-foreground">{opportunity.language_preference.join(", ")}</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Compensation */}
+                {formatSalary(opportunity.salary_min, opportunity.salary_max) && (
+                  <div>
+                    <div className="flex items-center gap-2 mb-4">
+                      <DollarSign className="h-5 w-5 text-primary" />
+                      <h2 className="text-lg font-semibold">Compensation</h2>
+                    </div>
+                    <p className="text-muted-foreground">{formatSalary(opportunity.salary_min, opportunity.salary_max)}</p>
+                  </div>
+                )}
+
+                {/* Attachments - Only show if attachments exist */}
+                {(opportunity as any).attachments && (opportunity as any).attachments.length > 0 && (
+                  <div>
+                    <div className="flex items-center gap-2 mb-4">
+                      <ImageIcon className="h-5 w-5 text-primary" />
+                      <h2 className="text-lg font-semibold">Media Gallery</h2>
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                      {(opportunity as any).attachments.map((attachment: any, index: number) => (
+                        <div key={index} className="aspect-square rounded-lg overflow-hidden">
+                          <img 
+                            src={attachment.url} 
+                            alt={`Attachment ${index + 1}`}
+                            className="w-full h-full object-cover hover:scale-105 transition-transform cursor-pointer"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Sidebar Info */}
+              <div className="space-y-6">
+                {/* Quick Info */}
+                <div>
+                  <h3 className="font-semibold mb-4">Quick Details</h3>
+                  <div className="space-y-3 text-sm">
+                    <div className="flex items-center gap-3">
+                      <MapPin className="w-4 h-4 text-muted-foreground shrink-0" />
+                      <span>{formatLocation()}</span>
+                    </div>
+                    
+                    <div className="flex items-center gap-3">
+                      <Clock className="w-4 h-4 text-muted-foreground shrink-0" />
+                      <span>Posted {formatDistanceToNow(new Date(opportunity.created_at), { addSuffix: true })}</span>
+                    </div>
+                    
+                    {opportunity.deadline && (
+                      <div className="flex items-center gap-3">
+                        <Calendar className="w-4 h-4 text-muted-foreground shrink-0" />
+                        <div>
+                          <p className="font-medium">Deadline</p>
+                          <p className="text-muted-foreground">{format(new Date(opportunity.deadline), 'MMM d, yyyy')}</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Statistics */}
+                <div>
+                  <h3 className="font-semibold mb-4">Statistics</h3>
+                  <div className="grid grid-cols-2 gap-4 text-center">
+                    <div className="p-3 rounded-lg bg-muted/30">
+                      <div className="text-xl font-bold text-primary">
+                        {opportunity.views_count || 0}
+                      </div>
+                      <div className="text-xs text-muted-foreground">Views</div>
+                    </div>
+                    <div className="p-3 rounded-lg bg-muted/30">
+                      <div className="text-xl font-bold text-primary">
+                        {opportunity.applications_count || 0}
+                      </div>
+                      <div className="text-xs text-muted-foreground">Applications</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Mobile Action Buttons */}
+                <div className="sm:hidden space-y-2">
+                  {isOwner ? (
+                    <>
+                      <Button 
+                        onClick={handleManageApplicants}
+                        className="w-full"
+                      >
+                        <Users className="w-4 h-4 mr-2" />
+                        Manage Applicants
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        onClick={() => setShowShareModal(true)}
+                        className="w-full"
+                      >
+                        <Share2 className="w-4 h-4 mr-2" />
+                        Share
+                      </Button>
+                    </>
+                  ) : isArtist && (
+                    <>
+                      <Button 
+                        onClick={handleApply}
+                        className="w-full"
+                      >
+                        Apply Now
+                      </Button>
+                      <Button 
+                        variant="outline"
+                        onClick={() => setShowShareModal(true)}
+                        className="w-full"
+                      >
+                        <Share2 className="w-4 h-4 mr-2" />
+                        Share
+                      </Button>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Modals */}
       <ShareOpportunityModal
-        opportunity={opportunity}
+        opportunity={{
+          id: opportunity.id,
+          title: opportunity.title,
+          organization: { name: opportunity.organization_name || opportunity.company || '' },
+          location: formatLocation()
+        }}
         open={showShareModal}
         onOpenChange={setShowShareModal}
       />
       
-      {showEditModal && (
-        <EditOpportunityModal
-          isOpen={showEditModal}
-          onClose={() => setShowEditModal(false)}
-          opportunity={opportunity}
-        />
-      )}
+      <ConfirmDeleteModal
+        open={showDeleteModal}
+        onOpenChange={setShowDeleteModal}
+        onConfirm={confirmDelete}
+        opportunityTitle={opportunity.title}
+      />
     </motion.div>
   );
 }

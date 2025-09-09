@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,7 +18,8 @@ import {
   Trash2,
   Edit,
   FileText,
-  Calendar
+  Calendar,
+  User
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ShareOpportunityModal } from "./share-opportunity-modal";
@@ -84,55 +84,49 @@ export function OpportunityCard({
     setDeleteModalOpen(false);
   };
 
-  const getGenderIcon = (gender?: string) => {
-    if (!gender) return null;
-    
-    const genderMap: Record<string, string> = {
-      "Male": "♂",
-      "Female": "♀", 
-      "Any": "⚲",
-      "Non-binary": "⚧"
-    };
-    
-    return genderMap[gender] || "⚲";
+  const truncateDescription = (description?: string) => {
+    if (!description) return "";
+    return description.length > 120 ? description.substring(0, 120) + "..." : description;
   };
 
   return (
     <>
-      <Card className={`relative bg-card hover:shadow-lg transition-all duration-200 border border-border/50 hover:border-primary/20 ${className}`}>
-        <CardContent className="p-6">
+      <Card className={`relative bg-card hover:shadow-lg transition-all duration-200 border border-border/50 hover:border-primary/20 rounded-xl ${className}`}>
+        <CardContent className="p-4 md:p-5 lg:p-6">
           {/* Header with thumbnail, title, org, and three-dots */}
-          <div className="flex gap-4 mb-4">
-            {/* Thumbnail */}
+          <div className="flex gap-3 md:gap-4 mb-4">
+            {/* Thumbnail - responsive sizes */}
             <div className="flex-shrink-0">
               {opportunity.thumbnail_url ? (
                 <img
                   src={opportunity.thumbnail_url}
                   alt={opportunity.title}
-                  className="w-20 h-20 md:w-20 md:h-20 rounded-lg object-cover"
+                  className="w-12 h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 rounded-lg object-cover"
                 />
               ) : (
-                <div className="w-20 h-20 md:w-20 md:h-20 rounded-lg bg-muted flex items-center justify-center">
-                  <FileText className="h-8 w-8 text-muted-foreground" />
+                <div className="w-12 h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 rounded-lg bg-muted flex items-center justify-center">
+                  <FileText className="h-6 w-6 md:h-7 md:w-7 lg:h-8 lg:w-8 text-muted-foreground" />
                 </div>
               )}
             </div>
 
             {/* Main content */}
             <div className="flex-1 min-w-0">
-              <div className="flex items-start justify-between gap-2 mb-2">
-                <h3 className="text-lg font-bold text-foreground line-clamp-2 flex-1">
+              <div className="flex items-start justify-between gap-2 mb-1">
+                <h3 className="text-base md:text-lg font-bold text-foreground line-clamp-2 flex-1 leading-tight">
                   {opportunity.title}
                 </h3>
                 
-                {/* Three-dots menu */}
+                {/* Three-dots menu - top-right placement */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground"
+                      className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground shrink-0"
                       aria-label="More options"
+                      aria-haspopup="true"
+                      aria-expanded="false"
                     >
                       <MoreVertical className="h-4 w-4" />
                     </Button>
@@ -159,15 +153,15 @@ export function OpportunityCard({
                 </DropdownMenu>
               </div>
 
-              <p className="text-sm font-medium text-muted-foreground mb-3">
+              <p className="text-sm font-medium text-muted-foreground mb-2">
                 {opportunity.organization.name}
               </p>
 
               {/* Metadata row */}
-              <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-3">
+              <div className="flex flex-wrap items-center gap-2 md:gap-3 text-xs md:text-sm text-muted-foreground mb-2">
                 {opportunity.gender && (
                   <div className="flex items-center gap-1">
-                    <span className="text-base">{getGenderIcon(opportunity.gender)}</span>
+                    <User className="h-3 w-3" />
                     <span>{opportunity.gender}</span>
                   </div>
                 )}
@@ -175,7 +169,7 @@ export function OpportunityCard({
                 {opportunity.location && (
                   <div className="flex items-center gap-1">
                     <MapPin className="h-3 w-3" />
-                    <span className="truncate max-w-[120px]">{opportunity.location}</span>
+                    <span className="truncate max-w-[100px] md:max-w-[120px]">{opportunity.location}</span>
                   </div>
                 )}
                 
@@ -191,7 +185,7 @@ export function OpportunityCard({
               {opportunity.artform && (
                 <Badge 
                   variant="secondary" 
-                  className="bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-300 mb-3"
+                  className="bg-primary/10 text-primary border-primary/20 hover:bg-primary/15 mb-3 text-xs"
                 >
                   {opportunity.artform}
                 </Badge>
@@ -201,70 +195,76 @@ export function OpportunityCard({
 
           {/* Description excerpt */}
           {opportunity.description && (
-            <p className="text-sm text-muted-foreground line-clamp-2 mb-4 leading-relaxed">
-              {opportunity.description}
+            <p className="text-sm text-muted-foreground mb-4 leading-relaxed line-clamp-2">
+              {truncateDescription(opportunity.description)}
             </p>
           )}
 
-          {/* Footer stats */}
-          <div className="flex items-center justify-between mb-4 text-xs text-muted-foreground">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-1">
-                <Clock className="h-3 w-3" />
-                <span>{formatDistanceToNow(new Date(opportunity.posted_at))} ago</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <Eye className="h-3 w-3" />
-                <span>{opportunity.views_count}</span>
-              </div>
-              {opportunity.is_owner && (
+          {/* Footer stats and buttons container */}
+          <div className="space-y-3">
+            {/* Footer stats */}
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
+              <div className="flex items-center gap-3 md:gap-4">
                 <div className="flex items-center gap-1">
-                  <Users className="h-3 w-3" />
-                  <span>{opportunity.applicants_count} applicants</span>
+                  <Clock className="h-3 w-3" />
+                  <span>{formatDistanceToNow(new Date(opportunity.posted_at), { addSuffix: true })}</span>
                 </div>
+                <div className="flex items-center gap-1">
+                  <Eye className="h-3 w-3" />
+                  <span>{opportunity.views_count}</span>
+                </div>
+                {opportunity.is_owner && (
+                  <div className="flex items-center gap-1">
+                    <Users className="h-3 w-3" />
+                    <span>{opportunity.applicants_count}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Action buttons - side-by-side, role-aware */}
+            <div className="flex gap-2">
+              {opportunity.is_owner ? (
+                // Organization (owner) buttons - side by side
+                <>
+                  <Button 
+                    onClick={() => onManageApplicants?.(opportunity.id)}
+                    className="flex-1 h-11 min-h-[44px] text-sm font-medium"
+                    size="default"
+                  >
+                    Manage Applicants
+                  </Button>
+                  <Button 
+                    variant="outline"
+                    onClick={() => onEdit?.(opportunity.id)}
+                    className="flex-1 h-11 min-h-[44px] text-sm font-medium"
+                    size="default"
+                  >
+                    <Edit className="h-4 w-4 mr-1" />
+                    Edit
+                  </Button>
+                </>
+              ) : (
+                // Artist (non-owner) buttons - side by side
+                <>
+                  <Button 
+                    variant="outline"
+                    onClick={handleViewDetails}
+                    className="flex-1 h-11 min-h-[44px] text-sm font-medium"
+                    size="default"
+                  >
+                    View Details
+                  </Button>
+                  <Button 
+                    onClick={() => onApply?.(opportunity.id)}
+                    className="flex-1 h-11 min-h-[44px] text-sm font-medium"
+                    size="default"
+                  >
+                    Apply
+                  </Button>
+                </>
               )}
             </div>
-          </div>
-
-          {/* Action buttons - role-aware */}
-          <div className="flex gap-2">
-            {opportunity.is_owner ? (
-              // Organization (owner) buttons
-              <>
-                <Button 
-                  onClick={() => onManageApplicants?.(opportunity.id)}
-                  className="flex-1 h-11"
-                >
-                  Manage Applicants
-                </Button>
-                <Button 
-                  variant="outline"
-                  onClick={() => onEdit?.(opportunity.id)}
-                  className="flex-1 h-11"
-                >
-                  <Edit className="h-4 w-4 mr-1" />
-                  Edit
-                </Button>
-              </>
-            ) : (
-              // Artist (non-owner) buttons  
-              <>
-                <Button 
-                  variant="outline"
-                  onClick={handleViewDetails}
-                  className="flex-1 h-11"
-                >
-                  <FileText className="h-4 w-4 mr-1" />
-                  View Details
-                </Button>
-                <Button 
-                  onClick={() => onApply?.(opportunity.id)}
-                  className="flex-1 h-11"
-                >
-                  Apply
-                </Button>
-              </>
-            )}
           </div>
         </CardContent>
       </Card>
