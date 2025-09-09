@@ -566,6 +566,27 @@ export type Database = {
           },
         ]
       }
+      opportunity_views: {
+        Row: {
+          id: string
+          opportunity_id: string
+          viewed_at: string
+          viewer_id: string
+        }
+        Insert: {
+          id?: string
+          opportunity_id: string
+          viewed_at?: string
+          viewer_id: string
+        }
+        Update: {
+          id?: string
+          opportunity_id?: string
+          viewed_at?: string
+          viewer_id?: string
+        }
+        Relationships: []
+      }
       posts: {
         Row: {
           comments_count: number | null
@@ -991,6 +1012,10 @@ export type Database = {
           user_id_param: string
         }
         Returns: number
+      }
+      track_opportunity_view: {
+        Args: { opportunity_id_param: string; viewer_id_param: string }
+        Returns: boolean
       }
       user_has_role: {
         Args: {

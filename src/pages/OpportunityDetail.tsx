@@ -31,6 +31,7 @@ import { ConfirmDeleteModal } from "@/components/opportunities/confirm-delete-mo
 import { useOrganizationOpportunities, useDeleteOpportunity } from "@/hooks/useOrganizationOpportunities";
 import { useOpportunities } from "@/hooks/useOpportunities";
 import { useCurrentProfile } from "@/hooks/useProfiles";
+import { useTrackOpportunityView } from "@/hooks/useViewTracking";
 
 function OpportunityDetail() {
   const { id } = useParams<{ id: string }>();
@@ -43,6 +44,7 @@ function OpportunityDetail() {
   const { data: allOpportunities } = useOpportunities(); // Get all opportunities with application status
   const { data: currentProfile } = useCurrentProfile();
   const deleteOpportunity = useDeleteOpportunity();
+  const trackView = useTrackOpportunityView();
   
   // Try to find opportunity from org opportunities first, then from all opportunities
   const opportunity = opportunities?.find(opp => opp.id === id) || 
@@ -56,7 +58,12 @@ function OpportunityDetail() {
     if (!id) {
       navigate("/opportunities");
     }
-  }, [id, navigate]);
+    
+    // Track view when page loads and opportunity is available
+    if (opportunity && id) {
+      trackView.mutate(id);
+    }
+  }, [id, navigate, opportunity, trackView]);
 
   const handleBack = () => {
     navigate("/opportunities");
@@ -295,6 +302,13 @@ function OpportunityDetail() {
                   </div>
                 )}
                 
+                {opportunity.experience_level && (
+                  <div className="flex items-center gap-1 px-3 py-1 rounded-full bg-muted/50 text-sm">
+                    <Briefcase className="h-4 w-4 text-muted-foreground" />
+                    <span className="capitalize">{opportunity.experience_level}</span>
+                  </div>
+                )}
+                
                 {opportunity.deadline && (
                   <div className="flex items-center gap-1 px-3 py-1 rounded-full bg-muted/50 text-sm">
                     <Calendar className="h-4 w-4 text-muted-foreground" />
@@ -357,7 +371,7 @@ function OpportunityDetail() {
                           <Briefcase className="h-4 w-4 text-muted-foreground" />
                           <div>
                             <p className="text-sm font-medium">Experience Level</p>
-                            <p className="text-sm text-muted-foreground">{opportunity.experience_level}</p>
+                            <p className="text-sm text-muted-foreground capitalize">{opportunity.experience_level}</p>
                           </div>
                         </div>
                       )}
@@ -367,7 +381,7 @@ function OpportunityDetail() {
                           <User className="h-4 w-4 text-muted-foreground" />
                           <div>
                             <p className="text-sm font-medium">Gender Preference</p>
-                            <p className="text-sm text-muted-foreground">{opportunity.gender_preference.join(", ")}</p>
+                            <p className="text-sm text-muted-foreground capitalize">{opportunity.gender_preference.join(", ")}</p>
                           </div>
                         </div>
                       )}
@@ -376,7 +390,7 @@ function OpportunityDetail() {
                         <div className="flex items-center gap-3">
                           <Languages className="h-4 w-4 text-muted-foreground" />
                           <div>
-                            <p className="text-sm font-medium">Languages</p>
+                            <p className="text-sm font-medium">Language Preferences</p>
                             <p className="text-sm text-muted-foreground">{opportunity.language_preference.join(", ")}</p>
                           </div>
                         </div>

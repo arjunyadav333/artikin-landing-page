@@ -4,24 +4,18 @@ import { supabase } from '@/integrations/supabase/client';
 export const useTrackOpportunityView = () => {
   return useMutation({
     mutationFn: async (opportunityId: string) => {
-      // First get current views count
-      const { data, error: fetchError } = await supabase
-        .from('opportunities')
-        .select('views_count')
-        .eq('id', opportunityId)
-        .single();
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (user) {
+        // Use the database function for deduped view tracking
+        const { error } = await supabase
+          .rpc('track_opportunity_view', {
+            opportunity_id_param: opportunityId,
+            viewer_id_param: user.id
+          });
 
-      if (fetchError) throw fetchError;
-
-      const currentViews = data?.views_count || 0;
-
-      // Then update with incremented count
-      const { error: updateError } = await supabase
-        .from('opportunities')
-        .update({ views_count: currentViews + 1 })
-        .eq('id', opportunityId);
-
-      if (updateError) throw updateError;
+        if (error) throw error;
+      }
     },
     // Silent mutation - no error handling needed for view tracking
   });
