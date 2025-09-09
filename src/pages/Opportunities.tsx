@@ -230,7 +230,7 @@ const Opportunities = () => {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                     className="grid gap-3 md:gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3"
+                     className="grid gap-3 md:gap-6 grid-cols-1"
                   >
                     {Array.from({ length: 6 }).map((_, i) => (
                       <OpportunitySkeletonCard key={i} />
@@ -252,7 +252,7 @@ const Opportunities = () => {
                       )}
                     </div>
 
-                    <div className="grid gap-3 md:gap-6 mb-4 md:mb-8 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+                    <div className="grid gap-3 md:gap-6 mb-4 md:mb-8 grid-cols-1">
                       <AnimatePresence>
                         {filteredOpportunities.map((opportunity, index) => (
                            <OpportunityCard
@@ -331,7 +331,7 @@ const Opportunities = () => {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-6"
+                    className="grid grid-cols-1 gap-3 md:gap-6"
                   >
                     {Array.from({ length: 6 }).map((_, i) => (
                       <ApplicationSkeletonCard key={i} />
@@ -353,7 +353,7 @@ const Opportunities = () => {
                       </p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-6 mb-4 md:mb-8">
+                    <div className="grid grid-cols-1 gap-3 md:gap-6 mb-4 md:mb-8">
                       <AnimatePresence>
                         {filteredApplications.map((application, index) => (
                           <motion.div
