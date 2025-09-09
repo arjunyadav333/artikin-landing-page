@@ -235,7 +235,7 @@ export default function ManageApplicants() {
     >
       {/* Header */}
       <div className="w-full border-b bg-background/95 backdrop-blur sticky top-0 z-40">
-        <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4">
+        <div className="flex items-center gap-4 px-4 sm:px-6 lg:px-8 py-4">
           <Button 
             variant="ghost" 
             onClick={handleBack}
@@ -247,8 +247,8 @@ export default function ManageApplicants() {
           
           {opportunity && (
             <div className="flex items-center gap-3">
-              <div className="text-right">
-                <h1 className="text-lg font-semibold text-foreground truncate max-w-48 sm:max-w-none">
+              <div>
+                <h1 className="text-lg font-semibold text-foreground">
                   {opportunity.title}
                 </h1>
                 <p className="text-sm text-muted-foreground">
