@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, Briefcase } from "lucide-react";
 import { useOrganizationOpportunities, useUpdateOpportunityStatus, useDeleteOpportunity } from "@/hooks/useOrganizationOpportunities";
-import { ApplicantManagement } from "./applicant-management";
 import { ComprehensivePostModal } from "./comprehensive-post-modal";
 import { EditOpportunityModal } from "./edit-opportunity-modal";
 import { OpportunityCard } from "./opportunity-card";
@@ -16,7 +15,6 @@ import { formatDistanceToNow, format } from "date-fns";
 
 export function OrganizationDashboard() {
   const navigate = useNavigate();
-  const [selectedOpportunity, setSelectedOpportunity] = useState<string | null>(null);
   const [editingOpportunity, setEditingOpportunity] = useState<any | null>(null);
   const [shareOpportunity, setShareOpportunity] = useState<any | null>(null);
   const [activeFilter, setActiveFilter] = useState("all");
@@ -70,7 +68,7 @@ export function OrganizationDashboard() {
   };
 
   const handleManageApplicants = (opportunityId: string) => {
-    setSelectedOpportunity(opportunityId);
+    navigate(`/opportunities/${opportunityId}/applicants`);
   };
 
   const handleEdit = (opportunity: any) => {
@@ -84,24 +82,6 @@ export function OrganizationDashboard() {
   const handleViewDetails = (opportunityId: string) => {
     navigate(`/opportunities/${opportunityId}`);
   };
-  if (selectedOpportunity) {
-    const opportunity = filteredOpportunities.find(opp => opp.id === selectedOpportunity);
-    return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" onClick={() => setSelectedOpportunity(null)} className="px-2">
-            ← Back
-          </Button>
-          <div>
-            <h2 className="text-xl font-semibold">{opportunity?.title}</h2>
-            <p className="text-sm text-muted-foreground">Manage applications</p>
-          </div>
-        </div>
-        
-        <ApplicantManagement opportunityId={selectedOpportunity} opportunityTitle={opportunity?.title || "Unknown Opportunity"} />
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-background">
