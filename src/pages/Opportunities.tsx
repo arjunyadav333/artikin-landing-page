@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Plus, Search, Filter } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { EnhancedOpportunityCard } from "@/components/opportunities/enhanced-opportunity-card";
 import { OpportunityCard } from "@/components/opportunities/opportunity-card";
 import { ApplicationCard } from "@/components/opportunities/application-card";
 import { OrganizationDashboard } from "@/components/opportunities/organization-dashboard";
@@ -17,6 +18,7 @@ import { useUserApplications, useDeleteApplication } from "@/hooks/useApplicatio
 import { useCurrentProfile } from "@/hooks/useProfiles";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useCreateConversation } from "@/hooks/useCreateConversation";
 
 const Opportunities = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -29,6 +31,7 @@ const Opportunities = () => {
   const { data: applications, isLoading: applicationsLoading } = useUserApplications();
   const applyToOpportunity = useApplyToOpportunity();
   const deleteApplication = useDeleteApplication();
+  const createConversation = useCreateConversation();
   const { toast } = useToast();
   const isMobile = useIsMobile();
   const navigate = useNavigate();
@@ -122,6 +125,22 @@ const Opportunities = () => {
 
   const handleManageApplicants = (opportunityId: string) => {
     navigate(`/opportunities/${opportunityId}/applicants`);
+  };
+
+  const handleMessage = async (opportunityId: string) => {
+    const opportunity = opportunities?.find(opp => opp.id === opportunityId);
+    if (!opportunity || !currentProfile) return;
+
+    try {
+      const conversation = await createConversation.mutateAsync({
+        artistId: currentProfile.user_id,
+        organizationId: opportunity.user_id,
+        opportunityId
+      });
+      navigate(`/messages?conversation=${conversation.id}`);
+    } catch (error) {
+      // Error handled in mutation
+    }
   };
 
   // Wait for profile to load before showing role-specific content
@@ -255,22 +274,28 @@ const Opportunities = () => {
 
                     <div className="grid gap-3 md:gap-6 mb-4 md:mb-8 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
                       <AnimatePresence>
-                        {filteredOpportunities.map((opportunity, index) => (
-                           <OpportunityCard
-                             key={opportunity.id}
-                           opportunity={{
-                             ...opportunity,
-                             user_id: opportunity.user_id,
-                             created_at: opportunity.created_at,
-                             applications_count: opportunity.applications_count,
-                             views_count: opportunity.views_count || 0
-                           }}
-                           currentUserRole={currentProfile?.role}
-                           currentUserId={currentProfile?.user_id}
-                           onApply={handleApply}
-                           onManageApplicants={handleManageApplicants}
-                           />
-                        ))}
+                         {filteredOpportunities.map((opportunity, index) => {
+                           const userApplication = applications?.find(app => app.opportunity_id === opportunity.id);
+                           return (
+                             <EnhancedOpportunityCard
+                               key={opportunity.id}
+                               opportunity={{
+                                 ...opportunity,
+                                 user_id: opportunity.user_id,
+                                 created_at: opportunity.created_at,
+                                 applications_count: opportunity.applications_count,
+                                 views_count: opportunity.views_count || 0,
+                                 user_applied: !!userApplication,
+                                 application_status: userApplication?.status as 'pending' | 'accepted' | 'rejected' | undefined
+                               }}
+                               currentUserRole={currentProfile?.role}
+                               currentUserId={currentProfile?.user_id}
+                               onApply={handleApply}
+                               onManageApplicants={handleManageApplicants}
+                               onMessage={handleMessage}
+                             />
+                           );
+                         })}
                       </AnimatePresence>
                     </div>
 

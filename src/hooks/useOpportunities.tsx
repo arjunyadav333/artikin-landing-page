@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useTrackOpportunityView } from './useViewTracking';
 
-export interface Opportunity {
+export interface OpportunityData {
   id: string;
   user_id: string;
   title: string;
@@ -36,7 +36,10 @@ export interface Opportunity {
     role?: string;
   };
   user_applied?: boolean;
+  application_status?: 'pending' | 'accepted' | 'rejected';
 }
+
+export type { OpportunityData as Opportunity };
 
 export const useOpportunities = (searchQuery?: string) => {
   return useQuery({
@@ -90,9 +93,8 @@ export const useOpportunities = (searchQuery?: string) => {
         user_applied: appliedOpportunityIds.has(opportunity.id)
       }));
     },
-    // Advanced caching
-    staleTime: 3 * 60 * 1000, // 3 minutes (opportunities change more frequently)
-    gcTime: 8 * 60 * 1000, // 8 minutes
+    staleTime: 3 * 60 * 1000,
+    gcTime: 8 * 60 * 1000,
     refetchOnWindowFocus: false,
     retry: 2,
   });
@@ -128,7 +130,6 @@ export const useCreateOpportunity = () => {
 
       if (error) throw error;
       
-      // Get profile for the created opportunity
       const { data: profile } = await supabase
         .from('profiles')
         .select('user_id, username, display_name, avatar_url, role')
@@ -180,7 +181,6 @@ export const useApplyToOpportunity = () => {
       if (error) throw error;
       return data;
     },
-    // Optimistic updates for better UX
     onMutate: async ({ opportunityId }) => {
       await queryClient.cancelQueries({ queryKey: ['opportunities'] });
       
