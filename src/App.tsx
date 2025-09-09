@@ -14,6 +14,7 @@ import NotFound from "./pages/NotFound";
 const Home = lazy(() => import("./pages/Home"));
 const Opportunities = lazy(() => import("./pages/Opportunities"));
 const OpportunityDetail = lazy(() => import("./pages/OpportunityDetail"));
+const OpportunityCardDemo = lazy(() => import("./pages/OpportunityCardDemo"));
 const Create = lazy(() => import("./pages/Create"));
 const Connections = lazy(() => import("./pages/Connections"));
 const DiscoverPeople = lazy(() => import("./pages/DiscoverPeople"));
@@ -130,6 +131,24 @@ const AppRoutes = () => {
             <AppLayout>
               <Suspense fallback={<DefaultLoader />}>
                 <OpportunityDetail />
+              </Suspense>
+            </AppLayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/opportunity/:id" element={
+          <ProtectedRoute>
+            <AppLayout>
+              <Suspense fallback={<DefaultLoader />}>
+                <OpportunityDetail />
+              </Suspense>
+            </AppLayout>
+          </ProtectedRoute>
+        } />
+        <Route path="/opportunity-demo" element={
+          <ProtectedRoute>
+            <AppLayout>
+              <Suspense fallback={<DefaultLoader />}>
+                <OpportunityCardDemo />
               </Suspense>
             </AppLayout>
           </ProtectedRoute>

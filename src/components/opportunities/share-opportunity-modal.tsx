@@ -22,12 +22,20 @@ import {
   Twitter, 
   Linkedin, 
   Mail,
-  MessageSquare,
-  Check
+  MessageCircle,
+  Check,
+  Send
 } from "lucide-react";
 
 interface ShareOpportunityModalProps {
-  opportunity: any;
+  opportunity: {
+    id: string;
+    title: string;
+    organization?: { name: string };
+    company?: string;
+    organization_name?: string;
+    location?: string;
+  };
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -64,6 +72,12 @@ export function ShareOpportunityModal({
 
   const shareOptions = [
     {
+      name: "WhatsApp",
+      icon: MessageCircle,
+      color: "bg-green-500 hover:bg-green-600",
+      url: `https://wa.me/?text=${encodeURIComponent(`${shareText}\n\n${shareUrl}`)}`
+    },
+    {
       name: "Facebook",
       icon: Facebook,
       color: "bg-blue-600 hover:bg-blue-700",
@@ -80,6 +94,12 @@ export function ShareOpportunityModal({
       icon: Linkedin,
       color: "bg-blue-700 hover:bg-blue-800",
       url: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`
+    },
+    {
+      name: "Telegram",
+      icon: Send,
+      color: "bg-blue-500 hover:bg-blue-600",
+      url: `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`
     },
     {
       name: "Email",
@@ -135,15 +155,15 @@ export function ShareOpportunityModal({
       {/* Social Share */}
       <div className="space-y-3">
         <h4 className="text-sm font-medium">Share on Social Media</h4>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-3 gap-2">
           {shareOptions.map((option) => (
             <Button
               key={option.name}
               onClick={() => handleSocialShare(option.url)}
-              className={`${option.color} text-white flex items-center gap-2 h-10`}
+              className={`${option.color} text-white flex items-center gap-2 h-12 text-xs px-2`}
             >
               <option.icon className="h-4 w-4" />
-              <span className="text-sm">{option.name}</span>
+              <span className="hidden sm:inline">{option.name}</span>
             </Button>
           ))}
         </div>
