@@ -27,6 +27,8 @@ export interface Application {
     full_name?: string;
     avatar_url?: string;
     artform?: string;
+    location?: string;
+    bio?: string;
   };
 }
 
@@ -64,13 +66,26 @@ export const useOpportunityApplications = (opportunityId: string) => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('opportunity_applications')
-        .select('*')
+        .select(`
+          *,
+          profiles (
+            id,
+            username,
+            display_name,
+            full_name,
+            avatar_url,
+            artform,
+            location,
+            bio
+          )
+        `)
         .eq('opportunity_id', opportunityId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data as any;
-    }
+      return data as Application[];
+    },
+    enabled: !!opportunityId
   });
 };
 
