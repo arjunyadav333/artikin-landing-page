@@ -13,7 +13,7 @@ import {
   MessageSquare,
   AlertCircle,
   Lock,
-  MoreHorizontal
+  MoreVertical
 } from "lucide-react";
 import { useOpportunityApplications, useUpdateApplicationStatus, useDeleteApplication } from "@/hooks/useApplications";
 import { useOrganizationOpportunities } from "@/hooks/useOrganizationOpportunities";
@@ -367,7 +367,7 @@ export default function ManageApplicants() {
                               <Button
                                 onClick={() => handleAccept(application.id)}
                                 disabled={updateStatus.isPending}
-                                className="h-9 px-3 text-sm font-medium bg-[#2563EB] hover:bg-[#1E40AF] text-white rounded-lg"
+                                className="h-8 px-2.5 text-xs font-medium bg-[#16A34A] hover:bg-[#15803D] text-white rounded-lg"
                                 aria-label={`Accept ${fullname}`}
                               >
                                 Accept
@@ -376,7 +376,7 @@ export default function ManageApplicants() {
                                 onClick={() => handleReject(application.id)}
                                 disabled={updateStatus.isPending}
                                 variant="outline"
-                                className="h-9 px-3 text-sm font-medium border border-[#FCA5A5] text-[#DC2626] hover:bg-[#FEF2F2] rounded-lg"
+                                className="h-8 px-2.5 text-xs font-medium border border-[#FCA5A5] text-[#DC2626] hover:bg-[#FEF2F2] rounded-lg"
                                 aria-label={`Reject ${fullname}`}
                               >
                                 Reject
@@ -393,7 +393,7 @@ export default function ManageApplicants() {
                               <Button
                                 onClick={() => profile?.id && handleMessage(profile.id)}
                                 variant="outline"
-                                className="h-9 px-3 text-sm font-medium border border-[#E5E7EB] text-[#111827] hover:bg-[#F9FAFB] rounded-lg"
+                                className="h-8 px-2.5 text-xs font-medium border border-[#E5E7EB] text-[#111827] hover:bg-[#F9FAFB] rounded-lg"
                                 aria-label={`Message ${fullname}`}
                               >
                                 Message
@@ -410,7 +410,7 @@ export default function ManageApplicants() {
                               <Button
                                 onClick={() => profile?.id && handleMessage(profile.id)}
                                 variant="outline"
-                                className="h-9 px-3 text-sm font-medium border border-[#E5E7EB] text-[#111827] hover:bg-[#F9FAFB] rounded-lg"
+                                className="h-8 px-2.5 text-xs font-medium border border-[#E5E7EB] text-[#111827] hover:bg-[#F9FAFB] rounded-lg"
                                 aria-label={`Message ${fullname}`}
                               >
                                 Message
@@ -424,10 +424,10 @@ export default function ManageApplicants() {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="h-9 w-9 p-0 rounded-full"
+                                className="h-8 w-8 p-0 rounded-full"
                                 aria-label={`More options for ${fullname}`}
                               >
-                                <MoreHorizontal className="h-3.5 w-3.5" />
+                                <MoreVertical className="h-3.5 w-3.5" />
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" role="menu">
