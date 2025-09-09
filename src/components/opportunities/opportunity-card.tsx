@@ -28,21 +28,29 @@ import { useNavigate } from "react-router-dom";
 
 interface OpportunityData {
   id: string;
+  user_id: string;
   title: string;
   company?: string;
-  organization_name?: string;
-  image_url?: string;
-  gender_preference?: string[];
-  art_forms?: string[];
+  description: string;
   location?: string;
   city?: string;
   state?: string;
-  deadline?: string;
-  description?: string;
-  created_at: string;
-  views_count: number;
+  salary_min?: number;
+  salary_max?: number;
+  type: string;
+  tags?: string[];
   applications_count: number;
-  user_applied?: boolean;
+  status?: string;
+  deadline?: string;
+  views_count?: number;
+  created_at: string;
+  updated_at: string;
+  image_url?: string;
+  organization_name?: string;
+  art_forms?: string[];
+  experience_level?: string;
+  gender_preference?: string[];
+  language_preference?: string[];
   profiles?: {
     user_id: string;
     username: string;
@@ -50,7 +58,7 @@ interface OpportunityData {
     avatar_url?: string;
     role?: string;
   };
-  user_id: string;
+  user_applied?: boolean;
 }
 
 interface OpportunityCardProps {
