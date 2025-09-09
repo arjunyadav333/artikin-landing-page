@@ -10,6 +10,8 @@ export interface Opportunity {
   company?: string;
   description: string;
   location?: string;
+  city?: string;
+  state?: string;
   salary_min?: number;
   salary_max?: number;
   type: string;
@@ -20,6 +22,12 @@ export interface Opportunity {
   views_count?: number;
   created_at: string;
   updated_at: string;
+  image_url?: string;
+  organization_name?: string;
+  art_forms?: string[];
+  experience_level?: string;
+  gender_preference?: string[];
+  language_preference?: string[];
   profiles?: {
     user_id: string;
     username: string;

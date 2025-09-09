@@ -10,6 +10,8 @@ import { PageSpinner } from "@/components/ui/loading-spinner";
 import { HomePageSkeleton, ProfilePageSkeleton, ConnectionsPageSkeleton } from "@/components/ui/page-skeleton";
 import NotFound from "./pages/NotFound";
 
+const ManageApplicants = lazy(() => import("./pages/ManageApplicants"));
+
 // Lazy load components for better performance and code splitting
 const Home = lazy(() => import("./pages/Home"));
 const Opportunities = lazy(() => import("./pages/Opportunities"));
@@ -126,7 +128,15 @@ const AppRoutes = () => {
             </AppLayout>
           </ProtectedRoute>
         } />
-        <Route path="/opportunities/:id" element={
+        <Route path="/opportunities/:id/applicants" element={
+          <ProtectedRoute>
+            <AppLayout>
+              <Suspense fallback={<DefaultLoader />}>
+                <ManageApplicants />
+              </Suspense>
+            </AppLayout>
+          </ProtectedRoute>
+        } />
           <ProtectedRoute>
             <AppLayout>
               <Suspense fallback={<DefaultLoader />}>

@@ -174,23 +174,14 @@ export function OrganizationDashboard() {
                   <OpportunityCard
                     key={opportunity.id}
                     opportunity={{
-                      id: opportunity.id,
-                      title: opportunity.title,
-                      organization: {
-                        id: opportunity.profiles?.user_id || '',
-                        name: opportunity.profiles?.display_name || opportunity.company || 'Unknown Organization',
-                        logo_url: opportunity.profiles?.avatar_url
-                      },
-                      gender: "Any", // Default or map from your data structure
-                      artform: opportunity.tags?.[0] || "General", // Use first tag as artform
-                      location: opportunity.location,
-                      deadline: opportunity.deadline,
-                      description: opportunity.description,
-                      posted_at: opportunity.created_at,
-                      views_count: opportunity.views_count || 0,
-                      applicants_count: opportunity.applications_count || 0,
-                      is_owner: true // Organizations are owners of their opportunities
+                      ...opportunity,
+                      user_id: opportunity.user_id,
+                      created_at: opportunity.created_at,
+                      applications_count: opportunity.applications_count,
+                      views_count: opportunity.views_count || 0
                     }}
+                    currentUserRole="organization"
+                    currentUserId={opportunity.user_id}
                     onEdit={() => handleEdit(opportunity)}
                     onManageApplicants={handleManageApplicants}
                     onDelete={handleDeleteOpportunity}

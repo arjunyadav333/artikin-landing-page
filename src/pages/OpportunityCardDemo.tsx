@@ -6,40 +6,40 @@ const sampleOpportunities = [
   {
     id: "1",
     title: "Lead Actor for Feature Film",
-    organization: {
-      id: "org1",
-      name: "Vikram Films",
-      logo_url: ""
-    },
-    thumbnail_url: "",
-    gender: "Any",
-    artform: "Acting",
+    company: "Vikram Films",
+    organization_name: "Vikram Films",
+    image_url: "",
+    gender_preference: ["Any"],
+    art_forms: ["Acting"],
     location: "Hyderabad, Telangana",
+    city: "Hyderabad",
+    state: "Telangana",
     deadline: "2025-11-07T00:00:00Z",
     description: "We are looking for a talented lead actor for our upcoming feature film. This is an exciting opportunity to work with renowned directors and a professional crew.",
-    posted_at: "2025-09-09T10:00:00Z",
+    created_at: "2025-09-09T10:00:00Z",
     views_count: 234,
-    applicants_count: 12,
-    is_owner: true
+    applications_count: 12,
+    user_applied: false,
+    user_id: "org1"
   },
   {
     id: "2", 
     title: "Classical Dancer for Stage Performance",
-    organization: {
-      id: "org2",
-      name: "Chennai Dance Academy",
-      logo_url: ""
-    },
-    thumbnail_url: "",
-    gender: "Female",
-    artform: "Dance",
+    company: "Chennai Dance Academy",
+    organization_name: "Chennai Dance Academy", 
+    image_url: "",
+    gender_preference: ["Female"],
+    art_forms: ["Dance"],
     location: "Chennai, Tamil Nadu",
+    city: "Chennai",
+    state: "Tamil Nadu",
     deadline: "2025-10-15T00:00:00Z",
     description: "Seeking experienced classical dancer for a prestigious stage performance. Bharatanatyam or Kuchipudi preferred.",
-    posted_at: "2025-09-08T14:30:00Z",
+    created_at: "2025-09-08T14:30:00Z",
     views_count: 189,
-    applicants_count: 8,
-    is_owner: false
+    applications_count: 7,
+    user_applied: true,
+    user_id: "org2"
   }
 ];
 
@@ -90,6 +90,8 @@ export default function OpportunityCardDemo() {
             <h2 className="text-xl font-semibold mb-4">Organization View (Owner)</h2>
             <OpportunityCard
               opportunity={sampleOpportunities[0]}
+              currentUserRole="organization"
+              currentUserId="org1"
               onEdit={handleEdit}
               onManageApplicants={handleManageApplicants}
               onDelete={handleDelete}
@@ -100,6 +102,8 @@ export default function OpportunityCardDemo() {
             <h2 className="text-xl font-semibold mb-4">Artist View (Non-owner)</h2>
             <OpportunityCard
               opportunity={sampleOpportunities[1]}
+              currentUserRole="artist"
+              currentUserId="artist1"
               onApply={handleApply}
             />
           </div>
