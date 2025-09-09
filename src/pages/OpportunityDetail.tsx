@@ -176,12 +176,12 @@ function OpportunityDetail() {
           </div>
         </div>
 
-        {/* Single Section Layout */}
-        <Card className="overflow-hidden">
-          {/* Hero Banner */}
+        {/* Single Section Layout - matches prompt exactly */}
+        <Card className="overflow-hidden shadow-lg border border-border/50">
+          {/* Large Banner/Hero Image - top of single section */}
           <div className="relative">
             {opportunity.image_url ? (
-              <div className="w-full h-48 md:h-64 lg:h-80">
+              <div className="w-full h-48 sm:h-56 md:h-64 lg:h-80">
                 <img 
                   src={opportunity.image_url} 
                   alt={opportunity.title}
@@ -189,46 +189,72 @@ function OpportunityDetail() {
                 />
               </div>
             ) : (
-              <div className="w-full h-48 md:h-64 lg:h-80 bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
+              <div className="w-full h-48 sm:h-56 md:h-64 lg:h-80 bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
                 <Briefcase className="w-16 h-16 md:w-20 md:h-20 text-primary/50" />
-              </div>
-            )}
-            
-            {/* Organization logo overlay */}
-            {opportunity.image_url && (
-              <div className="absolute bottom-4 left-4">
-                <Avatar className="w-16 h-16 md:w-20 md:h-20 border-4 border-background shadow-lg">
-                  <AvatarImage src={opportunity.image_url} alt={opportunity.organization_name} />
-                  <AvatarFallback className="bg-primary/10">
-                    <Building className="w-8 h-8 text-primary" />
-                  </AvatarFallback>
-                </Avatar>
               </div>
             )}
           </div>
           
           <CardContent className="p-6 md:p-8 space-y-8">
-            {/* Title and Organization */}
+            {/* Title Section - H1 + Organization */}
             <div className="space-y-4">
               <div>
                 <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground mb-2">
                   {opportunity.title}
                 </h1>
-                <p className="text-lg md:text-xl text-muted-foreground font-medium">
-                  {opportunity.company || opportunity.organization_name}
-                </p>
+                <div className="flex items-center gap-3 mb-4">
+                  {/* Organization logo */}
+                  <Avatar className="w-12 h-12 md:w-16 md:h-16 rounded-lg border-2 border-background shadow-sm">
+                    <AvatarImage src={opportunity.image_url || opportunity.profiles?.avatar_url} alt={opportunity.organization_name} />
+                    <AvatarFallback className="bg-primary/10 rounded-lg">
+                      <Building className="w-6 h-6 md:w-8 md:h-8 text-primary" />
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="text-lg md:text-xl text-muted-foreground font-medium">
+                      {opportunity.company || opportunity.organization_name || opportunity.profiles?.display_name}
+                    </p>
+                  </div>
+                </div>
               </div>
               
-              {/* Key metadata pills */}
+              {/* Key metadata pills - under title as specified */}
               <div className="flex flex-wrap items-center gap-3">
+                {opportunity.gender_preference?.map((gender: string, index: number) => (
+                  <div key={index} className="flex items-center gap-1 px-3 py-1 rounded-full bg-muted/50 text-sm">
+                    <User className="h-4 w-4 text-muted-foreground" />
+                    <span>{gender}</span>
+                  </div>
+                ))}
+                
                 {opportunity.art_forms?.map((artform: string, index: number) => (
                   <Badge 
                     key={index}
-                    className="bg-primary/10 text-primary border-primary/20 hover:bg-primary/15"
+                    className="bg-blue-50 text-blue-600 border-blue-200 hover:bg-blue-100 dark:bg-blue-950/50 dark:text-blue-300 dark:border-blue-800"
                   >
                     {artform}
                   </Badge>
                 ))}
+                
+                {opportunity.location && (
+                  <div className="flex items-center gap-1 px-3 py-1 rounded-full bg-muted/50 text-sm">
+                    <MapPin className="h-4 w-4 text-muted-foreground" />
+                    <span>{formatLocation()}</span>
+                  </div>
+                )}
+                
+                {opportunity.deadline && (
+                  <div className="flex items-center gap-1 px-3 py-1 rounded-full bg-muted/50 text-sm">
+                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                    <span>{format(new Date(opportunity.deadline), 'MMM d, yyyy')}</span>
+                  </div>
+                )}
+                
+                <div className="flex items-center gap-1 px-3 py-1 rounded-full bg-muted/50 text-sm">
+                  <Clock className="h-4 w-4 text-muted-foreground" />
+                  <span>Posted {formatDistanceToNow(new Date(opportunity.created_at), { addSuffix: true })}</span>
+                </div>
+                
                 <Badge variant={opportunity.status === 'active' ? 'default' : 'secondary'}>
                   {opportunity.status === 'active' ? 'Active' : 'Closed'}
                 </Badge>
