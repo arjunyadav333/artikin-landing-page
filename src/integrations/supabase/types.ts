@@ -171,25 +171,40 @@ export type Database = {
         Row: {
           created_at: string | null
           id: string
+          last_message_at: string | null
           last_message_id: string | null
+          last_message_type: string | null
+          opportunity_id: string | null
           participant_a: string
           participant_b: string
+          unread_count_user1: number | null
+          unread_count_user2: number | null
           updated_at: string | null
         }
         Insert: {
           created_at?: string | null
           id?: string
+          last_message_at?: string | null
           last_message_id?: string | null
+          last_message_type?: string | null
+          opportunity_id?: string | null
           participant_a: string
           participant_b: string
+          unread_count_user1?: number | null
+          unread_count_user2?: number | null
           updated_at?: string | null
         }
         Update: {
           created_at?: string | null
           id?: string
+          last_message_at?: string | null
           last_message_id?: string | null
+          last_message_type?: string | null
+          opportunity_id?: string | null
           participant_a?: string
           participant_b?: string
+          unread_count_user1?: number | null
+          unread_count_user2?: number | null
           updated_at?: string | null
         }
         Relationships: [
@@ -198,6 +213,13 @@ export type Database = {
             columns: ["last_message_id"]
             isOneToOne: false
             referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "opportunities"
             referencedColumns: ["id"]
           },
           {
@@ -317,6 +339,38 @@ export type Database = {
           },
         ]
       }
+      message_reactions: {
+        Row: {
+          created_at: string | null
+          emoji: string
+          id: string
+          message_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          emoji: string
+          id?: string
+          message_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          emoji?: string
+          id?: string
+          message_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_reactions_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       message_receipts: {
         Row: {
           message_id: string
@@ -354,12 +408,19 @@ export type Database = {
           created_at: string | null
           deleted: boolean | null
           deleted_for_everyone: boolean | null
+          delivered_at: string | null
+          edited: boolean | null
           edited_at: string | null
           id: string
           kind: string
+          link_preview: Json | null
+          media_url: string | null
+          message_type: string | null
           meta: Json | null
           pending: boolean | null
+          replied_to_message_id: string | null
           reply_to: string | null
+          seen_at: string | null
           sender_id: string
         }
         Insert: {
@@ -369,12 +430,19 @@ export type Database = {
           created_at?: string | null
           deleted?: boolean | null
           deleted_for_everyone?: boolean | null
+          delivered_at?: string | null
+          edited?: boolean | null
           edited_at?: string | null
           id?: string
           kind: string
+          link_preview?: Json | null
+          media_url?: string | null
+          message_type?: string | null
           meta?: Json | null
           pending?: boolean | null
+          replied_to_message_id?: string | null
           reply_to?: string | null
+          seen_at?: string | null
           sender_id: string
         }
         Update: {
@@ -384,12 +452,19 @@ export type Database = {
           created_at?: string | null
           deleted?: boolean | null
           deleted_for_everyone?: boolean | null
+          delivered_at?: string | null
+          edited?: boolean | null
           edited_at?: string | null
           id?: string
           kind?: string
+          link_preview?: Json | null
+          media_url?: string | null
+          message_type?: string | null
           meta?: Json | null
           pending?: boolean | null
+          replied_to_message_id?: string | null
           reply_to?: string | null
+          seen_at?: string | null
           sender_id?: string
         }
         Relationships: [
@@ -405,6 +480,13 @@ export type Database = {
             columns: ["conversation_id"]
             isOneToOne: false
             referencedRelation: "conversations_secure"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_replied_to_message_id_fkey"
+            columns: ["replied_to_message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
             referencedColumns: ["id"]
           },
           {
