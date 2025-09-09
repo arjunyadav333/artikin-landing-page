@@ -321,14 +321,14 @@ export function OpportunityCard({
                   </Button>
                 </>
               ) : (
-                // Artist buttons: "View Details" (outlined) + "Apply/Applied" (primary)  
+                // Artist buttons: "View All Details" (outlined) + "Apply/Applied" (primary)  
                 <>
                   <Button 
                     variant="outline"
                     onClick={handleViewDetails}
                     className="flex-1 h-11 min-h-[44px] text-sm font-medium border-input hover:bg-primary/10 hover:text-primary"
                   >
-                    View Details
+                    View All Details
                   </Button>
                   {opportunity.user_applied ? (
                     opportunity.application_status === 'accepted' ? (
