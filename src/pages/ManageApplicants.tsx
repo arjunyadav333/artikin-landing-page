@@ -235,28 +235,28 @@ export default function ManageApplicants() {
     >
       {/* Header */}
       <div className="w-full border-b bg-background/95 backdrop-blur sticky top-0 z-40">
-        <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4">
-          <Button 
-            variant="ghost" 
-            onClick={handleBack}
-            className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            <span className="hidden sm:inline">Back</span>
-          </Button>
-          
-          {opportunity && (
-            <div className="flex items-center gap-3">
-              <div className="text-right">
-                <h1 className="text-lg font-semibold text-foreground truncate max-w-48 sm:max-w-none">
+        <div className="flex items-center px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center gap-4">
+            <Button 
+              variant="ghost" 
+              onClick={handleBack}
+              className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              <span className="hidden sm:inline">Back</span>
+            </Button>
+            
+            {opportunity && (
+              <div>
+                <h1 className="text-lg font-semibold text-foreground">
                   {opportunity.title}
                 </h1>
                 <p className="text-sm text-muted-foreground">
                   {opportunity.organization_name} • {opportunity.location}
                 </p>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
 
@@ -359,113 +359,78 @@ export default function ManageApplicants() {
                           </div>
                         </div>
 
-                        {/* Right group - Controls */}
-                        <div className="flex items-center gap-2">
-                          {/* All tab - Accept/Reject buttons */}
-                          {tab === 'all' && application.status === 'pending' && (
-                            <>
-                              <Button
-                                onClick={() => handleAccept(application.id)}
-                                disabled={updateStatus.isPending}
-                                className="h-8 px-2.5 text-xs font-medium bg-[#16A34A] hover:bg-[#15803D] text-white rounded-lg"
-                                aria-label={`Accept ${fullname}`}
-                              >
-                                Accept
-                              </Button>
-                              <Button
-                                onClick={() => handleReject(application.id)}
-                                disabled={updateStatus.isPending}
-                                variant="outline"
-                                className="h-8 px-2.5 text-xs font-medium border border-[#FCA5A5] text-[#DC2626] hover:bg-[#FEF2F2] rounded-lg"
-                                aria-label={`Reject ${fullname}`}
-                              >
-                                Reject
-                              </Button>
-                            </>
-                          )}
-
-                          {/* Accepted tab - Status pill + Message button */}
-                          {(tab === 'accepted' || (tab === 'all' && application.status === 'accepted')) && application.status === 'accepted' && (
-                            <>
-                              <div className="inline-flex items-center h-7 px-2.5 bg-[#ECFDF5] text-[#16A34A] text-[13px] font-semibold rounded-full">
-                                Accepted
-                              </div>
-                              <Button
-                                onClick={() => profile?.id && handleMessage(profile.id)}
-                                variant="outline"
-                                className="h-8 px-2.5 text-xs font-medium border border-[#E5E7EB] text-[#111827] hover:bg-[#F9FAFB] rounded-lg"
-                                aria-label={`Message ${fullname}`}
-                              >
-                                Message
-                              </Button>
-                            </>
-                          )}
-
-                          {/* Rejected tab - Status pill + Message button */}
-                          {(tab === 'rejected' || (tab === 'all' && application.status === 'rejected')) && application.status === 'rejected' && (
-                            <>
-                              <div className="inline-flex items-center h-7 px-2.5 bg-[#FEF2F2] text-[#DC2626] text-[13px] font-semibold rounded-full">
-                                Rejected
-                              </div>
-                              <Button
-                                onClick={() => profile?.id && handleMessage(profile.id)}
-                                variant="outline"
-                                className="h-8 px-2.5 text-xs font-medium border border-[#E5E7EB] text-[#111827] hover:bg-[#F9FAFB] rounded-lg"
-                                aria-label={`Message ${fullname}`}
-                              >
-                                Message
-                              </Button>
-                            </>
-                          )}
-
-                          {/* Three-dots menu */}
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-8 w-8 p-0 rounded-full"
+                         {/* Right group - Controls */}
+                         <div className="flex items-center gap-2">
+                           {/* Three-dots menu - positioned slightly left */}
+                           <DropdownMenu>
+                             <DropdownMenuTrigger asChild>
+                               <Button
+                                 variant="ghost"
+                                 size="sm"
+                                 className="h-8 w-8 p-0 rounded-full mr-1"
                                 aria-label={`More options for ${fullname}`}
                               >
-                                <MoreVertical className="h-3.5 w-3.5" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" role="menu">
-                              <DropdownMenuItem 
-                                onClick={() => profile?.id && handleViewProfile(profile.id)}
-                              >
-                                View Profile
-                              </DropdownMenuItem>
-                              <DropdownMenuItem 
-                                onClick={() => profile?.id && handleMessage(profile.id)}
-                              >
-                                Message
-                              </DropdownMenuItem>
-                              {application.status === 'accepted' && (
-                                <DropdownMenuItem 
-                                  onClick={() => handleRevoke(application.id)}
-                                  disabled={updateStatus.isPending}
-                                >
-                                  Revoke Accept
-                                </DropdownMenuItem>
-                              )}
-                              {application.status === 'rejected' && (
-                                <DropdownMenuItem 
-                                  onClick={() => handleRevoke(application.id)}
-                                  disabled={updateStatus.isPending}
-                                >
-                                  Revoke Reject
-                                </DropdownMenuItem>
-                              )}
-                              <DropdownMenuItem 
-                                onClick={() => handleRemove(application.id)}
-                                disabled={deleteApplication.isPending}
-                                className="text-red-600"
-                              >
-                                Remove
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                                 <MoreVertical className="h-3.5 w-3.5 rotate-90" />
+                               </Button>
+                             </DropdownMenuTrigger>
+                             <DropdownMenuContent align="end" role="menu">
+                               {/* All tab - Accept/Reject options */}
+                               {tab === 'all' && application.status === 'pending' && (
+                                 <>
+                                   <DropdownMenuItem 
+                                     onClick={() => handleAccept(application.id)}
+                                     disabled={updateStatus.isPending}
+                                   >
+                                     Accept
+                                   </DropdownMenuItem>
+                                   <DropdownMenuItem 
+                                     onClick={() => handleReject(application.id)}
+                                     disabled={updateStatus.isPending}
+                                   >
+                                     Reject
+                                   </DropdownMenuItem>
+                                 </>
+                               )}
+                               
+                               {/* Common options for all states */}
+                               <DropdownMenuItem 
+                                 onClick={() => profile?.id && handleViewProfile(profile.id)}
+                               >
+                                 View Profile
+                               </DropdownMenuItem>
+                               <DropdownMenuItem 
+                                 onClick={() => profile?.id && handleMessage(profile.id)}
+                               >
+                                 Message
+                               </DropdownMenuItem>
+                               
+                               {/* Status change options */}
+                               {application.status === 'accepted' && (
+                                 <DropdownMenuItem 
+                                   onClick={() => handleRevoke(application.id)}
+                                   disabled={updateStatus.isPending}
+                                 >
+                                   Revoke Accept
+                                 </DropdownMenuItem>
+                               )}
+                               {application.status === 'rejected' && (
+                                 <DropdownMenuItem 
+                                   onClick={() => handleRevoke(application.id)}
+                                   disabled={updateStatus.isPending}
+                                 >
+                                   Revoke Reject
+                                 </DropdownMenuItem>
+                               )}
+                               
+                               <DropdownMenuItem 
+                                 onClick={() => handleRemove(application.id)}
+                                 disabled={deleteApplication.isPending}
+                                 className="text-red-600"
+                               >
+                                 Remove
+                               </DropdownMenuItem>
+                             </DropdownMenuContent>
+                           </DropdownMenu>
                         </div>
                       </div>
                     );
