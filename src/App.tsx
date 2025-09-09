@@ -137,6 +137,7 @@ const AppRoutes = () => {
             </AppLayout>
           </ProtectedRoute>
         } />
+        <Route path="/opportunities/:id" element={
           <ProtectedRoute>
             <AppLayout>
               <Suspense fallback={<DefaultLoader />}>
