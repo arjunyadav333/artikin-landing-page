@@ -36,6 +36,7 @@ export interface Opportunity {
     role?: string;
   };
   user_applied?: boolean;
+  application_status?: 'pending' | 'accepted' | 'rejected';
 }
 
 export const useOpportunities = (searchQuery?: string) => {
@@ -44,11 +45,10 @@ export const useOpportunities = (searchQuery?: string) => {
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       
-      // Build query with optional search
+      // Build query to get all opportunities (not just active)
       let query = supabase
         .from('opportunities')
-        .select('*')
-        .eq('status', 'active');
+        .select('*');
 
       // Add search if query provided
       if (searchQuery?.trim()) {
@@ -72,22 +72,25 @@ export const useOpportunities = (searchQuery?: string) => {
 
       const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
 
-      // Check applications if user is authenticated
-      let appliedOpportunityIds = new Set();
+      // Check applications with status if user is authenticated
+      let applicationMap = new Map();
       if (user) {
         const { data: applications } = await supabase
           .from('opportunity_applications')
-          .select('opportunity_id')
+          .select('opportunity_id, status')
           .eq('user_id', user.id);
         
-        appliedOpportunityIds = new Set(applications?.map(a => a.opportunity_id) || []);
+        applications?.forEach(app => {
+          applicationMap.set(app.opportunity_id, app.status);
+        });
       }
 
       // Combine data efficiently
       return opportunities.map(opportunity => ({
         ...opportunity,
         profiles: profileMap.get(opportunity.user_id),
-        user_applied: appliedOpportunityIds.has(opportunity.id)
+        user_applied: applicationMap.has(opportunity.id),
+        application_status: applicationMap.get(opportunity.id)
       }));
     },
     // Advanced caching

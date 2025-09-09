@@ -52,7 +52,13 @@ export const useUserApplications = () => {
             title,
             company,
             type,
-            location
+            location,
+            image_url,
+            status,
+            profiles (
+              display_name,
+              avatar_url
+            )
           )
         `)
         .eq('user_id', user.id)

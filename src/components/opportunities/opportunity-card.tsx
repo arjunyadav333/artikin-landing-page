@@ -59,6 +59,7 @@ interface OpportunityData {
     role?: string;
   };
   user_applied?: boolean;
+  application_status?: 'pending' | 'accepted' | 'rejected';
 }
 
 interface OpportunityCardProps {
@@ -140,7 +141,8 @@ export function OpportunityCard({
                   onError={(e) => {
                     // Fallback to placeholder on image error
                     e.currentTarget.style.display = 'none';
-                    e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                    const placeholder = e.currentTarget.nextElementSibling as HTMLElement;
+                    if (placeholder) placeholder.classList.remove('hidden');
                   }}
                 />
               ) : null}
@@ -151,10 +153,35 @@ export function OpportunityCard({
 
             {/* Right: Main content area */}
             <div className="flex-1 min-w-0 pr-8">
-              {/* Title - bold, max 2 lines */}
-              <h3 className="text-base sm:text-lg font-bold text-foreground line-clamp-2 leading-tight mb-1">
-                {opportunity.title}
-              </h3>
+              {/* Title with status badge */}
+              <div className="flex items-center gap-2 mb-1">
+                <h3 className="text-base sm:text-lg font-bold text-foreground line-clamp-2 leading-tight flex-1">
+                  {opportunity.title}
+                </h3>
+                {/* Opportunity Status Badge */}
+                <Badge 
+                  variant={opportunity.status === 'active' ? 'default' : 'secondary'}
+                  className="text-xs px-2 py-0.5 flex-shrink-0"
+                >
+                  {opportunity.status === 'active' ? 'Active' : 'Closed'}
+                </Badge>
+              </div>
+              
+              {/* Application Status Badge for Applied Users */}
+              {opportunity.user_applied && opportunity.application_status && (
+                <div className="mb-2">
+                  <Badge 
+                    className={`text-xs px-2 py-0.5 ${
+                      opportunity.application_status === 'accepted' ? 'bg-green-500/10 text-green-600 border-green-500/20' :
+                      opportunity.application_status === 'rejected' ? 'bg-red-500/10 text-red-600 border-red-500/20' :
+                      'bg-blue-500/10 text-blue-600 border-blue-500/20'
+                    }`}
+                  >
+                    {opportunity.application_status === 'accepted' ? 'Accepted' :
+                     opportunity.application_status === 'rejected' ? 'Rejected' : 'Pending'}
+                  </Badge>
+                </div>
+              )}
               
               {/* Organization name - smaller, muted */}
               <p className="text-sm font-medium text-muted-foreground mb-3">
@@ -304,18 +331,33 @@ export function OpportunityCard({
                     View Details
                   </Button>
                   {opportunity.user_applied ? (
-                    <Button 
-                      disabled
-                      className="flex-1 h-11 min-h-[44px] text-sm font-medium bg-muted text-muted-foreground cursor-not-allowed"
-                    >
-                      Applied
-                    </Button>
+                    opportunity.application_status === 'accepted' ? (
+                      <Button 
+                        onClick={() => navigate(`/messages?opportunity=${opportunity.id}`)}
+                        className="flex-1 h-11 min-h-[44px] text-sm font-medium bg-green-600 text-white hover:bg-green-700"
+                      >
+                        Message
+                      </Button>
+                    ) : (
+                      <Button 
+                        disabled
+                        className="flex-1 h-11 min-h-[44px] text-sm font-medium bg-muted text-muted-foreground cursor-not-allowed"
+                      >
+                        {opportunity.application_status === 'rejected' ? 'Rejected' : 
+                         opportunity.application_status === 'pending' ? 'Applied' : 'Applied'}
+                      </Button>
+                    )
                   ) : (
                     <Button 
                       onClick={() => onApply?.(opportunity.id)}
-                      className="flex-1 h-11 min-h-[44px] text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90"
+                      disabled={opportunity.status !== 'active'}
+                      className={`flex-1 h-11 min-h-[44px] text-sm font-medium ${
+                        opportunity.status !== 'active' 
+                          ? 'bg-muted text-muted-foreground cursor-not-allowed'
+                          : 'bg-primary text-primary-foreground hover:bg-primary/90'
+                      }`}
                     >
-                      Apply
+                      {opportunity.status !== 'active' ? 'Closed' : 'Apply'}
                     </Button>
                   )}
                 </>

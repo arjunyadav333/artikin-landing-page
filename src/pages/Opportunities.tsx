@@ -116,8 +116,7 @@ const Opportunities = () => {
   };
 
   const handleViewOpportunity = (opportunityId: string) => {
-    // TODO: Navigate to opportunity detail page
-    console.log("View opportunity:", opportunityId);
+    navigate(`/opportunities/${opportunityId}`);
   };
 
   const handleManageApplicants = (opportunityId: string) => {

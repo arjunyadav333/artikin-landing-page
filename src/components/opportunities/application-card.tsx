@@ -102,6 +102,19 @@ export function ApplicationCard({
           </div>
           
           <div className="flex items-center gap-2">
+            {application.status === 'accepted' && (
+              <Button 
+                variant="default"
+                size="sm"
+                onClick={() => {
+                  // Navigate to messaging with opportunity context
+                  window.location.href = `/messages?opportunity=${application.opportunity_id}`;
+                }}
+                className="text-xs bg-green-600 hover:bg-green-700"
+              >
+                Message
+              </Button>
+            )}
             <Button 
               variant="outline" 
               size="sm"

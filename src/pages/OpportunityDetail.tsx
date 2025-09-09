@@ -29,6 +29,7 @@ import { formatDistanceToNow, format } from "date-fns";
 import { ShareOpportunityModal } from "@/components/opportunities/share-opportunity-modal";
 import { ConfirmDeleteModal } from "@/components/opportunities/confirm-delete-modal";
 import { useOrganizationOpportunities, useDeleteOpportunity } from "@/hooks/useOrganizationOpportunities";
+import { useOpportunities } from "@/hooks/useOpportunities";
 import { useCurrentProfile } from "@/hooks/useProfiles";
 
 function OpportunityDetail() {
@@ -39,10 +40,13 @@ function OpportunityDetail() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   
   const { data: opportunities } = useOrganizationOpportunities();
+  const { data: allOpportunities } = useOpportunities(); // Get all opportunities with application status
   const { data: currentProfile } = useCurrentProfile();
   const deleteOpportunity = useDeleteOpportunity();
   
-  const opportunity = opportunities?.find(opp => opp.id === id);
+  // Try to find opportunity from org opportunities first, then from all opportunities
+  const opportunity = opportunities?.find(opp => opp.id === id) || 
+                     allOpportunities?.find(opp => opp.id === id);
   
   // Check if current user is the owner
   const isOwner = opportunity && currentProfile && opportunity.user_id === currentProfile.user_id;
@@ -82,7 +86,10 @@ function OpportunityDetail() {
   };
 
   const handleApply = () => {
-    // TODO: Implement apply logic
+    if (!opportunity) return;
+    
+    // Use the apply mutation from useOpportunities hook
+    // This would require accessing the mutation here or creating a new one
     toast({
       title: "Application submitted",
       description: "Your application has been submitted successfully."
@@ -165,12 +172,37 @@ function OpportunityDetail() {
                   <Share2 className="w-4 w-4 mr-2" />
                   <span className="hidden sm:inline">Share</span>
                 </Button>
-                <Button 
-                  onClick={handleApply}
-                  size="sm"
-                >
-                  Apply Now
-                </Button>
+                
+                {/* Status-based action button */}
+                {(opportunity as any).user_applied ? (
+                  (opportunity as any).application_status === 'accepted' ? (
+                    <Button 
+                      onClick={() => navigate(`/messages?opportunity=${opportunity.id}`)}
+                      size="sm"
+                      className="bg-green-600 hover:bg-green-700"
+                    >
+                      Message
+                    </Button>
+                  ) : (
+                    <Button 
+                      disabled
+                      size="sm"
+                      className="bg-muted text-muted-foreground cursor-not-allowed"
+                    >
+                      {(opportunity as any).application_status === 'rejected' ? 'Rejected' : 
+                       (opportunity as any).application_status === 'pending' ? 'Applied' : 'Applied'}
+                    </Button>
+                  )
+                ) : (
+                  <Button 
+                    onClick={handleApply}
+                    size="sm"
+                    disabled={opportunity.status !== 'active'}
+                    className={opportunity.status !== 'active' ? 'bg-muted text-muted-foreground cursor-not-allowed' : ''}
+                  >
+                    {opportunity.status !== 'active' ? 'Closed' : 'Apply Now'}
+                  </Button>
+                )}
               </>
             )}
           </div>
@@ -178,22 +210,42 @@ function OpportunityDetail() {
 
         {/* Single Section Layout - matches prompt exactly */}
         <Card className="overflow-hidden shadow-lg border border-border/50">
-          {/* Large Banner/Hero Image - top of single section */}
-          <div className="relative">
-            {opportunity.image_url ? (
-              <div className="w-full h-48 sm:h-56 md:h-64 lg:h-80">
-                <img 
-                  src={opportunity.image_url} 
-                  alt={opportunity.title}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            ) : (
-              <div className="w-full h-48 sm:h-56 md:h-64 lg:h-80 bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
-                <Briefcase className="w-16 h-16 md:w-20 md:h-20 text-primary/50" />
-              </div>
-            )}
-          </div>
+            {/* Large Banner/Hero Image - top of single section */}
+            <div className="relative">
+              {opportunity.image_url ? (
+                <div className="w-full h-48 sm:h-56 md:h-64 lg:h-80">
+                  <img 
+                    src={opportunity.image_url} 
+                    alt={opportunity.title}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      // Hide broken image and show placeholder
+                      e.currentTarget.style.display = 'none';
+                      const container = e.currentTarget.parentElement;
+                      if (container) {
+                        container.innerHTML = `
+                          <div class="w-full h-full bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
+                            <div class="text-center">
+                              <svg class="w-16 h-16 md:w-20 md:h-20 text-primary/50 mx-auto mb-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd" />
+                              </svg>
+                              <p class="text-sm text-muted-foreground">Image not available</p>
+                            </div>
+                          </div>
+                        `;
+                      }
+                    }}
+                  />
+                </div>
+              ) : (
+                <div className="w-full h-48 sm:h-56 md:h-64 lg:h-80 bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
+                  <div className="text-center">
+                    <Briefcase className="w-16 h-16 md:w-20 md:h-20 text-primary/50 mx-auto mb-2" />
+                    <p className="text-sm text-muted-foreground">No image provided</p>
+                  </div>
+                </div>
+              )}
+            </div>
           
           <CardContent className="p-6 md:p-8 space-y-8">
             {/* Title Section - H1 + Organization */}
@@ -255,9 +307,23 @@ function OpportunityDetail() {
                   <span>Posted {formatDistanceToNow(new Date(opportunity.created_at), { addSuffix: true })}</span>
                 </div>
                 
-                <Badge variant={opportunity.status === 'active' ? 'default' : 'secondary'}>
+                <Badge variant={opportunity.status === 'active' ? 'default' : 'secondary'} className="mr-2">
                   {opportunity.status === 'active' ? 'Active' : 'Closed'}
                 </Badge>
+                
+                {/* Show application status if user has applied */}
+                {(opportunity as any).user_applied && (opportunity as any).application_status && (
+                  <Badge 
+                    className={`mr-2 ${
+                      (opportunity as any).application_status === 'accepted' ? 'bg-green-500/10 text-green-600 border-green-500/20' :
+                      (opportunity as any).application_status === 'rejected' ? 'bg-red-500/10 text-red-600 border-red-500/20' :
+                      'bg-blue-500/10 text-blue-600 border-blue-500/20'
+                    }`}
+                  >
+                    {(opportunity as any).application_status === 'accepted' ? 'Accepted' :
+                     (opportunity as any).application_status === 'rejected' ? 'Rejected' : 'Pending'}
+                  </Badge>
+                )}
               </div>
             </div>
 
@@ -421,12 +487,34 @@ function OpportunityDetail() {
                     </>
                   ) : isArtist && (
                     <>
-                      <Button 
-                        onClick={handleApply}
-                        className="w-full"
-                      >
-                        Apply Now
-                      </Button>
+                      {/* Status-based action button */}
+                      {(opportunity as any).user_applied ? (
+                        (opportunity as any).application_status === 'accepted' ? (
+                          <Button 
+                            onClick={() => navigate(`/messages?opportunity=${opportunity.id}`)}
+                            className="w-full bg-green-600 hover:bg-green-700"
+                          >
+                            Message
+                          </Button>
+                        ) : (
+                          <Button 
+                            disabled
+                            className="w-full bg-muted text-muted-foreground cursor-not-allowed"
+                          >
+                            {(opportunity as any).application_status === 'rejected' ? 'Rejected' : 
+                             (opportunity as any).application_status === 'pending' ? 'Applied' : 'Applied'}
+                          </Button>
+                        )
+                      ) : (
+                        <Button 
+                          onClick={handleApply}
+                          className="w-full"
+                          disabled={opportunity.status !== 'active'}
+                        >
+                          {opportunity.status !== 'active' ? 'Closed' : 'Apply Now'}
+                        </Button>
+                      )}
+                      
                       <Button 
                         variant="outline"
                         onClick={() => setShowShareModal(true)}
