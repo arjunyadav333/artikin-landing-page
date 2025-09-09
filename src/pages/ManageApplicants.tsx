@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -16,11 +16,14 @@ import {
   Users,
   Search,
   Info,
-  MessageSquare
+  MessageSquare,
+  AlertCircle,
+  Lock
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useOpportunityApplications, useUpdateApplicationStatus, useDeleteApplication } from "@/hooks/useApplications";
 import { useOrganizationOpportunities } from "@/hooks/useOrganizationOpportunities";
+import { useCurrentProfile } from "@/hooks/useProfiles";
 import { ApplicantDetailsModal } from "@/components/manage-applicants/applicant-details-modal";
 import { ApplicantActionsMenu } from "@/components/manage-applicants/applicant-actions-menu";
 import type { Application } from "@/hooks/useApplications";
@@ -34,12 +37,41 @@ export default function ManageApplicants() {
   const [undoTimeout, setUndoTimeout] = useState<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
 
-  const { data: opportunities } = useOrganizationOpportunities();
-  const { data: applications = [], isLoading } = useOpportunityApplications(id || '');
+  const { data: currentProfile, isLoading: profileLoading } = useCurrentProfile();
+  const { data: opportunities, isLoading: opportunitiesLoading } = useOrganizationOpportunities();
+  const { data: applications = [], isLoading: applicationsLoading } = useOpportunityApplications(id || '');
   const updateStatus = useUpdateApplicationStatus();
   const deleteApplication = useDeleteApplication();
 
   const opportunity = opportunities?.find(opp => opp.id === id);
+  const isLoading = profileLoading || opportunitiesLoading;
+
+  // Authorization checks
+  useEffect(() => {
+    if (!isLoading && currentProfile) {
+      // Check if user is an organization
+      if (currentProfile.role !== 'organization') {
+        toast({
+          title: "Access Denied",
+          description: "Only organizations can manage applicants.",
+          variant: "destructive"
+        });
+        navigate("/opportunities");
+        return;
+      }
+
+      // Check if opportunity exists and user owns it
+      if (!opportunitiesLoading && opportunities !== undefined && !opportunity) {
+        toast({
+          title: "Access Denied", 
+          description: "You don't have permission to manage applicants for this opportunity.",
+          variant: "destructive"
+        });
+        navigate("/opportunities");
+        return;
+      }
+    }
+  }, [currentProfile, opportunity, opportunities, opportunitiesLoading, isLoading, navigate, toast]);
 
   const handleBack = () => {
     navigate("/opportunities");
@@ -143,12 +175,47 @@ export default function ManageApplicants() {
     rejected: applications.filter(app => app.status === 'rejected').length,
   };
 
-  if (!opportunity) {
+  // Loading state
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center space-y-4">
           <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full mx-auto"></div>
-          <p className="text-muted-foreground">Loading opportunity...</p>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Authorization error state
+  if (!currentProfile || currentProfile.role !== 'organization') {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <Lock className="h-12 w-12 text-muted-foreground mx-auto" />
+          <h3 className="text-lg font-medium">Access Denied</h3>
+          <p className="text-muted-foreground">Only organizations can manage applicants.</p>
+          <Button onClick={() => navigate("/opportunities")}>
+            Back to Opportunities
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Opportunity not found error state
+  if (!opportunity) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <AlertCircle className="h-12 w-12 text-muted-foreground mx-auto" />
+          <h3 className="text-lg font-medium">Opportunity Not Found</h3>
+          <p className="text-muted-foreground">
+            You don't have permission to manage applicants for this opportunity.
+          </p>
+          <Button onClick={() => navigate("/opportunities")}>
+            Back to Opportunities
+          </Button>
         </div>
       </div>
     );
