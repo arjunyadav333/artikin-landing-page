@@ -424,7 +424,7 @@ export default function ManageApplicants() {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="h-8 w-8 p-0 rounded-full"
+                                className="h-8 w-8 p-5 rounded-full"
                                 aria-label={`More options for ${fullname}`}
                               >
                                 <MoreVertical className="h-3.5 w-3.5" />
