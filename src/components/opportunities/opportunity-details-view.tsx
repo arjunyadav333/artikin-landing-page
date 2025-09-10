@@ -155,11 +155,11 @@ export function OpportunityDetailsView({
         {/* Hero Section */}
         <Card className="mb-8 overflow-hidden">
           {opportunity.thumbnail_url && (
-            <div className="h-64 bg-gradient-to-r from-primary/10 to-accent/10">
+            <div className="h-80 bg-gradient-to-r from-primary/10 to-accent/10">
               <img
                 src={opportunity.thumbnail_url}
                 alt={opportunity.title}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-contain bg-muted"
               />
             </div>
           )}
@@ -184,19 +184,26 @@ export function OpportunityDetailsView({
                   {opportunity.organization.name}
                 </p>
                 
-                {/* Key metadata */}
+                {/* Key metadata in requested order */}
                 <div className="flex flex-wrap gap-6 text-sm text-muted-foreground">
-                  {opportunity.gender && (
-                    <div className="flex items-center gap-2">
-                      <User className="h-4 w-4" />
-                      <span>{getGenderIcon(opportunity.gender)} {opportunity.gender}</span>
-                    </div>
-                  )}
-                  
                   {opportunity.location && (
                     <div className="flex items-center gap-2">
                       <MapPin className="h-4 w-4" />
                       <span>{opportunity.location}</span>
+                    </div>
+                  )}
+                  
+                  {opportunity.experience_level && (
+                    <div className="flex items-center gap-2">
+                      <User className="h-4 w-4" />
+                      <span>{opportunity.experience_level}</span>
+                    </div>
+                  )}
+                  
+                  {opportunity.languages && opportunity.languages.length > 0 && (
+                    <div className="flex items-center gap-2">
+                      <Languages className="h-4 w-4" />
+                      <span>{opportunity.languages.join(', ')}</span>
                     </div>
                   )}
                   
@@ -214,14 +221,17 @@ export function OpportunityDetailsView({
                 </div>
               </div>
               
-              {opportunity.artform && (
-                <Badge 
-                  variant="secondary" 
-                  className="bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-300 text-base px-4 py-2"
-                >
-                  {opportunity.artform}
-                </Badge>
-              )}
+              {/* Art forms badges */}
+              <div className="flex flex-wrap gap-2">
+                {opportunity.artform && (
+                  <Badge 
+                    variant="secondary" 
+                    className="bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-300 text-base px-4 py-2"
+                  >
+                    {opportunity.artform}
+                  </Badge>
+                )}
+              </div>
             </div>
 
             {/* Stats */}
@@ -231,13 +241,11 @@ export function OpportunityDetailsView({
                 <span className="font-medium">{opportunity.views_count}</span>
                 <span>views</span>
               </div>
-              {opportunity.is_owner && (
-                <div className="flex items-center gap-2">
-                  <Users className="h-4 w-4" />
-                  <span className="font-medium">{opportunity.applicants_count}</span>
-                  <span>applicants</span>
-                </div>
-              )}
+              <div className="flex items-center gap-2">
+                <Users className="h-4 w-4" />
+                <span className="font-medium">{opportunity.applicants_count}</span>
+                <span>applicants</span>
+              </div>
             </div>
           </CardContent>
         </Card>

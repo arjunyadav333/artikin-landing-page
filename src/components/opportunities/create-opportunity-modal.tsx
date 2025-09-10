@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -13,6 +14,8 @@ import {
 } from "@/components/ui/dialog";
 import { Plus } from "lucide-react";
 import { useCreateOpportunity } from "@/hooks/useOpportunities";
+import { OpportunityImageUpload } from "./opportunity-image-upload";
+import { useAuth } from "@/hooks/useAuth";
 
 export function CreateOpportunityModal() {
   const [open, setOpen] = useState(false);
@@ -21,12 +24,50 @@ export function CreateOpportunityModal() {
     company: "",
     description: "",
     location: "",
+    city: "",
+    state: "",
     salary_min: "",
     salary_max: "",
     type: "",
     tags: "",
-    deadline: ""
+    deadline: "",
+    image_url: "",
+    art_forms: [] as string[],
+    experience_level: "",
+    gender_preference: [] as string[],
+    language_preference: [] as string[],
+    organization_name: ""
   });
+
+  const { user } = useAuth();
+
+  // Art form options
+  const artFormOptions = [
+    "Acting", "Dance", "Music", "Visual Arts", "Theater", "Film", "Photography", 
+    "Writing", "Fashion", "Digital Art", "Performance Art", "Voice Acting"
+  ];
+
+  // Experience level options
+  const experienceLevels = ["Beginner", "Intermediate", "Advanced", "Professional", "Any"];
+
+  // Gender preference options
+  const genderOptions = ["Male", "Female", "Non-binary", "Any"];
+
+  // Language options
+  const languageOptions = [
+    "English", "Spanish", "French", "German", "Italian", "Portuguese", 
+    "Chinese", "Japanese", "Korean", "Arabic", "Hindi", "Russian"
+  ];
+
+  // Get organization name from user profile
+  useEffect(() => {
+    if (user?.user_metadata?.full_name || user?.user_metadata?.display_name) {
+      setFormData(prev => ({
+        ...prev,
+        organization_name: user.user_metadata?.full_name || user.user_metadata?.display_name || ""
+      }));
+    }
+  }, [user]);
 
   const createOpportunity = useCreateOpportunity();
 
@@ -38,11 +79,19 @@ export function CreateOpportunityModal() {
       company: formData.company || undefined,
       description: formData.description,
       location: formData.location || undefined,
+      city: formData.city || undefined,
+      state: formData.state || undefined,
       salary_min: formData.salary_min ? parseInt(formData.salary_min) : undefined,
       salary_max: formData.salary_max ? parseInt(formData.salary_max) : undefined,
       type: formData.type,
       tags: formData.tags ? formData.tags.split(',').map(tag => tag.trim()) : undefined,
-      deadline: formData.deadline || undefined
+      deadline: formData.deadline || undefined,
+      image_url: formData.image_url || undefined,
+      art_forms: formData.art_forms.length > 0 ? formData.art_forms : undefined,
+      experience_level: formData.experience_level || undefined,
+      gender_preference: formData.gender_preference.length > 0 ? formData.gender_preference : undefined,
+      language_preference: formData.language_preference.length > 0 ? formData.language_preference : undefined,
+      organization_name: formData.organization_name || undefined
     };
 
     try {
@@ -53,11 +102,19 @@ export function CreateOpportunityModal() {
         company: "",
         description: "",
         location: "",
+        city: "",
+        state: "",
         salary_min: "",
         salary_max: "",
         type: "",
         tags: "",
-        deadline: ""
+        deadline: "",
+        image_url: "",
+        art_forms: [],
+        experience_level: "",
+        gender_preference: [],
+        language_preference: [],
+        organization_name: user?.user_metadata?.full_name || user?.user_metadata?.display_name || ""
       });
     } catch (error) {
       console.error('Error creating opportunity:', error);
@@ -66,6 +123,19 @@ export function CreateOpportunityModal() {
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleArrayChange = (field: string, values: string[]) => {
+    setFormData(prev => ({ ...prev, [field]: values }));
+  };
+
+  const toggleArrayItem = (field: string, item: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: prev[field as keyof typeof prev].includes(item)
+        ? (prev[field as keyof typeof prev] as string[]).filter((i: string) => i !== item)
+        : [...(prev[field as keyof typeof prev] as string[]), item]
+    }));
   };
 
   return (
@@ -82,6 +152,12 @@ export function CreateOpportunityModal() {
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Image Upload */}
+          <OpportunityImageUpload
+            value={formData.image_url}
+            onChange={(url) => handleInputChange('image_url', url || '')}
+          />
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="title">Job Title *</Label>
@@ -89,50 +165,106 @@ export function CreateOpportunityModal() {
                 id="title"
                 value={formData.title}
                 onChange={(e) => handleInputChange('title', e.target.value)}
-                placeholder="e.g. Senior Frontend Developer"
+                placeholder="e.g. Lead Actor for Theater Production"
                 required
               />
             </div>
             
             <div>
-              <Label htmlFor="company">Company</Label>
+              <Label htmlFor="organization_name">Organization Name *</Label>
               <Input
-                id="company"
-                value={formData.company}
-                onChange={(e) => handleInputChange('company', e.target.value)}
-                placeholder="Company name"
+                id="organization_name"
+                value={formData.organization_name}
+                onChange={(e) => handleInputChange('organization_name', e.target.value)}
+                placeholder="Your organization name"
+                required
               />
             </div>
           </div>
 
           <div>
-            <Label htmlFor="description">Job Description *</Label>
+            <Label htmlFor="description">Description *</Label>
             <Textarea
               id="description"
               value={formData.description}
               onChange={(e) => handleInputChange('description', e.target.value)}
-              placeholder="Describe the role, responsibilities, requirements..."
+              placeholder="Describe the opportunity, requirements, and what you're looking for..."
               className="min-h-[120px]"
               required
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Location */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <Label htmlFor="location">Location</Label>
+              <Label htmlFor="location">Location (General)</Label>
               <Input
                 id="location"
                 value={formData.location}
                 onChange={(e) => handleInputChange('location', e.target.value)}
-                placeholder="e.g. New York, NY or Remote"
+                placeholder="e.g. Remote or New York, NY"
               />
+            </div>
+            <div>
+              <Label htmlFor="city">City</Label>
+              <Input
+                id="city"
+                value={formData.city}
+                onChange={(e) => handleInputChange('city', e.target.value)}
+                placeholder="e.g. New York"
+              />
+            </div>
+            <div>
+              <Label htmlFor="state">State</Label>
+              <Input
+                id="state"
+                value={formData.state}
+                onChange={(e) => handleInputChange('state', e.target.value)}
+                placeholder="e.g. NY"
+              />
+            </div>
+          </div>
+
+          {/* Art Forms */}
+          <div>
+            <Label>Art Forms *</Label>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-2">
+              {artFormOptions.map((artForm) => (
+                <div key={artForm} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={artForm}
+                    checked={formData.art_forms.includes(artForm)}
+                    onCheckedChange={() => toggleArrayItem('art_forms', artForm)}
+                  />
+                  <Label htmlFor={artForm} className="text-sm font-normal">
+                    {artForm}
+                  </Label>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Experience Level & Job Type */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="experience_level">Experience Level</Label>
+              <Select value={formData.experience_level} onValueChange={(value) => handleInputChange('experience_level', value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select experience level" />
+                </SelectTrigger>
+                <SelectContent>
+                  {experienceLevels.map((level) => (
+                    <SelectItem key={level} value={level}>{level}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             
             <div>
-              <Label htmlFor="type">Job Type *</Label>
+              <Label htmlFor="type">Opportunity Type *</Label>
               <Select value={formData.type} onValueChange={(value) => handleInputChange('type', value)}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select job type" />
+                  <SelectValue placeholder="Select opportunity type" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Full-time">Full-time</SelectItem>
@@ -140,32 +272,73 @@ export function CreateOpportunityModal() {
                   <SelectItem value="Contract">Contract</SelectItem>
                   <SelectItem value="Freelance">Freelance</SelectItem>
                   <SelectItem value="Project-based">Project-based</SelectItem>
-                  <SelectItem value="Internship">Internship</SelectItem>
+                  <SelectItem value="Audition">Audition</SelectItem>
+                  <SelectItem value="Gig">One-time Gig</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
 
+          {/* Gender & Language Preferences */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label>Gender Preference</Label>
+              <div className="grid grid-cols-2 gap-2 mt-2">
+                {genderOptions.map((gender) => (
+                  <div key={gender} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={gender}
+                      checked={formData.gender_preference.includes(gender)}
+                      onCheckedChange={() => toggleArrayItem('gender_preference', gender)}
+                    />
+                    <Label htmlFor={gender} className="text-sm font-normal">
+                      {gender}
+                    </Label>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <Label>Language Preferences</Label>
+              <div className="grid grid-cols-2 gap-2 mt-2 max-h-32 overflow-y-auto">
+                {languageOptions.map((language) => (
+                  <div key={language} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={language}
+                      checked={formData.language_preference.includes(language)}
+                      onCheckedChange={() => toggleArrayItem('language_preference', language)}
+                    />
+                    <Label htmlFor={language} className="text-sm font-normal">
+                      {language}
+                    </Label>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Compensation & Deadline */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <Label htmlFor="salary_min">Min Salary ($)</Label>
+              <Label htmlFor="salary_min">Min Compensation ($)</Label>
               <Input
                 id="salary_min"
                 type="number"
                 value={formData.salary_min}
                 onChange={(e) => handleInputChange('salary_min', e.target.value)}
-                placeholder="50000"
+                placeholder="1000"
               />
             </div>
             
             <div>
-              <Label htmlFor="salary_max">Max Salary ($)</Label>
+              <Label htmlFor="salary_max">Max Compensation ($)</Label>
               <Input
                 id="salary_max"
                 type="number"
                 value={formData.salary_max}
                 onChange={(e) => handleInputChange('salary_max', e.target.value)}
-                placeholder="80000"
+                placeholder="5000"
               />
             </div>
 
@@ -181,12 +354,12 @@ export function CreateOpportunityModal() {
           </div>
 
           <div>
-            <Label htmlFor="tags">Skills/Tags</Label>
+            <Label htmlFor="tags">Additional Skills/Tags</Label>
             <Input
               id="tags"
               value={formData.tags}
               onChange={(e) => handleInputChange('tags', e.target.value)}
-              placeholder="React, TypeScript, Node.js (comma-separated)"
+              placeholder="Improvisation, Stage Combat, Classical Training (comma-separated)"
             />
           </div>
 

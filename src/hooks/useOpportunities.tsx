@@ -111,11 +111,19 @@ export const useCreateOpportunity = () => {
       company?: string;
       description: string;
       location?: string;
+      city?: string;
+      state?: string;
       salary_min?: number;
       salary_max?: number;
       type: string;
       tags?: string[];
       deadline?: string;
+      image_url?: string;
+      art_forms?: string[];
+      experience_level?: string;
+      gender_preference?: string[];
+      language_preference?: string[];
+      organization_name?: string;
     }) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');

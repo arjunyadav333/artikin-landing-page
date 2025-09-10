@@ -8,11 +8,19 @@ export interface EditOpportunityData {
   description: string;
   type: string;
   location?: string;
+  city?: string;
+  state?: string;
   salary_min?: number;
   salary_max?: number;
   deadline?: string;
   tags?: string[];
   status: string;
+  image_url?: string;
+  art_forms?: string[];
+  experience_level?: string;
+  gender_preference?: string[];
+  language_preference?: string[];
+  organization_name?: string;
 }
 
 export const useEditOpportunity = () => {
@@ -35,11 +43,19 @@ export const useEditOpportunity = () => {
           description: data.description,
           type: data.type,
           location: data.location,
+          city: data.city,
+          state: data.state,
           salary_min: data.salary_min,
           salary_max: data.salary_max,
           deadline: data.deadline ? new Date(data.deadline).toISOString() : null,
           tags: data.tags,
           status: data.status,
+          image_url: data.image_url,
+          art_forms: data.art_forms,
+          experience_level: data.experience_level,
+          gender_preference: data.gender_preference,
+          language_preference: data.language_preference,
+          organization_name: data.organization_name,
           updated_at: new Date().toISOString()
         })
         .eq('id', opportunityId)
