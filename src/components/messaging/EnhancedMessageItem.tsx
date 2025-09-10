@@ -279,7 +279,7 @@ export const EnhancedMessageItem: React.FC<EnhancedMessageItemProps> = ({
       )}
       
       {/* Message bubble */}
-      <div className={cn("flex flex-col max-w-sm lg:max-w-md", isOwn ? "items-end" : "items-start")}>
+      <div className={cn("flex flex-col", isOwn ? "items-end" : "items-start")}>
         {/* Sender name */}
         {showSender && !isOwn && (
           <div className="text-xs font-medium text-muted-foreground mb-1">
@@ -290,12 +290,15 @@ export const EnhancedMessageItem: React.FC<EnhancedMessageItemProps> = ({
         {/* Message content */}
         <div className="relative group/message">
           <div className={cn(
-            "rounded-2xl px-3 py-2 max-w-full break-words",
+            "rounded-2xl px-3 py-2 break-words overflow-wrap-anywhere hyphens-auto",
+            "max-w-[280px] sm:max-w-[320px] md:max-w-sm lg:max-w-md",
             isOwn 
-              ? "bg-primary text-white ml-auto" 
-              : "bg-muted text-foreground"
+              ? "bg-primary text-primary-foreground ml-auto" 
+              : "bg-muted text-muted-foreground"
           )}>
-            {renderMessageContent()}
+            <div className={cn(isOwn ? "text-white" : "text-foreground")}>
+              {renderMessageContent()}
+            </div>
           </div>
 
           {/* Quick reactions on hover */}
