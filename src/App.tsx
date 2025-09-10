@@ -39,25 +39,30 @@ const DefaultLoader = () => <PageSpinner />;
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      // Optimized cache settings for sub-300ms performance
-      staleTime: 2 * 60 * 1000, // 2 minutes - fresher data
-      gcTime: 5 * 60 * 1000, // 5 minutes - faster cleanup
+      // Ultra-aggressive caching for maximum performance
+      staleTime: 5 * 60 * 1000, // 5 minutes - longer cache
+      gcTime: 10 * 60 * 1000, // 10 minutes - extended cleanup
       refetchOnWindowFocus: false,
       refetchOnMount: false,
+      refetchOnReconnect: false,
       networkMode: 'always',
+      // Deduplicate requests with same query key
+      structuralSharing: true,
       retry: (failureCount, error: any) => {
-        // Don't retry auth errors
-        if (error?.message?.includes('JWT') || error?.message?.includes('auth')) {
+        // Don't retry auth errors or network errors for speed
+        if (error?.message?.includes('JWT') || 
+            error?.message?.includes('auth') ||
+            error?.status === 401 ||
+            error?.status === 403) {
           return false;
         }
-        return failureCount < 2; // Reduced retries for speed
+        return failureCount < 1; // Single retry only for speed
       },
-      retryDelay: attemptIndex => Math.min(500 * 2 ** attemptIndex, 5000), // Faster retries
+      retryDelay: 200, // Super fast retries
     },
     mutations: {
-      // Optimized mutation settings
-      retry: 1,
-      retryDelay: 500, // Faster mutation retries
+      // Lightning fast mutations
+      retry: 0, // No retries for mutations - fail fast
       networkMode: 'always'
     }
   }

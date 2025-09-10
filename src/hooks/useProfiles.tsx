@@ -44,7 +44,10 @@ export const useProfile = (userId?: string) => {
       if (error) throw error;
       return data as Profile;
     },
-    enabled: !!userId
+    enabled: !!userId,
+    // Enhanced caching for profiles
+    staleTime: 10 * 60 * 1000, // 10 minutes for profiles
+    gcTime: 30 * 60 * 1000, // 30 minutes cache time
   });
 };
 
@@ -63,7 +66,12 @@ export const useCurrentProfile = () => {
       
       if (error) throw error;
       return data as Profile;
-    }
+    },
+    // Aggressive caching for current user profile
+    staleTime: 15 * 60 * 1000, // 15 minutes for current user
+    gcTime: 60 * 60 * 1000, // 1 hour cache time
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   });
 };
 

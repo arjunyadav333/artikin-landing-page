@@ -12,7 +12,7 @@ import { useNavigate } from "react-router-dom";
 import { useFollowUser, useConnectionStatus } from "@/hooks/useConnections";
 import { useToast } from "@/hooks/use-toast";
 import { useDirectMessage } from "@/hooks/useDirectMessage";
-import { useAuth } from "@/hooks/useAuth";
+import { useUserId } from "@/hooks/useOptimizedAuth";
 
 interface UserCardProps {
   user: {
@@ -45,7 +45,7 @@ export function UserCard({
   const followUser = useFollowUser();
   const { data: connectionStatus } = useConnectionStatus(user.user_id);
   const { startDirectMessage, isLoading: isMessageLoading } = useDirectMessage();
-  const { user: currentUser } = useAuth();
+  const currentUserId = useUserId();
   
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
@@ -148,7 +148,7 @@ export function UserCard({
         {/* Actions */}
         <div className="flex items-center gap-2">
           {/* Message Button - visible for non-self users */}
-          {currentUser?.id !== user.user_id && (
+          {currentUserId !== user.user_id && (
             <Button 
               size="sm" 
               variant="outline"
@@ -165,7 +165,7 @@ export function UserCard({
             </Button>
           )}
 
-          {showFollowButton && currentUser?.id !== user.user_id && (
+          {showFollowButton && currentUserId !== user.user_id && (
             <Button 
               size="sm" 
               variant={followButtonState.variant}
@@ -189,7 +189,7 @@ export function UserCard({
                 <Eye className="h-4 w-4 mr-2" />
                 View Profile
               </DropdownMenuItem>
-              {currentUser?.id !== user.user_id && (
+              {currentUserId !== user.user_id && (
                 <DropdownMenuItem onClick={handleMessage} disabled={isMessageLoading(user.user_id)}>
                   {isMessageLoading(user.user_id) ? (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -205,7 +205,7 @@ export function UserCard({
                   Remove Follower
                 </DropdownMenuItem>
               )}
-              {currentUser?.id !== user.user_id && (
+              {currentUserId !== user.user_id && (
                 <>
                   <DropdownMenuItem onClick={handleBlock} className="text-destructive">
                     <UserX className="h-4 w-4 mr-2" />

@@ -1,7 +1,6 @@
 import { useInfiniteQuery, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { useQueryPerformance } from '@/hooks/usePerformanceMonitoring';
 
 export interface Post {
   id: string;
@@ -32,7 +31,6 @@ export interface Post {
 }
 
 export const usePosts = (limit = 10) => {
-  const { markQueryComplete } = useQueryPerformance(['posts']);
   
   return useInfiniteQuery({
     queryKey: ['posts', limit],
@@ -106,8 +104,6 @@ export const usePosts = (limit = 10) => {
         });
       }
 
-      // Track query performance
-      markQueryComplete();
       return processedPosts;
     },
     getNextPageParam: (lastPage, pages) => {
