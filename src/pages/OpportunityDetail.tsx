@@ -220,34 +220,20 @@ function OpportunityDetail() {
             {/* Large Banner/Hero Image - top of single section */}
             <div className="relative">
               {opportunity.image_url ? (
-                <div className="w-full h-48 sm:h-56 md:h-64 lg:h-80">
+                <div className="w-full h-48 sm:h-56 md:h-64 lg:h-80 overflow-hidden">
                   <img 
                     src={opportunity.image_url} 
                     alt={opportunity.title}
                     className="w-full h-full object-cover"
                     onError={(e) => {
-                      // Hide broken image and show placeholder
-                      e.currentTarget.style.display = 'none';
-                      const container = e.currentTarget.parentElement;
-                      if (container) {
-                        container.innerHTML = `
-                          <div class="w-full h-full bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
-                            <div class="text-center">
-                              <svg class="w-16 h-16 md:w-20 md:h-20 text-primary/50 mx-auto mb-2" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd" />
-                              </svg>
-                              <p class="text-sm text-muted-foreground">Image not available</p>
-                            </div>
-                          </div>
-                        `;
-                      }
+                      e.currentTarget.src = '/placeholder.svg';
                     }}
                   />
                 </div>
               ) : (
                 <div className="w-full h-48 sm:h-56 md:h-64 lg:h-80 bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
                   <div className="text-center">
-                    <Briefcase className="w-16 h-16 md:w-20 md:h-20 text-primary/50 mx-auto mb-2" />
+                    <ImageIcon className="w-16 h-16 md:w-20 md:h-20 text-primary/30 mx-auto mb-2" />
                     <p className="text-sm text-muted-foreground">No image provided</p>
                   </div>
                 </div>
@@ -262,16 +248,16 @@ function OpportunityDetail() {
                   {opportunity.title}
                 </h1>
                 <div className="flex items-center gap-3 mb-4">
-                  {/* Organization logo */}
+                  {/* Organization logo - use profile avatar, not opportunity image */}
                   <Avatar className="w-12 h-12 md:w-16 md:h-16 rounded-lg border-2 border-background shadow-sm">
-                    <AvatarImage src={opportunity.image_url || opportunity.profiles?.avatar_url} alt={opportunity.organization_name} />
+                    <AvatarImage src={opportunity.profiles?.avatar_url} alt={opportunity.organization_name || opportunity.company} />
                     <AvatarFallback className="bg-primary/10 rounded-lg">
                       <Building className="w-6 h-6 md:w-8 md:h-8 text-primary" />
                     </AvatarFallback>
                   </Avatar>
-                  <div>
-                    <p className="text-lg md:text-xl text-muted-foreground font-medium">
-                      {opportunity.company || opportunity.organization_name || opportunity.profiles?.display_name}
+                  <div className="space-y-1">
+                    <p className="text-lg md:text-xl text-foreground font-medium">
+                      {opportunity.organization_name || opportunity.company || opportunity.profiles?.display_name}
                     </p>
                   </div>
                 </div>
@@ -279,13 +265,14 @@ function OpportunityDetail() {
               
               {/* Key metadata pills - under title as specified */}
               <div className="flex flex-wrap items-center gap-3">
-                {opportunity.gender_preference?.map((gender: string, index: number) => (
-                  <div key={index} className="flex items-center gap-1 px-3 py-1 rounded-full bg-muted/50 text-sm">
-                    <User className="h-4 w-4 text-muted-foreground" />
-                    <span>{gender}</span>
-                  </div>
-                ))}
+                {/* Opportunity Type - Prominent display */}
+                {opportunity.type && (
+                  <Badge variant="default" className="bg-primary text-primary-foreground font-medium px-3 py-1">
+                    {opportunity.type}
+                  </Badge>
+                )}
                 
+                {/* Art Forms */}
                 {opportunity.art_forms?.map((artform: string, index: number) => (
                   <Badge 
                     key={index}
@@ -295,13 +282,32 @@ function OpportunityDetail() {
                   </Badge>
                 ))}
                 
-                {opportunity.location && (
-                  <div className="flex items-center gap-1 px-3 py-1 rounded-full bg-muted/50 text-sm">
-                    <MapPin className="h-4 w-4 text-muted-foreground" />
-                    <span>{formatLocation()}</span>
-                  </div>
-                )}
+                {/* Tags */}
+                {opportunity.tags?.map((tag: string, index: number) => (
+                  <Badge 
+                    key={index}
+                    variant="secondary"
+                    className="bg-accent/10 text-accent-foreground border-accent/20"
+                  >
+                    {tag}
+                  </Badge>
+                ))}
                 
+                {/* Gender Preferences */}
+                {opportunity.gender_preference?.map((gender: string, index: number) => (
+                  <div key={index} className="flex items-center gap-1 px-3 py-1 rounded-full bg-muted/50 text-sm">
+                    <User className="h-4 w-4 text-muted-foreground" />
+                    <span>{gender}</span>
+                  </div>
+                ))}
+                
+                {/* Location */}
+                <div className="flex items-center gap-1 px-3 py-1 rounded-full bg-muted/50 text-sm">
+                  <MapPin className="h-4 w-4 text-muted-foreground" />
+                  <span>{formatLocation()}</span>
+                </div>
+                
+                {/* Experience Level */}
                 {opportunity.experience_level && (
                   <div className="flex items-center gap-1 px-3 py-1 rounded-full bg-muted/50 text-sm">
                     <Briefcase className="h-4 w-4 text-muted-foreground" />
@@ -309,26 +315,29 @@ function OpportunityDetail() {
                   </div>
                 )}
                 
+                {/* Deadline */}
                 {opportunity.deadline && (
-                  <div className="flex items-center gap-1 px-3 py-1 rounded-full bg-muted/50 text-sm">
-                    <Calendar className="h-4 w-4 text-muted-foreground" />
-                    <span>{format(new Date(opportunity.deadline), 'MMM d, yyyy')}</span>
+                  <div className="flex items-center gap-1 px-3 py-1 rounded-full bg-red-50 dark:bg-red-950/20 text-sm text-red-600 dark:text-red-400">
+                    <Calendar className="h-4 w-4" />
+                    <span>Due {format(new Date(opportunity.deadline), 'MMM d, yyyy')}</span>
                   </div>
                 )}
                 
+                {/* Posted Date */}
                 <div className="flex items-center gap-1 px-3 py-1 rounded-full bg-muted/50 text-sm">
                   <Clock className="h-4 w-4 text-muted-foreground" />
                   <span>Posted {formatDistanceToNow(new Date(opportunity.created_at), { addSuffix: true })}</span>
                 </div>
                 
-                <Badge variant={opportunity.status === 'active' ? 'default' : 'secondary'} className="mr-2">
+                {/* Status */}
+                <Badge variant={opportunity.status === 'active' ? 'default' : 'secondary'}>
                   {opportunity.status === 'active' ? 'Active' : 'Closed'}
                 </Badge>
                 
-                {/* Show application status if user has applied */}
+                {/* Application Status */}
                 {(opportunity as any).user_applied && (opportunity as any).application_status && (
                   <Badge 
-                    className={`mr-2 ${
+                    className={`${
                       (opportunity as any).application_status === 'accepted' ? 'bg-green-500/10 text-green-600 border-green-500/20' :
                       (opportunity as any).application_status === 'rejected' ? 'bg-red-500/10 text-red-600 border-red-500/20' :
                       'bg-blue-500/10 text-blue-600 border-blue-500/20'
@@ -358,46 +367,91 @@ function OpportunityDetail() {
                   </div>
                 </div>
 
-                {/* Requirements */}
-                {(opportunity.experience_level || opportunity.gender_preference?.length > 0 || opportunity.language_preference?.length > 0) && (
-                  <div>
-                    <div className="flex items-center gap-2 mb-4">
-                      <Award className="h-5 w-5 text-primary" />
-                      <h2 className="text-lg font-semibold">Requirements</h2>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {opportunity.experience_level && (
-                        <div className="flex items-center gap-3">
-                          <Briefcase className="h-4 w-4 text-muted-foreground" />
-                          <div>
-                            <p className="text-sm font-medium">Experience Level</p>
-                            <p className="text-sm text-muted-foreground capitalize">{opportunity.experience_level}</p>
-                          </div>
+                {/* Requirements & Preferences */}
+                <div>
+                  <div className="flex items-center gap-2 mb-4">
+                    <Award className="h-5 w-5 text-primary" />
+                    <h2 className="text-lg font-semibold">Requirements & Preferences</h2>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {opportunity.experience_level && (
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <Briefcase className="h-4 w-4 text-primary" />
+                          <p className="font-medium">Experience Level</p>
                         </div>
-                      )}
-                      
-                      {opportunity.gender_preference && opportunity.gender_preference.length > 0 && (
-                        <div className="flex items-center gap-3">
-                          <User className="h-4 w-4 text-muted-foreground" />
-                          <div>
-                            <p className="text-sm font-medium">Gender Preference</p>
-                            <p className="text-sm text-muted-foreground capitalize">{opportunity.gender_preference.join(", ")}</p>
-                          </div>
+                        <p className="text-muted-foreground capitalize pl-6">{opportunity.experience_level}</p>
+                      </div>
+                    )}
+                    
+                    {opportunity.gender_preference && opportunity.gender_preference.length > 0 && (
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <User className="h-4 w-4 text-primary" />
+                          <p className="font-medium">Gender Preference</p>
                         </div>
-                      )}
-                      
-                      {opportunity.language_preference && opportunity.language_preference.length > 0 && (
-                        <div className="flex items-center gap-3">
-                          <Languages className="h-4 w-4 text-muted-foreground" />
-                          <div>
-                            <p className="text-sm font-medium">Language Preferences</p>
-                            <p className="text-sm text-muted-foreground">{opportunity.language_preference.join(", ")}</p>
-                          </div>
+                        <div className="flex flex-wrap gap-2 pl-6">
+                          {opportunity.gender_preference.map((gender: string, index: number) => (
+                            <Badge key={index} variant="outline" className="text-xs">
+                              {gender}
+                            </Badge>
+                          ))}
                         </div>
-                      )}
+                      </div>
+                    )}
+                    
+                    {opportunity.language_preference && opportunity.language_preference.length > 0 && (
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <Languages className="h-4 w-4 text-primary" />
+                          <p className="font-medium">Language Preferences</p>
+                        </div>
+                        <div className="flex flex-wrap gap-2 pl-6">
+                          {opportunity.language_preference.map((lang: string, index: number) => (
+                            <Badge key={index} variant="outline" className="text-xs">
+                              {lang}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {opportunity.art_forms && opportunity.art_forms.length > 0 && (
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <Award className="h-4 w-4 text-primary" />
+                          <p className="font-medium">Art Forms</p>
+                        </div>
+                        <div className="flex flex-wrap gap-2 pl-6">
+                          {opportunity.art_forms.map((artform: string, index: number) => (
+                            <Badge key={index} variant="outline" className="text-xs bg-blue-50 text-blue-600 border-blue-200">
+                              {artform}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {opportunity.type && (
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <Clock className="h-4 w-4 text-primary" />
+                          <p className="font-medium">Job Type</p>
+                        </div>
+                        <p className="text-muted-foreground pl-6">{opportunity.type}</p>
+                      </div>
+                    )}
+                    
+                    {/* Location Details */}
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <MapPin className="h-4 w-4 text-primary" />
+                        <p className="font-medium">Location</p>
+                      </div>
+                      <p className="text-muted-foreground pl-6">{formatLocation()}</p>
                     </div>
                   </div>
-                )}
+                </div>
 
                 {/* Compensation */}
                 {formatSalary(opportunity.salary_min, opportunity.salary_max) && (
@@ -435,46 +489,61 @@ function OpportunityDetail() {
               {/* Sidebar Info */}
               <div className="space-y-6">
                 {/* Quick Info */}
-                <div>
+                <div className="bg-muted/30 rounded-lg p-6">
                   <h3 className="font-semibold mb-4">Quick Details</h3>
-                  <div className="space-y-3 text-sm">
-                    <div className="flex items-center gap-3">
-                      <MapPin className="w-4 h-4 text-muted-foreground shrink-0" />
-                      <span>{formatLocation()}</span>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-muted-foreground">Type</span>
+                      <span className="text-sm font-medium">{opportunity.type || 'Not specified'}</span>
                     </div>
                     
-                    <div className="flex items-center gap-3">
-                      <Clock className="w-4 h-4 text-muted-foreground shrink-0" />
-                      <span>Posted {formatDistanceToNow(new Date(opportunity.created_at), { addSuffix: true })}</span>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-muted-foreground">Location</span>
+                      <span className="text-sm font-medium">{formatLocation()}</span>
+                    </div>
+                    
+                    {formatSalary(opportunity.salary_min, opportunity.salary_max) && (
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground">Salary</span>
+                        <span className="text-sm font-medium">{formatSalary(opportunity.salary_min, opportunity.salary_max)}</span>
+                      </div>
+                    )}
+                    
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-muted-foreground">Posted</span>
+                      <span className="text-sm font-medium">{formatDistanceToNow(new Date(opportunity.created_at), { addSuffix: true })}</span>
                     </div>
                     
                     {opportunity.deadline && (
-                      <div className="flex items-center gap-3">
-                        <Calendar className="w-4 h-4 text-muted-foreground shrink-0" />
-                        <div>
-                          <p className="font-medium">Deadline</p>
-                          <p className="text-muted-foreground">{format(new Date(opportunity.deadline), 'MMM d, yyyy')}</p>
-                        </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-muted-foreground">Deadline</span>
+                        <span className="text-sm font-medium text-red-600">{format(new Date(opportunity.deadline), 'MMM d, yyyy')}</span>
                       </div>
                     )}
+                    
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-muted-foreground">Status</span>
+                      <Badge variant={opportunity.status === 'active' ? 'default' : 'secondary'} className="text-xs">
+                        {opportunity.status === 'active' ? 'Active' : 'Closed'}
+                      </Badge>
+                    </div>
                   </div>
                 </div>
 
                 {/* Statistics */}
-                <div>
-                  <h3 className="font-semibold mb-4">Statistics</h3>
-                  <div className="grid grid-cols-2 gap-4 text-center">
-                    <div className="p-3 rounded-lg bg-muted/30">
-                      <div className="text-xl font-bold text-primary">
-                        {opportunity.views_count || 0}
-                      </div>
-                      <div className="text-xs text-muted-foreground">Views</div>
+                <div className="bg-muted/30 rounded-lg p-6">
+                  <h3 className="font-semibold mb-4 flex items-center gap-2">
+                    <Eye className="h-4 w-4" />
+                    Statistics
+                  </h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-primary">{opportunity.views_count || 0}</div>
+                      <div className="text-sm text-muted-foreground">Views</div>
                     </div>
-                    <div className="p-3 rounded-lg bg-muted/30">
-                      <div className="text-xl font-bold text-primary">
-                        {opportunity.applications_count || 0}
-                      </div>
-                      <div className="text-xs text-muted-foreground">Applications</div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-primary">{opportunity.applications_count || 0}</div>
+                      <div className="text-sm text-muted-foreground">Applications</div>
                     </div>
                   </div>
                 </div>
