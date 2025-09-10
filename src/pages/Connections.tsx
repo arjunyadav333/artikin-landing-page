@@ -90,8 +90,12 @@ const Connections = () => {
 
   // Combined connections for "All" tab
   const allConnections = useMemo(() => {
-    const followingUsers = filteredFollowing.map(user => ({ ...user, relation: 'following' as const }));
-    const followerUsers = filteredFollowers.map(user => ({ ...user, relation: 'follower' as const }));
+    // Safety check: ensure arrays exist and are arrays
+    const safeFilteredFollowing = Array.isArray(filteredFollowing) ? filteredFollowing : [];
+    const safeFilteredFollowers = Array.isArray(filteredFollowers) ? filteredFollowers : [];
+    
+    const followingUsers = safeFilteredFollowing.map(user => ({ ...user, relation: 'following' as const }));
+    const followerUsers = safeFilteredFollowers.map(user => ({ ...user, relation: 'follower' as const }));
     
     // Merge and deduplicate by user_id
     const combined = [...followingUsers, ...followerUsers];
@@ -153,20 +157,20 @@ const Connections = () => {
             <Tabs defaultValue="all" className="w-full">
               <TabsList className="grid w-full grid-cols-3 mb-6">
                 <TabsTrigger value="all">
-                  All ({allConnections.length})
+                  All ({allConnections?.length || 0})
                 </TabsTrigger>
                 <TabsTrigger value="followers">
-                  Followers ({followersLoading ? '...' : filteredFollowers.length})
+                  Followers ({followersLoading ? '...' : (filteredFollowers?.length || 0)})
                 </TabsTrigger>
                 <TabsTrigger value="following">
-                  Following ({followingLoading ? '...' : filteredFollowing.length})
+                  Following ({followingLoading ? '...' : (filteredFollowing?.length || 0)})
                 </TabsTrigger>
               </TabsList>
 
               {/* All Tab */}
               <TabsContent value="all" className="mt-0">
                 <div className="bg-card rounded-lg border overflow-hidden">
-                  {allConnections.length > 0 ? (
+                  {allConnections && allConnections.length > 0 ? (
                     allConnections.map((user, index) => (
                       <motion.div
                         key={user.user_id}
@@ -214,7 +218,7 @@ const Connections = () => {
                     <div className="flex justify-center py-8">
                       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                     </div>
-                  ) : filteredFollowers.length > 0 ? (
+                  ) : filteredFollowers && filteredFollowers.length > 0 ? (
                     filteredFollowers.map((user, index) => (
                       <motion.div
                         key={user.id}
@@ -254,7 +258,7 @@ const Connections = () => {
                     <div className="flex justify-center py-8">
                       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                     </div>
-                  ) : filteredFollowing.length > 0 ? (
+                  ) : filteredFollowing && filteredFollowing.length > 0 ? (
                     filteredFollowing.map((user, index) => (
                       <motion.div
                         key={user.id}
