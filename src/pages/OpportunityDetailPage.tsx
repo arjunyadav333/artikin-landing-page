@@ -97,7 +97,7 @@ export default function OpportunityDetailPage() {
     if (opportunity?.location) {
       return opportunity.location;
     }
-    return 'Location not specified';
+    return 'Remote/Location flexible';
   };
 
   if (!opportunity) {
@@ -139,66 +139,23 @@ export default function OpportunityDetailPage() {
             </div>
 
             <div className="flex items-center gap-2">
-              {isOwner ? (
-                <>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => navigate(`/manage-applicants?opportunityId=${opportunity.id}`)}
-                    className="h-9 gap-2"
-                  >
-                    <Users className="h-4 w-4" />
-                    Manage Applicants
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setShareModalOpen(true)}
-                    className="h-9 gap-2"
-                  >
-                    <Share2 className="h-4 w-4" />
-                    Share
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setEditModalOpen(true)}
-                    className="h-9 gap-2"
-                  >
-                    <Edit className="h-4 w-4" />
-                    Edit
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleDelete}
-                    className="h-9 gap-2 text-destructive hover:text-destructive"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                    Delete
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setShareModalOpen(true)}
-                    className="h-9 gap-2"
-                  >
-                    <Share2 className="h-4 w-4" />
-                    Share
-                  </Button>
-                  {isArtist && !opportunity.user_applied && (
-                    <Button
-                      onClick={handleApply}
-                      disabled={applyToOpportunity.isPending}
-                      className="h-9 gap-2"
-                    >
-                      {applyToOpportunity.isPending ? 'Applying...' : 'Apply Now'}
-                    </Button>
-                  )}
-                </>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShareModalOpen(true)}
+                className="h-9 gap-2"
+              >
+                <Share2 className="h-4 w-4" />
+                Share
+              </Button>
+              {isArtist && !opportunity.user_applied && (
+                <Button
+                  onClick={handleApply}
+                  disabled={applyToOpportunity.isPending}
+                  className="h-9 gap-2"
+                >
+                  {applyToOpportunity.isPending ? 'Applying...' : 'Apply Now'}
+                </Button>
               )}
             </div>
           </div>
@@ -208,20 +165,15 @@ export default function OpportunityDetailPage() {
       <div className="max-w-6xl mx-auto px-4 py-8">
         {/* Hero Section with Image - Full width, no cropping */}
         <Card className="mb-8 overflow-hidden">
-          <div className="h-96 bg-muted flex items-center justify-center">
-            {opportunity.image_url ? (
+          {opportunity.image_url && (
+            <div className="h-96 bg-muted">
               <img
                 src={opportunity.image_url}
                 alt={opportunity.title}
                 className="w-full h-full object-contain bg-muted"
               />
-            ) : (
-              <div className="text-center text-muted-foreground">
-                <div className="text-4xl mb-2">🎭</div>
-                <p>No image provided</p>
-              </div>
-            )}
-          </div>
+            </div>
+          )}
           
           <CardContent className="p-8">
             {/* Fields in requested order */}
@@ -236,17 +188,19 @@ export default function OpportunityDetailPage() {
                 <Avatar className="h-12 w-12">
                   <AvatarImage
                     src={opportunity.profiles?.avatar_url}
-                    alt={opportunity.organization_name || opportunity.profiles?.display_name}
+                    alt={opportunity.organization_name || opportunity.profiles?.display_name || 'Organization'}
                   />
                   <AvatarFallback className="text-sm font-semibold">
-                    {(opportunity.organization_name || opportunity.profiles?.display_name || '').substring(0, 2).toUpperCase()}
+                    {(opportunity.organization_name || opportunity.profiles?.display_name || 'ORG').substring(0, 2).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
                 <div>
                   <p className="text-xl font-semibold text-foreground">
-                    {opportunity.organization_name || opportunity.profiles?.display_name}
+                    {opportunity.organization_name || opportunity.profiles?.display_name || 'Organization'}
                   </p>
-                  <p className="text-sm text-muted-foreground">Organization</p>
+                  <p className="text-sm text-muted-foreground">
+                    {opportunity.profiles?.role === 'organization' ? 'Organization' : 'Employer'}
+                  </p>
                 </div>
               </div>
 
@@ -259,20 +213,20 @@ export default function OpportunityDetailPage() {
               {/* Experience Level */}
               <div className="flex items-center gap-2 text-muted-foreground">
                 <User className="h-5 w-5" />
-                <span className="text-lg">Experience: {opportunity.experience_level || 'Not specified'}</span>
+                <span className="text-lg">Experience: {opportunity.experience_level || 'Any level'}</span>
               </div>
 
               {/* Language Preferences */}
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Languages className="h-5 w-5" />
-                <span className="text-lg">Languages: {opportunity.language_preference && opportunity.language_preference.length > 0 ? opportunity.language_preference.join(', ') : 'Not specified'}</span>
+                <span className="text-lg">Languages: {opportunity.language_preference && opportunity.language_preference.length > 0 ? opportunity.language_preference.join(', ') : 'Any language'}</span>
               </div>
 
               {/* Deadline */}
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Calendar className="h-5 w-5" />
                 <span className="text-lg">
-                  Application Deadline: {opportunity.deadline ? new Date(opportunity.deadline).toLocaleDateString() : 'Not specified'}
+                  Application Deadline: {opportunity.deadline ? new Date(opportunity.deadline).toLocaleDateString() : 'Open deadline'}
                 </span>
               </div>
 
@@ -292,7 +246,7 @@ export default function OpportunityDetailPage() {
                     ))
                   ) : (
                     <Badge variant="outline" className="text-sm px-3 py-1">
-                      Not specified
+                      All art forms
                     </Badge>
                   )}
                 </div>
@@ -350,6 +304,33 @@ export default function OpportunityDetailPage() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Management Section for Owners - At the Bottom */}
+        {isOwner && (
+          <Card className="mb-8">
+            <CardContent className="p-6">
+              <h2 className="text-xl font-semibold mb-4">Manage Opportunity</h2>
+              <div className="flex gap-4">
+                <Button 
+                  variant="outline" 
+                  size="lg" 
+                  onClick={() => navigate(`/manage-applicants?opportunityId=${opportunity.id}`)}
+                >
+                  <Users className="h-4 w-4 mr-2" />
+                  Manage Applicants
+                </Button>
+                <Button variant="outline" size="lg" onClick={() => setEditModalOpen(true)}>
+                  <Edit className="h-4 w-4 mr-2" />
+                  Edit
+                </Button>
+                <Button variant="destructive" size="lg" onClick={handleDelete}>
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       {/* Modals */}
