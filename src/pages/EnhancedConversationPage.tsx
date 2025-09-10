@@ -23,6 +23,7 @@ import { ConversationActions } from "@/components/messaging/ConversationActions"
 import { MessageListSkeleton } from "@/components/ui/message-skeleton";
 import { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
+import { useVisualViewport } from "@/hooks/useVisualViewport";
 
 const EnhancedConversationPage = () => {
   const { chatId } = useParams();
@@ -30,7 +31,8 @@ const EnhancedConversationPage = () => {
   const { user } = useAuth();
   const [replyingTo, setReplyingTo] = useState(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const { height: viewportHeight, isKeyboardOpen } = useVisualViewport();
 
   // Redirect if no chatId
   if (!chatId) {
@@ -94,8 +96,9 @@ const EnhancedConversationPage = () => {
         replyToMessageId: options?.replyTo || replyingTo?.id
       });
       
-      // Auto-scroll to show new message
+      // Keep input focused to prevent keyboard from closing
       setTimeout(() => {
+        inputRef.current?.focus();
         messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
       }, 50);
       
@@ -149,9 +152,12 @@ const EnhancedConversationPage = () => {
   }
 
   return (
-    <div className="h-screen bg-background flex flex-col overflow-hidden">
-      {/* Mobile Chat Header - Sticky at top */}
-      <div className="sticky top-0 z-10 flex-shrink-0 p-4 border-b bg-card shadow-sm">
+    <div 
+      className="bg-background flex flex-col overflow-hidden"
+      style={{ height: `${viewportHeight}px` }}
+    >
+      {/* Mobile Chat Header - Fixed at top */}
+      <div className="fixed top-0 left-0 right-0 z-50 flex-shrink-0 p-4 border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80 shadow-sm safe-area-inset-top">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <Button 
@@ -194,7 +200,13 @@ const EnhancedConversationPage = () => {
       </div>
 
       {/* Messages Area - Scrollable middle section */}
-      <div className="flex-1 overflow-hidden">
+      <div 
+        className="flex-1 overflow-hidden"
+        style={{ 
+          marginTop: '80px', // Account for fixed header
+          marginBottom: isKeyboardOpen ? '140px' : '140px' // Account for fixed input
+        }}
+      >
         <ScrollArea className="h-full px-4 py-2">
           {messagesLoading ? (
             <MessageListSkeleton count={8} />
@@ -236,9 +248,10 @@ const EnhancedConversationPage = () => {
         </ScrollArea>
       </div>
 
-      {/* Message Input - Sticky at bottom */}
-      <div className="sticky bottom-0 z-10 flex-shrink-0 p-4 border-t bg-card shadow-sm">
+      {/* Message Input - Fixed at bottom */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 flex-shrink-0 p-4 border-t bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80 shadow-sm safe-area-inset-bottom">
         <EnhancedMessageInput
+          ref={inputRef}
           value={draftText}
           onChange={updateDraft}
           onSend={handleSendMessage}

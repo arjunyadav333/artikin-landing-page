@@ -54,7 +54,7 @@ const COMMON_EMOJIS = [
   '💔', '💕', '💖', '💘', '⭐', '🌟', '✨', '🎉', '🎊', '🙏'
 ];
 
-export const EnhancedMessageInput: React.FC<EnhancedMessageInputProps> = ({
+export const EnhancedMessageInput = React.forwardRef<HTMLInputElement, EnhancedMessageInputProps>(({
   value,
   onChange,
   onSend,
@@ -63,11 +63,14 @@ export const EnhancedMessageInput: React.FC<EnhancedMessageInputProps> = ({
   replyingTo,
   onCancelReply,
   placeholder = "Type a message..."
-}) => {
+}, ref) => {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [attachments, setAttachments] = useState<File[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Use forwarded ref or fallback to internal ref
+  const actualInputRef = (ref as React.RefObject<HTMLInputElement>) || inputRef;
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -86,10 +89,15 @@ export const EnhancedMessageInput: React.FC<EnhancedMessageInputProps> = ({
     
     setAttachments([]);
     onCancelReply?.();
-  }, [value, attachments, disabled, onSend, replyingTo, onCancelReply]);
+    
+    // Keep focus on input to prevent keyboard from closing
+    setTimeout(() => {
+      actualInputRef.current?.focus();
+    }, 100);
+  }, [value, attachments, disabled, onSend, replyingTo, onCancelReply, actualInputRef]);
 
   const handleEmojiSelect = (emoji: string) => {
-    const input = inputRef.current;
+    const input = actualInputRef.current;
     if (input) {
       const cursorPosition = input.selectionStart || 0;
       const newValue = value.slice(0, cursorPosition) + emoji + value.slice(cursorPosition);
@@ -226,13 +234,17 @@ export const EnhancedMessageInput: React.FC<EnhancedMessageInputProps> = ({
         {/* Text input */}
         <div className="flex-1 relative">
           <Input
-            ref={inputRef}
+            ref={actualInputRef}
             value={value}
             onChange={(e) => handleInputChange(e.target.value)}
             placeholder={placeholder}
-            className="pr-20 resize-none min-h-[40px]"
+            className="pr-20 resize-none min-h-[40px] touch-manipulation"
             onKeyPress={handleKeyPress}
             disabled={disabled}
+            inputMode="text"
+            autoComplete="off"
+            autoCorrect="off"
+            spellCheck="false"
           />
           
           {/* Emoji and send buttons */}
@@ -278,4 +290,6 @@ export const EnhancedMessageInput: React.FC<EnhancedMessageInputProps> = ({
       </div>
     </div>
   );
-};
+});
+
+EnhancedMessageInput.displayName = 'EnhancedMessageInput';
