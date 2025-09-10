@@ -150,8 +150,8 @@ const EnhancedConversationPage = () => {
 
   return (
     <div className="h-screen bg-background flex flex-col overflow-hidden">
-      {/* Mobile Chat Header - Fixed at top */}
-      <div className="flex-shrink-0 p-4 border-b bg-card shadow-sm">
+      {/* Mobile Chat Header - Sticky at top */}
+      <div className="sticky top-0 z-10 flex-shrink-0 p-4 border-b bg-card shadow-sm">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <Button 
@@ -236,8 +236,8 @@ const EnhancedConversationPage = () => {
         </ScrollArea>
       </div>
 
-      {/* Message Input - Fixed at bottom */}
-      <div className="flex-shrink-0 p-4 border-t bg-card shadow-sm">
+      {/* Message Input - Sticky at bottom */}
+      <div className="sticky bottom-0 z-10 flex-shrink-0 p-4 border-t bg-card shadow-sm">
         <EnhancedMessageInput
           value={draftText}
           onChange={updateDraft}
