@@ -94,7 +94,10 @@ export default function OpportunityDetailPage() {
     if (opportunity?.city && opportunity?.state) {
       return `${opportunity.city}, ${opportunity.state}`;
     }
-    return opportunity?.location || 'Location not specified';
+    if (opportunity?.location) {
+      return opportunity.location;
+    }
+    return 'Location not specified';
   };
 
   if (!opportunity) {
@@ -205,15 +208,20 @@ export default function OpportunityDetailPage() {
       <div className="max-w-6xl mx-auto px-4 py-8">
         {/* Hero Section with Image - Full width, no cropping */}
         <Card className="mb-8 overflow-hidden">
-          {opportunity.image_url && (
-            <div className="h-96 bg-muted">
+          <div className="h-96 bg-muted flex items-center justify-center">
+            {opportunity.image_url ? (
               <img
                 src={opportunity.image_url}
                 alt={opportunity.title}
                 className="w-full h-full object-contain bg-muted"
               />
-            </div>
-          )}
+            ) : (
+              <div className="text-center text-muted-foreground">
+                <div className="text-4xl mb-2">🎭</div>
+                <p>No image provided</p>
+              </div>
+            )}
+          </div>
           
           <CardContent className="p-8">
             {/* Fields in requested order */}
@@ -249,37 +257,31 @@ export default function OpportunityDetailPage() {
               </div>
 
               {/* Experience Level */}
-              {opportunity.experience_level && (
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <User className="h-5 w-5" />
-                  <span className="text-lg">Experience: {opportunity.experience_level}</span>
-                </div>
-              )}
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <User className="h-5 w-5" />
+                <span className="text-lg">Experience: {opportunity.experience_level || 'Not specified'}</span>
+              </div>
 
               {/* Language Preferences */}
-              {opportunity.language_preference && opportunity.language_preference.length > 0 && (
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <Languages className="h-5 w-5" />
-                  <span className="text-lg">Languages: {opportunity.language_preference.join(', ')}</span>
-                </div>
-              )}
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Languages className="h-5 w-5" />
+                <span className="text-lg">Languages: {opportunity.language_preference && opportunity.language_preference.length > 0 ? opportunity.language_preference.join(', ') : 'Not specified'}</span>
+              </div>
 
               {/* Deadline */}
-              {opportunity.deadline && (
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <Calendar className="h-5 w-5" />
-                  <span className="text-lg">
-                    Application Deadline: {new Date(opportunity.deadline).toLocaleDateString()}
-                  </span>
-                </div>
-              )}
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Calendar className="h-5 w-5" />
+                <span className="text-lg">
+                  Application Deadline: {opportunity.deadline ? new Date(opportunity.deadline).toLocaleDateString() : 'Not specified'}
+                </span>
+              </div>
 
               {/* Art Forms */}
-              {opportunity.art_forms && opportunity.art_forms.length > 0 && (
-                <div>
-                  <p className="text-lg font-semibold mb-2">Art Forms</p>
-                  <div className="flex flex-wrap gap-2">
-                    {opportunity.art_forms.map((artForm) => (
+              <div>
+                <p className="text-lg font-semibold mb-2">Art Forms</p>
+                <div className="flex flex-wrap gap-2">
+                  {opportunity.art_forms && opportunity.art_forms.length > 0 ? (
+                    opportunity.art_forms.map((artForm) => (
                       <Badge 
                         key={artForm}
                         variant="secondary" 
@@ -287,10 +289,14 @@ export default function OpportunityDetailPage() {
                       >
                         {artForm}
                       </Badge>
-                    ))}
-                  </div>
+                    ))
+                  ) : (
+                    <Badge variant="outline" className="text-sm px-3 py-1">
+                      Not specified
+                    </Badge>
+                  )}
                 </div>
-              )}
+              </div>
 
               {/* Description */}
               <div>
