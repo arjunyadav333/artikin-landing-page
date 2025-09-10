@@ -100,7 +100,7 @@ const EnhancedMessages = () => {
   };
 
   const handleConversationClick = (conversationId: string) => {
-    navigate(`/messages/enhanced/${conversationId}`);
+    navigate(`/messages/${conversationId}`);
   };
 
   const getRoleDisplay = (participant: any) => {

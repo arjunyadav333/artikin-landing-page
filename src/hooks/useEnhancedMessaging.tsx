@@ -225,7 +225,7 @@ export const useEnhancedMessages = (conversationId?: string) => {
   });
 };
 
-// Hook to send enhanced messages
+// Hook to send enhanced messages with optimistic updates
 export const useSendEnhancedMessage = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -249,28 +249,57 @@ export const useSendEnhancedMessage = () => {
     }) => {
       if (!user) throw new Error('User not authenticated');
 
-      const { data: message, error } = await supabase
-        .from('messages')
-        .insert({
-          conversation_id: conversationId,
-          sender_id: user.id,
-          kind: messageType,
-          body: content,
-          media_url: mediaUrl,
-          link_preview: linkPreview,
-          replied_to_message_id: replyToMessageId
-        })
-        .select()
-        .single();
+      // Use RPC for faster message creation
+      const { data, error } = await supabase.rpc('create_message_with_client_id', {
+        conversation_id_param: conversationId,
+        sender_id_param: user.id,
+        client_id_param: `client_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        kind_param: messageType,
+        body_param: content
+      });
 
       if (error) throw error;
-      return message;
+      if (!data || data.length === 0) {
+        throw new Error('Failed to create message');
+      }
+
+      return data[0];
     },
-    onSuccess: (data) => {
+    onSuccess: (data, variables) => {
+      // Update conversation query to move it to top
       queryClient.invalidateQueries({ queryKey: ['enhanced-conversations'] });
-      queryClient.invalidateQueries({ queryKey: ['enhanced-messages', data.conversation_id] });
+      
+      // Optimistically add message to the messages query
+      const queryKey = ['enhanced-messages', variables.conversationId];
+      queryClient.setQueryData(queryKey, (oldData: any) => {
+        if (!oldData) return oldData;
+        
+        const newMessage = {
+          id: data.id,
+          conversation_id: variables.conversationId,
+          sender_id: user!.id,
+          kind: variables.messageType || 'text',
+          body: variables.content,
+          media_url: variables.mediaUrl,
+          link_preview: variables.linkPreview,
+          replied_to_message_id: variables.replyToMessageId,
+          created_at: data.created_at || new Date().toISOString(),
+          updated_at: data.created_at || new Date().toISOString(),
+          content: variables.content,
+          sender: {
+            user_id: user!.id,
+            username: user!.user_metadata?.username || 'You',
+            display_name: user!.user_metadata?.display_name || 'You',
+            avatar_url: user!.user_metadata?.avatar_url
+          },
+          reactions: []
+        };
+        
+        return [...oldData, newMessage];
+      });
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error('Message send error:', error);
       toast({
         title: "Error",
         description: "Failed to send message. Please try again.",
