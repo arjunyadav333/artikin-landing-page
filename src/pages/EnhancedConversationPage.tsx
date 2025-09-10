@@ -149,53 +149,53 @@ const EnhancedConversationPage = () => {
   }
 
   return (
-    <AppLayout>
-      <div className="mobile-vh bg-background flex flex-col md:h-auto">
-        {/* Enhanced Chat Header */}
-        <div className="p-4 border-b bg-card">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={() => navigate('/messages')}
-                className="lg:hidden"
-              >
-                <ArrowLeft className="h-4 w-4" />
-              </Button>
-              <Avatar className="h-10 w-10">
-                <AvatarImage 
-                  src={conversation.other_participant?.avatar_url} 
-                  alt={conversation.other_participant?.display_name} 
-                />
-                <AvatarFallback className="bg-primary text-primary-foreground">
-                  {getInitials(conversation.other_participant?.display_name)}
-                </AvatarFallback>
-              </Avatar>
-              <div>
-                <p className="font-semibold">
-                  {conversation.other_participant?.display_name || 'Unknown User'}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  {typingUsers.length > 0 ? 'typing...' : `@${conversation.other_participant?.username || 'unknown'}`}
-                </p>
-              </div>
+    <div className="h-screen bg-background flex flex-col overflow-hidden">
+      {/* Mobile Chat Header - Fixed at top */}
+      <div className="flex-shrink-0 p-4 border-b bg-card shadow-sm">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => navigate('/messages')}
+              className="h-8 w-8 p-0"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+            <Avatar className="h-9 w-9">
+              <AvatarImage 
+                src={conversation.other_participant?.avatar_url} 
+                alt={conversation.other_participant?.display_name} 
+              />
+              <AvatarFallback className="bg-primary text-primary-foreground text-sm">
+                {getInitials(conversation.other_participant?.display_name)}
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <p className="font-semibold text-sm">
+                {conversation.other_participant?.display_name || 'Unknown User'}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {typingUsers.length > 0 ? 'typing...' : `@${conversation.other_participant?.username || 'unknown'}`}
+              </p>
             </div>
-
-            <ConversationActions
-              conversationId={conversation.id}
-              isPinned={conversation.participant_settings?.pinned || false}
-              otherParticipant={{
-                ...conversation.other_participant,
-                id: conversation.other_participant?.user_id || ''
-              }}
-              onClose={() => navigate('/messages')}
-            />
           </div>
-        </div>
 
-        {/* Enhanced Messages */}
-        <ScrollArea className="flex-1 p-4">
+          <ConversationActions
+            conversationId={conversation.id}
+            isPinned={conversation.participant_settings?.pinned || false}
+            otherParticipant={{
+              ...conversation.other_participant,
+              id: conversation.other_participant?.user_id || ''
+            }}
+            onClose={() => navigate('/messages')}
+          />
+        </div>
+      </div>
+
+      {/* Messages Area - Scrollable middle section */}
+      <div className="flex-1 overflow-hidden">
+        <ScrollArea className="h-full px-4 py-2">
           {messagesLoading ? (
             <MessageListSkeleton count={8} />
           ) : messages.length === 0 ? (
@@ -234,22 +234,22 @@ const EnhancedConversationPage = () => {
             </>
           )}
         </ScrollArea>
-
-        {/* Enhanced Message Input */}
-        <div className="sticky bottom-0 p-4 border-t bg-card/95 backdrop-blur-sm">
-          <EnhancedMessageInput
-            value={draftText}
-            onChange={updateDraft}
-            onSend={handleSendMessage}
-            onTyping={sendTypingStatus}
-            replyingTo={replyingTo}
-            onCancelReply={() => setReplyingTo(null)}
-            disabled={sendMessage.isPending}
-            placeholder={`Message ${conversation.other_participant?.display_name || 'someone'}...`}
-          />
-        </div>
       </div>
-    </AppLayout>
+
+      {/* Message Input - Fixed at bottom */}
+      <div className="flex-shrink-0 p-4 border-t bg-card shadow-sm">
+        <EnhancedMessageInput
+          value={draftText}
+          onChange={updateDraft}
+          onSend={handleSendMessage}
+          onTyping={sendTypingStatus}
+          replyingTo={replyingTo}
+          onCancelReply={() => setReplyingTo(null)}
+          disabled={sendMessage.isPending}
+          placeholder={`Message ${conversation.other_participant?.display_name || 'someone'}...`}
+        />
+      </div>
+    </div>
   );
 };
 

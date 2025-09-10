@@ -179,14 +179,12 @@ export const EnhancedMessageItem: React.FC<EnhancedMessageItemProps> = ({
         )}
 
         {/* Message content */}
-        {message.message_type === 'text' && (
-          <div className="text-sm">
-            {message.content || message.body}
-            {message.edited && (
-              <span className="text-xs text-muted-foreground ml-2">(edited)</span>
-            )}
-          </div>
-        )}
+        <div className="text-sm break-words">
+          {message.content || message.body || 'Message'}
+          {message.edited && (
+            <span className="text-xs opacity-70 ml-2">(edited)</span>
+          )}
+        </div>
 
         {/* Media content */}
         {message.message_type === 'image' && message.media_url && (
@@ -292,10 +290,10 @@ export const EnhancedMessageItem: React.FC<EnhancedMessageItemProps> = ({
         {/* Message content */}
         <div className="relative group/message">
           <div className={cn(
-            "rounded-2xl px-4 py-2 max-w-full break-words",
+            "rounded-2xl px-3 py-2 max-w-full break-words",
             isOwn 
-              ? "bg-primary text-primary-foreground ml-auto" 
-              : "bg-muted"
+              ? "bg-primary text-white ml-auto" 
+              : "bg-muted text-foreground"
           )}>
             {renderMessageContent()}
           </div>
