@@ -109,6 +109,7 @@ export const PostRowWide = ({ post }: PostRowWideProps) => {
   };
 
   const formatText = (text: string) => {
+    if (!text) return '';
     return text.split(' ').map((word, index) => {
       if (word.startsWith('#')) {
         return (
@@ -141,13 +142,14 @@ export const PostRowWide = ({ post }: PostRowWideProps) => {
     });
   };
 
-  const shouldTruncate = post.content.length > 200;
+  const shouldTruncate = post.content?.length > 200;
   const displayText = shouldTruncate && !isExpanded 
-    ? post.content.slice(0, 200) + '...' 
-    : post.content;
+    ? post.content?.slice(0, 200) + '...' 
+    : post.content || '';
 
   const getDisplayRole = () => {
-    return post.profiles.account_type === 'artist' ? 'Artist' : 'Organization';
+    if (!post.profiles?.role) return 'User';
+    return post.profiles.role === 'artist' ? 'Artist' : 'Organization';
   };
 
   return (
@@ -165,11 +167,11 @@ export const PostRowWide = ({ post }: PostRowWideProps) => {
         <Link to={`/profile/${post.user_id}`} className="post__avatar-link flex-shrink-0">
           <img
             className="post__avatar w-11 h-11 rounded-full object-cover"
-            src={post.profiles.avatar_url || post.profiles.profile_pic || ''}
-            alt={`${post.profiles.display_name || post.profiles.full_name} avatar`}
+            src={post.profiles?.avatar_url || post.profiles?.profile_pic || ''}
+            alt={`${post.profiles?.display_name || post.profiles?.full_name || 'User'} avatar`}
             onError={(e) => {
               const target = e.target as HTMLImageElement;
-              target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(post.profiles.display_name || 'User')}&background=random`;
+              target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(post.profiles?.display_name || 'User')}&background=random`;
             }}
           />
         </Link>
@@ -179,7 +181,7 @@ export const PostRowWide = ({ post }: PostRowWideProps) => {
             to={`/profile/${post.user_id}`}
             className="post__fullname block font-semibold hover:underline truncate"
           >
-            {post.profiles.display_name || post.profiles.full_name || 'Unknown User'}
+            {post.profiles?.display_name || post.profiles?.full_name || 'Unknown User'}
           </Link>
           <div className="post__role text-muted-foreground text-sm">
             {getDisplayRole()}
@@ -296,7 +298,7 @@ export const PostRowWide = ({ post }: PostRowWideProps) => {
           
           <div className="post__text mb-2">
             <div className={!isExpanded && shouldTruncate ? 'line-clamp-3' : ''}>
-              {formatText(displayText)}
+              {displayText && formatText(displayText)}
             </div>
             
             {shouldTruncate && (
