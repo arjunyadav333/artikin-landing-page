@@ -25,10 +25,7 @@ export const useConnections = (userId?: string, type: 'following' | 'followers' 
   const query = useQuery({
     queryKey: ['connections', userId, type],
     queryFn: async () => {
-      if (!userId) {
-        console.log(`No userId provided for ${type} connections`);
-        return [];
-      }
+      if (!userId) return [];
 
       const isFollowing = type === 'following';
       
@@ -85,10 +82,9 @@ export const useConnections = (userId?: string, type: 'following' | 'followers' 
       }));
 
       console.log(`${type} data:`, result);
-      return result || []; // Ensure we always return an array
+      return result;
     },
-    enabled: !!userId,
-    initialData: [] // Provide initial empty array to prevent undefined
+    enabled: !!userId
   });
 
   // Real-time subscription for connections updates
@@ -116,7 +112,7 @@ export const useConnections = (userId?: string, type: 'following' | 'followers' 
           if (isRelevant) {
             // Optimistically update the cache
             queryClient.setQueryData(['connections', userId, type], (old: any) => {
-              if (!old || !Array.isArray(old)) return old;
+              if (!old) return old;
               
               if (eventType === 'INSERT' && newConnection) {
                 // Add new connection
@@ -232,34 +228,34 @@ export const useFollowUser = () => {
 
       // Optimistically update posts data
       queryClient.setQueriesData({ queryKey: ['posts'] }, (oldData: any) => {
-        if (!oldData?.pages || !Array.isArray(oldData.pages)) return oldData;
+        if (!oldData?.pages) return oldData;
         
         return {
           ...oldData,
           pages: oldData.pages.map((page: any) => ({
             ...page,
-            posts: Array.isArray(page.posts) ? page.posts.map((post: any) => 
+            posts: page.posts?.map((post: any) => 
               post.user_id === targetUserId 
                 ? { ...post, is_following: !isCurrentlyFollowing }
                 : post
-            ) : []
+            ) || []
           }))
         };
       });
 
       // Optimistically update home feed data
       queryClient.setQueriesData({ queryKey: ['homeFeed'] }, (oldData: any) => {
-        if (!oldData?.pages || !Array.isArray(oldData.pages)) return oldData;
+        if (!oldData?.pages) return oldData;
         
         return {
           ...oldData,
           pages: oldData.pages.map((page: any) => ({
             ...page,
-            posts: Array.isArray(page.posts) ? page.posts.map((post: any) => 
+            posts: page.posts?.map((post: any) => 
               post.user_id === targetUserId 
                 ? { ...post, is_following: !isCurrentlyFollowing }
                 : post
-            ) : []
+            ) || []
           }))
         };
       });
