@@ -15,7 +15,7 @@ const ManageApplicants = lazy(() => import("./pages/ManageApplicants"));
 // Lazy load components for better performance and code splitting
 const Home = lazy(() => import("./pages/Home"));
 const Opportunities = lazy(() => import("./pages/Opportunities"));
-const OpportunityDetail = lazy(() => import("./pages/OpportunityDetail"));
+const OpportunityDetailPage = lazy(() => import("./pages/OpportunityDetailPage"));
 const OpportunityCardDemo = lazy(() => import("./pages/OpportunityCardDemo"));
 const Create = lazy(() => import("./pages/Create"));
 const Connections = lazy(() => import("./pages/Connections"));
@@ -146,7 +146,7 @@ const AppRoutes = () => {
           <ProtectedRoute>
             <AppLayout>
               <Suspense fallback={<DefaultLoader />}>
-                <OpportunityDetail />
+                <OpportunityDetailPage />
               </Suspense>
             </AppLayout>
           </ProtectedRoute>
@@ -155,7 +155,7 @@ const AppRoutes = () => {
           <ProtectedRoute>
             <AppLayout>
               <Suspense fallback={<DefaultLoader />}>
-                <OpportunityDetail />
+                <OpportunityDetailPage />
               </Suspense>
             </AppLayout>
           </ProtectedRoute>
