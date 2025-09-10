@@ -21,13 +21,13 @@ const Create = lazy(() => import("./pages/Create"));
 const Connections = lazy(() => import("./pages/Connections"));
 const DiscoverPeople = lazy(() => import("./pages/DiscoverPeople"));
 const UserProfile = lazy(() => import("./pages/UserProfile"));
-const Messages = lazy(() => import("./pages/Messages"));
+const EnhancedMessages = lazy(() => import("./pages/EnhancedMessages"));
 const Auth = lazy(() => import("./pages/Auth"));
 const AuthNew = lazy(() => import("./pages/AuthNew"));
 const SignUp = lazy(() => import("./pages/SignUp"));
 const PostDetail = lazy(() => import("./pages/PostDetail"));
 const TagFeed = lazy(() => import("./pages/TagFeed"));
-const ConversationPage = lazy(() => import("./pages/ConversationPage"));
+const EnhancedConversationPage = lazy(() => import("./pages/EnhancedConversationPage"));
 const Settings = lazy(() => import("./pages/Settings"));
 
 // Optimized loading components for different pages
@@ -231,14 +231,14 @@ const AppRoutes = () => {
         <Route path="/messages" element={
           <ProtectedRoute>
             <Suspense fallback={<DefaultLoader />}>
-              <Messages />
+              <EnhancedMessages />
             </Suspense>
           </ProtectedRoute>
         } />
         <Route path="/messages/:chatId" element={
           <ProtectedRoute>
             <Suspense fallback={<DefaultLoader />}>
-              <ConversationPage />
+              <EnhancedConversationPage />
             </Suspense>
           </ProtectedRoute>
         } />
