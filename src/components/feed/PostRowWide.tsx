@@ -141,13 +141,14 @@ export const PostRowWide = ({ post }: PostRowWideProps) => {
     });
   };
 
-  const shouldTruncate = post.content.length > 200;
+  const postContent = post.content || '';
+  const shouldTruncate = postContent.length > 200;
   const displayText = shouldTruncate && !isExpanded 
-    ? post.content.slice(0, 200) + '...' 
-    : post.content;
+    ? postContent.slice(0, 200) + '...' 
+    : postContent;
 
   const getDisplayRole = () => {
-    return post.profiles.account_type === 'artist' ? 'Artist' : 'Organization';
+    return post.profiles?.account_type === 'artist' ? 'Artist' : 'Organization';
   };
 
   return (
