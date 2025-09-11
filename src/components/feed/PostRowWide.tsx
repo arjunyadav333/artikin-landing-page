@@ -388,12 +388,7 @@ export const PostRowWide = ({ post }: PostRowWideProps) => {
       <EditPostModal
         isOpen={editModalOpen}
         onClose={() => setEditModalOpen(false)}
-        post={{
-          id: post.id,
-          title: post.title,
-          content: post.content,
-          tags: post.tags
-        }}
+        post={post}
       />
 
       {/* Social Share Modal */}

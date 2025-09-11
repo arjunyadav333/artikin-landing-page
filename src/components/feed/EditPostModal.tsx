@@ -7,16 +7,12 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { HomeFeedPost } from '@/hooks/useHomeFeed';
 
 interface EditPostModalProps {
   isOpen: boolean;
   onClose: () => void;
-  post: {
-    id: string;
-    title?: string;
-    content: string;
-    tags?: string[];
-  };
+  post: HomeFeedPost;
 }
 
 export const EditPostModal = ({ isOpen, onClose, post }: EditPostModalProps) => {

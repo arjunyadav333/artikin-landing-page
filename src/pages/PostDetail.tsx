@@ -1,10 +1,11 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { FullWidthPost } from "@/components/feed/full-width-post";
+import { PostRowWide } from "@/components/feed/PostRowWide";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { PostSkeleton } from "@/components/ui/post-skeleton";
+import { HomeFeedPost } from "@/hooks/useHomeFeed";
 
 const PostDetail = () => {
   const { postId } = useParams<{ postId: string }>();
@@ -20,7 +21,8 @@ const PostDetail = () => {
         .select(`
           *,
           profiles (
-            id, user_id, username, display_name, avatar_url, role, artform, location
+            id, user_id, username, display_name, full_name, handle, account_type, 
+            art_form, avatar_url, profile_pic, role, artform, organization_type, location
           )
         `)
         .eq('id', postId)
@@ -40,9 +42,6 @@ const PostDetail = () => {
         userLiked = !!likeData;
       }
 
-      // Saves functionality removed
-      let userSaved = false;
-
       // Check if user is following the post author
       let isFollowing = false;
       if (user && user.id !== data.user_id) {
@@ -55,12 +54,27 @@ const PostDetail = () => {
         isFollowing = !!followData;
       }
 
-      return {
-        ...data,
+      // Transform the data to match HomeFeedPost interface
+      const transformedPost: HomeFeedPost = {
+        id: data.id,
+        user_id: data.user_id,
+        title: data.title,
+        content: data.content,
+        media_urls: data.media_urls,
+        media_types: data.media_types,
+        tags: data.tags,
+        visibility: data.visibility,
+        likes_count: data.likes_count || 0,
+        comments_count: data.comments_count || 0,
+        shares_count: data.shares_count || 0,
+        created_at: data.created_at,
+        updated_at: data.updated_at,
+        profiles: data.profiles as any, // The profiles should be properly joined
         user_liked: userLiked,
-        user_saved: userSaved,
         is_following: isFollowing
-      } as any; // Type assertion to bypass strict typing for now
+      };
+
+      return transformedPost;
     },
     enabled: !!postId,
   });
@@ -131,7 +145,7 @@ const PostDetail = () => {
       </div>
       
       <div className="w-full max-w-none sm:max-w-2xl sm:mx-auto lg:max-w-3xl xl:max-w-4xl">
-        <FullWidthPost post={post} />
+        <PostRowWide post={post} />
       </div>
     </div>
   );

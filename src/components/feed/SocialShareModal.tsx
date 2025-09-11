@@ -2,24 +2,18 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Facebook, Twitter, Linkedin, MessageCircle, Copy, Share } from 'lucide-react';
+import { HomeFeedPost } from '@/hooks/useHomeFeed';
 
 interface SocialShareModalProps {
   isOpen: boolean;
   onClose: () => void;
-  post: {
-    id: string;
-    content: string;
-    profiles?: {
-      display_name?: string;
-      full_name?: string;
-    };
-  };
+  post: HomeFeedPost;
 }
 
 export const SocialShareModal = ({ isOpen, onClose, post }: SocialShareModalProps) => {
   const { toast } = useToast();
   const postUrl = `${window.location.origin}/post/${post.id}`;
-  const authorName = post.profiles?.display_name || post.profiles?.full_name || 'Unknown User';
+  const authorName = post.profiles?.display_name || post.profiles?.full_name || post.profiles?.username || 'Unknown User';
   const shareText = `Check out this post by ${authorName}: ${(post.content || '').slice(0, 100)}${(post.content || '').length > 100 ? '...' : ''}`;
 
   const shareOptions = [
