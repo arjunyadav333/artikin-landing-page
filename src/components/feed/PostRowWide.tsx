@@ -109,6 +109,7 @@ export const PostRowWide = ({ post }: PostRowWideProps) => {
   };
 
   const formatText = (text: string) => {
+    if (!text) return '';
     return text.split(' ').map((word, index) => {
       if (word.startsWith('#')) {
         return (
@@ -141,14 +142,14 @@ export const PostRowWide = ({ post }: PostRowWideProps) => {
     });
   };
 
-  const postContent = post.content || '';
-  const shouldTruncate = postContent.length > 200;
+  const shouldTruncate = post.content?.length > 200;
   const displayText = shouldTruncate && !isExpanded 
-    ? postContent.slice(0, 200) + '...' 
-    : postContent;
+    ? post.content?.slice(0, 200) + '...' 
+    : post.content || '';
 
   const getDisplayRole = () => {
-    return post.profiles?.account_type === 'artist' ? 'Artist' : 'Organization';
+    if (!post.profiles?.role) return 'User';
+    return post.profiles.role === 'artist' ? 'Artist' : 'Organization';
   };
 
   return (
@@ -297,7 +298,7 @@ export const PostRowWide = ({ post }: PostRowWideProps) => {
           
           <div className="post__text mb-2">
             <div className={!isExpanded && shouldTruncate ? 'line-clamp-3' : ''}>
-              {formatText(displayText)}
+              {displayText && formatText(displayText)}
             </div>
             
             {shouldTruncate && (
