@@ -1,13 +1,16 @@
 import { useState } from 'react';
-import { Heart, MessageCircle, Share2, MoreVertical, Edit, Trash2, Copy, Flag, EyeOff } from 'lucide-react';
+import { Heart, MessageCircle, Share2, MoreVertical, Edit, Trash2, Copy, Share } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { HomeFeedPost, useLikePost, useSharePost } from '@/hooks/useHomeFeed';
+import { HomeFeedPost, useLikePost } from '@/hooks/useHomeFeed';
 import { useFollowUser } from '@/hooks/useConnections';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { useDeletePost } from '@/hooks/useDeletePost';
 import { MediaCarousel } from './MediaCarousel';
 import { CommentSheet } from './CommentSheet';
-import { ShareSheet } from './ShareSheet';
+import { EditPostModal } from './EditPostModal';
+import { SocialShareModal } from './SocialShareModal';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
 interface PostRowWideProps {
   post: HomeFeedPost;
@@ -20,11 +23,13 @@ export const PostRowWide = ({ post }: PostRowWideProps) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [commentSheetOpen, setCommentSheetOpen] = useState(false);
-  const [shareSheetOpen, setShareSheetOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [socialShareModalOpen, setSocialShareModalOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   
   const likeMutation = useLikePost(20);
   const followMutation = useFollowUser();
-  const shareMutation = useSharePost();
+  const deletePostMutation = useDeletePost();
 
   const handleFollow = () => {
     if (!user) {
@@ -65,7 +70,7 @@ export const PostRowWide = ({ post }: PostRowWideProps) => {
   };
 
   const handleShare = () => {
-    setShareSheetOpen(true);
+    setSocialShareModalOpen(true);
   };
 
   const handleMenuAction = (action: string) => {
@@ -80,32 +85,19 @@ export const PostRowWide = ({ post }: PostRowWideProps) => {
         });
         break;
       case 'edit':
-        // TODO: Implement edit functionality
-        toast({
-          title: "Edit post",
-          description: "Edit functionality coming soon"
-        });
+        setEditModalOpen(true);
         break;
       case 'delete':
-        // TODO: Implement delete functionality
-        toast({
-          title: "Delete post",
-          description: "Delete functionality coming soon"
-        });
+        setDeleteDialogOpen(true);
         break;
-      case 'report':
-        toast({
-          title: "Report sent",
-          description: "Thank you for reporting this post"
-        });
-        break;
-      case 'hide':
-        toast({
-          title: "Post hidden",
-          description: "This post has been hidden from your feed"
-        });
+      case 'share':
+        setSocialShareModalOpen(true);
         break;
     }
+  };
+
+  const handleDeletePost = () => {
+    deletePostMutation.mutate(post.id);
   };
 
   const formatText = (text: string) => {
@@ -141,12 +133,13 @@ export const PostRowWide = ({ post }: PostRowWideProps) => {
     });
   };
 
-  const shouldTruncate = post.content.length > 200;
+  const shouldTruncate = (post.content || '').length > 200;
   const displayText = shouldTruncate && !isExpanded 
-    ? post.content.slice(0, 200) + '...' 
-    : post.content;
+    ? (post.content || '').slice(0, 200) + '...' 
+    : (post.content || '');
 
   const getDisplayRole = () => {
+    if (!post.profiles) return 'User';
     return post.profiles.account_type === 'artist' ? 'Artist' : 'Organization';
   };
 
@@ -165,11 +158,11 @@ export const PostRowWide = ({ post }: PostRowWideProps) => {
         <Link to={`/profile/${post.user_id}`} className="post__avatar-link flex-shrink-0">
           <img
             className="post__avatar w-11 h-11 rounded-full object-cover"
-            src={post.profiles.avatar_url || post.profiles.profile_pic || ''}
-            alt={`${post.profiles.display_name || post.profiles.full_name} avatar`}
+            src={post.profiles?.avatar_url || post.profiles?.profile_pic || ''}
+            alt={`${post.profiles?.display_name || post.profiles?.full_name || 'User'} avatar`}
             onError={(e) => {
               const target = e.target as HTMLImageElement;
-              target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(post.profiles.display_name || 'User')}&background=random`;
+              target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(post.profiles?.display_name || 'User')}&background=random`;
             }}
           />
         </Link>
@@ -179,7 +172,7 @@ export const PostRowWide = ({ post }: PostRowWideProps) => {
             to={`/profile/${post.user_id}`}
             className="post__fullname block font-semibold hover:underline truncate"
           >
-            {post.profiles.display_name || post.profiles.full_name || 'Unknown User'}
+            {post.profiles?.display_name || post.profiles?.full_name || 'Unknown User'}
           </Link>
           <div className="post__role text-muted-foreground text-sm">
             {getDisplayRole()}
@@ -240,40 +233,29 @@ export const PostRowWide = ({ post }: PostRowWideProps) => {
                       <Trash2 className="w-4 h-4 mr-2" />
                       Delete
                     </button>
-                    <div className="border-t my-1" />
                   </>
                 ) : (
                   <>
                     <button
                       role="menuitem"
                       className="flex items-center w-full px-3 py-2 text-sm hover:bg-muted transition-colors"
-                      data-menu-action="report"
-                      onClick={() => handleMenuAction('report')}
+                      data-menu-action="copy-link"
+                      onClick={() => handleMenuAction('copy-link')}
                     >
-                      <Flag className="w-4 h-4 mr-2" />
-                      Report
+                      <Copy className="w-4 h-4 mr-2" />
+                      Copy Link
                     </button>
                     <button
                       role="menuitem"
                       className="flex items-center w-full px-3 py-2 text-sm hover:bg-muted transition-colors"
-                      data-menu-action="hide"
-                      onClick={() => handleMenuAction('hide')}
+                      data-menu-action="share"
+                      onClick={() => handleMenuAction('share')}
                     >
-                      <EyeOff className="w-4 h-4 mr-2" />
-                      Hide
+                      <Share className="w-4 h-4 mr-2" />
+                      Share
                     </button>
-                    <div className="border-t my-1" />
                   </>
                 )}
-                <button
-                  role="menuitem"
-                  className="flex items-center w-full px-3 py-2 text-sm hover:bg-muted transition-colors"
-                  data-menu-action="copy-link"
-                  onClick={() => handleMenuAction('copy-link')}
-                >
-                  <Copy className="w-4 h-4 mr-2" />
-                  Copy Link
-                </button>
               </div>
             )}
 
@@ -380,7 +362,6 @@ export const PostRowWide = ({ post }: PostRowWideProps) => {
             data-action="share"
             aria-label="Share post"
             onClick={handleShare}
-            disabled={shareMutation.isPending}
           >
             <Share2 className="icon w-5 h-5 text-muted-foreground group-hover:text-green-500 transition-all group-hover:scale-110" />
             <span 
@@ -403,15 +384,46 @@ export const PostRowWide = ({ post }: PostRowWideProps) => {
         }}
       />
 
-      {/* Share Sheet */}
-      <ShareSheet
-        post={post}
-        isOpen={shareSheetOpen}
-        onClose={() => setShareSheetOpen(false)}
-        onShareRecorded={() => {  
-          // Real-time updates will handle this via subscription
+      {/* Edit Post Modal */}
+      <EditPostModal
+        isOpen={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
+        post={{
+          id: post.id,
+          title: post.title,
+          content: post.content,
+          tags: post.tags
         }}
       />
+
+      {/* Social Share Modal */}
+      <SocialShareModal
+        isOpen={socialShareModalOpen}
+        onClose={() => setSocialShareModalOpen(false)}
+        post={post}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Post</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this post? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeletePost}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={deletePostMutation.isPending}
+            >
+              {deletePostMutation.isPending ? 'Deleting...' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </article>
   );
 };
