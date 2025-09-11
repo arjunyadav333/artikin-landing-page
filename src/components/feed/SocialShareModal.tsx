@@ -9,8 +9,9 @@ interface SocialShareModalProps {
   post: {
     id: string;
     content: string;
-    profiles: {
-      display_name: string;
+    profiles?: {
+      display_name?: string;
+      full_name?: string;
     };
   };
 }
@@ -18,7 +19,8 @@ interface SocialShareModalProps {
 export const SocialShareModal = ({ isOpen, onClose, post }: SocialShareModalProps) => {
   const { toast } = useToast();
   const postUrl = `${window.location.origin}/post/${post.id}`;
-  const shareText = `Check out this post by ${post.profiles.display_name}: ${post.content.slice(0, 100)}${post.content.length > 100 ? '...' : ''}`;
+  const authorName = post.profiles?.display_name || post.profiles?.full_name || 'Unknown User';
+  const shareText = `Check out this post by ${authorName}: ${(post.content || '').slice(0, 100)}${(post.content || '').length > 100 ? '...' : ''}`;
 
   const shareOptions = [
     {
@@ -65,7 +67,7 @@ export const SocialShareModal = ({ isOpen, onClose, post }: SocialShareModalProp
     if (navigator.share) {
       try {
         await navigator.share({
-          title: `Post by ${post.profiles.display_name}`,
+          title: `Post by ${authorName}`,
           text: shareText,
           url: postUrl,
         });
