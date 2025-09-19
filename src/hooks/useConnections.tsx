@@ -226,37 +226,45 @@ export const useFollowUser = () => {
         isFollowedBy: previousConnectionStatus ? (previousConnectionStatus as any).isFollowedBy : false
       });
 
-      // Optimistically update posts data
+      // Optimistically update posts data with better error handling
       queryClient.setQueriesData({ queryKey: ['posts'] }, (oldData: any) => {
-        if (!oldData?.pages) return oldData;
+        if (!oldData?.pages || !Array.isArray(oldData.pages)) return oldData;
         
         return {
           ...oldData,
-          pages: oldData.pages.map((page: any) => ({
-            ...page,
-            posts: page.posts?.map((post: any) => 
-              post.user_id === targetUserId 
-                ? { ...post, is_following: !isCurrentlyFollowing }
-                : post
-            ) || []
-          }))
+          pages: oldData.pages.map((page: any) => {
+            if (!page?.posts || !Array.isArray(page.posts)) return page;
+            
+            return {
+              ...page,
+              posts: page.posts.map((post: any) => 
+                post?.user_id === targetUserId 
+                  ? { ...post, is_following: !isCurrentlyFollowing }
+                  : post
+              )
+            };
+          })
         };
       });
 
-      // Optimistically update home feed data
+      // Optimistically update home feed data with better error handling
       queryClient.setQueriesData({ queryKey: ['homeFeed'] }, (oldData: any) => {
-        if (!oldData?.pages) return oldData;
+        if (!oldData?.pages || !Array.isArray(oldData.pages)) return oldData;
         
         return {
           ...oldData,
-          pages: oldData.pages.map((page: any) => ({
-            ...page,
-            posts: page.posts?.map((post: any) => 
-              post.user_id === targetUserId 
-                ? { ...post, is_following: !isCurrentlyFollowing }
-                : post
-            ) || []
-          }))
+          pages: oldData.pages.map((page: any) => {
+            if (!page?.posts || !Array.isArray(page.posts)) return page;
+            
+            return {
+              ...page,
+              posts: page.posts.map((post: any) => 
+                post?.user_id === targetUserId 
+                  ? { ...post, is_following: !isCurrentlyFollowing }
+                  : post
+              )
+            };
+          })
         };
       });
 
@@ -268,10 +276,10 @@ export const useFollowUser = () => {
       };
     },
     onSuccess: (_, { isCurrentlyFollowing }) => {
+      // Only invalidate connection-related queries, not the entire feed
       queryClient.invalidateQueries({ queryKey: ['connections'] });
       queryClient.invalidateQueries({ queryKey: ['connectionStatus'] });
-      queryClient.invalidateQueries({ queryKey: ['posts'] });
-      queryClient.invalidateQueries({ queryKey: ['homeFeed'] });
+      // Don't invalidate feed queries - rely on optimistic updates
     },
     onError: (error: any, variables, context) => {
       // Rollback optimistic updates
