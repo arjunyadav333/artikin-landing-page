@@ -17,7 +17,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { MoreHorizontal, MessageCircle, UserX, Flag, Loader2 } from "lucide-react";
+import { MoreVertical, MessageCircle, UserX, Flag, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useFollowUser, useConnectionStatus } from "@/hooks/useConnections";
 import { useDirectMessage } from "@/hooks/useDirectMessage";
@@ -194,7 +194,7 @@ export function UserRow({
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="sm" className="h-9 w-9 p-0 hover:bg-muted rounded-xl">
-                    <MoreHorizontal className="h-4 w-4 text-sky-400" />
+                    <MoreVertical className="h-4 w-4 text-foreground" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48 bg-popover border shadow-lg rounded-xl z-50">
