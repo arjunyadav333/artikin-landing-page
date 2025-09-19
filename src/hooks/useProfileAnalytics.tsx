@@ -1,6 +1,6 @@
 import { useToast } from '@/hooks/use-toast';
 
-// Simplify analytics hooks to avoid database calls until tables are created
+// Placeholder implementations until database tables are created
 export const useProfileViews = (profileId?: string) => {
   return {
     data: [],
@@ -22,8 +22,9 @@ export const useBookmarkProfile = () => {
   return {
     mutate: () => {
       toast({
-        title: "Coming soon",
-        description: "Profile bookmarking will be available soon."
+        title: "Feature not ready",
+        description: "Profile bookmarking is being developed. Database tables need to be created first.",
+        variant: "destructive"
       });
     },
     mutateAsync: async () => {},

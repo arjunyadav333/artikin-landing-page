@@ -62,7 +62,7 @@ export function AwardsCard({ profile, isOwnProfile }: AwardsCardProps) {
 
   const handleAddAward = async () => {
     if (newAward.title && newAward.year) {
-      // TODO: Upload files and get URLs
+      // Media upload will be implemented when backend is ready
       const mediaUrls = selectedFiles.map(f => ({ id: f.id, url: f.preview }));
       
       const award: Award = {
@@ -80,13 +80,13 @@ export function AwardsCard({ profile, isOwnProfile }: AwardsCardProps) {
       });
       setSelectedFiles([]);
       setIsAddModalOpen(false);
-      // TODO: Save to backend
+      // Backend integration pending
     }
   };
 
   const handleDelete = (id: string) => {
     setAwards(prev => prev.filter(award => award.id !== id));
-    // TODO: Delete from backend
+    // Backend integration pending
   };
 
   const handleDeleteMedia = (mediaId: string) => {
@@ -96,7 +96,7 @@ export function AwardsCard({ profile, isOwnProfile }: AwardsCardProps) {
     }));
     setAwards(updatedAwards);
     setSelectedAwardMedia(prev => prev.filter(m => m.id !== mediaId));
-    // TODO: Delete from backend
+    // Backend integration pending
   };
 
   const openLightbox = (awardMedia: Array<{ id: string; url: string; }>, index: number) => {

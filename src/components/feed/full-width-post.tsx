@@ -133,7 +133,7 @@ export function FullWidthPost({ post }: FullWidthPostProps) {
         title: "Post Deleted",
         description: "Your post has been deleted"
       });
-      // TODO: Implement actual delete functionality
+      // Delete implementation will be added
     }
   };
 

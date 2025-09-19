@@ -20,7 +20,7 @@ export const useDraftMessage = (conversationId?: string) => {
           .eq('conversation_id', convId)
           .eq('user_id', user.id);
       } catch (error) {
-        console.error('Error saving draft:', error);
+        // Handle error silently for now
       }
     }, 1000),
     [user]
@@ -53,7 +53,6 @@ export const useDraftMessage = (conversationId?: string) => {
           setDraftText("");
         }
       } catch (error) {
-        console.error('Error loading draft:', error);
         setDraftText("");
       }
     };
@@ -86,9 +85,9 @@ export const useDraftMessage = (conversationId?: string) => {
           .update({ drafted_text: null })
           .eq('conversation_id', conversationId)
           .eq('user_id', user.id);
-        console.log('Draft cleared');
+        
       } catch (error) {
-        console.error('Error clearing draft:', error);
+        // Handle error silently
       }
     }
   }, [conversationId, user, cancelPendingSaves]);

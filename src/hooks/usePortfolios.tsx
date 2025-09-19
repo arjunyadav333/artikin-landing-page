@@ -1,5 +1,3 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
 export interface Portfolio {
@@ -17,7 +15,7 @@ export interface Portfolio {
   updated_at: string;
 }
 
-// Simplify hooks to avoid database calls until tables are created
+// Placeholder implementations until database tables are created
 export const useUserPortfolios = (userId?: string) => {
   return {
     data: [],
@@ -39,8 +37,9 @@ export const useCreatePortfolio = () => {
   return {
     mutate: () => {
       toast({
-        title: "Coming soon",
-        description: "Portfolio creation will be available soon."
+        title: "Feature not ready",
+        description: "Portfolio creation is being developed. Database tables need to be created first.",
+        variant: "destructive"
       });
     },
     mutateAsync: async () => {},
@@ -53,8 +52,9 @@ export const useUpdatePortfolio = () => {
   return {
     mutate: () => {
       toast({
-        title: "Coming soon", 
-        description: "Portfolio updates will be available soon."
+        title: "Feature not ready", 
+        description: "Portfolio updates are being developed. Database tables need to be created first.",
+        variant: "destructive"
       });
     },
     mutateAsync: async () => {},
@@ -67,8 +67,9 @@ export const useDeletePortfolio = () => {
   return {
     mutate: () => {
       toast({
-        title: "Coming soon",
-        description: "Portfolio deletion will be available soon."
+        title: "Feature not ready",
+        description: "Portfolio deletion is being developed. Database tables need to be created first.",
+        variant: "destructive"
       });
     },
     mutateAsync: async () => {},

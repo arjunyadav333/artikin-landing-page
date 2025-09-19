@@ -44,6 +44,7 @@ export const PostRowWide = ({ post }: PostRowWideProps) => {
     }
     
     console.log('Follow button clicked for user:', post.user_id, 'Current following state:', post.is_following);
+    console.log('Follow button clicked for user:', post.user_id, 'Current following state:', post.is_following);
     followMutation.mutate({ 
       targetUserId: post.user_id, 
       isCurrentlyFollowing: post.is_following || false 
@@ -60,6 +61,7 @@ export const PostRowWide = ({ post }: PostRowWideProps) => {
       return;
     }
     
+    console.log('Like button clicked for post:', post.id, 'Current liked state:', post.user_liked);
     console.log('Like button clicked for post:', post.id, 'Current liked state:', post.user_liked);
     likeMutation.mutate({ 
       postId: post.id, 

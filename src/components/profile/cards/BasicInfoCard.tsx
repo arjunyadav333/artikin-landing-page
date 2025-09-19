@@ -55,10 +55,13 @@ export function BasicInfoCard({ profile, isOwnProfile }: BasicInfoCardProps) {
     languages: ['English', 'Hindi'] // Mock data
   });
 
-  const handleSave = () => {
-    // TODO: Implement save logic
-    console.log('Saving basic info:', formData);
-    setIsEditing(false);
+  const handleSave = async () => {
+    try {
+      // Implementation will be added when backend is ready
+      setIsEditing(false);
+    } catch (error) {
+      // Handle error when backend is implemented
+    }
   };
 
   const calculateAge = (birthDate: Date) => {

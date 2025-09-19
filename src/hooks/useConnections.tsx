@@ -36,12 +36,12 @@ export const useConnections = (userId?: string, type: 'following' | 'followers' 
         .eq(isFollowing ? 'follower_id' : 'following_id', userId);
 
       if (connectionsError) {
-        console.error('Connections query error:', connectionsError);
+        
         throw connectionsError;
       }
 
       if (!connections?.length) {
-        console.log(`No ${type} connections found`);
+        
         return [];
       }
 
@@ -69,7 +69,7 @@ export const useConnections = (userId?: string, type: 'following' | 'followers' 
         .in('user_id', userIds);
 
       if (profilesError) {
-        console.error('Profiles query error:', profilesError);
+        
         throw profilesError;
       }
 
@@ -81,7 +81,7 @@ export const useConnections = (userId?: string, type: 'following' | 'followers' 
         )
       }));
 
-      console.log(`${type} data:`, result);
+      
       return result;
     },
     enabled: !!userId
@@ -101,7 +101,7 @@ export const useConnections = (userId?: string, type: 'following' | 'followers' 
           table: 'connections'
         },
         (payload) => {
-          console.log('Connections change:', payload);
+          
           const { eventType, new: newConnection, old: oldConnection } = payload;
           
           // Check if this change affects the current user's connections
@@ -116,11 +116,11 @@ export const useConnections = (userId?: string, type: 'following' | 'followers' 
               
               if (eventType === 'INSERT' && newConnection) {
                 // Add new connection
-                console.log('Adding new connection:', newConnection);
+                
                 return [...old, newConnection as any];
               } else if (eventType === 'DELETE' && oldConnection) {
                 // Remove deleted connection
-                console.log('Removing connection:', oldConnection);
+                
                 return old.filter((conn: any) => conn.id !== (oldConnection as any).id);
               }
               

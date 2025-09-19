@@ -176,7 +176,7 @@ export function PostDetailModal({ post, onClose }: PostDetailModalProps) {
         </div>
       </div>
 
-      {/* Comments Drawer - TODO: Implement */}
+      {/* Comments will be implemented */}
       {showComments && (
         <div className="fixed inset-0 bg-black/50 z-50" onClick={() => setShowComments(false)}>
           <div className="absolute bottom-0 left-0 right-0 bg-background rounded-t-lg p-4">

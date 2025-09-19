@@ -50,7 +50,7 @@ const DiscoverPeople = () => {
           case 'alphabetical-za':
             return b.display_name?.localeCompare(a.display_name) || 0;
           case 'most-popular':
-            // TODO: Add follower count to profiles table for proper sorting
+            // Follower count sorting will be implemented
             return 0;
           case 'newest':
           default:

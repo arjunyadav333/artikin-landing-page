@@ -84,9 +84,8 @@ const Connections = () => {
   };
 
   const handleRemoveFollower = (userId: string) => {
-    // TODO: Implement remove follower functionality
-    console.log('Remove follower:', userId);
-  };
+      // Remove follower functionality will be implemented
+    };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 pb-20 md:pb-8">

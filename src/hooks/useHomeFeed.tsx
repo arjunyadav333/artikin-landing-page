@@ -148,7 +148,7 @@ export const useHomeFeed = (limit = 20) => {
             schema: 'public', 
             table: 'posts' 
           }, (payload) => {
-            console.log('Posts change:', payload);
+            
             const { eventType, new: newPost, old: oldPost } = payload;
             
             queryClient.setQueryData(['homeFeed', limit], (old: any) => {
@@ -179,12 +179,12 @@ export const useHomeFeed = (limit = 20) => {
             });
           })
           .subscribe((status) => {
-            console.log('Posts subscription status:', status);
+            
             if (status === 'SUBSCRIBED') {
               reconnectAttempts = 0;
             } else if (status === 'CLOSED' && isSubscribed && reconnectAttempts < maxReconnectAttempts) {
               reconnectAttempts++;
-              console.log(`Attempting to reconnect posts subscription (attempt ${reconnectAttempts})`);
+              
               setTimeout(() => {
                 if (isSubscribed) setupSubscriptions();
               }, Math.pow(2, reconnectAttempts) * 1000);
@@ -199,14 +199,14 @@ export const useHomeFeed = (limit = 20) => {
             schema: 'public', 
             table: 'likes' 
           }, (payload) => {
-            console.log('Likes change:', payload);
+            
             const postId = (payload.new as any)?.post_id || (payload.old as any)?.post_id;
             const isInsert = payload.eventType === 'INSERT';
             const affectedUserId = (payload.new as any)?.user_id || (payload.old as any)?.user_id;
             
             // Only update if this is not the current user's action (to avoid double counting with optimistic updates)
             if (affectedUserId === user.id) {
-              console.log('Skipping realtime update for own action');
+              
               return;
             }
             
@@ -339,7 +339,7 @@ export const useLikePost = (limit = 20) => {
     mutationFn: async ({ postId, isLiked }: { postId: string; isLiked: boolean }) => {
       if (!user) throw new Error('Not authenticated');
 
-      console.log('useLikePost mutation called:', { postId, isLiked, userId: user.id });
+      
 
       if (isLiked) {
         const { error } = await supabase
@@ -348,13 +348,13 @@ export const useLikePost = (limit = 20) => {
           .eq('user_id', user.id)
           .eq('post_id', postId);
         if (error) throw error;
-        console.log('Like removed successfully');
+        
       } else {
         const { error } = await supabase
           .from('likes')
           .insert({ user_id: user.id, post_id: postId });
         if (error) throw error;
-        console.log('Like added successfully');
+        
       }
     },
     onMutate: async ({ postId, isLiked }) => {
