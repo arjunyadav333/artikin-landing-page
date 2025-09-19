@@ -24,11 +24,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useDirectMessage } from '@/hooks/useDirectMessage';
+import { cn } from '@/lib/utils';
 import type { Application } from "@/hooks/useApplications";
 
 export default function ManageApplicants() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { startDirectMessage } = useDirectMessage();
   const [activeTab, setActiveTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [undoTimeout, setUndoTimeout] = useState<NodeJS.Timeout | null>(null);
@@ -127,8 +130,7 @@ export default function ManageApplicants() {
   };
 
   const handleMessage = (userId: string) => {
-    // Navigate to messaging - implement based on your messaging routes
-    navigate(`/messages?user=${userId}`);
+    startDirectMessage(userId);
   };
 
   const showUndoToast = (message: string, undoFn: () => void) => {

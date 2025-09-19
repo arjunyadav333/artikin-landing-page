@@ -132,6 +132,17 @@ END:VCARD`;
               {!isOwnProfile && (
                 <>
                   <DropdownMenuSeparator />
+                  <DropdownMenuItem 
+                    onClick={() => startDirectMessage(profile.user_id)}
+                    disabled={isMessageLoading(profile.user_id)}
+                  >
+                    {isMessageLoading(profile.user_id) ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <MessageSquare className="h-4 w-4 mr-2" />
+                    )}
+                    Message
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={handleExportContact}>
                     <Mail className="h-4 w-4 mr-2" />
                     Export Contact
