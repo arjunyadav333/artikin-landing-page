@@ -18,6 +18,13 @@ export default {
 			}
 		},
 		extend: {
+			fontSize: {
+				'13px': '13px',
+				'14px': '14px', 
+				'15px': '15px',
+				'16px': '16px',
+				'17px': '17px',
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',

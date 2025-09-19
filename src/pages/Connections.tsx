@@ -1,23 +1,25 @@
 import { useState, useMemo } from "react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Users } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { FilterDropdown, FilterOptions } from "@/components/connections/filter-dropdown";
-import { UserCard } from "@/components/connections/user-card";
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { Search, ChevronDown } from "lucide-react";
+import { UserRow } from "@/components/connections/user-row";
 import { useConnections } from "@/hooks/useConnections";
 import { useCurrentProfile } from "@/hooks/useProfiles";
-import { motion } from "framer-motion";
+import { Skeleton } from "@/components/ui/skeleton";
+
+type SortOption = 'newest' | 'alphabetical' | 'relevant';
 
 const Connections = () => {
-  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
-  const [filters, setFilters] = useState<FilterOptions>({
-    showArtistsOnly: false,
-    showOrganizationsOnly: false,
-    sortBy: 'newest'
-  });
+  const [sortBy, setSortBy] = useState<SortOption>('newest');
+  const [activeTab, setActiveTab] = useState('following');
 
   const { data: currentProfile } = useCurrentProfile();
   const { data: following = [], isLoading: followingLoading } = useConnections(
@@ -47,21 +49,15 @@ const Connections = () => {
           if (!matchesSearch) return false;
         }
         
-        // Type filters
-        if (filters.showArtistsOnly && user.role !== 'artist') return false;
-        if (filters.showOrganizationsOnly && user.role !== 'organization') return false;
-        
-        // Artform filter
-        if (filters.artformFilter && user.artform !== filters.artformFilter) return false;
-        
         return true;
       })
       .sort((a, b) => {
-        switch (filters.sortBy) {
-          case 'alphabetical-az':
+        switch (sortBy) {
+          case 'alphabetical':
             return a.display_name?.localeCompare(b.display_name) || 0;
-          case 'alphabetical-za':
-            return b.display_name?.localeCompare(a.display_name) || 0;
+          case 'relevant':
+            // TODO: Implement relevance sorting
+            return 0;
           case 'newest':
           default:
             return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
@@ -71,159 +67,189 @@ const Connections = () => {
 
   const filteredFollowing = useMemo(() => 
     filterAndSortUsers(following, 'following'), 
-    [following, searchTerm, filters]
+    [following, searchTerm, sortBy]
   );
   
   const filteredFollowers = useMemo(() => 
     filterAndSortUsers(followers, 'followers'), 
-    [followers, searchTerm, filters]
+    [followers, searchTerm, sortBy]
   );
 
-  const handleDiscoverPeople = () => {
-    navigate('/connections/discover');
+  const handleRemoveFollower = (userId: string) => {
+    // Remove follower functionality will be implemented
   };
 
-  const handleRemoveFollower = (userId: string) => {
-      // Remove follower functionality will be implemented
-    };
+  const getSortDisplayText = (sort: SortOption) => {
+    switch (sort) {
+      case 'alphabetical': return 'Alphabetical';
+      case 'relevant': return 'Most Relevant';
+      case 'newest': 
+      default: return 'Most Recent';
+    }
+  };
+
+  const UserRowSkeleton = () => (
+    <div className="flex items-center h-16 px-4 border-b border-gray-100">
+      <Skeleton className="h-12 w-12 rounded-full mr-3" />
+      <div className="flex-1">
+        <Skeleton className="h-4 w-32 mb-2" />
+        <Skeleton className="h-3 w-24" />
+      </div>
+      <Skeleton className="h-8 w-20 rounded-full" />
+    </div>
+  );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 pb-20 md:pb-8">
-      <div className="container max-w-4xl mx-auto px-4 py-6">
-        {/* Search Bar & Filters */}
-        <motion.div 
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-6"
-        >
-          <div className="flex gap-4 items-center mb-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search among followers and following..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <FilterDropdown filters={filters} onFiltersChange={setFilters} />
+    <div className="min-h-screen bg-white pb-20 md:pb-8">
+      <div className="max-w-2xl mx-auto md:max-w-3xl">
+        {/* Header */}
+        <div className="sticky top-0 bg-white border-b border-gray-100 px-4 py-4 z-40">
+          <div className="text-center md:text-left">
+            <h1 className="text-16px font-semibold text-gray-900 md:text-16px">
+              Connections
+            </h1>
+            <p className="text-13px font-medium text-gray-600 mt-1">
+              Followers • {followersLoading ? '...' : filteredFollowers.length} | Following • {followingLoading ? '...' : filteredFollowing.length}
+            </p>
           </div>
+        </div>
 
-          {/* Discover People Button */}
-          <Button 
-            onClick={handleDiscoverPeople}
-            className="w-full bg-[#007bff] hover:bg-[#007bff]/90 text-white font-semibold py-3 rounded-lg"
-            size="lg"
-          >
-            <Users className="h-5 w-5 mr-2" />
-            Discover People
-          </Button>
-        </motion.div>
-
-        {/* Tabs Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-        >
-          <Tabs defaultValue="followers" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="followers">
-                Followers ({followersLoading ? '...' : filteredFollowers.length})
+        {/* Tabs */}
+        <div className="sticky top-[73px] bg-white border-b border-gray-100 px-4 py-3 z-30">
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="bg-transparent p-0 h-auto gap-2">
+              <TabsTrigger 
+                value="following" 
+                className="px-4 py-1.5 text-14px font-medium rounded-full data-[state=active]:bg-accent data-[state=active]:text-white data-[state=inactive]:bg-gray-100 data-[state=inactive]:text-gray-700 border-0"
+              >
+                Following
               </TabsTrigger>
-              <TabsTrigger value="following">
-                Following ({followingLoading ? '...' : filteredFollowing.length})
+              <TabsTrigger 
+                value="followers" 
+                className="px-4 py-1.5 text-14px font-medium rounded-full data-[state=active]:bg-accent data-[state=active]:text-white data-[state=inactive]:bg-gray-100 data-[state=inactive]:text-gray-700 border-0"
+              >
+                Followers
               </TabsTrigger>
             </TabsList>
-
-            {/* Followers Tab */}
-            <TabsContent value="followers" className="mt-6">
-              <div className="space-y-4">
-                {followersLoading ? (
-                  <div className="flex justify-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                  </div>
-                ) : filteredFollowers.length > 0 ? (
-                  filteredFollowers.map((user, index) => (
-                    <motion.div
-                      key={user.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                    >
-                      <UserCard 
-                        user={user} 
-                        isFollower={true}
-                        onRemoveFollower={handleRemoveFollower}
-                      />
-                    </motion.div>
-                  ))
-                ) : (
-                  <div className="text-center py-12">
-                    <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold text-muted-foreground mb-2">
-                      {searchTerm || Object.values(filters).some(v => v && v !== 'newest') 
-                        ? 'No followers match your search criteria' 
-                        : 'No followers yet'}
-                    </h3>
-                    <p className="text-muted-foreground">
-                      {!searchTerm && !Object.values(filters).some(v => v && v !== 'newest')
-                        ? 'When people follow you, they\'ll appear here.'
-                        : 'Try adjusting your search or filters.'}
-                    </p>
-                  </div>
-                )}
-              </div>
-            </TabsContent>
-
-            {/* Following Tab */}
-            <TabsContent value="following" className="mt-6">
-              <div className="space-y-4">
-                {followingLoading ? (
-                  <div className="flex justify-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                  </div>
-                ) : filteredFollowing.length > 0 ? (
-                  filteredFollowing.map((user, index) => (
-                    <motion.div
-                      key={user.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                    >
-                      <UserCard 
-                        user={user} 
-                        isFollowing={true}
-                      />
-                    </motion.div>
-                  ))
-                ) : (
-                  <div className="text-center py-12">
-                    <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold text-muted-foreground mb-2">
-                      {searchTerm || Object.values(filters).some(v => v && v !== 'newest') 
-                        ? 'No following match your search criteria' 
-                        : 'Not following anyone yet'}
-                    </h3>
-                    <p className="text-muted-foreground">
-                      {!searchTerm && !Object.values(filters).some(v => v && v !== 'newest')
-                        ? 'Start following people to see them here.'
-                        : 'Try adjusting your search or filters.'}
-                    </p>
-                    {(!searchTerm && !Object.values(filters).some(v => v && v !== 'newest')) && (
-                      <Button 
-                        onClick={handleDiscoverPeople}
-                        className="mt-4 bg-[#007bff] hover:bg-[#007bff]/90"
-                      >
-                        Discover People
-                      </Button>
-                    )}
-                  </div>
-                )}
-              </div>
-            </TabsContent>
           </Tabs>
-        </motion.div>
+        </div>
+
+        {/* Search Bar */}
+        <div className="sticky top-[125px] bg-white px-4 py-3 border-b border-gray-50 z-20">
+          <div className="flex items-center gap-3">
+            <div className="relative flex-1 max-w-lg mx-auto md:mx-0">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="Search connections"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 h-10 rounded-full border border-gray-200 bg-white focus:ring-2 focus:ring-accent focus:border-accent text-14px"
+              />
+            </div>
+            {/* Sort Dropdown - Desktop */}
+            <div className="hidden md:block">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="text-14px font-medium rounded-full">
+                    {getSortDisplayText(sortBy)}
+                    <ChevronDown className="ml-1 h-3 w-3" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="bg-white border shadow-lg">
+                  <DropdownMenuItem onClick={() => setSortBy('newest')}>
+                    Most Recent
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setSortBy('alphabetical')}>
+                    Alphabetical
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setSortBy('relevant')}>
+                    Most Relevant
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+        </div>
+
+        {/* Content */}
+        <Tabs value={activeTab}>
+          {/* Following Tab */}
+          <TabsContent value="following" className="m-0">
+            <div className="bg-white">
+              {followingLoading ? (
+                <div className="space-y-0">
+                  {Array.from({ length: 8 }).map((_, i) => (
+                    <UserRowSkeleton key={i} />
+                  ))}
+                </div>
+              ) : filteredFollowing.length > 0 ? (
+                <div>
+                  {filteredFollowing.map((user) => (
+                    <UserRow
+                      key={user.id}
+                      user={user}
+                      isFollowing={true}
+                      showOptionsMenu={true}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-16 px-4">
+                  <div className="text-gray-400 mb-4">
+                    <svg className="w-16 h-16 mx-auto" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M16 4c0-1.11.89-2 2-2s2 .89 2 2-.89 2-2 2-2-.89-2-2zm4 18v-6h2.5l-2.54-7.63A1.5 1.5 0 0 0 18.54 8H17c-.83 0-1.54.5-1.85 1.22l-2.26 5.34c-.24.57.1 1.23.72 1.23.24 0 .47-.1.64-.26L16 14l1 3v5h3zM12.5 11.5c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5S11 9.17 11 10s.67 1.5 1.5 1.5zM5.5 6c1.11 0 2-.89 2-2s-.89-2-2-2-2 .89-2 2 .89 2 2 2zm2.25 2h-4.5c-.83 0-1.54.5-1.85 1.22L.74 12.63A1.5 1.5 0 0 0 2.09 14H3.5v8h3v-6.5h2V22h3v-6c0-1.1-.9-2-2-2h-1l1.8-3.1c.2-.34.3-.73.3-1.1v-2.8C10.6 6.45 10.15 6 9.6 6z"/>
+                    </svg>
+                  </div>
+                  <h3 className="text-17px font-semibold text-gray-900 mb-2">
+                    {searchTerm ? 'No results found' : 'No following yet'}
+                  </h3>
+                  <p className="text-15px text-gray-500">
+                    {searchTerm ? 'Try a different search term.' : 'When you follow people, they\'ll appear here.'}
+                  </p>
+                </div>
+              )}
+            </div>
+          </TabsContent>
+
+          {/* Followers Tab */}
+          <TabsContent value="followers" className="m-0">
+            <div className="bg-white">
+              {followersLoading ? (
+                <div className="space-y-0">
+                  {Array.from({ length: 8 }).map((_, i) => (
+                    <UserRowSkeleton key={i} />
+                  ))}
+                </div>
+              ) : filteredFollowers.length > 0 ? (
+                <div>
+                  {filteredFollowers.map((user) => (
+                    <UserRow
+                      key={user.id}
+                      user={user}
+                      isFollower={true}
+                      showOptionsMenu={true}
+                      onRemoveFollower={handleRemoveFollower}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-16 px-4">
+                  <div className="text-gray-400 mb-4">
+                    <svg className="w-16 h-16 mx-auto" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M16 4c0-1.11.89-2 2-2s2 .89 2 2-.89 2-2 2-2-.89-2-2zm4 18v-6h2.5l-2.54-7.63A1.5 1.5 0 0 0 18.54 8H17c-.83 0-1.54.5-1.85 1.22l-2.26 5.34c-.24.57.1 1.23.72 1.23.24 0 .47-.1.64-.26L16 14l1 3v5h3zM12.5 11.5c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5S11 9.17 11 10s.67 1.5 1.5 1.5zM5.5 6c1.11 0 2-.89 2-2s-.89-2-2-2-2 .89-2 2 .89 2 2 2zm2.25 2h-4.5c-.83 0-1.54.5-1.85 1.22L.74 12.63A1.5 1.5 0 0 0 2.09 14H3.5v8h3v-6.5h2V22h3v-6c0-1.1-.9-2-2-2h-1l1.8-3.1c.2-.34.3-.73.3-1.1v-2.8C10.6 6.45 10.15 6 9.6 6z"/>
+                    </svg>
+                  </div>
+                  <h3 className="text-17px font-semibold text-gray-900 mb-2">
+                    {searchTerm ? 'No results found' : 'No followers yet'}
+                  </h3>
+                  <p className="text-15px text-gray-500">
+                    {searchTerm ? 'Try a different search term.' : 'When people follow you, they\'ll appear here.'}
+                  </p>
+                </div>
+              )}
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
