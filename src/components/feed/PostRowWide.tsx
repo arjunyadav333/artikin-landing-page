@@ -7,7 +7,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useDeletePost } from '@/hooks/useDeletePost';
 import { MediaCarousel } from './MediaCarousel';
-import { CommentSheet } from './CommentSheet';
+import { InstagramCommentModal } from './InstagramCommentModal';
 import { EditPostModal } from './EditPostModal';
 import { SocialShareModal } from './SocialShareModal';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
@@ -380,14 +380,11 @@ export const PostRowWide = ({ post }: PostRowWideProps) => {
         </div>
       </footer>
 
-      {/* Comment Sheet */}
-      <CommentSheet
+      {/* Instagram Comment Modal */}
+      <InstagramCommentModal
         post={post}
         isOpen={commentSheetOpen}
         onClose={() => setCommentSheetOpen(false)}
-        onCommentAdded={() => {
-          // Real-time updates will handle this via subscription
-        }}
       />
 
       {/* Edit Post Modal */}
