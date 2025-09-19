@@ -128,18 +128,18 @@ const Connections = () => {
 
         {/* Following and Followers Buttons */}
         <div className="mb-6">
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
             <Button
               onClick={() => setActiveTab('following')}
               variant={activeTab === 'following' ? 'default' : 'outline'}
-              className="text-sm font-medium rounded-xl"
+              className="text-sm font-medium rounded-xl w-full sm:w-auto"
             >
               Following ({followingLoading ? '...' : filteredFollowing.length})
             </Button>
             <Button
               onClick={() => setActiveTab('followers')}
               variant={activeTab === 'followers' ? 'default' : 'outline'}
-              className="text-sm font-medium rounded-xl"
+              className="text-sm font-medium rounded-xl w-full sm:w-auto"
             >
               Followers ({followersLoading ? '...' : filteredFollowers.length})
             </Button>
