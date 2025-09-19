@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Heart, MessageCircle, Share2, MoreVertical, Edit, Trash2, Copy, Share } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { HomeFeedPost, useLikePost } from '@/hooks/useHomeFeed';
-import { useFollowUser } from '@/hooks/useConnections';
+import { useFollowUser, useConnectionStatus } from '@/hooks/useConnections';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useDeletePost } from '@/hooks/useDeletePost';
@@ -30,6 +30,7 @@ export const PostRowWide = ({ post }: PostRowWideProps) => {
   const likeMutation = useLikePost(20);
   const followMutation = useFollowUser();
   const deletePostMutation = useDeletePost();
+  const connectionStatus = useConnectionStatus(post.user_id);
 
   const handleFollow = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -43,11 +44,13 @@ export const PostRowWide = ({ post }: PostRowWideProps) => {
       return;
     }
     
-    console.log('Follow button clicked for user:', post.user_id, 'Current following state:', post.is_following);
-    console.log('Follow button clicked for user:', post.user_id, 'Current following state:', post.is_following);
+    // Use connection status query first, then fallback to post data
+    const currentFollowingState = connectionStatus.data?.isFollowing ?? post.is_following ?? false;
+    console.log('Follow button clicked for user:', post.user_id, 'Current following state:', currentFollowingState);
+    
     followMutation.mutate({ 
       targetUserId: post.user_id, 
-      isCurrentlyFollowing: post.is_following || false 
+      isCurrentlyFollowing: currentFollowingState 
     });
   };
 
@@ -61,7 +64,6 @@ export const PostRowWide = ({ post }: PostRowWideProps) => {
       return;
     }
     
-    console.log('Like button clicked for post:', post.id, 'Current liked state:', post.user_liked);
     console.log('Like button clicked for post:', post.id, 'Current liked state:', post.user_liked);
     likeMutation.mutate({ 
       postId: post.id, 
@@ -187,16 +189,16 @@ export const PostRowWide = ({ post }: PostRowWideProps) => {
           {!isOwner && user && (
             <button
               className={`btn btn--follow px-3 py-1 text-sm rounded-full border transition-colors ${
-                post.is_following 
+                (connectionStatus.data?.isFollowing ?? post.is_following)
                   ? 'bg-secondary text-secondary-foreground' 
                   : 'bg-primary text-primary-foreground hover:bg-primary/90'
               }`}
               data-follow-user-id={post.user_id}
-              aria-pressed={post.is_following}
+              aria-pressed={connectionStatus.data?.isFollowing ?? post.is_following}
               onClick={handleFollow}
               disabled={followMutation.isPending}
             >
-              {post.is_following ? 'Following' : 'Follow'}
+              {(connectionStatus.data?.isFollowing ?? post.is_following) ? 'Following' : 'Follow'}
             </button>
           )}
 
