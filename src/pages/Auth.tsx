@@ -177,7 +177,7 @@ const Auth = () => {
               </Button>
             </div>
 
-            <div className="text-center mt-6">
+            <div className="text-center mt-6 space-y-3">
               <p className="text-sm text-muted-foreground">
                 Don't have an account?{' '}
                 <Button
@@ -188,6 +188,16 @@ const Auth = () => {
                   Sign Up
                 </Button>
               </p>
+              
+              <div>
+                <Button
+                  variant="link"
+                  className="text-muted-foreground hover:text-primary text-sm p-0 h-auto"
+                  onClick={() => navigate('/')}
+                >
+                  ← Back to Home
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>

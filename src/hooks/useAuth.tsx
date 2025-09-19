@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, useMemo, useCallback } 
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
 
 interface AuthContextType {
   user: User | null;
@@ -33,6 +34,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   // Memoize auth functions to prevent re-renders
   const setAuthState = useCallback((newSession: Session | null) => {
@@ -147,6 +149,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signOut = useCallback(async () => {
     try {
       await supabase.auth.signOut();
+      navigate('/'); // Redirect to landing page
       toast({
         title: "Signed out",
         description: "You've been successfully signed out."
@@ -158,7 +161,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         variant: "destructive"
       });
     }
-  }, [toast]);
+  }, [toast, navigate]);
 
   // Memoize context value to prevent unnecessary re-renders
   const value = useMemo(() => ({
