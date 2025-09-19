@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { HomeFeedPost } from '@/hooks/useHomeFeed';
@@ -16,10 +15,8 @@ interface EditPostModalProps {
 }
 
 export const EditPostModal = ({ isOpen, onClose, post }: EditPostModalProps) => {
-  const [title, setTitle] = useState(post.title || '');
   const [content, setContent] = useState(post.content || '');
   const [tagsString, setTagsString] = useState(post.tags?.join(', ') || '');
-  const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const updatePostMutation = useMutation({
@@ -29,7 +26,6 @@ export const EditPostModal = ({ isOpen, onClose, post }: EditPostModalProps) => 
       const { error } = await supabase
         .from('posts')
         .update({
-          title: title.trim() || null,
           content: content.trim(),
           tags: tags.length > 0 ? tags : null,
           updated_at: new Date().toISOString()
@@ -41,28 +37,15 @@ export const EditPostModal = ({ isOpen, onClose, post }: EditPostModalProps) => 
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['homeFeed'] });
       queryClient.invalidateQueries({ queryKey: ['posts'] });
-      toast({
-        title: "Post updated",
-        description: "Your post has been updated successfully"
-      });
       onClose();
     },
     onError: (error: any) => {
-      toast({
-        title: "Failed to update post",
-        description: error.message,
-        variant: "destructive"
-      });
+      // Error handling without toast
     }
   });
 
   const handleSave = () => {
     if (!content.trim()) {
-      toast({
-        title: "Content required",
-        description: "Please enter some content for your post",
-        variant: "destructive"
-      });
       return;
     }
     updatePostMutation.mutate();
@@ -75,17 +58,7 @@ export const EditPostModal = ({ isOpen, onClose, post }: EditPostModalProps) => 
           <DialogTitle>Edit Post</DialogTitle>
         </DialogHeader>
         
-        <div className="space-y-4">
-          <div>
-            <Label htmlFor="title">Title (optional)</Label>
-            <Input
-              id="title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Enter a title for your post"
-            />
-          </div>
-          
+        <div className="space-y-4">          
           <div>
             <Label htmlFor="content">Content *</Label>
             <Textarea
