@@ -7,7 +7,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Search, Filter } from "lucide-react";
+import { Search, Filter, ChevronDown } from "lucide-react";
 import { UserRow } from "@/components/connections/user-row";
 import { useConnections } from "@/hooks/useConnections";
 import { useCurrentProfile } from "@/hooks/useProfiles";
@@ -128,18 +128,18 @@ const Connections = () => {
 
         {/* Following and Followers Buttons */}
         <div className="mb-6">
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+          <div className="flex items-center gap-4">
             <Button
               onClick={() => setActiveTab('following')}
               variant={activeTab === 'following' ? 'default' : 'outline'}
-              className="text-sm font-medium rounded-xl w-full sm:w-auto"
+              className="text-sm font-medium rounded-xl flex-1"
             >
               Following ({followingLoading ? '...' : filteredFollowing.length})
             </Button>
             <Button
               onClick={() => setActiveTab('followers')}
               variant={activeTab === 'followers' ? 'default' : 'outline'}
-              className="text-sm font-medium rounded-xl w-full sm:w-auto"
+              className="text-sm font-medium rounded-xl flex-1"
             >
               Followers ({followersLoading ? '...' : filteredFollowers.length})
             </Button>
@@ -170,9 +170,7 @@ const Connections = () => {
               ) : (
                 <div className="text-center py-20 px-6">
                   <div className="w-16 h-16 bg-gradient-to-br from-primary/10 to-secondary/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                    <svg className="w-8 h-8 text-muted-foreground" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M16 4c0-1.11.89-2 2-2s2 .89 2 2-.89 2-2 2-2-.89-2-2zm4 18v-6h2.5l-2.54-7.63A1.5 1.5 0 0 0 18.54 8H17c-.83 0-1.54.5-1.85 1.22l-2.26 5.34c-.24.57.1 1.23.72 1.23.24 0 .47-.1.64-.26L16 14l1 3v5h3zM12.5 11.5c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5S11 9.17 11 10s.67 1.5 1.5 1.5zM5.5 6c1.11 0 2-.89 2-2s-.89-2-2-2-2 .89 2 2zm2.25 2h-4.5c-.83 0-1.54.5-1.85 1.22L.74 12.63A1.5 1.5 0 0 0 2.09 14H3.5v8h3v-6.5h2V22h3v-6c0-1.1-.9-2-2-2h-1l1.8-3.1c.2-.34.3-.73.3-1.1v-2.8C10.6 6.45 10.15 6 9.6 6z"/>
-                    </svg>
+                    <ChevronDown className="w-8 h-8 text-muted-foreground" />
                   </div>
                   <h3 className="text-lg font-semibold text-foreground mb-2">
                     {searchTerm ? 'No results found' : 'No following yet'}
@@ -208,9 +206,7 @@ const Connections = () => {
               ) : (
                 <div className="text-center py-20 px-6">
                   <div className="w-16 h-16 bg-gradient-to-br from-primary/10 to-secondary/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                    <svg className="w-8 h-8 text-muted-foreground" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M16 4c0-1.11.89-2 2-2s2 .89 2 2-.89 2-2 2-2-.89-2-2zm4 18v-6h2.5l-2.54-7.63A1.5 1.5 0 0 0 18.54 8H17c-.83 0-1.54.5-1.85 1.22l-2.26 5.34c-.24.57.1 1.23.72 1.23.24 0 .47-.1.64-.26L16 14l1 3v5h3zM12.5 11.5c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5S11 9.17 11 10s.67 1.5 1.5 1.5zM5.5 6c1.11 0 2-.89 2-2s-.89-2-2-2-2 .89 2 2zm2.25 2h-4.5c-.83 0-1.54.5-1.85 1.22L.74 12.63A1.5 1.5 0 0 0 2.09 14H3.5v8h3v-6.5h2V22h3v-6c0-1.1-.9-2-2-2h-1l1.8-3.1c.2-.34.3-.73.3-1.1v-2.8C10.6 6.45 10.15 6 9.6 6z"/>
-                    </svg>
+                    <ChevronDown className="w-8 h-8 text-muted-foreground" />
                   </div>
                   <h3 className="text-lg font-semibold text-foreground mb-2">
                     {searchTerm ? 'No results found' : 'No followers yet'}
