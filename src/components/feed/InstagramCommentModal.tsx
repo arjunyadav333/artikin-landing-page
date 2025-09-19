@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { X, MoreVertical } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { HomeFeedPost } from '@/hooks/useHomeFeed';
@@ -147,6 +147,14 @@ export function InstagramCommentModal({ post, isOpen, onClose }: InstagramCommen
         {/* Sticky Header */}
         <div className="flex items-center justify-between p-4 border-b border-border bg-background sticky top-0 z-10">
           <div className="flex items-center gap-3 flex-1 min-w-0">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onClose}
+              className="h-8 w-8 p-0 mr-1"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
             <Link to={`/profile/${post.user_id}`} className="flex-shrink-0">
               <Avatar className="h-8 w-8">
                 <AvatarImage 
@@ -166,24 +174,6 @@ export function InstagramCommentModal({ post, isOpen, onClose }: InstagramCommen
                 Comments • {(allComments.length || 0)}
               </p>
             </div>
-          </div>
-          
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 w-8 p-0"
-            >
-              <MoreVertical className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onClose}
-              className="h-8 w-8 p-0"
-            >
-              <X className="h-4 w-4" />
-            </Button>
           </div>
         </div>
 
@@ -258,19 +248,10 @@ export function InstagramCommentModal({ post, isOpen, onClose }: InstagramCommen
                     <p className="text-sm break-words leading-5">
                       {comment.content}
                     </p>
-                  </div>
-                  {comment.user_id === user?.id && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity self-start"
-                    >
-                      <MoreVertical className="h-3 w-3" />
-                    </Button>
-                  )}
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
+          </div>
           )}
         </div>
 
