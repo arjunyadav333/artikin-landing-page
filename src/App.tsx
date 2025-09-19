@@ -25,6 +25,8 @@ const EnhancedMessages = lazy(() => import("./pages/EnhancedMessages"));
 const Auth = lazy(() => import("./pages/Auth"));
 const AuthNew = lazy(() => import("./pages/AuthNew"));
 const SignUp = lazy(() => import("./pages/SignUp"));
+const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const PostDetail = lazy(() => import("./pages/PostDetail"));
 const TagFeed = lazy(() => import("./pages/TagFeed"));
 const EnhancedConversationPage = lazy(() => import("./pages/EnhancedConversationPage"));
@@ -102,6 +104,16 @@ const AppRoutes = () => {
         <Route path="/auth/signup" element={
           <Suspense fallback={<DefaultLoader />}>
             <SignUp />
+          </Suspense>
+        } />
+        <Route path="/forgot-password" element={
+          <Suspense fallback={<DefaultLoader />}>
+            <ForgotPassword />
+          </Suspense>
+        } />
+        <Route path="/auth/reset-password" element={
+          <Suspense fallback={<DefaultLoader />}>
+            <ResetPassword />
           </Suspense>
         } />
         
