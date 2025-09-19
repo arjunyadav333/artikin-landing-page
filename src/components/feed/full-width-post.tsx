@@ -60,7 +60,9 @@ export function FullWidthPost({ post }: FullWidthPostProps) {
   };
 
 
-  const handleFollow = () => {
+  const handleFollow = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     if (!isOwnPost) {
       followUserMutation.mutate({ 
         targetUserId: post.user_id, 

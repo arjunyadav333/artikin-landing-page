@@ -22,7 +22,9 @@ export const PostHeader = ({ post, isOwner }: PostHeaderProps) => {
   const { user } = useAuth();
   const followMutation = useFollowUser();
 
-  const handleFollow = () => {
+  const handleFollow = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     if (!user) return;
     followMutation.mutate({ 
       targetUserId: post.user_id, 

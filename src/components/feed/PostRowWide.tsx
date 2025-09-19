@@ -31,7 +31,9 @@ export const PostRowWide = ({ post }: PostRowWideProps) => {
   const followMutation = useFollowUser();
   const deletePostMutation = useDeletePost();
 
-  const handleFollow = () => {
+  const handleFollow = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     if (!user) {
       toast({
         title: "Sign in required",
