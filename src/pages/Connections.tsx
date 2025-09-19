@@ -79,11 +79,11 @@ const Connections = () => {
   };
 
   const UserRowSkeleton = () => (
-    <div className="flex items-center px-6 py-4">
-      <Skeleton className="h-12 w-12 rounded-full mr-4" />
+    <div className="flex items-center px-4 py-3">
+      <Skeleton className="h-10 w-10 rounded-full mr-3" />
       <div className="flex-1">
         <Skeleton className="h-4 w-32 mb-2" />
-        <Skeleton className="h-3 w-24" />
+        <Skeleton className="h-3 w-20" />
       </div>
       <Skeleton className="h-9 w-20 rounded-xl" />
     </div>
@@ -91,9 +91,17 @@ const Connections = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-8">
-      <div className="w-full px-4 py-6">
-        {/* Search and Filter */}
+      <div className="w-full px-4 py-4">
+        {/* Header */}
         <div className="mb-6">
+          <h1 className="text-xl font-bold text-foreground mb-1">My Connections</h1>
+          <p className="text-muted-foreground text-sm">
+            Manage your followers and people you follow
+          </p>
+        </div>
+
+        {/* Search and Filter */}
+        <div className="mb-4">
           <div className="flex items-center gap-3">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -101,17 +109,17 @@ const Connections = () => {
                 placeholder="Search connections"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 h-11 rounded-xl border-border bg-background focus:ring-2 focus:ring-ring focus:border-ring text-sm"
+                className="pl-10 h-10 rounded-xl border-border bg-background focus:ring-2 focus:ring-ring focus:border-ring text-sm"
               />
             </div>
             {/* Filter Dropdown - Icon Only */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="rounded-xl px-3">
+                <Button variant="outline" size="sm" className="rounded-xl px-3 h-10">
                   <Filter className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="bg-popover border shadow-lg rounded-xl">
+              <DropdownMenuContent align="end" className="bg-popover border shadow-lg rounded-xl z-50">
                 <DropdownMenuItem onClick={() => setSortBy('newest')}>
                   Most Recent
                 </DropdownMenuItem>
@@ -127,19 +135,19 @@ const Connections = () => {
         </div>
 
         {/* Following and Followers Buttons */}
-        <div className="mb-6">
-          <div className="flex items-center gap-4">
+        <div className="mb-4">
+          <div className="flex items-center gap-3">
             <Button
               onClick={() => setActiveTab('following')}
               variant={activeTab === 'following' ? 'default' : 'outline'}
-              className="text-sm font-medium rounded-xl flex-1"
+              className="text-sm font-medium rounded-xl flex-1 h-10"
             >
               Following ({followingLoading ? '...' : filteredFollowing.length})
             </Button>
             <Button
               onClick={() => setActiveTab('followers')}
               variant={activeTab === 'followers' ? 'default' : 'outline'}
-              className="text-sm font-medium rounded-xl flex-1"
+              className="text-sm font-medium rounded-xl flex-1 h-10"
             >
               Followers ({followersLoading ? '...' : filteredFollowers.length})
             </Button>

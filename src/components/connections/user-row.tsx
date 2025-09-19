@@ -144,13 +144,13 @@ export function UserRow({
 
   return (
     <>
-      <div className="flex items-center px-6 py-4 hover:bg-muted/50 transition-colors">
+      <div className="flex items-center px-4 py-3 hover:bg-muted/50 transition-colors">
         {/* Avatar */}
         <div 
-          className="cursor-pointer mr-4"
+          className="cursor-pointer mr-3"
           onClick={handleViewProfile}
         >
-          <Avatar className="h-12 w-12">
+          <Avatar className="h-10 w-10">
             <AvatarImage src={user.avatar_url} alt={user.display_name} />
             <AvatarFallback className="bg-muted text-muted-foreground text-sm font-medium">
               {user.display_name.split(' ').map(n => n[0]).join('').toUpperCase()}
@@ -167,7 +167,7 @@ export function UserRow({
             {user.display_name}
           </div>
           <div className="text-xs text-muted-foreground truncate">
-            @{user.username} • {getUserTypeDisplay()}
+            {getUserTypeDisplay()}
           </div>
         </div>
 
@@ -194,10 +194,10 @@ export function UserRow({
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="sm" className="h-9 w-9 p-0 hover:bg-muted rounded-xl">
-                    <MoreHorizontal className="h-4 w-4" />
+                    <MoreHorizontal className="h-4 w-4 text-sky-400" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48 bg-popover border shadow-lg rounded-xl">
+                <DropdownMenuContent align="end" className="w-48 bg-popover border shadow-lg rounded-xl z-50">
                   <DropdownMenuItem onClick={handleMessage} className="flex items-center">
                     {isMessageLoading(user.user_id) ? (
                       <Loader2 className="h-4 w-4 mr-3 animate-spin" />
