@@ -162,11 +162,11 @@ export function ContactSocialCard({ profile, isOwnProfile }: ContactSocialCardPr
               >
                 <div className="flex items-center gap-3">
                   <span className="text-lg">{getPlatformIcon(link.type)}</span>
-                  <div>
-                    <div className="font-medium text-gray-800">
+                  <div className="min-w-0 flex-1">
+                    <div className="font-medium text-gray-800 truncate">
                       {link.label || getPlatformLabel(link.type)}
                     </div>
-                    <div className="text-sm text-gray-500 truncate max-w-xs">
+                    <div className="text-sm text-gray-500 truncate">
                       {link.url}
                     </div>
                   </div>

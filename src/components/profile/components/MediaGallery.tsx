@@ -245,19 +245,27 @@ export function MediaGallery({
           )}
         </CardHeader>
         
-        <CardContent className="p-6 pt-0">
+        <CardContent className="p-4 md:p-6 pt-0">
           {mediaItems.length > 0 ? (
-            <div className="grid grid-cols-3 lg:grid-cols-5 gap-2">
-              {mediaItems.map((item, index) => renderThumbnail(item, index))}
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 max-h-80 overflow-y-auto">
+              {mediaItems.slice(0, 12).map((item, index) => renderThumbnail(item, index))}
+              {mediaItems.length > 12 && (
+                <div className="aspect-square bg-gray-100 rounded flex items-center justify-center cursor-pointer hover:bg-gray-200 transition-colors">
+                  <div className="text-center">
+                    <Plus className="h-6 w-6 mx-auto mb-1 text-gray-400" />
+                    <p className="text-xs text-gray-500">+{mediaItems.length - 12}</p>
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
-            <div className="text-center py-12 text-gray-500">
+            <div className="text-center py-8 text-gray-500">
               <div className="mb-4">
-                <div className="h-16 w-16 mx-auto bg-gray-100 rounded-full flex items-center justify-center">
-                  <Image className="h-8 w-8 text-gray-400" />
+                <div className="h-12 w-12 mx-auto bg-gray-100 rounded-full flex items-center justify-center">
+                  <Image className="h-6 w-6 text-gray-400" />
                 </div>
               </div>
-              <p className="text-lg">No portfolio items yet</p>
+              <p className="text-base">No portfolio items yet</p>
               {isOwnProfile && (
                 <p className="text-sm mt-1">Upload your first project to get started</p>
               )}

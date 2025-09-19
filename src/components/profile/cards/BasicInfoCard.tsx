@@ -273,10 +273,10 @@ export function BasicInfoCard({ profile, isOwnProfile }: BasicInfoCardProps) {
             </div>
 
             {profile.bio && (
-              <div className="md:col-span-2">
-                <h4 className="text-sm text-gray-600 font-medium mb-1">Bio</h4>
-                <p className="text-base text-gray-800 leading-relaxed">{profile.bio}</p>
-              </div>
+            <div className="md:col-span-2">
+              <h4 className="text-sm text-gray-600 font-medium mb-1">Bio</h4>
+              <p className="text-sm md:text-base text-gray-800 leading-relaxed line-clamp-4 break-words overflow-hidden">{profile.bio}</p>
+            </div>
             )}
 
             <div className="md:col-span-2">

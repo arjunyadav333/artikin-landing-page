@@ -336,7 +336,7 @@ export function ProjectsCard({ profile, isOwnProfile }: ProjectsCardProps) {
                           project.endDate ? format(project.endDate, 'MMM yyyy') : 'Present'
                         }
                       </p>
-                      <p className="text-sm text-gray-700 mb-3">
+                      <p className="text-sm text-gray-700 mb-3 line-clamp-3 break-words overflow-hidden">
                         {project.description}
                       </p>
                       {project.links.length > 0 && (
@@ -356,16 +356,21 @@ export function ProjectsCard({ profile, isOwnProfile }: ProjectsCardProps) {
                       )}
                       {project.media.length > 0 && (
                         <div className="mt-3">
-                          <div className="flex gap-2 flex-wrap">
-                            {project.media.map((media, index) => (
+                          <div className="flex gap-2 flex-wrap max-w-full overflow-hidden">
+                            {project.media.slice(0, 6).map((media, index) => (
                               <img
                                 key={media.id}
                                 src={media.url}
                                 alt={`Project ${project.title} image ${index + 1}`}
-                                className="w-12 h-12 object-cover rounded cursor-pointer hover:opacity-80 transition-opacity"
+                                className="w-10 h-10 md:w-12 md:h-12 object-cover rounded cursor-pointer hover:opacity-80 transition-opacity flex-shrink-0"
                                 onClick={() => openLightbox(project.media, index)}
                               />
                             ))}
+                            {project.media.length > 6 && (
+                              <div className="w-10 h-10 md:w-12 md:h-12 bg-gray-100 rounded flex items-center justify-center text-xs text-gray-500 flex-shrink-0">
+                                +{project.media.length - 6}
+                              </div>
+                            )}
                           </div>
                         </div>
                       )}
