@@ -428,6 +428,23 @@ All colors MUST be HSL.
   }
 }
 
+/* Landing page animations */
+.animation-delay-2000 {
+  animation-delay: 2s;
+}
+
+.animation-delay-4000 {
+  animation-delay: 4s;
+}
+
+.animate-gradient-text {
+  background: linear-gradient(-45deg, #3B82F6, #8B5CF6, #3B82F6, #10B981);
+  background-size: 400% 400%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
 /* Mobile Safe Area Support */
 @layer utilities {
   .safe-area-inset-top {
