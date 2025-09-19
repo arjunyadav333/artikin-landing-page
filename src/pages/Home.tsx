@@ -50,11 +50,6 @@ const Home = () => {
             </div>
           </div>
 
-          {/* Mobile: Show personalized sections even when feed is empty */}
-          <div className="xl:hidden space-y-6 mt-8 pb-20">
-            <SuggestedArtistsSection />
-            <PersonalizedOpportunitiesSection />
-          </div>
         </div>
       </div>
     );
@@ -123,11 +118,6 @@ const Home = () => {
             </div>
           )}
 
-          {/* Mobile Personalized Sections */}
-          <div className="space-y-6 pb-20"> {/* pb-20 for bottom nav */}
-            <SuggestedArtistsSection />
-            <PersonalizedOpportunitiesSection />
-          </div>
         </main>
       </div>
     </div>

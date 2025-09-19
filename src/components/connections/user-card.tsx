@@ -61,7 +61,9 @@ export function UserCard({
     e.preventDefault();
     e.stopPropagation();
     
-    const currentFollowingState = connectionStatus?.isFollowing || isFollowing || false;
+    // Use connection status query first, then fallback to props
+    const currentFollowingState = connectionStatus?.isFollowing ?? isFollowing ?? false;
+    console.log('Follow button clicked for user:', user.user_id, 'Current following state:', currentFollowingState);
     
     followUser.mutate({
       targetUserId: user.user_id,
