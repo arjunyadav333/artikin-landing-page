@@ -78,15 +78,6 @@ const Connections = () => {
     // Remove follower functionality will be implemented
   };
 
-  const getSortDisplayText = (sort: SortOption) => {
-    switch (sort) {
-      case 'alphabetical': return 'Alphabetical';
-      case 'relevant': return 'Most Relevant';
-      case 'newest': 
-      default: return 'Most Recent';
-    }
-  };
-
   const UserRowSkeleton = () => (
     <div className="flex items-center px-6 py-4">
       <Skeleton className="h-12 w-12 rounded-full mr-4" />
@@ -100,68 +91,63 @@ const Connections = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-8">
-      <div className="max-w-4xl mx-auto px-4 py-6" style={{ maxWidth: 'var(--feed-max-width)' }}>
+      <div className="w-full px-4 py-6">
         {/* Search and Filter */}
-        <div className="bg-card rounded-2xl border border-border/50 shadow-sm mb-6 overflow-hidden">
-          <div className="px-6 py-6">
-            <div className="flex items-center gap-3">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search connections"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 h-11 rounded-xl border-border bg-background focus:ring-2 focus:ring-ring focus:border-ring text-sm"
-                />
-              </div>
-              {/* Filter Dropdown */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="text-sm font-medium rounded-xl px-4">
-                    <Filter className="mr-2 h-4 w-4" />
-                    {getSortDisplayText(sortBy)}
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="bg-popover border shadow-lg rounded-xl">
-                  <DropdownMenuItem onClick={() => setSortBy('newest')}>
-                    Most Recent
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setSortBy('alphabetical')}>
-                    Alphabetical
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setSortBy('relevant')}>
-                    Most Relevant
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+        <div className="mb-6">
+          <div className="flex items-center gap-3">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search connections"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 h-11 rounded-xl border-border bg-background focus:ring-2 focus:ring-ring focus:border-ring text-sm"
+              />
             </div>
+            {/* Filter Dropdown - Icon Only */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="rounded-xl px-3">
+                  <Filter className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="bg-popover border shadow-lg rounded-xl">
+                <DropdownMenuItem onClick={() => setSortBy('newest')}>
+                  Most Recent
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSortBy('alphabetical')}>
+                  Alphabetical
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSortBy('relevant')}>
+                  Most Relevant
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
 
         {/* Following and Followers Buttons */}
-        <div className="bg-card rounded-2xl border border-border/50 shadow-sm mb-6 overflow-hidden">
-          <div className="px-6 py-4">
-            <div className="flex items-center gap-4">
-              <Button
-                onClick={() => setActiveTab('following')}
-                variant={activeTab === 'following' ? 'default' : 'outline'}
-                className="text-sm font-medium rounded-xl"
-              >
-                Following ({followingLoading ? '...' : filteredFollowing.length})
-              </Button>
-              <Button
-                onClick={() => setActiveTab('followers')}
-                variant={activeTab === 'followers' ? 'default' : 'outline'}
-                className="text-sm font-medium rounded-xl"
-              >
-                Followers ({followersLoading ? '...' : filteredFollowers.length})
-              </Button>
-            </div>
+        <div className="mb-6">
+          <div className="flex items-center gap-4">
+            <Button
+              onClick={() => setActiveTab('following')}
+              variant={activeTab === 'following' ? 'default' : 'outline'}
+              className="text-sm font-medium rounded-xl"
+            >
+              Following ({followingLoading ? '...' : filteredFollowing.length})
+            </Button>
+            <Button
+              onClick={() => setActiveTab('followers')}
+              variant={activeTab === 'followers' ? 'default' : 'outline'}
+              className="text-sm font-medium rounded-xl"
+            >
+              Followers ({followersLoading ? '...' : filteredFollowers.length})
+            </Button>
           </div>
         </div>
 
         {/* Content */}
-        <div className="bg-card rounded-2xl border border-border/50 shadow-sm overflow-hidden">
+        <div>
           {activeTab === 'following' && (
             <div>
               {followingLoading ? (
