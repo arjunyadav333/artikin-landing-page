@@ -133,18 +133,9 @@ export const useCreateComment = () => {
           )
         };
       });
-
-      toast({
-        title: "Comment posted",
-        description: "Your comment has been added successfully."
-      });
     },
     onError: (error: any) => {
-      toast({
-        title: "Failed to post comment",
-        description: error.message,
-        variant: "destructive"
-      });
+      // Error handling without toast
     }
   });
 };
@@ -225,11 +216,7 @@ export const useLikeComment = () => {
         queryClient.setQueryData(['comments', context.postId], context.previousComments);
       }
       
-      toast({
-        title: 'Failed to like comment',
-        description: error.message,
-        variant: "destructive"
-      });
+      // Error handling without toast
     },
     onSettled: (data, error, variables, context) => {
       if (context?.postId) {

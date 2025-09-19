@@ -109,11 +109,6 @@ export const CommentSheet: React.FC<CommentSheetProps> = ({
       setComments(commentsWithProfiles);
     } catch (error) {
       console.error('Failed to load comments:', error);
-      toast({
-        title: "Failed to load comments",
-        description: "Please try again",
-        variant: "destructive"
-      });
     } finally {
       setIsLoading(false);
     }
@@ -169,18 +164,8 @@ export const CommentSheet: React.FC<CommentSheetProps> = ({
 
       setNewComment('');
       onCommentAdded();
-      
-      toast({
-        title: "Comment posted",
-        description: "Your comment has been added"
-      });
     } catch (error) {
       console.error('Failed to post comment:', error);
-      toast({
-        title: "Failed to post comment",
-        description: "Please try again",
-        variant: "destructive"
-      });
     } finally {
       setIsSubmitting(false);
     }

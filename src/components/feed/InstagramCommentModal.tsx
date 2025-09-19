@@ -6,7 +6,6 @@ import { HomeFeedPost } from '@/hooks/useHomeFeed';
 import { useAuth } from '@/hooks/useAuth';
 import { useComments, useCreateComment, Comment } from '@/hooks/useComments';
 import { Link } from 'react-router-dom';
-import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
 interface InstagramCommentModalProps {
@@ -20,7 +19,6 @@ export function InstagramCommentModal({ post, isOpen, onClose }: InstagramCommen
   const [showNewBadge, setShowNewBadge] = useState(false);
   const [pendingComments, setPendingComments] = useState<Comment[]>([]);
   const { user } = useAuth();
-  const { toast } = useToast();
   const { data: comments = [], isLoading } = useComments(post.id);
   const createCommentMutation = useCreateComment();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -91,11 +89,6 @@ export function InstagramCommentModal({ post, isOpen, onClose }: InstagramCommen
     } catch (error) {
       // Remove failed comment and show error
       setPendingComments(prev => prev.filter(c => c.id !== tempId));
-      toast({
-        title: "Failed to post comment",
-        description: "Please try again",
-        variant: "destructive"
-      });
     }
   };
 

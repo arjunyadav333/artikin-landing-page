@@ -36,11 +36,6 @@ export const PostRowWide = ({ post }: PostRowWideProps) => {
     e.preventDefault();
     e.stopPropagation();
     if (!user) {
-      toast({
-        title: "Sign in required",
-        description: "Please sign in to follow users",
-        variant: "destructive"
-      });
       return;
     }
     
@@ -56,11 +51,6 @@ export const PostRowWide = ({ post }: PostRowWideProps) => {
 
   const handleLike = () => {
     if (!user) {
-      toast({
-        title: "Sign in required",
-        description: "Please sign in to like posts",
-        variant: "destructive"
-      });
       return;
     }
     
@@ -85,10 +75,6 @@ export const PostRowWide = ({ post }: PostRowWideProps) => {
     switch (action) {
       case 'copy-link':
         navigator.clipboard.writeText(`${window.location.origin}/post/${post.id}`);
-        toast({
-          title: "Link copied",
-          description: "Post link copied to clipboard"
-        });
         break;
       case 'edit':
         setEditModalOpen(true);
