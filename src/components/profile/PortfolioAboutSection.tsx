@@ -28,15 +28,15 @@ export function PortfolioAboutSection({
           {/* Basic Information Card (includes Body Features for actors/models) */}
           <BasicInfoCard profile={profile} isOwnProfile={isOwnProfile} />
           
+          {/* Social Card */}
+          <ContactSocialCard profile={profile} isOwnProfile={isOwnProfile} />
+          
           {/* Certificates Card */}
           <CertificatesCard profile={profile} isOwnProfile={isOwnProfile} />
         </div>
         
         {/* Right Column */}
         <div className="space-y-4 md:space-y-6">
-          {/* Contact & Social Card */}
-          <ContactSocialCard profile={profile} isOwnProfile={isOwnProfile} />
-          
           {/* Awards Card */}
           <AwardsCard profile={profile} isOwnProfile={isOwnProfile} />
           
