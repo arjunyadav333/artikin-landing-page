@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { Search, Plus, Bell, LogOut, User, Settings, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -17,9 +17,110 @@ import { useAuth } from "@/hooks/useAuth";
 export function TopBar() {
   const [searchQuery, setSearchQuery] = useState("");
   const { user, signOut } = useAuth();
+  const headerRef = useRef<HTMLElement>(null);
+  const [isHidden, setIsHidden] = useState(false);
+  const scrollData = useRef({
+    lastScroll: 0,
+    accumulated: 0,
+    ticking: false
+  });
+
+  useEffect(() => {
+    const isMobile = () => window.innerWidth < 768;
+    
+    const onScroll = () => {
+      const current = window.scrollY || 0;
+      const delta = current - scrollData.current.lastScroll;
+      
+      // Ignore tiny movements
+      const minDelta = isMobile() ? 8 : 10;
+      if (Math.abs(delta) < minDelta) {
+        scrollData.current.lastScroll = current;
+        return;
+      }
+
+      scrollData.current.accumulated += delta;
+
+      // Hide: scroll down enough and not at top
+      if (scrollData.current.accumulated > 60 && current > 100 && !isHidden) {
+        setIsHidden(true);
+        scrollData.current.accumulated = 0;
+      }
+
+      // Show: scroll up enough
+      if (scrollData.current.accumulated < -30 && isHidden) {
+        setIsHidden(false);
+        scrollData.current.accumulated = 0;
+      }
+
+      // Always show at top
+      if (current <= 0 && isHidden) {
+        setIsHidden(false);
+        scrollData.current.accumulated = 0;
+      }
+
+      scrollData.current.lastScroll = current;
+    };
+
+    const handleScroll = () => {
+      if (!scrollData.current.ticking) {
+        requestAnimationFrame(() => {
+          onScroll();
+          scrollData.current.ticking = false;
+        });
+        scrollData.current.ticking = true;
+      }
+    };
+
+    // Add focus handlers for header elements
+    const handleFocus = () => {
+      setIsHidden(false);
+    };
+
+    const setupFocusHandlers = () => {
+      if (headerRef.current) {
+        const focusableElements = headerRef.current.querySelectorAll(
+          'button, a, input, [tabindex]:not([tabindex="-1"])'
+        );
+        focusableElements.forEach(el => {
+          el.addEventListener('focus', handleFocus);
+        });
+
+        return () => {
+          focusableElements.forEach(el => {
+            el.removeEventListener('focus', handleFocus);
+          });
+        };
+      }
+    };
+
+    // Initialize scroll position
+    scrollData.current.lastScroll = window.scrollY || 0;
+
+    // Setup listeners
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    const cleanupFocus = setupFocusHandlers();
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (cleanupFocus) cleanupFocus();
+    };
+  }, [isHidden]);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/80 backdrop-blur-xl">
+    <header 
+      ref={headerRef}
+      className={`sticky top-0 z-50 w-full border-b border-border/50 bg-background/80 backdrop-blur-xl transition-all duration-[220ms] will-change-transform ${
+        isHidden 
+          ? 'transform -translate-y-full opacity-0 pointer-events-none' 
+          : 'transform translate-y-0 opacity-100'
+      }`}
+      style={{
+        transitionTimingFunction: 'cubic-bezier(.2,.9,.2,1)',
+        transitionProperty: 'transform, opacity',
+        transitionDuration: '220ms, 160ms'
+      }}
+    >
       <div className="flex h-16 items-center gap-4 px-4 lg:px-6">
         {/* Mobile Layout: Profile, Artikin, Notifications, Hamburger */}
         <div className="flex md:hidden items-center justify-between w-full">
