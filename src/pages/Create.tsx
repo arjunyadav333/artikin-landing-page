@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Image, X, Upload, Loader2 } from "lucide-react";
+import { Image, X, Upload, Loader2, ArrowLeft } from "lucide-react";
 import { useCurrentProfile } from "@/hooks/useProfiles";
 import { useCreatePost } from "@/hooks/usePosts";
 
@@ -117,8 +117,18 @@ const Create = () => {
       <div className="w-full max-w-2xl mx-auto px-4 py-6 lg:px-6">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-foreground">Create Post</h1>
-          <p className="text-sm text-muted-foreground mt-1">Share your thoughts with the community</p>
+          <div className="flex items-center space-x-3 mb-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate(-1)}
+              className="h-9 w-9"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <h1 className="text-2xl font-bold text-foreground">Create Post</h1>
+          </div>
+          <p className="text-sm text-muted-foreground">Share your thoughts with the community</p>
         </div>
 
         <Card className="border-border">
