@@ -20,35 +20,38 @@ export function PortfolioAboutSection({
   portfoliosLoading = false 
 }: PortfolioAboutSectionProps) {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 max-w-full">
-      {/* Left Column */}
-      <div className="space-y-4 md:space-y-6">
-        {/* Basic Information Card (includes Body Features for actors/models) */}
-        <BasicInfoCard profile={profile} isOwnProfile={isOwnProfile} />
+    <div className="space-y-4 md:space-y-6">
+      {/* Two Column Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 max-w-full">
+        {/* Left Column */}
+        <div className="space-y-4 md:space-y-6">
+          {/* Basic Information Card (includes Body Features for actors/models) */}
+          <BasicInfoCard profile={profile} isOwnProfile={isOwnProfile} />
+          
+          {/* Certificates Card */}
+          <CertificatesCard profile={profile} isOwnProfile={isOwnProfile} />
+        </div>
         
-        {/* Certificates Card */}
-        <CertificatesCard profile={profile} isOwnProfile={isOwnProfile} />
-        
-        {/* Portfolio & Media Gallery */}
-        <MediaGallery 
-          profile={profile}
-          isOwnProfile={isOwnProfile}
-          portfolios={portfolios}
-          portfoliosLoading={portfoliosLoading}
-        />
+        {/* Right Column */}
+        <div className="space-y-4 md:space-y-6">
+          {/* Contact & Social Card */}
+          <ContactSocialCard profile={profile} isOwnProfile={isOwnProfile} />
+          
+          {/* Awards Card */}
+          <AwardsCard profile={profile} isOwnProfile={isOwnProfile} />
+          
+          {/* Past Projects Card */}
+          <ProjectsCard profile={profile} isOwnProfile={isOwnProfile} />
+        </div>
       </div>
       
-      {/* Right Column */}
-      <div className="space-y-4 md:space-y-6">
-        {/* Contact & Social Card */}
-        <ContactSocialCard profile={profile} isOwnProfile={isOwnProfile} />
-        
-        {/* Awards Card */}
-        <AwardsCard profile={profile} isOwnProfile={isOwnProfile} />
-        
-        {/* Past Projects Card */}
-        <ProjectsCard profile={profile} isOwnProfile={isOwnProfile} />
-      </div>
+      {/* Portfolio & Media Gallery - Full Width at Bottom */}
+      <MediaGallery 
+        profile={profile}
+        isOwnProfile={isOwnProfile}
+        portfolios={portfolios}
+        portfoliosLoading={portfoliosLoading}
+      />
     </div>
   );
 }
