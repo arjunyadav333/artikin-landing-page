@@ -47,12 +47,13 @@ export const AppLayout = memo(({ children }: AppLayoutProps) => {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-background">
+      {/* Fixed TopBar - outside scrollable container */}
+      <TopBar />
+      
+      <div className="min-h-screen flex w-full bg-background pt-16">
         <AppSidebar />
         
-        <div className="flex-1 flex flex-col">
-          <TopBar />
-          
+        <div className="flex-1 flex flex-col">          
           {!hidesMobileNav && (
             <div className="md:hidden">
               <MobileBottomNav />
