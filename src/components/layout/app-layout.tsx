@@ -50,7 +50,7 @@ export const AppLayout = memo(({ children }: AppLayoutProps) => {
       <div className="min-h-screen flex w-full bg-background">
         <AppSidebar />
         
-        <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex-1 flex flex-col">
           <TopBar />
           
           {!hidesMobileNav && (
@@ -59,7 +59,7 @@ export const AppLayout = memo(({ children }: AppLayoutProps) => {
             </div>
           )}
           
-          <main className="flex-1 overflow-auto pt-16">
+          <main className="flex-1 overflow-auto">
             {contentStructure}
           </main>
         </div>
