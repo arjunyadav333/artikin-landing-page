@@ -1,10 +1,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 
 export const useDeletePost = () => {
   const queryClient = useQueryClient();
-  const { toast } = useToast();
 
   return useMutation({
     mutationFn: async (postId: string) => {
@@ -16,19 +14,16 @@ export const useDeletePost = () => {
       if (error) throw error;
     },
     onSuccess: () => {
+      // Invalidate all post-related queries to ensure the deleted post is removed everywhere
       queryClient.invalidateQueries({ queryKey: ['homeFeed'] });
       queryClient.invalidateQueries({ queryKey: ['posts'] });
-      toast({
-        title: "Post deleted",
-        description: "Your post has been deleted successfully"
-      });
+      queryClient.invalidateQueries({ queryKey: ['userPosts'] }); // Remove from user profile posts
+      queryClient.invalidateQueries({ queryKey: ['tagPosts'] }); // Remove from tag feeds
+      queryClient.invalidateQueries({ queryKey: ['comments'] }); // Remove associated comments
     },
     onError: (error: any) => {
-      toast({
-        title: "Failed to delete post",
-        description: error.message,
-        variant: "destructive"
-      });
+      // Error handling without toast
+      console.error('Failed to delete post:', error);
     }
   });
 };
