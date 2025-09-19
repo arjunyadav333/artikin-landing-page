@@ -48,12 +48,27 @@ export function TopBar() {
               <span className="absolute -top-1 -right-1 h-3 w-3 bg-destructive rounded-full text-xs"></span>
             </Button>
 
-            {/* Hamburger Menu */}
-            <SidebarTrigger>
-              <Button variant="ghost" size="sm" className="rounded-full h-9 w-9">
-                <Menu className="h-4 w-4" />
-              </Button>
-            </SidebarTrigger>
+            {/* Hamburger Menu with Settings */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="rounded-full h-9 w-9">
+                  <Menu className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuItem asChild>
+                  <Link to="/settings" className="w-full cursor-pointer">
+                    <Settings className="mr-2 h-4 w-4" />
+                    Settings
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => signOut()}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Sign Out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
 

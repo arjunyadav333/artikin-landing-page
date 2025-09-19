@@ -55,20 +55,17 @@ const NavigationItemComponent = memo(({
   }
 
   return (
-    <Link key={item.name} to={item.href} className="flex-1 max-w-16">
+    <Link key={item.name} to={item.href} className="flex-1">
       <div
         className={`
-          flex flex-col items-center justify-center py-2 px-1 rounded-lg transition-colors
+          flex items-center justify-center py-3 px-2 rounded-lg transition-colors
           ${isActive 
             ? "text-foreground" 
             : "text-muted-foreground hover:text-foreground"
           }
         `}
       >
-        <Icon className={`h-5 w-5 mb-1`} />
-        <span className={`text-xs truncate w-full text-center ${isActive ? "font-bold" : "font-medium"}`}>
-          {item.name}
-        </span>
+        <Icon className="h-6 w-6" />
       </div>
     </Link>
   );
