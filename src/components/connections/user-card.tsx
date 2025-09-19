@@ -60,9 +60,12 @@ export function UserCard({
   const handleFollow = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    
+    const currentFollowingState = connectionStatus?.isFollowing || isFollowing || false;
+    
     followUser.mutate({
       targetUserId: user.user_id,
-      isCurrentlyFollowing: connectionStatus?.isFollowing || false
+      isCurrentlyFollowing: currentFollowingState
     });
   };
 
@@ -97,10 +100,14 @@ export function UserCard({
   };
 
   const getFollowButtonState = () => {
-    if (connectionStatus?.isFollowing) {
+    // Use props as fallback for connection status
+    const currentlyFollowing = connectionStatus?.isFollowing ?? isFollowing;
+    const currentlyFollowedBy = connectionStatus?.isFollowedBy ?? isFollower;
+    
+    if (currentlyFollowing) {
       return { text: 'Following', variant: 'secondary' as const, icon: UserCheck };
     }
-    if (connectionStatus?.isFollowedBy && !connectionStatus?.isFollowing) {
+    if (currentlyFollowedBy && !currentlyFollowing) {
       return { text: 'Follow Back', variant: 'default' as const, icon: UserPlus };
     }
     return { text: 'Follow', variant: 'default' as const, icon: UserPlus };
@@ -110,7 +117,7 @@ export function UserCard({
 
   return (
     <div className="bg-card border rounded-lg p-4 hover:shadow-md transition-shadow">
-      <div className="flex items-start gap-4">
+      <div className="flex items-start gap-4 relative">
         {/* Profile Picture */}
         <Avatar className="h-12 w-12 cursor-pointer" onClick={handleViewProfile}>
           <AvatarImage src={user.avatar_url} alt={user.display_name} />
@@ -120,11 +127,11 @@ export function UserCard({
         </Avatar>
 
         {/* User Info */}
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 pointer-events-none">
           <div className="flex items-center gap-2 mb-1">
             <button
               onClick={handleViewProfile}
-              className="font-semibold text-foreground hover:text-primary transition-colors cursor-pointer truncate"
+              className="font-semibold text-foreground hover:text-primary transition-colors cursor-pointer truncate pointer-events-auto"
             >
               {user.display_name}
             </button>
@@ -148,7 +155,7 @@ export function UserCard({
         </div>
 
         {/* Actions */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 pointer-events-auto relative z-10">
           {/* Message Button - visible for non-self users */}
           {currentUserId !== user.user_id && (
             <Button 
