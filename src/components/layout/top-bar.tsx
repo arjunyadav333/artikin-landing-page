@@ -19,7 +19,7 @@ export function TopBar() {
   const { user, signOut } = useAuth();
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 w-full border-b border-border/50 bg-background/80 backdrop-blur-xl">
+    <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/80 backdrop-blur-xl">
       <div className="flex h-16 items-center gap-4 px-4 lg:px-6">
         {/* Mobile Layout: Profile, Artikin, Notifications, Hamburger */}
         <div className="flex md:hidden items-center justify-between w-full">
