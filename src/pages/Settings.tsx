@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Settings as SettingsIcon, Shield, LogOut, Trash2, Undo2 } from "lucide-react";
+import { ArrowLeft, Shield, LogOut, Trash2, Undo2 } from "lucide-react";
 
 export default function Settings() {
   const navigate = useNavigate();
@@ -168,10 +168,17 @@ export default function Settings() {
       <div className="max-w-4xl mx-auto p-6 space-y-8">
         {/* Header */}
         <div className="flex items-center gap-3 pb-6 border-b border-border">
-          <SettingsIcon className="h-8 w-8 text-primary" />
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate(-1)}
+            className="h-9 w-9"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Settings</h1>
-            <p className="text-muted-foreground">Manage your account preferences and privacy</p>
+            <h1 className="text-xl font-bold text-foreground">Settings</h1>
+            <p className="text-sm text-muted-foreground">Manage your account preferences and privacy</p>
           </div>
         </div>
 
