@@ -262,7 +262,7 @@ export default function Settings() {
             {/* Delete Account */}
             <div className="flex items-center justify-between p-4 rounded-lg border border-destructive/20 bg-destructive/5">
               <div className="flex items-center gap-3">
-                <Trash2 className="h-5 w-5 text-destructive" />
+                <Trash2 className="h-10 w-10 text-destructive" />
                 <div>
                   <p className="font-medium text-destructive">Delete</p>
                   <p className="text-sm text-muted-foreground">Permanently delete your account and all data</p>
