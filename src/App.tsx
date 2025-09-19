@@ -13,6 +13,7 @@ import NotFound from "./pages/NotFound";
 const ManageApplicants = lazy(() => import("./pages/ManageApplicants"));
 
 // Lazy load components for better performance and code splitting
+const Index = lazy(() => import("./pages/Index"));
 const Home = lazy(() => import("./pages/Home"));
 const Opportunities = lazy(() => import("./pages/Opportunities"));
 const OpportunityDetailPage = lazy(() => import("./pages/OpportunityDetailPage"));
@@ -85,11 +86,30 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 const AppRoutes = () => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
 
   return (
     <BrowserRouter>
       <Routes>
+        {/* Landing Page for unauthenticated users */}
+        <Route path="/" element={
+          loading ? (
+            <DefaultLoader />
+          ) : user ? (
+            <ProtectedRoute>
+              <AppLayout>
+                <Suspense fallback={<HomeLoader />}>
+                  <Home />
+                </Suspense>
+              </AppLayout>
+            </ProtectedRoute>
+          ) : (
+            <Suspense fallback={<DefaultLoader />}>
+              <Index />
+            </Suspense>
+          )
+        } />
+        
         {/* Auth Routes (No Layout) */}
         <Route path="/auth" element={
           <Suspense fallback={<DefaultLoader />}>
@@ -118,15 +138,6 @@ const AppRoutes = () => {
         } />
         
         {/* App Routes (With Layout) */}
-        <Route path="/" element={
-          <ProtectedRoute>
-            <AppLayout>
-              <Suspense fallback={<HomeLoader />}>
-                <Home />
-              </Suspense>
-            </AppLayout>
-          </ProtectedRoute>
-        } />
         <Route path="/home" element={
           <ProtectedRoute>
             <AppLayout>
