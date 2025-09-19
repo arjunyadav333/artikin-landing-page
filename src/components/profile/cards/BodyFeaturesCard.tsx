@@ -48,33 +48,7 @@ export function BodyFeaturesCard({ profile, isOwnProfile }: BodyFeaturesCardProp
     weightUnit: 'kg' as 'kg' | 'lb'
   });
 
-  // Mock body features data - current and historical
-  const [bodyFeatures, setBodyFeatures] = useState<BodyFeatures[]>([
-    {
-      id: '1',
-      eyeColor: 'Brown',
-      hairColor: 'Black',
-      skinColor: 'Medium',
-      height: 175,
-      heightUnit: 'cm',
-      weight: 68,
-      weightUnit: 'kg',
-      recordedAt: new Date(),
-      isPrimary: true
-    },
-    {
-      id: '2',
-      eyeColor: 'Brown',
-      hairColor: 'Brown', // Changed hair color
-      skinColor: 'Medium',
-      height: 175,
-      heightUnit: 'cm',
-      weight: 70, // Previous weight
-      weightUnit: 'kg',
-      recordedAt: new Date('2023-06-01'),
-      isPrimary: false
-    }
-  ]);
+  const [bodyFeatures, setBodyFeatures] = useState<BodyFeatures[]>([]);
 
   const primaryFeatures = bodyFeatures.find(f => f.isPrimary);
   const historicalFeatures = bodyFeatures.filter(f => !f.isPrimary).sort(
