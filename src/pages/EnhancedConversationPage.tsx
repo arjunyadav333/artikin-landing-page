@@ -154,7 +154,7 @@ const EnhancedConversationPage = () => {
   return (
     <div className="mobile-conversation-layout bg-background">
       {/* Chat Header - Sticky at top */}
-      <div className="conversation-header flex-shrink-0 p-4 border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80 shadow-sm">
+      <div className="conversation-header flex-shrink-0 p-4 pt-9 border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80 shadow-sm">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <Button 
@@ -240,7 +240,7 @@ const EnhancedConversationPage = () => {
       </div>
 
       {/* Message Input - Sticky at bottom */}
-      <div className="conversation-input flex-shrink-0 p-4 border-t bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80 shadow-sm">
+      <div className="conversation-input flex-shrink-0 p-4 pb-9 border-t bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80 shadow-sm">
         <EnhancedMessageInput
           ref={inputRef}
           value={draftText}
