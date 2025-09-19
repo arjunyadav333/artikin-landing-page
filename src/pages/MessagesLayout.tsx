@@ -240,8 +240,15 @@ const MessagesLayout = () => {
 
   return (
     <div className="h-screen bg-background flex">
-      {/* Left Sidebar - Chat List */}
-      <div className="w-80 border-r bg-card flex flex-col">
+      {/* Mobile: Show only chat list or conversation */}
+      {/* Desktop: Show both side by side */}
+      
+      {/* Chat List - Hidden on mobile when conversation is selected */}
+      <div className={cn(
+        "bg-card flex flex-col border-r",
+        "md:w-80", // Fixed width on desktop
+        chatId ? "hidden md:flex" : "w-full md:w-80" // Full width on mobile when no chat selected, hidden when chat is selected
+      )}>
         <div className="p-4 border-b">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-2">
@@ -301,7 +308,7 @@ const MessagesLayout = () => {
                 <div 
                   className={cn(
                     "flex items-center space-x-3 p-4 cursor-pointer hover:bg-muted transition-colors group",
-                    chatId === conv.id && "bg-muted"
+                    chatId === conv.id && "bg-muted md:bg-muted"
                   )}
                   onClick={() => handleConversationClick(conv.id)}
                 >
@@ -396,10 +403,13 @@ const MessagesLayout = () => {
         </ScrollArea>
       </div>
 
-      {/* Right Side - Conversation View */}
-      <div className="flex-1 flex flex-col">
+      {/* Conversation View - Full screen on mobile, right side on desktop */}
+      <div className={cn(
+        "flex flex-col bg-background",
+        chatId ? "flex-1" : "hidden md:flex md:flex-1" // Show when chat selected, hidden on mobile when no chat
+      )}>
         {!chatId ? (
-          // No conversation selected
+          // No conversation selected (Desktop only)
           <div className="flex-1 flex items-center justify-center text-muted-foreground">
             <div className="text-center">
               <div className="h-16 w-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
@@ -429,6 +439,15 @@ const MessagesLayout = () => {
             <div className="flex-shrink-0 p-4 border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80 shadow-sm">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
+                  {/* Back button for mobile */}
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => navigate('/messages')}
+                    className="h-8 w-8 p-0 md:hidden"
+                  >
+                    <ArrowLeft className="h-4 w-4" />
+                  </Button>
                   <Avatar className="h-9 w-9">
                     <AvatarImage 
                       src={conversation.other_participant?.avatar_url} 
