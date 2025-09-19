@@ -84,6 +84,12 @@ export function TopBar() {
 
           {/* Desktop Actions */}
           <div className="flex items-center gap-2">
+            {/* Notifications */}
+            <Button variant="ghost" size="sm" className="relative rounded-full h-9 w-9">
+              <Bell className="h-4 w-4" />
+              <span className="absolute -top-1 -right-1 h-3 w-3 bg-destructive rounded-full text-xs"></span>
+            </Button>
+
             {/* Create Post Button */}
             <Link to="/create">
               <Button 
@@ -94,45 +100,6 @@ export function TopBar() {
                 <span className="hidden sm:inline">Create</span>
               </Button>
             </Link>
-
-            {/* Notifications */}
-            <Button variant="ghost" size="sm" className="relative rounded-full h-9 w-9">
-              <Bell className="h-4 w-4" />
-              <span className="absolute -top-1 -right-1 h-3 w-3 bg-destructive rounded-full text-xs"></span>
-            </Button>
-
-            {/* Desktop Profile Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src={user?.user_metadata?.avatar_url} />
-                    <AvatarFallback className="text-xs">
-                      {user?.user_metadata?.full_name?.[0] || user?.email?.[0]?.toUpperCase() || 'U'}
-                    </AvatarFallback>
-                  </Avatar>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56 bg-background/95 backdrop-blur-lg border border-border/50" align="end" forceMount>
-                <DropdownMenuItem asChild>
-                  <Link to="/profile/me" className="flex items-center">
-                    <User className="mr-2 h-4 w-4" />
-                    <span>Profile</span>
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/settings" className="flex items-center">
-                    <Settings className="mr-2 h-4 w-4" />
-                    <span>Settings</span>
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={signOut}>
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>Sign out</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
           </div>
         </div>
       </div>
