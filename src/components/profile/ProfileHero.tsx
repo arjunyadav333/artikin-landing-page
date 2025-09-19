@@ -14,7 +14,8 @@ import {
   Shield,
   Mail,
   ExternalLink,
-  Loader2
+  Loader2,
+  ArrowLeft
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -52,6 +53,7 @@ export function ProfileHero({
   followers = [],
   following = []
 }: ProfileHeroProps) {
+  const navigate = useNavigate();
   const { startDirectMessage, isLoading: isMessageLoading } = useDirectMessage();
 
   const handleExportContact = () => {
@@ -89,6 +91,18 @@ END:VCARD`;
           <div className="w-full h-full bg-gradient-to-r from-gray-100 to-gray-200"></div>
         )}
         
+        {/* Back Button */}
+        <div className="absolute top-4 left-4">
+          <Button 
+            variant="outline" 
+            size="icon" 
+            onClick={() => navigate(-1)}
+            className="bg-white/95 backdrop-blur-sm border-gray-200 shadow-sm rounded-lg hover:bg-white"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+        </div>
+
         {/* Actions Menu */}
         <div className="absolute top-4 right-4">
           <DropdownMenu>
