@@ -244,7 +244,17 @@ const MessagesLayout = () => {
       <div className="w-80 border-r bg-card flex flex-col">
         <div className="p-4 border-b">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold">Messages</h3>
+            <div className="flex items-center space-x-2">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => navigate('/')}
+                className="h-8 w-8 p-0"
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+              <h3 className="font-semibold">Messages</h3>
+            </div>
             <Button 
               variant="ghost" 
               size="sm" 
