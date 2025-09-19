@@ -59,7 +59,7 @@ export const AppLayout = memo(({ children }: AppLayoutProps) => {
             </div>
           )}
           
-          <main className="flex-1 overflow-auto">
+          <main className="flex-1 overflow-auto pt-16">
             {contentStructure}
           </main>
         </div>
