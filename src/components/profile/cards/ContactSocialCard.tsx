@@ -40,11 +40,8 @@ export function ContactSocialCard({ profile, isOwnProfile }: ContactSocialCardPr
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [newLink, setNewLink] = useState({ type: '', url: '', label: '' });
   
-  // Mock social links - replace with actual profile data
-  const [socialLinks, setSocialLinks] = useState<SocialLink[]>([
-    { id: '1', type: 'instagram', url: 'https://instagram.com/johndoe' },
-    { id: '2', type: 'website', url: 'https://johndoe.com' },
-  ]);
+  // Empty social links - users need to add their own
+  const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
 
   const handleAddLink = () => {
     if (newLink.type && newLink.url) {
@@ -79,7 +76,7 @@ export function ContactSocialCard({ profile, isOwnProfile }: ContactSocialCardPr
   return (
     <Card className="bg-white rounded-2xl shadow-sm">
       <CardHeader className="flex flex-row items-center justify-between pb-4">
-        <CardTitle className="text-xl font-semibold">Contact & Social</CardTitle>
+        <CardTitle className="text-xl font-semibold">Social</CardTitle>
         {isOwnProfile && (
           <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
             <DialogTrigger asChild>
@@ -160,17 +157,17 @@ export function ContactSocialCard({ profile, isOwnProfile }: ContactSocialCardPr
                 key={link.id}
                 className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:border-primary/30 transition-colors"
               >
-                <div className="flex items-center gap-3">
-                  <span className="text-lg">{getPlatformIcon(link.type)}</span>
-                  <div className="min-w-0 flex-1">
-                    <div className="font-medium text-gray-800 truncate">
-                      {link.label || getPlatformLabel(link.type)}
-                    </div>
-                    <div className="text-sm text-gray-500 truncate">
-                      {link.url}
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <span className="text-lg flex-shrink-0">{getPlatformIcon(link.type)}</span>
+                    <div className="min-w-0 flex-1">
+                      <div className="font-medium text-gray-800 truncate">
+                        {link.label || getPlatformLabel(link.type)}
+                      </div>
+                      <div className="text-sm text-gray-500 truncate break-all">
+                        {link.url}
+                      </div>
                     </div>
                   </div>
-                </div>
                 
                 <div className="flex items-center gap-2">
                   <Button

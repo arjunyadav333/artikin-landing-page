@@ -35,33 +35,8 @@ export function MediaGallery({
     file: null as File | null
   });
 
-  // Mock portfolio items
-  const [mediaItems, setMediaItems] = useState<MediaItem[]>([
-    {
-      id: '1',
-      url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500'
-    },
-    {
-      id: '2',
-      url: 'https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=500'
-    },
-    {
-      id: '3',
-      url: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=500'
-    },
-    {
-      id: '4',
-      url: 'https://images.unsplash.com/photo-1570126646281-5ec4f8e0ee06?w=500'
-    },
-    {
-      id: '5',
-      url: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=500'
-    },
-    {
-      id: '6',
-      url: 'https://images.unsplash.com/photo-1542038784456-1ea8e935640e?w=500'
-    }
-  ]);
+  // Empty media items - users need to add their own
+  const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -168,7 +143,7 @@ export function MediaGallery({
     <>
       <Card className="bg-white rounded-2xl shadow-sm">
         <CardHeader className="flex flex-row items-center justify-between pb-4">
-          <CardTitle className="text-xl font-semibold">Portfolio & Media</CardTitle>
+          <CardTitle className="text-xl font-semibold">Media</CardTitle>
           {isOwnProfile && (
             <Dialog open={isUploadModalOpen} onOpenChange={setIsUploadModalOpen}>
               <DialogTrigger asChild>

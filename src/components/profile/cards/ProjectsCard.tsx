@@ -47,32 +47,8 @@ export function ProjectsCard({ profile, isOwnProfile }: ProjectsCardProps) {
     attachmentUrl: ''
   });
 
-  // Mock projects data
-  const [projects, setProjects] = useState<Project[]>([
-    {
-      id: '1',
-      title: 'Romeo and Juliet',
-      role: 'Romeo',
-      description: 'Lead role in Shakespeare\'s classic tragedy. Performed at the Metropolitan Theatre for 3 months.',
-      startDate: new Date('2023-06-01'),
-      endDate: new Date('2023-08-31'),
-      links: ['https://mettheatre.com/romeo-juliet'],
-      media: [
-        { id: '1', url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500' },
-        { id: '2', url: 'https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=500' }
-      ]
-    },
-    {
-      id: '2',
-      title: 'Commercial Photography Campaign',
-      role: 'Model',
-      description: 'Fashion modeling for summer collection campaign. Featured in print and digital advertisements.',
-      startDate: new Date('2023-04-15'),
-      endDate: new Date('2023-05-15'),
-      links: ['https://fashionbrand.com/campaign'],
-      media: []
-    }
-  ]);
+  // Empty projects - users need to add their own
+  const [projects, setProjects] = useState<Project[]>([]);
 
   const handleAddProject = async () => {
     if (newProject.title && newProject.description) {

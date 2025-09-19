@@ -45,28 +45,8 @@ export function CertificatesCard({ profile, isOwnProfile }: CertificatesCardProp
     externalLink: ''
   });
 
-  // Mock certificates data
-  const [certificates, setCertificates] = useState<Certificate[]>([
-    {
-      id: '1',
-      title: 'Advanced Acting Techniques',
-      issuer: 'National Theatre Academy',
-      date: new Date('2023-08-15'),
-      description: 'Completed intensive 6-month program in method acting and character development.',
-      externalLink: 'https://certificate-verify.com/abc123',
-      media: [
-        { id: '1', url: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=500' }
-      ]
-    },
-    {
-      id: '2',
-      title: 'Voice & Diction Certification',
-      issuer: 'Speech & Drama Institute',
-      date: new Date('2023-03-20'),
-      description: 'Professional certification in voice modulation and clear speech for performers.',
-      media: []
-    }
-  ]);
+  // Empty certificates - users need to add their own
+  const [certificates, setCertificates] = useState<Certificate[]>([]);
 
   const handleAddCertificate = async () => {
     if (newCertificate.title && newCertificate.issuer) {

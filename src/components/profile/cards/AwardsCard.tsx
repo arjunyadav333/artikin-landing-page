@@ -39,26 +39,8 @@ export function AwardsCard({ profile, isOwnProfile }: AwardsCardProps) {
     externalLink: ''
   });
 
-  // Mock awards data
-  const [awards, setAwards] = useState<Award[]>([
-    {
-      id: '1',
-      title: 'Best Supporting Actor',
-      year: 2023,
-      description: 'Regional Theatre Awards for outstanding performance in "The Glass Menagerie".',
-      externalLink: 'https://theatreawards.com/winners/2023',
-      media: [
-        { id: '1', url: 'https://images.unsplash.com/photo-1570126646281-5ec4f8e0ee06?w=500' }
-      ]
-    },
-    {
-      id: '2',
-      title: 'Excellence in Performance',
-      year: 2022,
-      description: 'Drama Academy recognition for consistent high-quality performances.',
-      media: []
-    }
-  ]);
+  // Empty awards - users need to add their own
+  const [awards, setAwards] = useState<Award[]>([]);
 
   const handleAddAward = async () => {
     if (newAward.title && newAward.year) {

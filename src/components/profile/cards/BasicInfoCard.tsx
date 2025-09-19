@@ -50,9 +50,9 @@ export function BasicInfoCard({ profile, isOwnProfile }: BasicInfoCardProps) {
     contact_email: profile.contact_email || '',
     artform: profile.artform || '',
     organization_type: profile.organization_type || '',
-    // Mock DOB - replace with actual
-    dob: new Date('1990-01-01'),
-    languages: ['English', 'Hindi'] // Mock data
+    // Empty DOB and languages - user needs to add
+    dob: undefined as Date | undefined,
+    languages: [] as string[]
   });
 
   const handleSave = async () => {
@@ -250,10 +250,12 @@ export function BasicInfoCard({ profile, isOwnProfile }: BasicInfoCardProps) {
               <p className="text-base text-gray-800">{profile.location || 'Not provided'}</p>
             </div>
 
+            {formData.dob && (
             <div>
               <h4 className="text-sm text-gray-600 font-medium mb-1">Age</h4>
               <p className="text-base text-gray-800">{calculateAge(formData.dob)} years old</p>
             </div>
+            )}
 
             <div>
               <h4 className="text-sm text-gray-600 font-medium mb-1">Email</h4>
@@ -279,6 +281,7 @@ export function BasicInfoCard({ profile, isOwnProfile }: BasicInfoCardProps) {
             </div>
             )}
 
+            {formData.languages.length > 0 && (
             <div className="md:col-span-2">
               <h4 className="text-sm text-gray-600 font-medium mb-2">Languages</h4>
               <div className="flex flex-wrap gap-2">
@@ -292,37 +295,9 @@ export function BasicInfoCard({ profile, isOwnProfile }: BasicInfoCardProps) {
                 ))}
               </div>
             </div>
-
-            {/* Body Features - Only for Actors & Models */}
-            {profile.role === 'artist' && (profile.artform === 'actor' || profile.artform === 'model') && (
-              <div className="md:col-span-2 space-y-4">
-                <div className="border-t pt-6">
-                  <h4 className="text-sm text-gray-600 font-medium mb-4">Body Features</h4>
-                  <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                    <div className="text-center p-3 bg-gray-50 rounded-lg">
-                      <div className="text-sm text-gray-600 mb-1">Eyes</div>
-                      <div className="font-medium text-gray-800">Brown</div>
-                    </div>
-                    <div className="text-center p-3 bg-gray-50 rounded-lg">
-                      <div className="text-sm text-gray-600 mb-1">Hair</div>
-                      <div className="font-medium text-gray-800">Black</div>
-                    </div>
-                    <div className="text-center p-3 bg-gray-50 rounded-lg">
-                      <div className="text-sm text-gray-600 mb-1">Skin</div>
-                      <div className="font-medium text-gray-800">Medium</div>
-                    </div>
-                    <div className="text-center p-3 bg-gray-50 rounded-lg">
-                      <div className="text-sm text-gray-600 mb-1">Height</div>
-                      <div className="font-medium text-gray-800">175 cm</div>
-                    </div>
-                    <div className="text-center p-3 bg-gray-50 rounded-lg">
-                      <div className="text-sm text-gray-600 mb-1">Weight</div>
-                      <div className="font-medium text-gray-800">68 kg</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
             )}
+
+            {/* Body Features - Only for Actors & Models - Empty by default, users need to add */}
           </div>
         )}
       </CardContent>
