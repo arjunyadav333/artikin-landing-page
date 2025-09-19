@@ -264,7 +264,7 @@ export default function Settings() {
               <div className="flex items-center gap-3">
                 <Trash2 className="h-5 w-5 text-destructive" />
                 <div>
-                  <p className="font-medium text-destructive">Delete Account</p>
+                  <p className="font-medium text-destructive">Delete</p>
                   <p className="text-sm text-muted-foreground">Permanently delete your account and all data</p>
                 </div>
               </div>
@@ -275,7 +275,7 @@ export default function Settings() {
                     variant="destructive" 
                     onClick={() => setDeleteStep('confirm')}
                   >
-                    Delete Account
+                    Delete 
                   </Button>
                 </AlertDialogTrigger>
                 
