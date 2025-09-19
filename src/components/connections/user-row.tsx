@@ -194,7 +194,7 @@ export function UserRow({
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="sm" className="h-9 w-9 p-0 hover:bg-muted rounded-xl">
-                    <Morevertical className="h-4 w-4 text-black-400" />
+                    <MoreHorizontal className="h-4 w-4 text-sky-400" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48 bg-popover border shadow-lg rounded-xl z-50">
