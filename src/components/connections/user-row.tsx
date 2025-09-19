@@ -198,7 +198,7 @@ export function UserRow({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48 bg-popover border shadow-lg rounded-xl z-50">
-                  <DropdownMenuItem onClick={handleMessage} className="flex items-center">
+                  <DropdownMenuItem onClick={handleMessage} className="flex items-center hover:bg-sky-100 focus:bg-sky-100 hover:text-sky-900 focus:text-sky-900">
                     {isMessageLoading(user.user_id) ? (
                       <Loader2 className="h-4 w-4 mr-3 animate-spin" />
                     ) : (
@@ -209,7 +209,7 @@ export function UserRow({
                   {isFollower && onRemoveFollower && (
                     <DropdownMenuItem 
                       onClick={handleRemoveFollower} 
-                      className="text-destructive focus:text-destructive"
+                      className="text-destructive focus:text-destructive hover:bg-sky-100 focus:bg-sky-100"
                     >
                       <UserX className="h-4 w-4 mr-3" />
                       Remove Follower
@@ -217,14 +217,14 @@ export function UserRow({
                   )}
                   <DropdownMenuItem 
                     onClick={handleBlock} 
-                    className="text-destructive focus:text-destructive"
+                    className="text-destructive focus:text-destructive hover:bg-sky-100 focus:bg-sky-100"
                   >
                     <UserX className="h-4 w-4 mr-3" />
                     Block
                   </DropdownMenuItem>
                   <DropdownMenuItem 
                     onClick={handleReport} 
-                    className="text-destructive focus:text-destructive"
+                    className="text-destructive focus:text-destructive hover:bg-sky-100 focus:bg-sky-100"
                   >
                     <Flag className="h-4 w-4 mr-3" />
                     Report
