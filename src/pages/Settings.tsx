@@ -250,13 +250,32 @@ export default function Settings() {
                   <p className="text-sm text-muted-foreground">Sign out of your account</p>
                 </div>
               </div>
-              <Button 
-                variant="outline" 
-                onClick={handleLogout}
-                className="hover:bg-muted"
-              >
-                Sign Out
-              </Button>
+              
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button 
+                    variant="outline" 
+                    className="hover:bg-muted"
+                  >
+                    Sign Out
+                  </Button>
+                </AlertDialogTrigger>
+                
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Sign Out?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Are you sure you want to sign out of your account?
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleLogout}>
+                      Sign Out
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
 
             {/* Delete Account */}
