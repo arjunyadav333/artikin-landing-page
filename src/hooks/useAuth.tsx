@@ -1,7 +1,6 @@
 import { createContext, useContext, useEffect, useState, useMemo, useCallback } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 
 interface AuthContextType {
   user: User | null;
@@ -32,7 +31,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
 
   // Memoize auth functions to prevent re-renders
   const setAuthState = useCallback((newSession: Session | null) => {
@@ -87,30 +85,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
       });
 
-      if (error) {
-        toast({
-          title: "Sign up failed",
-          description: error.message,
-          variant: "destructive"
-        });
-      } else {
-        toast({
-          title: "Check your email",
-          description: "We've sent you a confirmation link to complete your registration."
-        });
-      }
+      // Remove toast notifications
 
       return { error };
     } catch (error: any) {
-      const errorMessage = error.message || 'An unexpected error occurred';
-      toast({
-        title: "Sign up failed",
-        description: errorMessage,
-        variant: "destructive"
-      });
       return { error };
     }
-  }, [toast]);
+  }, []);
 
   const signIn = useCallback(async (email: string, password: string) => {
     try {
@@ -119,48 +100,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         password
       });
 
-      if (error) {
-        toast({
-          title: "Sign in failed",
-          description: error.message,
-          variant: "destructive"
-        });
-      } else {
-        toast({
-          title: "Welcome back!",
-          description: "You've successfully signed in."
-        });
-      }
+      // Remove toast notifications
 
       return { error };
     } catch (error: any) {
-      const errorMessage = error.message || 'An unexpected error occurred';
-      toast({
-        title: "Sign in failed",
-        description: errorMessage,
-        variant: "destructive"
-      });
       return { error };
     }
-  }, [toast]);
+  }, []);
 
   const signOut = useCallback(async () => {
     try {
       await supabase.auth.signOut();
       // Use window.location for navigation since we're outside Router context
       window.location.href = '/';
-      toast({
-        title: "Signed out",
-        description: "You've been successfully signed out."
-      });
     } catch (error: any) {
-      toast({
-        title: "Error signing out",
-        description: error.message || 'An unexpected error occurred',
-        variant: "destructive"
-      });
+      // Silent error handling
     }
-  }, [toast]);
+  }, []);
 
   // Memoize context value to prevent unnecessary re-renders
   const value = useMemo(() => ({
