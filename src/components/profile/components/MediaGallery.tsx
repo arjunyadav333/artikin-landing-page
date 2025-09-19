@@ -247,16 +247,8 @@ export function MediaGallery({
         
         <CardContent className="p-4 md:p-6 pt-0">
           {mediaItems.length > 0 ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 max-h-80 overflow-y-auto">
-              {mediaItems.slice(0, 12).map((item, index) => renderThumbnail(item, index))}
-              {mediaItems.length > 12 && (
-                <div className="aspect-square bg-gray-100 rounded flex items-center justify-center cursor-pointer hover:bg-gray-200 transition-colors">
-                  <div className="text-center">
-                    <Plus className="h-6 w-6 mx-auto mb-1 text-gray-400" />
-                    <p className="text-xs text-gray-500">+{mediaItems.length - 12}</p>
-                  </div>
-                </div>
-              )}
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2">
+              {mediaItems.map((item, index) => renderThumbnail(item, index))}
             </div>
           ) : (
             <div className="text-center py-8 text-gray-500">

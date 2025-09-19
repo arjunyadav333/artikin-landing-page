@@ -60,8 +60,8 @@ export function ProfileTabs({
             </TabsList>
           </div>
 
-          {/* Tab Content with proper height constraints */}
-          <div className="pb-6 md:pb-8 min-h-[calc(100vh-300px)] max-h-screen overflow-y-auto">
+          {/* Tab Content - removed height constraints and scrolling */}
+          <div className="pb-6 md:pb-8">
             <TabsContent value="posts" className="space-y-4 md:space-y-6 m-0">
               <PostsGrid posts={posts} isLoading={postsLoading} />
             </TabsContent>
