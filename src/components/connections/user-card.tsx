@@ -57,7 +57,9 @@ export function UserCard({
     startDirectMessage(user.user_id);
   };
 
-  const handleFollow = () => {
+  const handleFollow = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     followUser.mutate({
       targetUserId: user.user_id,
       isCurrentlyFollowing: connectionStatus?.isFollowing || false

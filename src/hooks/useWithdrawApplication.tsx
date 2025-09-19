@@ -34,10 +34,6 @@ export const useWithdrawApplication = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['opportunities'] });
       queryClient.invalidateQueries({ queryKey: ['userApplications'] });
-      toast({
-        title: "Application withdrawn",
-        description: "Your application has been successfully withdrawn."
-      });
     },
     onError: (error: any) => {
       toast({

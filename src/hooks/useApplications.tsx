@@ -117,10 +117,6 @@ export const useUpdateApplicationStatus = () => {
     },
     onSuccess: (_, { status }) => {
       queryClient.invalidateQueries({ queryKey: ['opportunityApplications'] });
-      toast({
-        title: `Application ${status}`,
-        description: `The application has been ${status}.`
-      });
     },
     onError: (error: any) => {
       toast({
@@ -148,10 +144,6 @@ export const useDeleteApplication = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['userApplications'] });
       queryClient.invalidateQueries({ queryKey: ['opportunities'] });
-      toast({
-        title: "Application removed",
-        description: "Your application has been successfully removed."
-      });
     },
     onError: (error: any) => {
       toast({

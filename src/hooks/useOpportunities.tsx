@@ -214,10 +214,7 @@ export const useApplyToOpportunity = () => {
       return { previousOpportunities };
     },
     onSuccess: () => {
-      toast({
-        title: "Application submitted",
-        description: "Your application has been successfully submitted."
-      });
+      // Visual feedback is provided through button state changes
     },
     onError: (error: any, variables, context) => {
       if (context?.previousOpportunities) {

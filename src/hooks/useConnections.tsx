@@ -272,13 +272,6 @@ export const useFollowUser = () => {
       queryClient.invalidateQueries({ queryKey: ['connectionStatus'] });
       queryClient.invalidateQueries({ queryKey: ['posts'] });
       queryClient.invalidateQueries({ queryKey: ['homeFeed'] });
-      
-      toast({
-        title: isCurrentlyFollowing ? "Unfollowed" : "Following",
-        description: isCurrentlyFollowing 
-          ? "You are no longer following this user." 
-          : "You are now following this user."
-      });
     },
     onError: (error: any, variables, context) => {
       // Rollback optimistic updates
