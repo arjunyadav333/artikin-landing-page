@@ -114,7 +114,7 @@ const Create = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Mobile-first responsive layout */}
-      <div className="w-full max-w-2xl mx-auto px-4 py-6 lg:px-6 pb-24">
+      <div className="w-full max-w-2xl mx-auto px-4 py-6 lg:px-6">
         {/* Header */}
         <div className="mb-6">
           <div className="flex items-center space-x-3 mb-2">
@@ -268,7 +268,7 @@ const Create = () => {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex justify-between pt-4 border-t border-border relative z-50 bg-background">
+            <div className="flex justify-between pt-4 border-t border-border">
               <Button 
                 variant="outline" 
                 onClick={() => navigate("/home")}
