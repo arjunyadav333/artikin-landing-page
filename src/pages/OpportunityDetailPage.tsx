@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { LinkRenderer } from "@/components/ui/link-renderer";
 import { ApplyJobModal } from "@/components/opportunities/apply-job-modal";
 import { ShareBottomSheet } from "@/components/ui/share-bottom-sheet";
+import { supabase } from "@/integrations/supabase/client";
 export default function OpportunityDetailPage() {
   console.log("OpportunityDetailPage rendering - Bookmark should not be referenced");
   const {
@@ -73,6 +74,33 @@ export default function OpportunityDetailPage() {
       setApplicationStatus('pending'); // Default since application_status is not in the current schema
     }
   }, [foundOpportunity]);
+
+  // Realtime subscription for opportunity updates
+  useEffect(() => {
+    if (!id) return;
+
+    const channel = supabase
+      .channel('opportunity-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'opportunities',
+          filter: `id=eq.${id}`
+        },
+        (payload) => {
+          console.log('Opportunity updated:', payload);
+          // Invalidate queries to refetch data
+          window.location.reload();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [id]);
 
   // Handlers
   const handleQuickApply = () => {
@@ -152,7 +180,10 @@ export default function OpportunityDetailPage() {
             <h3 className="font-semibold mb-3">Opportunity Details</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-muted-foreground">
               {/* Art Forms */}
-              
+              <div className="flex items-start gap-2">
+                <span className="font-medium min-w-[120px]">Art Forms:</span>
+                <span>{opportunity.art_forms_display}</span>
+              </div>
               
               {/* Experience Level */}
               <div className="flex items-start gap-2">
@@ -171,6 +202,24 @@ export default function OpportunityDetailPage() {
                 <span className="font-medium min-w-[120px]">Languages:</span>
                 <span>{opportunity.language_preference_display}</span>
               </div>
+
+              {/* Organization Name */}
+              <div className="flex items-start gap-2">
+                <span className="font-medium min-w-[120px]">Organization:</span>
+                <span>{opportunity.company}</span>
+              </div>
+
+              {/* City & State */}
+              {(foundOpportunity?.city || foundOpportunity?.state) && (
+                <div className="flex items-start gap-2">
+                  <span className="font-medium min-w-[120px]">City/State:</span>
+                  <span>
+                    {foundOpportunity?.city && foundOpportunity?.state 
+                      ? `${foundOpportunity.city}, ${foundOpportunity.state}`
+                      : foundOpportunity?.city || foundOpportunity?.state}
+                  </span>
+                </div>
+              )}
               
               {/* Location */}
               <div className="flex items-start gap-2">
