@@ -16,9 +16,12 @@ import { Plus } from "lucide-react";
 import { useCreateOpportunity } from "@/hooks/useOpportunities";
 import { OpportunityImageUpload } from "./opportunity-image-upload";
 import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 
 export function CreateOpportunityModal() {
   const [open, setOpen] = useState(false);
+  const { user } = useAuth();
+  const { toast } = useToast();
   const [formData, setFormData] = useState({
     title: "",
     company: "",
@@ -38,8 +41,6 @@ export function CreateOpportunityModal() {
     language_preference: [] as string[],
     organization_name: ""
   });
-
-  const { user } = useAuth();
 
   // Art form options
   const artFormOptions = [
@@ -77,7 +78,22 @@ export function CreateOpportunityModal() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    console.log('Form submission - Raw form data:', formData);
+    console.log('=== FORM SUBMISSION DEBUG ===');
+    console.log('Raw form data:', JSON.stringify(formData, null, 2));
+    
+    // Validate critical fields before processing
+    if (!formData.title.trim()) {
+      toast({ title: "Error", description: "Title is required", variant: "destructive" });
+      return;
+    }
+    if (!formData.description.trim()) {
+      toast({ title: "Error", description: "Description is required", variant: "destructive" });
+      return;
+    }
+    if (!formData.type) {
+      toast({ title: "Error", description: "Opportunity type is required", variant: "destructive" });
+      return;
+    }
     
     const opportunityData = {
       title: formData.title.trim(),
@@ -99,21 +115,30 @@ export function CreateOpportunityModal() {
       organization_name: formData.organization_name?.trim() || null
     };
 
-    // Validate critical fields
-    console.log('Validation check:');
-    console.log('- Title:', opportunityData.title ? '✓' : '✗ MISSING');
-    console.log('- Description:', opportunityData.description ? '✓' : '✗ MISSING');
-    console.log('- Type:', opportunityData.type ? '✓' : '✗ MISSING');
-    console.log('- Organization name:', opportunityData.organization_name ? '✓' : '✗ MISSING');
-    console.log('- Art forms:', opportunityData.art_forms ? '✓' : '✗ EMPTY');
-    console.log('- Experience level:', opportunityData.experience_level ? '✓' : '✗ EMPTY');
-
-    console.log('Form submission - Structured opportunity data being sent:', opportunityData);
+    console.log('=== PROCESSED DATA ===');
+    console.log('Opportunity data to send:', JSON.stringify(opportunityData, null, 2));
+    
+    console.log('=== FIELD VALIDATION ===');
+    console.log('✓ Title:', opportunityData.title);
+    console.log('✓ Description:', opportunityData.description ? 'Present' : '✗ MISSING');
+    console.log('✓ Type:', opportunityData.type);
+    console.log('⚠ Organization name:', opportunityData.organization_name || 'MISSING');
+    console.log('⚠ Art forms:', opportunityData.art_forms ? `${opportunityData.art_forms.length} selected` : 'EMPTY');
+    console.log('⚠ Experience level:', opportunityData.experience_level || 'EMPTY');
+    console.log('⚠ City:', opportunityData.city || 'EMPTY');
+    console.log('⚠ State:', opportunityData.state || 'EMPTY');
+    console.log('⚠ Gender preference:', opportunityData.gender_preference ? `${opportunityData.gender_preference.length} selected` : 'EMPTY');
+    console.log('⚠ Language preference:', opportunityData.language_preference ? `${opportunityData.language_preference.length} selected` : 'EMPTY');
+    console.log('⚠ Image URL:', opportunityData.image_url || 'EMPTY');
 
     try {
+      console.log('=== SENDING TO API ===');
       const result = await createOpportunity.mutateAsync(opportunityData);
-      console.log('Form submission - Success result:', result);
+      console.log('=== SUCCESS ===');
+      console.log('API result:', result);
+      
       setOpen(false);
+      // Reset form
       setFormData({
         title: "",
         company: "",
@@ -133,8 +158,19 @@ export function CreateOpportunityModal() {
         language_preference: [],
         organization_name: user?.user_metadata?.full_name || user?.user_metadata?.display_name || ""
       });
+      
+      toast({ 
+        title: "Success", 
+        description: "Opportunity posted successfully!" 
+      });
     } catch (error) {
+      console.error('=== ERROR ===');
       console.error('Error creating opportunity:', error);
+      toast({ 
+        title: "Error", 
+        description: "Failed to post opportunity. Please try again.", 
+        variant: "destructive" 
+      });
     }
   };
 
