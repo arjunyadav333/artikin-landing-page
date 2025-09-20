@@ -1,346 +1,263 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { ArrowLeft, MapPin, Calendar, Clock, Users, Eye, Building, User, Languages, Star, Share2, Edit, Trash2 } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
-import { useOpportunities, useApplyToOpportunity } from "@/hooks/useOpportunities";
-import { useOrganizationOpportunities, useDeleteOpportunity } from "@/hooks/useOrganizationOpportunities";
-import { ShareOpportunityModal } from "@/components/opportunities/share-opportunity-modal";
-import { ConfirmDeleteModal } from "@/components/opportunities/confirm-delete-modal";
-import { EditOpportunityModal } from "@/components/opportunities/edit-opportunity-modal";
+import { ArrowLeft, MapPin, Calendar, Clock, Users, Eye, DollarSign, MessageCircle, Bookmark, BookmarkCheck, Star, Share2 } from "lucide-react";
+import { useOpportunities, useApplyToOpportunity, Opportunity } from "@/hooks/useOpportunities";
+import { useOrganizationOpportunities } from "@/hooks/useOrganizationOpportunities";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { LinkRenderer } from "@/components/ui/link-renderer";
+import { ApplyJobModal } from "@/components/opportunities/apply-job-modal";
+import { ShareBottomSheet } from "@/components/ui/share-bottom-sheet";
 export default function OpportunityDetailPage() {
-  const {
-    id
-  } = useParams<{
-    id: string;
-  }>();
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const {
-    user
-  } = useAuth();
-  const {
-    toast
-  } = useToast();
-  const [shareModalOpen, setShareModalOpen] = useState(false);
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [editModalOpen, setEditModalOpen] = useState(false);
+  const { user } = useAuth();
+  const { toast } = useToast();
+  
+  // State for modals and UI
+  const [showApplyModal, setShowApplyModal] = useState(false);
+  const [showShareSheet, setShowShareSheet] = useState(false);
+  const [hasApplied, setHasApplied] = useState(false);
+  const [applicationStatus, setApplicationStatus] = useState<string>('pending');
+  const [isSaved, setIsSaved] = useState(false);
+  const [isApplying, setIsApplying] = useState(false);
 
   // Hooks
-  const {
-    data: opportunities
-  } = useOpportunities();
-  const {
-    data: organizationOpportunities
-  } = useOrganizationOpportunities();
+  const { data: opportunities } = useOpportunities();
+  const { data: organizationOpportunities } = useOrganizationOpportunities();
   const applyToOpportunity = useApplyToOpportunity();
-  const deleteOpportunity = useDeleteOpportunity();
 
-  // Find the opportunity
-  const opportunity = opportunities?.find(opp => opp.id === id) || organizationOpportunities?.find(opp => opp.id === id);
-  const isOwner = user && opportunity && opportunity.user_id === user.id;
-  const isArtist = user?.user_metadata?.role === 'artist';
+  // Find the opportunity and transform data structure
+  const foundOpportunity = opportunities?.find(opp => opp.id === id) || organizationOpportunities?.find(opp => opp.id === id);
+  
+  // Transform opportunity data to match the expected structure
+  const opportunity = foundOpportunity ? {
+    ...foundOpportunity,
+    company: foundOpportunity.organization_name || foundOpportunity.company || 'Not specified',
+    location: foundOpportunity.location || (foundOpportunity.city && foundOpportunity.state ? `${foundOpportunity.city}, ${foundOpportunity.state}` : 'Remote/Location flexible'),
+    art_form: foundOpportunity.art_forms?.[0] || 'Not specified',
+    salary_range: foundOpportunity.salary_min && foundOpportunity.salary_max 
+      ? `$${foundOpportunity.salary_min.toLocaleString()} - $${foundOpportunity.salary_max.toLocaleString()}`
+      : foundOpportunity.salary_min 
+        ? `From $${foundOpportunity.salary_min.toLocaleString()}`
+        : foundOpportunity.salary_max 
+          ? `Up to $${foundOpportunity.salary_max.toLocaleString()}`
+          : null,
+    status: 'Open', // Default status
+    requirements: [], // Empty array for now
+    views: foundOpportunity.views_count || 0,
+    saves: 0, // Not available in current schema
+    posted_by: foundOpportunity.user_id
+  } : null;
+
   useEffect(() => {
-    if (!opportunity && id) {
-      console.log('Opportunity not found:', id);
+    if (foundOpportunity) {
+      setHasApplied(foundOpportunity.user_applied || false);
+      // Handle case where application_status might not exist
+      setApplicationStatus('pending'); // Default since application_status is not in the current schema
     }
-  }, [opportunity, id]);
-  const handleBack = () => {
-    navigate("/opportunities");
+  }, [foundOpportunity]);
+
+  // Handlers
+  const handleQuickApply = () => {
+    setShowApplyModal(true);
   };
-  const handleApply = () => {
-    if (!opportunity) return;
-    applyToOpportunity.mutate({
-      opportunityId: opportunity.id
+
+  const handleSave = () => {
+    setIsSaved(!isSaved);
+    toast({
+      title: isSaved ? "Removed from saved" : "Saved successfully",
+      description: isSaved ? "Opportunity removed from your saved list" : "Opportunity added to your saved list"
     });
   };
-  const handleDelete = () => {
-    setDeleteModalOpen(true);
-  };
-  const confirmDelete = () => {
-    if (!opportunity) return;
-    deleteOpportunity.mutate(opportunity.id);
-    setDeleteModalOpen(false);
-    navigate("/opportunities");
-  };
-  const formatSalary = (min?: number, max?: number): string | null => {
-    if (!min && !max) return null;
-    if (min && max) return `$${min.toLocaleString()} - $${max.toLocaleString()}`;
-    if (min) return `From $${min.toLocaleString()}`;
-    if (max) return `Up to $${max.toLocaleString()}`;
-    return null;
-  };
-  const formatLocation = (): string => {
-    if (opportunity?.city && opportunity?.state) {
-      return `${opportunity.city}, ${opportunity.state}`;
-    }
-    if (opportunity?.location) {
-      return opportunity.location;
-    }
-    return 'Remote/Location flexible';
+
+  const handleShare = () => {
+    setShowShareSheet(true);
   };
   if (!opportunity) {
-    return <div className="min-h-screen bg-background flex items-center justify-center">
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-semibold mb-4">Opportunity Not Found</h2>
-          <Button onClick={handleBack} variant="outline">
+          <Button onClick={() => navigate('/dashboard/opportunities')} variant="outline">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Opportunities
           </Button>
         </div>
-      </div>;
+      </div>
+    );
   }
-  return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-6 max-w-4xl">
-        {/* Back button */}
-        <Button 
-          onClick={handleBack} 
-          variant="ghost" 
-          className="mb-6 hover:bg-accent"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Opportunities
+
+  return <div className="max-w-4xl mx-auto p-6 space-y-6">
+      {/* Header */}
+      <div className="flex items-center gap-4">
+        <Button variant="outline" size="sm" onClick={() => navigate('/dashboard/opportunities')}>
+          <ArrowLeft className="w-4 h-4 mr-2" />
         </Button>
+        <h1 className="text-2xl font-bold">Opportunity Details</h1>
+      </div>
 
-        {/* Main content */}
-        <Card className="overflow-hidden">
-          <CardContent className="p-0">
-            {/* Opportunity Image */}
-            {opportunity.image_url ? (
-              <div className="w-full h-64 relative overflow-hidden">
-                <img 
-                  src={opportunity.image_url} 
-                  alt={opportunity.title}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            ) : (
-              <div className="w-full h-64 bg-muted flex items-center justify-center">
-                <Building className="h-16 w-16 text-muted-foreground" />
-              </div>
-            )}
-
-            <div className="p-8 space-y-6">
-              {/* 1. Opportunity Title */}
-              <div>
-                <h1 className="text-3xl font-bold text-foreground mb-2">
-                  {opportunity.title}
-                </h1>
-              </div>
-
-              {/* 2. Organization Name */}
-              <div>
-                <h2 className="text-lg font-semibold text-muted-foreground mb-1">Organization</h2>
-                <p className="text-xl text-foreground">
-                  {opportunity.organization_name || opportunity.company || 'Not specified'}
-                </p>
-              </div>
-
-              {/* 3. Location (City, State) */}
-              <div>
-                <h3 className="text-lg font-semibold text-muted-foreground mb-1">Location</h3>
-                <p className="text-foreground flex items-center">
-                  <MapPin className="h-4 w-4 mr-2 text-primary" />
-                  {formatLocation()}
-                </p>
-              </div>
-
-              {/* 4. Art Forms */}
-              <div>
-                <h3 className="text-lg font-semibold text-muted-foreground mb-2">Art Forms</h3>
-                <div className="flex flex-wrap gap-2">
-                  {opportunity.art_forms && opportunity.art_forms.length > 0 ? (
-                    opportunity.art_forms.map((artForm, index) => (
-                      <Badge key={index} variant="secondary" className="capitalize">
-                        {artForm}
-                      </Badge>
-                    ))
-                  ) : (
-                    <span className="text-muted-foreground">Not specified</span>
-                  )}
-                </div>
-              </div>
-
-              {/* 5. Experience Level */}
-              <div>
-                <h3 className="text-lg font-semibold text-muted-foreground mb-1">Experience Level</h3>
-                <p className="text-foreground capitalize">
-                  {opportunity.experience_level || 'Not specified'}
-                </p>
-              </div>
-
-              {/* 6. Gender Preference */}
-              <div>
-                <h3 className="text-lg font-semibold text-muted-foreground mb-2">Gender Preference</h3>
-                <div className="flex flex-wrap gap-2">
-                  {opportunity.gender_preference && opportunity.gender_preference.length > 0 ? (
-                    opportunity.gender_preference.map((gender, index) => (
-                      <Badge key={index} variant="outline" className="capitalize">
-                        {gender}
-                      </Badge>
-                    ))
-                  ) : (
-                    <span className="text-muted-foreground">Not specified</span>
-                  )}
-                </div>
-              </div>
-
-              {/* 7. Language Preference */}
-              <div>
-                <h3 className="text-lg font-semibold text-muted-foreground mb-2">Language Preference</h3>
-                <div className="flex flex-wrap gap-2">
-                  {opportunity.language_preference && opportunity.language_preference.length > 0 ? (
-                    opportunity.language_preference.map((language, index) => (
-                      <Badge key={index} variant="outline" className="capitalize">
-                        {language}
-                      </Badge>
-                    ))
-                  ) : (
-                    <span className="text-muted-foreground">Not specified</span>
-                  )}
-                </div>
-              </div>
-
-              {/* 8. Application Deadline */}
-              <div>
-                <h3 className="text-lg font-semibold text-muted-foreground mb-1">Application Deadline</h3>
-                <p className="text-foreground flex items-center">
-                  <Calendar className="h-4 w-4 mr-2 text-primary" />
-                  {opportunity.deadline 
-                    ? new Date(opportunity.deadline).toLocaleDateString('en-US', { 
-                        year: 'numeric', 
-                        month: 'long', 
-                        day: 'numeric' 
-                      })
-                    : 'Not specified'
-                  }
-                </p>
-              </div>
-
-              {/* 9. Description */}
-              <div>
-                <h3 className="text-lg font-semibold text-muted-foreground mb-3">Description</h3>
-                <div className="prose prose-sm max-w-none text-foreground">
-                  <p className="whitespace-pre-wrap leading-relaxed">
-                    {opportunity.description}
-                  </p>
-                </div>
-              </div>
-
-              {/* Additional Info */}
-              <div className="border-t pt-6 space-y-4">
-                {/* Salary Range */}
-                {formatSalary(opportunity.salary_min, opportunity.salary_max) && (
-                  <div>
-                    <h3 className="text-lg font-semibold text-muted-foreground mb-1">Salary Range</h3>
-                    <p className="text-foreground">
-                      {formatSalary(opportunity.salary_min, opportunity.salary_max)}
-                    </p>
-                  </div>
-                )}
-
-                {/* Job Type */}
-                <div>
-                  <h3 className="text-lg font-semibold text-muted-foreground mb-1">Job Type</h3>
-                  <Badge variant="secondary" className="capitalize">
-                    {opportunity.type}
-                  </Badge>
-                </div>
-
-                {/* Stats */}
-                <div className="flex items-center gap-6 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-2">
-                    <Eye className="h-4 w-4" />
-                    <span>{opportunity.views_count || 0} views</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Users className="h-4 w-4" />
-                    <span>{opportunity.applications_count || 0} applications</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-4 w-4" />
-                    <span>Posted {formatDistanceToNow(new Date(opportunity.created_at))} ago</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="border-t pt-6">
-                <div className="flex flex-wrap gap-3">
-                  {isOwner ? (
-                    <>
-                      <Button onClick={() => setEditModalOpen(true)} className="flex-1 sm:flex-none">
-                        <Edit className="h-4 w-4 mr-2" />
-                        Edit Opportunity
-                      </Button>
-                      <Button 
-                        onClick={handleDelete} 
-                        variant="destructive" 
-                        className="flex-1 sm:flex-none"
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Delete
-                      </Button>
-                    </>
-                  ) : (
-                    isArtist && (
-                      <Button 
-                        onClick={handleApply}
-                        disabled={applyToOpportunity.isPending || opportunity.user_applied}
-                        className="flex-1 sm:flex-none"
-                      >
-                        {applyToOpportunity.isPending 
-                          ? 'Applying...' 
-                          : opportunity.user_applied 
-                            ? 'Already Applied' 
-                            : 'Apply Now'
-                        }
-                      </Button>
-                    )
-                  )}
-                  
-                  <Button 
-                    onClick={() => setShareModalOpen(true)} 
-                    variant="outline"
-                    className="flex-1 sm:flex-none"
-                  >
-                    <Share2 className="h-4 w-4 mr-2" />
-                    Share
-                  </Button>
-                </div>
+      {/* Main Content */}
+      <Card>
+        <CardHeader>
+          <div className="flex justify-between items-start">
+            <div className="space-y-2">
+              <CardTitle className="text-2xl">{opportunity.title}</CardTitle>
+              <p className="text-xl text-primary font-medium">{opportunity.company}</p>
+              <div className="flex items-center gap-4 text-muted-foreground">
+                {opportunity.location && <div className="flex items-center gap-1">
+                    <MapPin className="w-4 h-4" />
+                    <span>{opportunity.location}</span>
+                  </div>}
+                {opportunity.salary_range && <div className="flex items-center gap-1">
+                    <DollarSign className="w-4 h-4" />
+                    <span>{opportunity.salary_range}</span>
+                  </div>}
+                {opportunity.deadline && <div className="flex items-center gap-1">
+                    <Calendar className="w-4 h-4" />
+                    <span>Deadline: {new Date(opportunity.deadline).toLocaleDateString()}</span>
+                  </div>}
               </div>
             </div>
-          </CardContent>
-        </Card>
+            <div className="flex items-center gap-2">
+              <Badge variant={opportunity.status === "Open" ? "default" : "secondary"} className="mx-0 px-[5px] py-0 my-0">
+                {opportunity.status}
+              </Badge>
+            </div>
+          </div>
+        </CardHeader>
+        
+        <CardContent className="space-y-6">
+          {/* Tags */}
+          <div className="flex gap-2 flex-wrap">
+            <Badge variant="outline">{opportunity.art_form}</Badge>
+            {opportunity.experience_level && <Badge variant="outline">{opportunity.experience_level}</Badge>}
+            {opportunity.gender_preference && <Badge variant="outline">{opportunity.gender_preference}</Badge>}
+          </div>
 
-        {/* Modals */}
-        <ShareOpportunityModal 
-          open={shareModalOpen}
-          onOpenChange={setShareModalOpen}
-          opportunity={opportunity}
-        />
+          {/* Requirements */}
+          <div>
+            <h3 className="font-semibold mb-3">Requirements</h3>
+            <div className="space-y-2 text-muted-foreground">
+              {/* Experience Level */}
+              {opportunity.experience_level && <div className="flex items-center gap-2">
+                  <span className="font-medium">Experience:</span>
+                  <span>{opportunity.experience_level}</span>
+                </div>}
+              
+              {/* Location */}
+              {opportunity.location && <div className="flex items-center gap-2">
+                  <MapPin className="w-4 h-4" />
+                  <span className="font-medium">Location:</span>
+                  <span>{opportunity.location}</span>
+                </div>}
+              
+              {/* Gender Preference */}
+              {opportunity.gender_preference && <div className="flex items-center gap-2">
+                  <span className="font-medium">Gender:</span>
+                  <span>{opportunity.gender_preference}</span>
+                </div>}
+              
+              {/* Salary Range */}
+              {opportunity.salary_range && <div className="flex items-center gap-2">
+                  <DollarSign className="w-4 h-4" />
+                  <span className="font-medium">Salary:</span>
+                  <span>{opportunity.salary_range}</span>
+                </div>}
+              
+              {/* Deadline */}
+              {opportunity.deadline && <div className="flex items-center gap-2">
+                  <Calendar className="w-4 h-4" />
+                  <span className="font-medium">Deadline:</span>
+                  <span>{new Date(opportunity.deadline).toLocaleDateString()}</span>
+                </div>}
+              
+              {/* Custom Requirements List */}
+              {opportunity.requirements && opportunity.requirements.length > 0 && <div className="mt-3">
+                  <ul className="list-disc list-inside space-y-1">
+                    {opportunity.requirements.map((req, index) => <li key={index}>{req}</li>)}
+                  </ul>
+                </div>}
+            </div>
+          </div>
 
-        <ConfirmDeleteModal
-          open={deleteModalOpen}
-          onOpenChange={setDeleteModalOpen}
-          onConfirm={confirmDelete}
-          opportunityTitle={opportunity.title}
-        />
+          {/* Description */}
+          <div>
+            <h3 className="font-semibold mb-2">Description</h3>
+            <LinkRenderer 
+              text={opportunity.description}
+              className="text-muted-foreground whitespace-pre-wrap"
+            />
+          </div>
 
-        {editModalOpen && (
-          <EditOpportunityModal
-            isOpen={editModalOpen}
-            onClose={() => setEditModalOpen(false)}
-            opportunity={opportunity}
-          />
-        )}
-      </div>
-    </div>
-  );
+          {/* Stats */}
+          <div className="flex items-center gap-6 text-sm text-muted-foreground">
+            <div className="flex items-center gap-1">
+              <Users className="w-4 h-4" />
+              <span>{opportunity.views || 0} views</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Star className="w-4 h-4" />
+              <span>{opportunity.saves || 0} saves</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Clock className="w-4 h-4" />
+              <span>Posted {new Date(opportunity.created_at).toLocaleDateString()}</span>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          {user && opportunity.posted_by !== user.id && opportunity.status === "Open" && <div className="flex gap-3 pt-4 border-t">
+              <Button onClick={handleQuickApply} disabled={hasApplied || isApplying} className="flex-1">
+                {isApplying ? "Applying..." : hasApplied ? (applicationStatus === 'Accepted' ? "Accepted" : "Applied") : "Apply Now"}
+              </Button>
+              {hasApplied && applicationStatus === 'Accepted' && (
+                <Button 
+                  variant="outline" 
+                  size="icon" 
+                  onClick={() => navigate(`/dashboard/messages?user=${opportunity.posted_by}`)}
+                  title="Message employer"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                </Button>
+              )}
+              <Button variant="outline" size="icon" onClick={handleSave}>
+                {isSaved ? <BookmarkCheck className="h-4 w-4" /> : <Bookmark className="h-4 w-4" />}
+              </Button>
+              <Button variant="outline" size="icon" onClick={handleShare}>
+                <Share2 className="w-4 h-4" />
+              </Button>
+            </div>}
+
+          {hasApplied && <div className={`border rounded-lg p-4 ${applicationStatus === 'Accepted' ? 'bg-blue-50 border-blue-200' : 'bg-green-50 border-green-200'}`}>
+              <p className={`font-medium ${applicationStatus === 'Accepted' ? 'text-blue-800' : 'text-green-800'}`}>
+                {applicationStatus === 'Accepted' 
+                  ? '🎉 Your application has been accepted!' 
+                  : '✓ You have already applied to this opportunity'
+                }
+              </p>
+            </div>}
+        </CardContent>
+      </Card>
+
+      {/* Apply Modal */}
+      {showApplyModal && opportunity && <ApplyJobModal opportunity={opportunity} isOpen={showApplyModal} onClose={() => setShowApplyModal(false)} onSuccess={() => {
+      setShowApplyModal(false);
+      setHasApplied(true);
+    }} />}
+
+      <ShareBottomSheet
+        open={showShareSheet}
+        onOpenChange={setShowShareSheet}
+        type="opportunity"
+        data={{
+          url: window.location.href,
+          title: opportunity?.title,
+          company: opportunity?.company
+        }}
+      />
+    </div>;
 }
