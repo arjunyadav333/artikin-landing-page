@@ -78,16 +78,25 @@ export default function OpportunityDetailPage() {
   // Realtime subscription for opportunity updates
   useEffect(() => {
     if (!id) return;
-    const channel = supabase.channel('opportunity-updates').on('postgres_changes', {
-      event: '*',
-      schema: 'public',
-      table: 'opportunities',
-      filter: `id=eq.${id}`
-    }, payload => {
-      console.log('Opportunity updated:', payload);
-      // Invalidate queries to refetch data
-      window.location.reload();
-    }).subscribe();
+
+    const channel = supabase
+      .channel('opportunity-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'opportunities',
+          filter: `id=eq.${id}`
+        },
+        (payload) => {
+          console.log('Opportunity updated:', payload);
+          // Invalidate queries to refetch data
+          window.location.reload();
+        }
+      )
+      .subscribe();
+
     return () => {
       supabase.removeChannel(channel);
     };
@@ -201,12 +210,16 @@ export default function OpportunityDetailPage() {
               </div>
 
               {/* City & State */}
-              {(foundOpportunity?.city || foundOpportunity?.state) && <div className="flex items-start gap-2">
+              {(foundOpportunity?.city || foundOpportunity?.state) && (
+                <div className="flex items-start gap-2">
                   <span className="font-medium min-w-[120px]">City/State:</span>
                   <span>
-                    {foundOpportunity?.city && foundOpportunity?.state ? `${foundOpportunity.city}, ${foundOpportunity.state}` : foundOpportunity?.city || foundOpportunity?.state}
+                    {foundOpportunity?.city && foundOpportunity?.state 
+                      ? `${foundOpportunity.city}, ${foundOpportunity.state}`
+                      : foundOpportunity?.city || foundOpportunity?.state}
                   </span>
-                </div>}
+                </div>
+              )}
               
               {/* Location */}
               <div className="flex items-start gap-2">
@@ -234,7 +247,10 @@ export default function OpportunityDetailPage() {
               <Users className="w-4 h-4" />
               <span>{opportunity.views || 0} views</span>
             </div>
-            
+            <div className="flex items-center gap-1">
+              <Star className="w-4 h-4" />
+              <span>{opportunity.saves || 0} saves</span>
+            </div>
             <div className="flex items-center gap-1">
               <Clock className="w-4 h-4" />
               <span>Posted {formatDistanceToNow(new Date(opportunity.created_at), {
