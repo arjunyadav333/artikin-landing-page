@@ -223,14 +223,12 @@ export default function OpportunityDetailPage() {
               
               {/* Location */}
               <div className="flex items-start gap-2">
-                <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
                 <span className="font-medium min-w-[100px]">Location:</span>
                 <span>{opportunity.location}</span>
               </div>
               
               {/* Deadline */}
               {opportunity.deadline && <div className="flex items-start gap-2">
-                  <Calendar className="w-4 h-4 mt-0.5 flex-shrink-0" />
                   <span className="font-medium min-w-[100px]">Deadline:</span>
                   <span>{new Date(opportunity.deadline).toLocaleDateString()}</span>
                 </div>}
