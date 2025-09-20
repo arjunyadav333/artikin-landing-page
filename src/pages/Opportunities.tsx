@@ -67,10 +67,6 @@ const Opportunities = () => {
         return filtered.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
       case "oldest":
         return filtered.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
-      case "salary-high":
-        return filtered.sort((a, b) => (b.salary_max || 0) - (a.salary_max || 0));
-      case "salary-low":
-        return filtered.sort((a, b) => (a.salary_min || 0) - (b.salary_min || 0));
       case "applications":
         return filtered.sort((a, b) => (b.applications_count || 0) - (a.applications_count || 0));
       default:

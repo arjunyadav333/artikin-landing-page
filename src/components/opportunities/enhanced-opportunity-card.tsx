@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { MapPin, Clock, DollarSign, Users, Eye, Bookmark, Star } from "lucide-react";
+import { MapPin, Clock, Users, Eye, Bookmark, Star } from "lucide-react";
 import { Opportunity } from "@/hooks/useOpportunities";
 import { formatDistanceToNow } from "date-fns";
 
@@ -22,14 +22,6 @@ export function EnhancedOpportunityCard({
   index,
   className = "" 
 }: EnhancedOpportunityCardProps) {
-  const formatSalary = (min?: number, max?: number) => {
-    if (!min && !max) return "Salary not specified";
-    if (min && max) return `$${min.toLocaleString()} - $${max.toLocaleString()}`;
-    if (min) return `From $${min.toLocaleString()}`;
-    if (max) return `Up to $${max.toLocaleString()}`;
-    return "Salary not specified";
-  };
-
   const getTypeColor = (type: string) => {
     const typeColors: Record<string, string> = {
       "Full-time": "bg-primary/10 text-primary border-primary/20",
@@ -151,14 +143,6 @@ export function EnhancedOpportunityCard({
             >
               <MapPin className="h-4 w-4 mr-2 flex-shrink-0 text-primary" />
               <span className="truncate font-medium">{opportunity.location || "Remote"}</span>
-            </motion.div>
-            
-            <motion.div 
-              className="flex items-center text-muted-foreground group-hover:text-foreground transition-colors"
-              whileHover={{ x: 4 }}
-            >
-              <DollarSign className="h-4 w-4 mr-2 flex-shrink-0 text-green-600" />
-              <span className="truncate font-medium">{formatSalary(opportunity.salary_min, opportunity.salary_max)}</span>
             </motion.div>
             
             <motion.div 

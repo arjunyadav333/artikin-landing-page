@@ -10,8 +10,6 @@ export interface EditOpportunityData {
   location?: string;
   city?: string;
   state?: string;
-  salary_min?: number;
-  salary_max?: number;
   deadline?: string;
   tags?: string[];
   status: string;
@@ -45,8 +43,6 @@ export const useEditOpportunity = () => {
           location: data.location,
           city: data.city,
           state: data.state,
-          salary_min: data.salary_min,
-          salary_max: data.salary_max,
           deadline: data.deadline ? new Date(data.deadline).toISOString() : null,
           tags: data.tags,
           status: data.status,

@@ -35,8 +35,6 @@ interface OpportunityData {
   location?: string;
   city?: string;
   state?: string;
-  salary_min?: number;
-  salary_max?: number;
   type: string;
   tags?: string[];
   applications_count: number;

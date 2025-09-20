@@ -3,21 +3,11 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ExternalLink, MapPin, DollarSign, Calendar } from 'lucide-react';
+import { ExternalLink, MapPin, Calendar } from 'lucide-react';
 import { usePersonalizedOpportunities, PersonalizedOpportunity } from '@/hooks/usePersonalizedOpportunities';
 import { formatDistanceToNow } from 'date-fns';
 
 const OpportunityCard = memo(({ opportunity }: { opportunity: PersonalizedOpportunity }) => {
-  const formatSalaryRange = (min: number | null, max: number | null) => {
-    if (!min && !max) return null;
-    if (min && max) {
-      return `$${(min / 1000).toFixed(0)}k - $${(max / 1000).toFixed(0)}k`;
-    }
-    if (min) return `$${(min / 1000).toFixed(0)}k+`;
-    if (max) return `Up to $${(max / 1000).toFixed(0)}k`;
-    return null;
-  };
-
   const getTypeColor = (type: string) => {
     switch (type.toLowerCase()) {
       case 'full-time':
@@ -35,7 +25,6 @@ const OpportunityCard = memo(({ opportunity }: { opportunity: PersonalizedOpport
     }
   };
 
-  const salaryRange = formatSalaryRange(opportunity.salary_min, opportunity.salary_max);
   const companyName = opportunity.organization_name || opportunity.company || opportunity.profiles?.display_name;
 
   return (
@@ -64,13 +53,6 @@ const OpportunityCard = memo(({ opportunity }: { opportunity: PersonalizedOpport
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <MapPin className="w-3 h-3 flex-shrink-0" />
               <span className="truncate">{opportunity.location}</span>
-            </div>
-          )}
-          
-          {salaryRange && (
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <DollarSign className="w-3 h-3 flex-shrink-0" />
-              <span>{salaryRange}</span>
             </div>
           )}
 

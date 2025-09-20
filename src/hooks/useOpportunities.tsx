@@ -12,8 +12,6 @@ export interface Opportunity {
   location?: string;
   city?: string;
   state?: string;
-  salary_min?: number;
-  salary_max?: number;
   type: string;
   tags?: string[];
   applications_count: number;
@@ -113,8 +111,6 @@ export const useCreateOpportunity = () => {
       location?: string;
       city?: string;
       state?: string;
-      salary_min?: number;
-      salary_max?: number;
       type: string;
       tags?: string[];
       deadline?: string;

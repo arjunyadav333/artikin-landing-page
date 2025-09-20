@@ -29,8 +29,6 @@ export const EditOpportunityModal: React.FC<EditOpportunityModalProps> = ({
     location: '',
     city: '',
     state: '',
-    salary_min: undefined,
-    salary_max: undefined,
     deadline: '',
     tags: [],
     status: 'active',
@@ -72,8 +70,6 @@ export const EditOpportunityModal: React.FC<EditOpportunityModalProps> = ({
         location: opportunity.location || '',
         city: opportunity.city || '',
         state: opportunity.state || '',
-        salary_min: opportunity.salary_min || undefined,
-        salary_max: opportunity.salary_max || undefined,
         deadline: opportunity.deadline ? new Date(opportunity.deadline).toISOString().split('T')[0] : '',
         tags: opportunity.tags || [],
         status: opportunity.status || 'active',
@@ -294,34 +290,8 @@ export const EditOpportunityModal: React.FC<EditOpportunityModalProps> = ({
             </div>
           </div>
 
-          {/* Compensation, Deadline & Status */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <Label htmlFor="salary_min">Min Compensation ($)</Label>
-              <Input
-                id="salary_min"
-                type="number"
-                value={formData.salary_min || ''}
-                onChange={(e) => setFormData(prev => ({ 
-                  ...prev, 
-                  salary_min: e.target.value ? parseInt(e.target.value) : undefined 
-                }))}
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="salary_max">Max Compensation ($)</Label>
-              <Input
-                id="salary_max"
-                type="number"
-                value={formData.salary_max || ''}
-                onChange={(e) => setFormData(prev => ({ 
-                  ...prev, 
-                  salary_max: e.target.value ? parseInt(e.target.value) : undefined 
-                }))}
-              />
-            </div>
-
+          {/* Deadline & Status */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="deadline">Application Deadline</Label>
               <Input

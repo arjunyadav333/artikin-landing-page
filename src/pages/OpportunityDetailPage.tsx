@@ -56,7 +56,6 @@ export default function OpportunityDetailPage() {
     experience_level_display: foundOpportunity.experience_level || 'Not specified',
     gender_preference_display: foundOpportunity.gender_preference && foundOpportunity.gender_preference.length > 0 ? foundOpportunity.gender_preference.join(', ') : 'Not specified',
     language_preference_display: foundOpportunity.language_preference && foundOpportunity.language_preference.length > 0 ? foundOpportunity.language_preference.join(', ') : 'Not specified',
-    salary_range: foundOpportunity.salary_min && foundOpportunity.salary_max ? `$${foundOpportunity.salary_min.toLocaleString()} - $${foundOpportunity.salary_max.toLocaleString()}` : foundOpportunity.salary_min ? `From $${foundOpportunity.salary_min.toLocaleString()}` : foundOpportunity.salary_max ? `Up to $${foundOpportunity.salary_max.toLocaleString()}` : 'Not specified',
     status: 'Open',
     // Default status
     requirements: [],
