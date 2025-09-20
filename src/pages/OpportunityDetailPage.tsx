@@ -51,12 +51,12 @@ export default function OpportunityDetailPage() {
   // Transform opportunity data to match the expected structure
   const opportunity = foundOpportunity ? {
     ...foundOpportunity,
-    company: foundOpportunity.organization_name || foundOpportunity.company || 'Not specified',
+    company: foundOpportunity.organization_name || foundOpportunity.company || foundOpportunity.profiles?.display_name || 'Organization',
     location: foundOpportunity.location || (foundOpportunity.city && foundOpportunity.state ? `${foundOpportunity.city}, ${foundOpportunity.state}` : 'Remote/Location flexible'),
-    art_forms_display: foundOpportunity.art_forms && foundOpportunity.art_forms.length > 0 ? foundOpportunity.art_forms.join(', ') : 'Not specified',
-    experience_level_display: foundOpportunity.experience_level || 'Not specified',
-    gender_preference_display: foundOpportunity.gender_preference && foundOpportunity.gender_preference.length > 0 ? foundOpportunity.gender_preference.join(', ') : 'Not specified',
-    language_preference_display: foundOpportunity.language_preference && foundOpportunity.language_preference.length > 0 ? foundOpportunity.language_preference.join(', ') : 'Not specified',
+    art_forms_display: foundOpportunity.art_forms && foundOpportunity.art_forms.length > 0 ? foundOpportunity.art_forms.join(', ') : 'All art forms',
+    experience_level_display: foundOpportunity.experience_level || 'Any experience level',
+    gender_preference_display: foundOpportunity.gender_preference && foundOpportunity.gender_preference.length > 0 ? foundOpportunity.gender_preference.join(', ') : 'All genders',
+    language_preference_display: foundOpportunity.language_preference && foundOpportunity.language_preference.length > 0 ? foundOpportunity.language_preference.join(', ') : 'Any language',
     status: 'Open',
     // Default status
     requirements: [],
