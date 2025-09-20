@@ -40,6 +40,7 @@ import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useCreateOpportunity } from "@/hooks/useOpportunities";
 import { useCurrentProfile } from "@/hooks/useProfiles";
+import { supabase } from "@/integrations/supabase/client";
 
 const formSchema = z.object({
   title: z.string().min(1, "Opportunity title is required"),
@@ -187,15 +188,44 @@ export function ComprehensivePostModal({ open, onOpenChange, trigger }: Comprehe
 
   const onSubmit = async (data: FormData) => {
     try {
+      // Handle image upload if present
+      let imageUrl = undefined;
+      if (data.image) {
+        const fileExt = data.image.name.split('.').pop();
+        const fileName = `${Date.now()}.${fileExt}`;
+        
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('opportunities')
+          .upload(fileName, data.image);
+
+        if (uploadError) {
+          console.error('Image upload error:', uploadError);
+          throw new Error('Failed to upload image');
+        }
+
+        const { data: urlData } = supabase.storage
+          .from('opportunities')
+          .getPublicUrl(uploadData.path);
+
+        imageUrl = urlData.publicUrl;
+      }
+
       const opportunityData = {
         title: data.title,
         company: data.company,
         description: data.description,
         location: data.city && data.state ? `${data.city}, ${data.state}` : data.city || data.state || undefined,
+        city: data.city || undefined,
+        state: data.state || undefined,
         type: "Full-time", // Default type
         tags: data.artForms,
         deadline: data.deadline.toISOString(),
         art_forms: data.artForms || [],
+        experience_level: data.experienceLevel || undefined,
+        gender_preference: data.genderPreference || [],
+        language_preference: data.languagePreference || [],
+        image_url: imageUrl,
+        organization_name: data.company || undefined,
       };
 
       await createOpportunity.mutateAsync(opportunityData);
