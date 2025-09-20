@@ -81,22 +81,22 @@ export function CreateOpportunityModal() {
     
     const opportunityData = {
       title: formData.title.trim(),
-      company: formData.company?.trim() || undefined,
+      company: formData.company?.trim() || null,
       description: formData.description.trim(),
-      location: formData.location?.trim() || undefined,
-      city: formData.city?.trim() || undefined,
-      state: formData.state?.trim() || undefined,
-      salary_min: formData.salary_min ? parseInt(formData.salary_min) : undefined,
-      salary_max: formData.salary_max ? parseInt(formData.salary_max) : undefined,
+      location: formData.location?.trim() || null,
+      city: formData.city?.trim() || null,
+      state: formData.state?.trim() || null,
+      salary_min: formData.salary_min ? parseInt(formData.salary_min) : null,
+      salary_max: formData.salary_max ? parseInt(formData.salary_max) : null,
       type: formData.type,
-      tags: formData.tags?.trim() ? formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0) : undefined,
-      deadline: formData.deadline || undefined,
-      image_url: formData.image_url?.trim() || undefined,
-      art_forms: formData.art_forms && formData.art_forms.length > 0 ? formData.art_forms : undefined,
-      experience_level: formData.experience_level?.trim() || undefined,
-      gender_preference: formData.gender_preference && formData.gender_preference.length > 0 ? formData.gender_preference : undefined,
-      language_preference: formData.language_preference && formData.language_preference.length > 0 ? formData.language_preference : undefined,
-      organization_name: formData.organization_name?.trim() || undefined
+      tags: formData.tags?.trim() ? formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0) : null,
+      deadline: formData.deadline || null,
+      image_url: formData.image_url?.trim() || null,
+      art_forms: formData.art_forms.length > 0 ? formData.art_forms : null,
+      experience_level: formData.experience_level || null,
+      gender_preference: formData.gender_preference.length > 0 ? formData.gender_preference : null,
+      language_preference: formData.language_preference.length > 0 ? formData.language_preference : null,
+      organization_name: formData.organization_name?.trim() || null
     };
 
     // Validate critical fields
