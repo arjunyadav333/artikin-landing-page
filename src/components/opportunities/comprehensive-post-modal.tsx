@@ -195,6 +195,7 @@ export function ComprehensivePostModal({ open, onOpenChange, trigger }: Comprehe
         type: "Full-time", // Default type
         tags: data.artForms,
         deadline: data.deadline.toISOString(),
+        art_forms: data.artForms || [],
       };
 
       await createOpportunity.mutateAsync(opportunityData);

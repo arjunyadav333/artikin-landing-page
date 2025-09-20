@@ -94,6 +94,10 @@ export function CreateOpportunityModal() {
       toast({ title: "Error", description: "Opportunity type is required", variant: "destructive" });
       return;
     }
+    if (!formData.art_forms || formData.art_forms.length === 0) {
+      toast({ title: "Error", description: "Please select at least one art form", variant: "destructive" });
+      return;
+    }
     
     const opportunityData = {
       title: formData.title.trim(),
@@ -108,7 +112,7 @@ export function CreateOpportunityModal() {
       tags: formData.tags?.trim() ? formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0) : null,
       deadline: formData.deadline || null,
       image_url: formData.image_url?.trim() || null,
-      art_forms: formData.art_forms.length > 0 ? formData.art_forms : null,
+      art_forms: formData.art_forms,
       experience_level: formData.experience_level || null,
       gender_preference: formData.gender_preference.length > 0 ? formData.gender_preference : null,
       language_preference: formData.language_preference.length > 0 ? formData.language_preference : null,
