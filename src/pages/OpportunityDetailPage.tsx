@@ -48,24 +48,15 @@ export default function OpportunityDetailPage() {
   // Find the opportunity and transform data structure
   const foundOpportunity = opportunities?.find(opp => opp.id === id) || organizationOpportunities?.find(opp => opp.id === id);
 
-  // Debug logging to see actual data
-  console.log('Found opportunity data:', foundOpportunity);
-  if (foundOpportunity) {
-    console.log('Art forms:', foundOpportunity.art_forms);
-    console.log('Experience level:', foundOpportunity.experience_level);
-    console.log('Gender preference:', foundOpportunity.gender_preference);
-    console.log('Language preference:', foundOpportunity.language_preference);
-  }
-
   // Transform opportunity data to match the expected structure
   const opportunity = foundOpportunity ? {
     ...foundOpportunity,
     company: foundOpportunity.organization_name || foundOpportunity.company || foundOpportunity.profiles?.display_name || 'Organization',
     location: foundOpportunity.location || (foundOpportunity.city && foundOpportunity.state ? `${foundOpportunity.city}, ${foundOpportunity.state}` : 'Remote/Location flexible'),
-    art_forms_display: foundOpportunity.art_forms && foundOpportunity.art_forms.length > 0 ? foundOpportunity.art_forms.join(', ') : 'Not specified',
+    art_forms_display: foundOpportunity.art_forms && Array.isArray(foundOpportunity.art_forms) && foundOpportunity.art_forms.length > 0 ? foundOpportunity.art_forms.join(', ') : 'Not specified',
     experience_level_display: foundOpportunity.experience_level || 'Not specified',
-    gender_preference_display: foundOpportunity.gender_preference && foundOpportunity.gender_preference.length > 0 ? foundOpportunity.gender_preference.join(', ') : 'Not specified',
-    language_preference_display: foundOpportunity.language_preference && foundOpportunity.language_preference.length > 0 ? foundOpportunity.language_preference.join(', ') : 'Not specified',
+    gender_preference_display: foundOpportunity.gender_preference && Array.isArray(foundOpportunity.gender_preference) && foundOpportunity.gender_preference.length > 0 ? foundOpportunity.gender_preference.join(', ') : 'Not specified',
+    language_preference_display: foundOpportunity.language_preference && Array.isArray(foundOpportunity.language_preference) && foundOpportunity.language_preference.length > 0 ? foundOpportunity.language_preference.join(', ') : 'Not specified',
     status: 'Open',
     // Default status
     requirements: [],

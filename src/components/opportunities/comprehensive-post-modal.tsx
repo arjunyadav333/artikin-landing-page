@@ -220,10 +220,10 @@ export function ComprehensivePostModal({ open, onOpenChange, trigger }: Comprehe
         type: "Full-time", // Default type
         tags: data.artForms,
         deadline: data.deadline.toISOString(),
-        art_forms: data.artForms || [],
+        art_forms: data.artForms && data.artForms.length > 0 ? data.artForms : [],
         experience_level: data.experienceLevel || undefined,
-        gender_preference: data.genderPreference || [],
-        language_preference: data.languagePreference || [],
+        gender_preference: data.genderPreference && data.genderPreference.length > 0 ? data.genderPreference : [],
+        language_preference: data.languagePreference && data.languagePreference.length > 0 ? data.languagePreference : [],
         image_url: imageUrl,
         organization_name: data.company || undefined,
       };
