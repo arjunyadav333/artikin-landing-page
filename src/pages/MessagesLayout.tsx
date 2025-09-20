@@ -60,6 +60,15 @@ const MessagesLayout = () => {
   const { data: messages = [], isLoading: messagesLoading } = useEnhancedMessages(chatId);
   const { draftText, updateDraft, clearDraft } = useDraftMessage(chatId);
   const { typingUsers, sendTypingStatus } = useTypingIndicators(chatId);
+
+  // Debug logging
+  console.log('MessagesLayout Debug:', {
+    conversationsLength: conversations.length,
+    conversations,
+    conversationsError,
+    conversationsLoading,
+    user: user?.id
+  });
   
   // Mutations for chat list
   const pinMutation = useMutation({

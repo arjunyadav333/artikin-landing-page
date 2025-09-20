@@ -95,10 +95,15 @@ export const useEnhancedConversations = () => {
 
       if (conversationsError) {
         console.error('Error fetching conversations:', conversationsError);
+        throw conversationsError;
+      }
+
+      if (!conversations?.length) {
+        console.log('No conversations found for user:', user.id);
         return [];
       }
 
-      if (!conversations?.length) return [];
+      console.log('Raw conversations from DB:', conversations);
 
       // Get participant settings for each conversation
       const conversationIds = conversations.map(c => c.id);
@@ -174,7 +179,9 @@ export const useEnhancedConversations = () => {
           })
       );
 
-      return result.filter(conv => conv.other_participant);
+      const finalResult = result.filter(conv => conv.other_participant);
+      console.log('Enhanced conversations result:', finalResult);
+      return finalResult;
     },
     enabled: !!user
   });

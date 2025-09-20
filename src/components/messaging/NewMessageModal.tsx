@@ -8,7 +8,7 @@ import { Search, User } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useCreateOrGetConversation } from "@/hooks/useMessaging";
+import { useDirectMessage } from "@/hooks/useDirectMessage";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
@@ -33,7 +33,7 @@ export const NewMessageModal = ({ open, onOpenChange }: NewMessageModalProps) =>
   const [searchTerm, setSearchTerm] = useState("");
   const { user } = useAuth();
   const navigate = useNavigate();
-  const createConversationMutation = useCreateOrGetConversation();
+  const { startDirectMessage, isLoading: isDirectMessageLoading } = useDirectMessage();
 
   // Fetch all users except current user
   const { data: users = [], isLoading } = useQuery({
@@ -71,14 +71,9 @@ export const NewMessageModal = ({ open, onOpenChange }: NewMessageModalProps) =>
   });
 
   const handleUserSelect = async (selectedUser: UserProfile) => {
-    try {
-      const conversationId = await createConversationMutation.mutateAsync(selectedUser.user_id);
-      onOpenChange(false);
-      navigate(`/messages/${conversationId}`);
-      setSearchTerm("");
-    } catch (error) {
-      console.error('Error creating conversation:', error);
-    }
+    startDirectMessage(selectedUser.user_id);
+    onOpenChange(false);
+    setSearchTerm("");
   };
 
   const getInitials = (name: string) => {
@@ -147,7 +142,7 @@ export const NewMessageModal = ({ open, onOpenChange }: NewMessageModalProps) =>
                     className={cn(
                       "flex items-center space-x-3 p-3 rounded-lg cursor-pointer",
                       "hover:bg-muted transition-colors",
-                      createConversationMutation.isPending && "opacity-50 pointer-events-none"
+                      isDirectMessageLoading(selectedUser.user_id) && "opacity-50 pointer-events-none"
                     )}
                     onClick={() => handleUserSelect(selectedUser)}
                   >
@@ -184,7 +179,7 @@ export const NewMessageModal = ({ open, onOpenChange }: NewMessageModalProps) =>
             )}
           </ScrollArea>
 
-          {createConversationMutation.isPending && (
+          {Object.values(users).some(user => isDirectMessageLoading(user.user_id)) && (
             <div className="text-center py-2">
               <div className="inline-flex items-center gap-2 text-sm text-muted-foreground">
                 <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
