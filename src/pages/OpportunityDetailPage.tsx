@@ -82,7 +82,7 @@ export default function OpportunityDetailPage() {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-semibold mb-4">Opportunity Not Found</h2>
-          <Button onClick={() => navigate('/dashboard/opportunities')} variant="outline">
+          <Button onClick={() => navigate('/opportunities')} variant="outline">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Opportunities
           </Button>
@@ -94,7 +94,7 @@ export default function OpportunityDetailPage() {
   return <div className="max-w-4xl mx-auto p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <Button variant="outline" size="sm" onClick={() => navigate('/dashboard/opportunities')}>
+        <Button variant="outline" size="sm" onClick={() => navigate('/opportunities')}>
           <ArrowLeft className="w-4 h-4 mr-2" />
         </Button>
         <h1 className="text-2xl font-bold">Opportunity Details</h1>
@@ -218,7 +218,7 @@ export default function OpportunityDetailPage() {
                 <Button 
                   variant="outline" 
                   size="icon" 
-                  onClick={() => navigate(`/dashboard/messages?user=${opportunity.posted_by}`)}
+                  onClick={() => navigate(`/messages?user=${opportunity.posted_by}`)}
                   title="Message employer"
                 >
                   <MessageCircle className="w-4 h-4" />
