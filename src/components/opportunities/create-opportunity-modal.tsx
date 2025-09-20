@@ -61,10 +61,13 @@ export function CreateOpportunityModal() {
 
   // Get organization name from user profile
   useEffect(() => {
+    console.log('Setting organization name from user:', user);
     if (user?.user_metadata?.full_name || user?.user_metadata?.display_name) {
+      const orgName = user.user_metadata?.full_name || user.user_metadata?.display_name || "";
+      console.log('Auto-populating organization_name with:', orgName);
       setFormData(prev => ({
         ...prev,
-        organization_name: user.user_metadata?.full_name || user.user_metadata?.display_name || ""
+        organization_name: orgName
       }));
     }
   }, [user]);
@@ -74,28 +77,42 @@ export function CreateOpportunityModal() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    console.log('Form submission - Raw form data:', formData);
+    
     const opportunityData = {
-      title: formData.title,
-      company: formData.company || undefined,
-      description: formData.description,
-      location: formData.location || undefined,
-      city: formData.city || undefined,
-      state: formData.state || undefined,
+      title: formData.title.trim(),
+      company: formData.company?.trim() || undefined,
+      description: formData.description.trim(),
+      location: formData.location?.trim() || undefined,
+      city: formData.city?.trim() || undefined,
+      state: formData.state?.trim() || undefined,
       salary_min: formData.salary_min ? parseInt(formData.salary_min) : undefined,
       salary_max: formData.salary_max ? parseInt(formData.salary_max) : undefined,
       type: formData.type,
-      tags: formData.tags ? formData.tags.split(',').map(tag => tag.trim()) : undefined,
+      tags: formData.tags?.trim() ? formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0) : undefined,
       deadline: formData.deadline || undefined,
-      image_url: formData.image_url || undefined,
-      art_forms: formData.art_forms.length > 0 ? formData.art_forms : undefined,
-      experience_level: formData.experience_level || undefined,
-      gender_preference: formData.gender_preference.length > 0 ? formData.gender_preference : undefined,
-      language_preference: formData.language_preference.length > 0 ? formData.language_preference : undefined,
-      organization_name: formData.organization_name || undefined
+      image_url: formData.image_url?.trim() || undefined,
+      art_forms: formData.art_forms && formData.art_forms.length > 0 ? formData.art_forms : undefined,
+      experience_level: formData.experience_level?.trim() || undefined,
+      gender_preference: formData.gender_preference && formData.gender_preference.length > 0 ? formData.gender_preference : undefined,
+      language_preference: formData.language_preference && formData.language_preference.length > 0 ? formData.language_preference : undefined,
+      organization_name: formData.organization_name?.trim() || undefined
     };
 
+    // Validate critical fields
+    console.log('Validation check:');
+    console.log('- Title:', opportunityData.title ? '✓' : '✗ MISSING');
+    console.log('- Description:', opportunityData.description ? '✓' : '✗ MISSING');
+    console.log('- Type:', opportunityData.type ? '✓' : '✗ MISSING');
+    console.log('- Organization name:', opportunityData.organization_name ? '✓' : '✗ MISSING');
+    console.log('- Art forms:', opportunityData.art_forms ? '✓' : '✗ EMPTY');
+    console.log('- Experience level:', opportunityData.experience_level ? '✓' : '✗ EMPTY');
+
+    console.log('Form submission - Structured opportunity data being sent:', opportunityData);
+
     try {
-      await createOpportunity.mutateAsync(opportunityData);
+      const result = await createOpportunity.mutateAsync(opportunityData);
+      console.log('Form submission - Success result:', result);
       setOpen(false);
       setFormData({
         title: "",
@@ -122,6 +139,7 @@ export function CreateOpportunityModal() {
   };
 
   const handleInputChange = (field: string, value: string) => {
+    console.log(`Input change for ${field}:`, value);
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -130,12 +148,18 @@ export function CreateOpportunityModal() {
   };
 
   const toggleArrayItem = (field: string, item: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: prev[field as keyof typeof prev].includes(item)
-        ? (prev[field as keyof typeof prev] as string[]).filter((i: string) => i !== item)
-        : [...(prev[field as keyof typeof prev] as string[]), item]
-    }));
+    console.log(`Toggling ${field} with item:`, item);
+    setFormData(prev => {
+      const currentArray = prev[field as keyof typeof prev] as string[];
+      const newArray = currentArray.includes(item)
+        ? currentArray.filter((i: string) => i !== item)
+        : [...currentArray, item];
+      console.log(`Updated ${field}:`, newArray);
+      return {
+        ...prev,
+        [field]: newArray
+      };
+    });
   };
 
   return (

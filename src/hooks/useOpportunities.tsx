@@ -125,19 +125,30 @@ export const useCreateOpportunity = () => {
       language_preference?: string[];
       organization_name?: string;
     }) => {
+      console.log('useCreateOpportunity - Received opportunity data:', newOpportunity);
+      
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
+      const insertData = {
+        ...newOpportunity,
+        user_id: user.id
+      };
+      
+      console.log('useCreateOpportunity - Data being inserted to database:', insertData);
+
       const { data, error } = await supabase
         .from('opportunities')
-        .insert({
-          ...newOpportunity,
-          user_id: user.id
-        })
+        .insert(insertData)
         .select('*')
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('useCreateOpportunity - Database insertion error:', error);
+        throw error;
+      }
+      
+      console.log('useCreateOpportunity - Database insertion success:', data);
       
       // Get profile for the created opportunity
       const { data: profile } = await supabase
