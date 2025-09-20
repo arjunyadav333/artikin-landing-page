@@ -1,3 +1,4 @@
+// Opportunity Detail Page - Updated to remove all Bookmark references
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,7 @@ import { LinkRenderer } from "@/components/ui/link-renderer";
 import { ApplyJobModal } from "@/components/opportunities/apply-job-modal";
 import { ShareBottomSheet } from "@/components/ui/share-bottom-sheet";
 export default function OpportunityDetailPage() {
+  console.log("OpportunityDetailPage rendering - Bookmark should not be referenced");
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
