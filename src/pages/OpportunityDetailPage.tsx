@@ -38,19 +38,29 @@ export default function OpportunityDetailPage() {
     ...foundOpportunity,
     company: foundOpportunity.organization_name || foundOpportunity.company || 'Not specified',
     location: foundOpportunity.location || (foundOpportunity.city && foundOpportunity.state ? `${foundOpportunity.city}, ${foundOpportunity.state}` : 'Remote/Location flexible'),
-    art_form: foundOpportunity.art_forms?.[0] || 'Not specified',
+    art_forms_display: foundOpportunity.art_forms && foundOpportunity.art_forms.length > 0 
+      ? foundOpportunity.art_forms.join(', ') 
+      : 'Not specified',
+    experience_level_display: foundOpportunity.experience_level || 'Not specified',
+    gender_preference_display: foundOpportunity.gender_preference && foundOpportunity.gender_preference.length > 0
+      ? foundOpportunity.gender_preference.join(', ')
+      : 'Not specified',
+    language_preference_display: foundOpportunity.language_preference && foundOpportunity.language_preference.length > 0
+      ? foundOpportunity.language_preference.join(', ')
+      : 'Not specified',
     salary_range: foundOpportunity.salary_min && foundOpportunity.salary_max 
       ? `$${foundOpportunity.salary_min.toLocaleString()} - $${foundOpportunity.salary_max.toLocaleString()}`
       : foundOpportunity.salary_min 
         ? `From $${foundOpportunity.salary_min.toLocaleString()}`
         : foundOpportunity.salary_max 
           ? `Up to $${foundOpportunity.salary_max.toLocaleString()}`
-          : null,
+          : 'Not specified',
     status: 'Open', // Default status
     requirements: [], // Empty array for now
     views: foundOpportunity.views_count || 0,
     saves: 0, // Not available in current schema
-    posted_by: foundOpportunity.user_id
+    posted_by: foundOpportunity.user_id,
+    image_url: foundOpportunity.image_url || null
   } : null;
 
   useEffect(() => {
@@ -131,56 +141,82 @@ export default function OpportunityDetailPage() {
         </CardHeader>
         
         <CardContent className="space-y-6">
+          {/* Opportunity Image */}
+          {opportunity.image_url && (
+            <div className="w-full h-48 rounded-lg overflow-hidden">
+              <img 
+                src={opportunity.image_url} 
+                alt={opportunity.title}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          )}
+
           {/* Tags */}
           <div className="flex gap-2 flex-wrap">
-            <Badge variant="outline">{opportunity.art_form}</Badge>
-            {opportunity.experience_level && <Badge variant="outline">{opportunity.experience_level}</Badge>}
-            {opportunity.gender_preference && <Badge variant="outline">{opportunity.gender_preference}</Badge>}
+            {opportunity.art_forms && opportunity.art_forms.length > 0 && 
+              opportunity.art_forms.map((artForm, index) => (
+                <Badge key={index} variant="outline">{artForm}</Badge>
+              ))
+            }
+            {opportunity.experience_level && (
+              <Badge variant="outline">{opportunity.experience_level}</Badge>
+            )}
+            {opportunity.type && (
+              <Badge variant="outline">{opportunity.type}</Badge>
+            )}
           </div>
 
-          {/* Requirements */}
+          {/* Requirements & Details */}
           <div>
-            <h3 className="font-semibold mb-3">Requirements</h3>
-            <div className="space-y-2 text-muted-foreground">
-              {/* Experience Level */}
-              {opportunity.experience_level && <div className="flex items-center gap-2">
-                  <span className="font-medium">Experience:</span>
-                  <span>{opportunity.experience_level}</span>
-                </div>}
+            <h3 className="font-semibold mb-3">Opportunity Details</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-muted-foreground">
+              {/* Art Forms */}
+              <div className="flex items-start gap-2">
+                <span className="font-medium min-w-[120px]">Art Forms:</span>
+                <span>{opportunity.art_forms_display}</span>
+              </div>
               
-              {/* Location */}
-              {opportunity.location && <div className="flex items-center gap-2">
-                  <MapPin className="w-4 h-4" />
-                  <span className="font-medium">Location:</span>
-                  <span>{opportunity.location}</span>
-                </div>}
+              {/* Experience Level */}
+              <div className="flex items-start gap-2">
+                <span className="font-medium min-w-[120px]">Experience:</span>
+                <span>{opportunity.experience_level_display}</span>
+              </div>
               
               {/* Gender Preference */}
-              {opportunity.gender_preference && <div className="flex items-center gap-2">
-                  <span className="font-medium">Gender:</span>
-                  <span>{opportunity.gender_preference}</span>
-                </div>}
+              <div className="flex items-start gap-2">
+                <span className="font-medium min-w-[120px]">Gender:</span>
+                <span>{opportunity.gender_preference_display}</span>
+              </div>
+              
+              {/* Language Preference */}
+              <div className="flex items-start gap-2">
+                <span className="font-medium min-w-[120px]">Languages:</span>
+                <span>{opportunity.language_preference_display}</span>
+              </div>
+              
+              {/* Location */}
+              <div className="flex items-start gap-2">
+                <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                <span className="font-medium min-w-[100px]">Location:</span>
+                <span>{opportunity.location}</span>
+              </div>
               
               {/* Salary Range */}
-              {opportunity.salary_range && <div className="flex items-center gap-2">
-                  <DollarSign className="w-4 h-4" />
-                  <span className="font-medium">Salary:</span>
-                  <span>{opportunity.salary_range}</span>
-                </div>}
+              <div className="flex items-start gap-2">
+                <DollarSign className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                <span className="font-medium min-w-[100px]">Salary:</span>
+                <span>{opportunity.salary_range}</span>
+              </div>
               
               {/* Deadline */}
-              {opportunity.deadline && <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4" />
-                  <span className="font-medium">Deadline:</span>
+              {opportunity.deadline && (
+                <div className="flex items-start gap-2">
+                  <Calendar className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                  <span className="font-medium min-w-[100px]">Deadline:</span>
                   <span>{new Date(opportunity.deadline).toLocaleDateString()}</span>
-                </div>}
-              
-              {/* Custom Requirements List */}
-              {opportunity.requirements && opportunity.requirements.length > 0 && <div className="mt-3">
-                  <ul className="list-disc list-inside space-y-1">
-                    {opportunity.requirements.map((req, index) => <li key={index}>{req}</li>)}
-                  </ul>
-                </div>}
+                </div>
+              )}
             </div>
           </div>
 
