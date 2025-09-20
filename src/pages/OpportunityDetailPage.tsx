@@ -146,7 +146,19 @@ export default function OpportunityDetailPage() {
           {/* Tags */}
           <div className="flex gap-2 flex-wrap">
             {opportunity.experience_level && <Badge variant="outline">{opportunity.experience_level}</Badge>}
-            {opportunity.type && <Badge variant="outline">{opportunity.type}</Badge>}
+            {/* Art Forms replacing full-time/part-time */}
+            {opportunity.art_forms && opportunity.art_forms.length > 0 && (
+              <>
+                <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 rounded-full">
+                  {opportunity.art_forms[0]}
+                </Badge>
+                {opportunity.art_forms.length > 1 && (
+                  <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 rounded-full">
+                    {opportunity.art_forms[1]}
+                  </Badge>
+                )}
+              </>
+            )}
           </div>
 
           {/* Requirements & Details */}
