@@ -218,15 +218,18 @@ export function ComprehensivePostModal({ open, onOpenChange, trigger }: Comprehe
         city: data.city || undefined,
         state: data.state || undefined,
         type: "Full-time", // Default type
-        tags: data.artForms,
+        tags: data.artForms || [],
         deadline: data.deadline.toISOString(),
-        art_forms: data.artForms && data.artForms.length > 0 ? data.artForms : [],
-        experience_level: data.experienceLevel || undefined,
-        gender_preference: data.genderPreference && data.genderPreference.length > 0 ? data.genderPreference : [],
-        language_preference: data.languagePreference && data.languagePreference.length > 0 ? data.languagePreference : [],
+        art_forms: data.artForms || [],
+        experience_level: data.experienceLevel, // Required field, should never be empty due to validation
+        gender_preference: data.genderPreference || [],
+        language_preference: data.languagePreference || [],
         image_url: imageUrl,
-        organization_name: data.company || undefined,
+        organization_name: data.company, // Always set to company name
       };
+
+      console.log('Form data being submitted:', data);
+      console.log('Opportunity data for database:', opportunityData);
 
       await createOpportunity.mutateAsync(opportunityData);
       onOpenChange(false);
