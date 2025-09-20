@@ -198,12 +198,7 @@ export default function OpportunityDetailPage() {
               </div>
 
               {/* City & State */}
-              {(foundOpportunity?.city || foundOpportunity?.state) && <div className="flex items-start gap-2">
-                  <span className="font-medium min-w-[120px]">City/State:</span>
-                  <span>
-                    {foundOpportunity?.city && foundOpportunity?.state ? `${foundOpportunity.city}, ${foundOpportunity.state}` : foundOpportunity?.city || foundOpportunity?.state}
-                  </span>
-                </div>}
+              {foundOpportunity?.city || foundOpportunity?.state}
               
               {/* Location */}
               <div className="flex items-start gap-2">
