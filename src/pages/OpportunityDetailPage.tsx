@@ -15,11 +15,19 @@ import { ApplyJobModal } from "@/components/opportunities/apply-job-modal";
 import { ShareBottomSheet } from "@/components/ui/share-bottom-sheet";
 export default function OpportunityDetailPage() {
   console.log("OpportunityDetailPage rendering - Bookmark should not be referenced");
-  const { id } = useParams<{ id: string }>();
+  const {
+    id
+  } = useParams<{
+    id: string;
+  }>();
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const { toast } = useToast();
-  
+  const {
+    user
+  } = useAuth();
+  const {
+    toast
+  } = useToast();
+
   // State for modals and UI
   const [showApplyModal, setShowApplyModal] = useState(false);
   const [showShareSheet, setShowShareSheet] = useState(false);
@@ -28,43 +36,37 @@ export default function OpportunityDetailPage() {
   const [isApplying, setIsApplying] = useState(false);
 
   // Hooks
-  const { data: opportunities } = useOpportunities();
-  const { data: organizationOpportunities } = useOrganizationOpportunities();
+  const {
+    data: opportunities
+  } = useOpportunities();
+  const {
+    data: organizationOpportunities
+  } = useOrganizationOpportunities();
   const applyToOpportunity = useApplyToOpportunity();
 
   // Find the opportunity and transform data structure
   const foundOpportunity = opportunities?.find(opp => opp.id === id) || organizationOpportunities?.find(opp => opp.id === id);
-  
+
   // Transform opportunity data to match the expected structure
   const opportunity = foundOpportunity ? {
     ...foundOpportunity,
     company: foundOpportunity.organization_name || foundOpportunity.company || 'Not specified',
     location: foundOpportunity.location || (foundOpportunity.city && foundOpportunity.state ? `${foundOpportunity.city}, ${foundOpportunity.state}` : 'Remote/Location flexible'),
-    art_forms_display: foundOpportunity.art_forms && foundOpportunity.art_forms.length > 0 
-      ? foundOpportunity.art_forms.join(', ') 
-      : 'Not specified',
+    art_forms_display: foundOpportunity.art_forms && foundOpportunity.art_forms.length > 0 ? foundOpportunity.art_forms.join(', ') : 'Not specified',
     experience_level_display: foundOpportunity.experience_level || 'Not specified',
-    gender_preference_display: foundOpportunity.gender_preference && foundOpportunity.gender_preference.length > 0
-      ? foundOpportunity.gender_preference.join(', ')
-      : 'Not specified',
-    language_preference_display: foundOpportunity.language_preference && foundOpportunity.language_preference.length > 0
-      ? foundOpportunity.language_preference.join(', ')
-      : 'Not specified',
-    salary_range: foundOpportunity.salary_min && foundOpportunity.salary_max 
-      ? `$${foundOpportunity.salary_min.toLocaleString()} - $${foundOpportunity.salary_max.toLocaleString()}`
-      : foundOpportunity.salary_min 
-        ? `From $${foundOpportunity.salary_min.toLocaleString()}`
-        : foundOpportunity.salary_max 
-          ? `Up to $${foundOpportunity.salary_max.toLocaleString()}`
-          : 'Not specified',
-    status: 'Open', // Default status
-    requirements: [], // Empty array for now
+    gender_preference_display: foundOpportunity.gender_preference && foundOpportunity.gender_preference.length > 0 ? foundOpportunity.gender_preference.join(', ') : 'Not specified',
+    language_preference_display: foundOpportunity.language_preference && foundOpportunity.language_preference.length > 0 ? foundOpportunity.language_preference.join(', ') : 'Not specified',
+    salary_range: foundOpportunity.salary_min && foundOpportunity.salary_max ? `$${foundOpportunity.salary_min.toLocaleString()} - $${foundOpportunity.salary_max.toLocaleString()}` : foundOpportunity.salary_min ? `From $${foundOpportunity.salary_min.toLocaleString()}` : foundOpportunity.salary_max ? `Up to $${foundOpportunity.salary_max.toLocaleString()}` : 'Not specified',
+    status: 'Open',
+    // Default status
+    requirements: [],
+    // Empty array for now
     views: foundOpportunity.views_count || 0,
-    saves: 0, // Not available in current schema
+    saves: 0,
+    // Not available in current schema
     posted_by: foundOpportunity.user_id,
     image_url: foundOpportunity.image_url || null
   } : null;
-
   useEffect(() => {
     if (foundOpportunity) {
       setHasApplied(foundOpportunity.user_applied || false);
@@ -77,13 +79,11 @@ export default function OpportunityDetailPage() {
   const handleQuickApply = () => {
     setShowApplyModal(true);
   };
-
   const handleShare = () => {
     setShowShareSheet(true);
   };
   if (!opportunity) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+    return <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-semibold mb-4">Opportunity Not Found</h2>
           <Button onClick={() => navigate('/opportunities')} variant="outline">
@@ -91,10 +91,8 @@ export default function OpportunityDetailPage() {
             Back to Opportunities
           </Button>
         </div>
-      </div>
-    );
+      </div>;
   }
-
   return <div className="max-w-4xl mx-auto p-6 space-y-6">
       {/* Header */}
       <div className="flex items-center gap-4">
@@ -127,42 +125,28 @@ export default function OpportunityDetailPage() {
                 {opportunity.status}
               </Badge>
               {/* Art Forms */}
-              {opportunity.art_forms && opportunity.art_forms.length > 0 && (
-                <div className="flex items-center gap-2">
+              {opportunity.art_forms && opportunity.art_forms.length > 0 && <div className="flex items-center gap-2">
                   <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 rounded-full">
                     {opportunity.art_forms[0]}
                   </Badge>
-                  {opportunity.art_forms.length > 1 && (
-                    <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 rounded-full">
+                  {opportunity.art_forms.length > 1 && <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 rounded-full">
                       {opportunity.art_forms[1]}
-                    </Badge>
-                  )}
-                </div>
-              )}
+                    </Badge>}
+                </div>}
             </div>
           </div>
         </CardHeader>
         
         <CardContent className="space-y-6">
           {/* Opportunity Image */}
-          {opportunity.image_url && (
-            <div className="w-full h-48 rounded-lg overflow-hidden">
-              <img 
-                src={opportunity.image_url} 
-                alt={opportunity.title}
-                className="w-full h-full object-cover"
-              />
-            </div>
-          )}
+          {opportunity.image_url && <div className="w-full h-48 rounded-lg overflow-hidden">
+              <img src={opportunity.image_url} alt={opportunity.title} className="w-full h-full object-cover" />
+            </div>}
 
           {/* Tags */}
           <div className="flex gap-2 flex-wrap">
-            {opportunity.experience_level && (
-              <Badge variant="outline">{opportunity.experience_level}</Badge>
-            )}
-            {opportunity.type && (
-              <Badge variant="outline">{opportunity.type}</Badge>
-            )}
+            {opportunity.experience_level && <Badge variant="outline">{opportunity.experience_level}</Badge>}
+            {opportunity.type && <Badge variant="outline">{opportunity.type}</Badge>}
           </div>
 
           {/* Requirements & Details */}
@@ -170,10 +154,7 @@ export default function OpportunityDetailPage() {
             <h3 className="font-semibold mb-3">Opportunity Details</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-muted-foreground">
               {/* Art Forms */}
-              <div className="flex items-start gap-2">
-                <span className="font-medium min-w-[120px]">Art Forms:</span>
-                <span>{opportunity.art_forms_display}</span>
-              </div>
+              
               
               {/* Experience Level */}
               <div className="flex items-start gap-2">
@@ -201,23 +182,18 @@ export default function OpportunityDetailPage() {
               </div>
               
               {/* Deadline */}
-              {opportunity.deadline && (
-                <div className="flex items-start gap-2">
+              {opportunity.deadline && <div className="flex items-start gap-2">
                   <Calendar className="w-4 h-4 mt-0.5 flex-shrink-0" />
                   <span className="font-medium min-w-[100px]">Deadline:</span>
                   <span>{new Date(opportunity.deadline).toLocaleDateString()}</span>
-                </div>
-              )}
+                </div>}
             </div>
           </div>
 
           {/* Description */}
           <div>
             <h3 className="font-semibold mb-2">Description</h3>
-            <LinkRenderer 
-              text={opportunity.description}
-              className="text-muted-foreground whitespace-pre-wrap"
-            />
+            <LinkRenderer text={opportunity.description} className="text-muted-foreground whitespace-pre-wrap" />
           </div>
 
           {/* Stats */}
@@ -232,25 +208,20 @@ export default function OpportunityDetailPage() {
             </div>
             <div className="flex items-center gap-1">
               <Clock className="w-4 h-4" />
-              <span>Posted {formatDistanceToNow(new Date(opportunity.created_at), { addSuffix: true })}</span>
+              <span>Posted {formatDistanceToNow(new Date(opportunity.created_at), {
+                addSuffix: true
+              })}</span>
             </div>
           </div>
 
           {/* Action Buttons */}
           {user && opportunity.posted_by !== user.id && opportunity.status === "Open" && <div className="flex gap-3 pt-4 border-t">
               <Button onClick={handleQuickApply} disabled={hasApplied || isApplying} className="flex-1">
-                {isApplying ? "Applying..." : hasApplied ? (applicationStatus === 'Accepted' ? "Accepted" : "Applied") : "Apply Now"}
+                {isApplying ? "Applying..." : hasApplied ? applicationStatus === 'Accepted' ? "Accepted" : "Applied" : "Apply Now"}
               </Button>
-              {hasApplied && applicationStatus === 'Accepted' && (
-                <Button 
-                  variant="outline" 
-                  size="icon" 
-                  onClick={() => navigate(`/messages?user=${opportunity.posted_by}`)}
-                  title="Message employer"
-                >
+              {hasApplied && applicationStatus === 'Accepted' && <Button variant="outline" size="icon" onClick={() => navigate(`/messages?user=${opportunity.posted_by}`)} title="Message employer">
                   <MessageCircle className="w-4 h-4" />
-                </Button>
-              )}
+                </Button>}
               <Button variant="outline" size="icon" onClick={handleShare}>
                 <Share2 className="w-4 h-4" />
               </Button>
@@ -258,10 +229,7 @@ export default function OpportunityDetailPage() {
 
           {hasApplied && <div className={`border rounded-lg p-4 ${applicationStatus === 'Accepted' ? 'bg-blue-50 border-blue-200' : 'bg-green-50 border-green-200'}`}>
               <p className={`font-medium ${applicationStatus === 'Accepted' ? 'text-blue-800' : 'text-green-800'}`}>
-                {applicationStatus === 'Accepted' 
-                  ? '🎉 Your application has been accepted!' 
-                  : '✓ You have already applied to this opportunity'
-                }
+                {applicationStatus === 'Accepted' ? '🎉 Your application has been accepted!' : '✓ You have already applied to this opportunity'}
               </p>
             </div>}
         </CardContent>
@@ -273,15 +241,10 @@ export default function OpportunityDetailPage() {
       setHasApplied(true);
     }} />}
 
-      <ShareBottomSheet
-        open={showShareSheet}
-        onOpenChange={setShowShareSheet}
-        type="opportunity"
-        data={{
-          url: window.location.href,
-          title: opportunity?.title,
-          company: opportunity?.company
-        }}
-      />
+      <ShareBottomSheet open={showShareSheet} onOpenChange={setShowShareSheet} type="opportunity" data={{
+      url: window.location.href,
+      title: opportunity?.title,
+      company: opportunity?.company
+    }} />
     </div>;
 }
