@@ -3,7 +3,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, MapPin, Calendar, Clock, Users, Eye, DollarSign, MessageCircle, Bookmark, BookmarkCheck, Star, Share2 } from "lucide-react";
+import { ArrowLeft, MapPin, Calendar, Clock, Users, Star, Share2, MessageCircle } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
 import { useOpportunities, useApplyToOpportunity, Opportunity } from "@/hooks/useOpportunities";
 import { useOrganizationOpportunities } from "@/hooks/useOrganizationOpportunities";
 import { useAuth } from "@/hooks/useAuth";
@@ -22,7 +23,6 @@ export default function OpportunityDetailPage() {
   const [showShareSheet, setShowShareSheet] = useState(false);
   const [hasApplied, setHasApplied] = useState(false);
   const [applicationStatus, setApplicationStatus] = useState<string>('pending');
-  const [isSaved, setIsSaved] = useState(false);
   const [isApplying, setIsApplying] = useState(false);
 
   // Hooks
@@ -76,14 +76,6 @@ export default function OpportunityDetailPage() {
     setShowApplyModal(true);
   };
 
-  const handleSave = () => {
-    setIsSaved(!isSaved);
-    toast({
-      title: isSaved ? "Removed from saved" : "Saved successfully",
-      description: isSaved ? "Opportunity removed from your saved list" : "Opportunity added to your saved list"
-    });
-  };
-
   const handleShare = () => {
     setShowShareSheet(true);
   };
@@ -122,10 +114,6 @@ export default function OpportunityDetailPage() {
                     <MapPin className="w-4 h-4" />
                     <span>{opportunity.location}</span>
                   </div>}
-                {opportunity.salary_range && <div className="flex items-center gap-1">
-                    <DollarSign className="w-4 h-4" />
-                    <span>{opportunity.salary_range}</span>
-                  </div>}
                 {opportunity.deadline && <div className="flex items-center gap-1">
                     <Calendar className="w-4 h-4" />
                     <span>Deadline: {new Date(opportunity.deadline).toLocaleDateString()}</span>
@@ -136,6 +124,19 @@ export default function OpportunityDetailPage() {
               <Badge variant={opportunity.status === "Open" ? "default" : "secondary"} className="mx-0 px-[5px] py-0 my-0">
                 {opportunity.status}
               </Badge>
+              {/* Art Forms */}
+              {opportunity.art_forms && opportunity.art_forms.length > 0 && (
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 rounded-full">
+                    {opportunity.art_forms[0]}
+                  </Badge>
+                  {opportunity.art_forms.length > 1 && (
+                    <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 rounded-full">
+                      {opportunity.art_forms[1]}
+                    </Badge>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </CardHeader>
@@ -154,11 +155,6 @@ export default function OpportunityDetailPage() {
 
           {/* Tags */}
           <div className="flex gap-2 flex-wrap">
-            {opportunity.art_forms && opportunity.art_forms.length > 0 && 
-              opportunity.art_forms.map((artForm, index) => (
-                <Badge key={index} variant="outline">{artForm}</Badge>
-              ))
-            }
             {opportunity.experience_level && (
               <Badge variant="outline">{opportunity.experience_level}</Badge>
             )}
@@ -202,13 +198,6 @@ export default function OpportunityDetailPage() {
                 <span>{opportunity.location}</span>
               </div>
               
-              {/* Salary Range */}
-              <div className="flex items-start gap-2">
-                <DollarSign className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                <span className="font-medium min-w-[100px]">Salary:</span>
-                <span>{opportunity.salary_range}</span>
-              </div>
-              
               {/* Deadline */}
               {opportunity.deadline && (
                 <div className="flex items-start gap-2">
@@ -241,7 +230,7 @@ export default function OpportunityDetailPage() {
             </div>
             <div className="flex items-center gap-1">
               <Clock className="w-4 h-4" />
-              <span>Posted {new Date(opportunity.created_at).toLocaleDateString()}</span>
+              <span>Posted {formatDistanceToNow(new Date(opportunity.created_at), { addSuffix: true })}</span>
             </div>
           </div>
 
@@ -260,9 +249,6 @@ export default function OpportunityDetailPage() {
                   <MessageCircle className="w-4 h-4" />
                 </Button>
               )}
-              <Button variant="outline" size="icon" onClick={handleSave}>
-                {isSaved ? <BookmarkCheck className="h-4 w-4" /> : <Bookmark className="h-4 w-4" />}
-              </Button>
               <Button variant="outline" size="icon" onClick={handleShare}>
                 <Share2 className="w-4 h-4" />
               </Button>
