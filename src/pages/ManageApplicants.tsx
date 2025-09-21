@@ -298,13 +298,13 @@ export default function ManageApplicants() {
                           <div>
                             <div 
                               className="text-[15px] font-semibold text-[#111827] leading-[1.2] cursor-pointer hover:text-[#2563EB] transition-colors"
-                              onClick={() => profile?.id && handleViewProfile(profile.id)}
+                              onClick={() => application.user_id && handleViewProfile(application.user_id)}
                               tabIndex={0}
                               role="button"
                               onKeyDown={(e) => {
                                 if (e.key === 'Enter' || e.key === ' ') {
                                   e.preventDefault();
-                                  profile?.id && handleViewProfile(profile.id);
+                                  application.user_id && handleViewProfile(application.user_id);
                                 }
                               }}
                               aria-label={`View profile of ${fullname}`}
@@ -313,13 +313,13 @@ export default function ManageApplicants() {
                             </div>
                             <div 
                               className="text-[13px] font-medium text-[#6B7280] leading-[1.1] mt-1 cursor-pointer hover:text-[#2563EB] transition-colors"
-                              onClick={() => profile?.id && handleViewProfile(profile.id)}
+                              onClick={() => application.user_id && handleViewProfile(application.user_id)}
                               tabIndex={0}
                               role="button"
                               onKeyDown={(e) => {
                                 if (e.key === 'Enter' || e.key === ' ') {
                                   e.preventDefault();
-                                  profile?.id && handleViewProfile(profile.id);
+                                  application.user_id && handleViewProfile(application.user_id);
                                 }
                               }}
                             >
@@ -360,7 +360,7 @@ export default function ManageApplicants() {
                                 Accepted
                               </div>
                               <Button
-                                onClick={() => profile?.id && handleMessage(profile.id)}
+                                onClick={() => application.user_id && handleMessage(application.user_id)}
                                 variant="outline"
                                 className="h-8 px-2.5 text-xs font-medium border border-[#E5E7EB] text-[#111827] hover:bg-[#F9FAFB] rounded-lg"
                                 aria-label={`Message ${fullname}`}
@@ -377,7 +377,7 @@ export default function ManageApplicants() {
                                 Rejected
                               </div>
                               <Button
-                                onClick={() => profile?.id && handleMessage(profile.id)}
+                                onClick={() => application.user_id && handleMessage(application.user_id)}
                                 variant="outline"
                                 className="h-8 px-2.5 text-xs font-medium border border-[#E5E7EB] text-[#111827] hover:bg-[#F9FAFB] rounded-lg"
                                 aria-label={`Message ${fullname}`}
@@ -401,12 +401,12 @@ export default function ManageApplicants() {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" role="menu">
                               <DropdownMenuItem 
-                                onClick={() => profile?.id && handleViewProfile(profile.id)}
+                                onClick={() => application.user_id && handleViewProfile(application.user_id)}
                               >
                                 View Profile
                               </DropdownMenuItem>
                               <DropdownMenuItem 
-                                onClick={() => profile?.id && handleMessage(profile.id)}
+                                onClick={() => application.user_id && handleMessage(application.user_id)}
                               >
                                 Message
                               </DropdownMenuItem>
