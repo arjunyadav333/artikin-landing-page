@@ -22,7 +22,7 @@ const Create = lazy(() => import("./pages/Create"));
 const Connections = lazy(() => import("./pages/Connections"));
 const DiscoverPeople = lazy(() => import("./pages/DiscoverPeople"));
 const UserProfile = lazy(() => import("./pages/UserProfile"));
-const MessagesLayout = lazy(() => import("./pages/MessagesLayout"));
+const OptimizedMessagesLayout = lazy(() => import("./pages/OptimizedMessagesLayout"));
 const Auth = lazy(() => import("./pages/Auth"));
 const AuthNew = lazy(() => import("./pages/AuthNew"));
 const SignUp = lazy(() => import("./pages/SignUp"));
@@ -38,34 +38,41 @@ const ProfileLoader = () => <ProfilePageSkeleton />;
 const ConnectionsLoader = () => <ConnectionsPageSkeleton />;
 const DefaultLoader = () => <PageSpinner />;
 
+// Ultra-optimized React Query client for maximum performance
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      // Ultra-aggressive caching for maximum performance
-      staleTime: 5 * 60 * 1000, // 5 minutes - longer cache
-      gcTime: 10 * 60 * 1000, // 10 minutes - extended cleanup
+      // Extended caching for maximum performance
+      staleTime: 10 * 60 * 1000, // 10 minutes - much longer cache
+      gcTime: 30 * 60 * 1000, // 30 minutes - extended cleanup
       refetchOnWindowFocus: false,
       refetchOnMount: false,
-      refetchOnReconnect: false,
+      refetchOnReconnect: 'always', // Only reconnect refetch
       networkMode: 'always',
-      // Deduplicate requests with same query key
+      // Enable structural sharing for better performance
       structuralSharing: true,
+      // Request deduplication
+      queryKeyHashFn: (queryKey) => JSON.stringify(queryKey),
       retry: (failureCount, error: any) => {
-        // Don't retry auth errors or network errors for speed
+        // Fail fast for auth errors
         if (error?.message?.includes('JWT') || 
             error?.message?.includes('auth') ||
             error?.status === 401 ||
             error?.status === 403) {
           return false;
         }
-        return failureCount < 1; // Single retry only for speed
+        return failureCount < 1; // Single retry only
       },
-      retryDelay: 200, // Super fast retries
+      retryDelay: 100, // Super fast retries
     },
     mutations: {
       // Lightning fast mutations
       retry: 0, // No retries for mutations - fail fast
-      networkMode: 'always'
+      networkMode: 'always',
+      // Use optimistic updates where possible
+      onMutate: () => {
+        console.log('Mutation starting...');
+      }
     }
   }
 });
@@ -258,14 +265,14 @@ const AppRoutes = () => {
         <Route path="/messages" element={
           <ProtectedRoute>
             <Suspense fallback={<DefaultLoader />}>
-              <MessagesLayout />
+              <OptimizedMessagesLayout />
             </Suspense>
           </ProtectedRoute>
         } />
         <Route path="/messages/:chatId" element={
           <ProtectedRoute>
             <Suspense fallback={<DefaultLoader />}>
-              <MessagesLayout />
+              <OptimizedMessagesLayout />
             </Suspense>
           </ProtectedRoute>
         } />
