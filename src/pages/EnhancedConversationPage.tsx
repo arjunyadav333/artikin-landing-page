@@ -143,6 +143,13 @@ const EnhancedConversationPage = () => {
     );
   }
 
+  // Auto-redirect to messages if conversation doesn't exist
+  useEffect(() => {
+    if (!conversationLoading && !conversation && conversationError?.message === 'CONVERSATION_NOT_FOUND') {
+      navigate('/messages', { replace: true });
+    }
+  }, [conversationLoading, conversation, conversationError, navigate]);
+
   if (!conversation) {
     return (
       <div className="mobile-conversation-layout bg-background flex items-center justify-center h-screen">
@@ -150,13 +157,13 @@ const EnhancedConversationPage = () => {
           <h2 className="text-xl font-semibold mb-2">
             {conversationError?.message === 'ACCESS_DENIED' 
               ? 'Access Denied'
-              : 'Conversation not found'
+              : 'Loading conversation...'
             }
           </h2>
           <p className="text-muted-foreground mb-4">
             {conversationError?.message === 'ACCESS_DENIED'
               ? 'You don\'t have permission to view this conversation.'
-              : 'This conversation may have been deleted or doesn\'t exist.'
+              : 'Redirecting to your conversations...'
             }
           </p>
           <Button onClick={() => navigate('/messages')}>
