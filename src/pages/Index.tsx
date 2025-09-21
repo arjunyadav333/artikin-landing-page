@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight, Play, X } from 'lucide-react';
 import { useScrollRestoration } from "@/hooks/useScrollRestoration";
-const HeroSection = () => {
+const Index = () => {
   const { navigateWithScrollSave } = useScrollRestoration();
   return <section id="home" className="relative min-h-screen xs:min-h-[100dvh] flex items-start md:items-center justify-center overflow-hidden pt-20 xs:pt-24 sm:pt-32 md:pt-0">
       {/* Animated Background Elements */}
@@ -75,4 +75,4 @@ const HeroSection = () => {
   
 };
 
-export default HeroSection;
+export default Index;
