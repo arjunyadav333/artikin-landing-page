@@ -14,7 +14,8 @@ import {
   useMessageReactions,
   useEditMessage,
   useDeleteMessage,
-  useMarkMessageSeen
+  useMarkMessageSeen,
+  useConversationById
 } from "@/hooks/useEnhancedMessaging";
 import { useDraftMessage } from "@/hooks/useDraftMessage";
 import { EnhancedMessageItem } from "@/components/messaging/EnhancedMessageItem";
@@ -42,6 +43,7 @@ const EnhancedConversationPage = () => {
 
   const { data: conversations = [] } = useEnhancedConversations();
   const { data: messages = [], isLoading: messagesLoading } = useEnhancedMessages(chatId);
+  const { data: currentConversation, isLoading: conversationLoading, error: conversationError } = useConversationById(chatId);
   const { draftText, updateDraft, clearDraft } = useDraftMessage(chatId);
   const { typingUsers, sendTypingStatus } = useTypingIndicators(chatId);
   
@@ -55,8 +57,8 @@ const EnhancedConversationPage = () => {
   // Enable real-time updates
   useEnhancedRealtimeMessages(chatId);
 
-  // Find current conversation
-  const conversation = conversations.find(c => c.id === chatId);
+  // Find current conversation (first try cache, then fallback to direct fetch)
+  const conversation = conversations.find(c => c.id === chatId) || currentConversation;
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -133,21 +135,35 @@ const EnhancedConversationPage = () => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   };
 
+  if (conversationLoading) {
+    return (
+      <div className="mobile-conversation-layout bg-background flex items-center justify-center h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
   if (!conversation) {
     return (
-      <AppLayout>
-        <div className="h-screen bg-background flex items-center justify-center">
-          <div className="text-center">
-            <h2 className="text-xl font-semibold mb-2">Conversation not found</h2>
-            <p className="text-muted-foreground mb-4">
-              This conversation may have been deleted or you don't have access to it.
-            </p>
-            <Button onClick={() => navigate('/messages')}>
-              Back to Messages
-            </Button>
-          </div>
+      <div className="mobile-conversation-layout bg-background flex items-center justify-center h-screen">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold mb-2">
+            {conversationError?.message === 'ACCESS_DENIED' 
+              ? 'Access Denied'
+              : 'Conversation not found'
+            }
+          </h2>
+          <p className="text-muted-foreground mb-4">
+            {conversationError?.message === 'ACCESS_DENIED'
+              ? 'You don\'t have permission to view this conversation.'
+              : 'This conversation may have been deleted or doesn\'t exist.'
+            }
+          </p>
+          <Button onClick={() => navigate('/messages')}>
+            Back to Messages
+          </Button>
         </div>
-      </AppLayout>
+      </div>
     );
   }
 

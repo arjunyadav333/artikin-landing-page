@@ -199,6 +199,114 @@ export const useEnhancedConversations = () => {
   });
 };
 
+// Hook to fetch a single conversation by ID
+export const useConversationById = (conversationId?: string) => {
+  const { user } = useAuth();
+  
+  return useQuery({
+    queryKey: ['conversation-by-id', conversationId],
+    queryFn: async () => {
+      if (!conversationId || !user) return null;
+
+      // First check if user has access to this conversation
+      const { data: conversationData, error: conversationError } = await supabase
+        .from('conversations')
+        .select('*')
+        .eq('id', conversationId)
+        .single();
+
+      if (conversationError) {
+        if (conversationError.code === 'PGRST116') {
+          throw new Error('CONVERSATION_NOT_FOUND');
+        }
+        throw conversationError;
+      }
+
+      // Check if user is a participant
+      const isParticipant = conversationData.participant_a === user.id || conversationData.participant_b === user.id;
+      if (!isParticipant) {
+        throw new Error('ACCESS_DENIED');
+      }
+
+      // Get the other participant
+      const otherParticipantId = conversationData.participant_a === user.id 
+        ? conversationData.participant_b 
+        : conversationData.participant_a;
+
+      // Fetch other participant's profile
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('user_id, username, display_name, avatar_url, role')
+        .eq('user_id', otherParticipantId)
+        .maybeSingle();
+
+      const otherParticipant = profile || {
+        user_id: otherParticipantId,
+        username: `user_${otherParticipantId.slice(0, 8)}`,
+        display_name: 'Unknown User',
+        avatar_url: null,
+        role: null
+      };
+
+      // Get participant settings
+      const { data: participantSettings } = await supabase
+        .from('conversation_participants')
+        .select('pinned, muted, archived')
+        .eq('conversation_id', conversationId)
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      // Get last message
+      let lastMessage = null;
+      if (conversationData.last_message_id) {
+        const { data: msgData } = await supabase
+          .from('messages')
+          .select('*')
+          .eq('id', conversationData.last_message_id)
+          .maybeSingle();
+
+        if (msgData) {
+          const { data: senderProfile } = await supabase
+            .from('profiles')
+            .select('user_id, username, display_name, avatar_url')
+            .eq('user_id', msgData.sender_id)
+            .maybeSingle();
+
+          lastMessage = {
+            ...msgData,
+            sender: senderProfile || {
+              user_id: msgData.sender_id,
+              username: `user_${msgData.sender_id.slice(0, 8)}`,
+              display_name: 'Unknown User',
+              avatar_url: null
+            }
+          };
+        }
+      }
+
+      return {
+        ...conversationData,
+        other_participant: otherParticipant,
+        last_message: lastMessage,
+        participant_settings: participantSettings || {
+          pinned: false,
+          muted: false,
+          archived: false
+        },
+        unread_count: 0 // We'll calculate this separately if needed
+      };
+    },
+    enabled: !!conversationId && !!user,
+    retry: (failureCount, error: any) => {
+      // Don't retry for not found or access denied errors
+      if (error?.message === 'CONVERSATION_NOT_FOUND' || error?.message === 'ACCESS_DENIED') {
+        return false;
+      }
+      return failureCount < 3;
+    }
+  });
+};
+
 // Enhanced hook to fetch messages with reactions and replies
 export const useEnhancedMessages = (conversationId?: string) => {
   const { user } = useAuth();

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
@@ -9,6 +9,7 @@ export const useDirectMessage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>({});
 
   const createOrGetConversationMutation = useMutation({
@@ -28,6 +29,8 @@ export const useDirectMessage = () => {
       setLoadingStates(prev => ({ ...prev, [targetUserId]: false }));
       
       if (result?.conversation_id) {
+        // Invalidate conversations cache to ensure it includes the new conversation
+        queryClient.invalidateQueries({ queryKey: ['enhanced-conversations'] });
         navigate(`/messages/${result.conversation_id}`);
       }
     },

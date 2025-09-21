@@ -9,7 +9,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Search, Send, Plus, Filter, MoreVertical, Pin, Trash2, ArrowLeft } from "lucide-react";
-import { useEnhancedConversations, useEnhancedMessages, useEnhancedRealtimeMessages, useTypingIndicators, useSendEnhancedMessage, useMessageReactions, useEditMessage, useDeleteMessage, useMarkMessageSeen } from "@/hooks/useEnhancedMessaging";
+import { useEnhancedConversations, useEnhancedMessages, useEnhancedRealtimeMessages, useTypingIndicators, useSendEnhancedMessage, useMessageReactions, useEditMessage, useDeleteMessage, useMarkMessageSeen, useConversationById } from "@/hooks/useEnhancedMessaging";
 import { NewMessageModal } from "@/components/messaging/NewMessageModal";
 import { useAuth } from "@/hooks/useAuth";
 import { formatDistanceToNow } from "date-fns";
@@ -58,6 +58,7 @@ const MessagesLayout = () => {
 
   const { data: conversations = [], isLoading: conversationsLoading, error: conversationsError } = useEnhancedConversations();
   const { data: messages = [], isLoading: messagesLoading } = useEnhancedMessages(chatId);
+  const { data: currentConversation, isLoading: conversationLoading, error: conversationError } = useConversationById(chatId);
   const { draftText, updateDraft, clearDraft } = useDraftMessage(chatId);
   const { typingUsers, sendTypingStatus } = useTypingIndicators(chatId);
 
@@ -113,8 +114,8 @@ const MessagesLayout = () => {
   // Enable real-time updates for selected conversation
   useEnhancedRealtimeMessages(chatId);
 
-  // Find current conversation
-  const conversation = conversations.find(c => c.id === chatId);
+  // Find current conversation (first try cache, then fallback to direct fetch)
+  const conversation = conversations.find(c => c.id === chatId) || currentConversation;
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -428,13 +429,26 @@ const MessagesLayout = () => {
               <p className="text-sm">Choose a conversation from the list to start messaging</p>
             </div>
           </div>
+        ) : conversationLoading ? (
+          // Loading conversation
+          <div className="flex-1 flex items-center justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          </div>
         ) : !conversation ? (
-          // Conversation not found
+          // Conversation not found or error
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center">
-              <h2 className="text-xl font-semibold mb-2">Conversation not found</h2>
+              <h2 className="text-xl font-semibold mb-2">
+                {conversationError?.message === 'ACCESS_DENIED' 
+                  ? 'Access Denied'
+                  : 'Conversation not found'
+                }
+              </h2>
               <p className="text-muted-foreground mb-4">
-                This conversation may have been deleted or you don't have access to it.
+                {conversationError?.message === 'ACCESS_DENIED'
+                  ? 'You don\'t have permission to view this conversation.'
+                  : 'This conversation may have been deleted or doesn\'t exist.'
+                }
               </p>
               <Button onClick={() => navigate('/messages')}>
                 Back to Messages
