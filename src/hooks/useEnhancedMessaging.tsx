@@ -132,7 +132,20 @@ export const useEnhancedConversations = () => {
               .from('profiles')
               .select('user_id, username, display_name, avatar_url, role')
               .eq('user_id', otherParticipantId)
-              .single();
+              .maybeSingle();
+
+            // If no profile exists, create a default one from auth user data
+            let otherParticipant = profile;
+            if (!profile) {
+              // Try to get basic info from auth.users metadata (fallback)
+              otherParticipant = {
+                user_id: otherParticipantId,
+                username: `user_${otherParticipantId.slice(0, 8)}`,
+                display_name: 'Unknown User',
+                avatar_url: null,
+                role: null
+              };
+            }
 
             // Get last message with full details
             let lastMessage = null;
@@ -149,7 +162,7 @@ export const useEnhancedConversations = () => {
                   .from('profiles')
                   .select('user_id, username, display_name, avatar_url')
                   .eq('user_id', msgData.sender_id)
-                  .single();
+                  .maybeSingle();
 
                 lastMessage = {
                   ...msgData,
@@ -166,7 +179,7 @@ export const useEnhancedConversations = () => {
 
             return {
               ...conv,
-              other_participant: profile,
+              other_participant: otherParticipant,
               last_message: lastMessage,
               unread_count: unreadCount,
               participant_settings: participantSettings || {
@@ -179,9 +192,8 @@ export const useEnhancedConversations = () => {
           })
       );
 
-      const finalResult = result.filter(conv => conv.other_participant);
-      console.log('Enhanced conversations result:', finalResult);
-      return finalResult;
+      console.log('Enhanced conversations result:', result);
+      return result;
     },
     enabled: !!user
   });
@@ -220,13 +232,22 @@ export const useEnhancedMessages = (conversationId?: string) => {
         .select('id, message_id, user_id, emoji, created_at')
         .in('message_id', messageIds);
 
-      return data.map(msg => ({
-        ...msg,
-        content: msg.body,
-        sender: senders?.find(s => s.user_id === msg.sender_id),
-        reactions: reactions?.filter(r => r.message_id === msg.id) || [],
-        replied_to_message: null // Will be implemented later with a separate query
-      })) as EnhancedMessage[];
+      return data.map(msg => {
+        const sender = senders?.find(s => s.user_id === msg.sender_id) || {
+          user_id: msg.sender_id,
+          username: `user_${msg.sender_id.slice(0, 8)}`,
+          display_name: 'Unknown User',
+          avatar_url: null
+        };
+
+        return {
+          ...msg,
+          content: msg.body,
+          sender,
+          reactions: reactions?.filter(r => r.message_id === msg.id) || [],
+          replied_to_message: null // Will be implemented later with a separate query
+        };
+      }) as EnhancedMessage[];
     },
     enabled: !!conversationId && !!user
   });
