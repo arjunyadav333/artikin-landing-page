@@ -22,7 +22,7 @@ const Create = lazy(() => import("./pages/Create"));
 const Connections = lazy(() => import("./pages/Connections"));
 const DiscoverPeople = lazy(() => import("./pages/DiscoverPeople"));
 const UserProfile = lazy(() => import("./pages/UserProfile"));
-const OptimizedMessagesLayout = lazy(() => import("./pages/OptimizedMessagesLayout"));
+const MessagesLayout = lazy(() => import("./pages/MessagesLayout"));
 const Auth = lazy(() => import("./pages/Auth"));
 const AuthNew = lazy(() => import("./pages/AuthNew"));
 const SignUp = lazy(() => import("./pages/SignUp"));
@@ -265,14 +265,14 @@ const AppRoutes = () => {
         <Route path="/messages" element={
           <ProtectedRoute>
             <Suspense fallback={<DefaultLoader />}>
-              <OptimizedMessagesLayout />
+              <MessagesLayout />
             </Suspense>
           </ProtectedRoute>
         } />
         <Route path="/messages/:chatId" element={
           <ProtectedRoute>
             <Suspense fallback={<DefaultLoader />}>
-              <OptimizedMessagesLayout />
+              <MessagesLayout />
             </Suspense>
           </ProtectedRoute>
         } />
