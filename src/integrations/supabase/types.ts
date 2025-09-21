@@ -216,6 +216,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "conversations_last_message_id_fkey"
+            columns: ["last_message_id"]
+            isOneToOne: false
+            referencedRelation: "messages_with_details"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "conversations_opportunity_id_fkey"
             columns: ["opportunity_id"]
             isOneToOne: false
@@ -227,6 +234,13 @@ export type Database = {
             columns: ["last_message_id"]
             isOneToOne: false
             referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_conversations_last_message"
+            columns: ["last_message_id"]
+            isOneToOne: false
+            referencedRelation: "messages_with_details"
             referencedColumns: ["id"]
           },
         ]
@@ -337,6 +351,13 @@ export type Database = {
             referencedRelation: "messages"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "message_attachments_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages_with_details"
+            referencedColumns: ["id"]
+          },
         ]
       }
       message_reactions: {
@@ -369,6 +390,13 @@ export type Database = {
             referencedRelation: "messages"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "message_reactions_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages_with_details"
+            referencedColumns: ["id"]
+          },
         ]
       }
       message_receipts: {
@@ -396,6 +424,13 @@ export type Database = {
             columns: ["message_id"]
             isOneToOne: false
             referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "message_receipts_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages_with_details"
             referencedColumns: ["id"]
           },
         ]
@@ -490,10 +525,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "messages_replied_to_message_id_fkey"
+            columns: ["replied_to_message_id"]
+            isOneToOne: false
+            referencedRelation: "messages_with_details"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "messages_reply_to_fkey"
             columns: ["reply_to"]
             isOneToOne: false
             referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_reply_to_fkey"
+            columns: ["reply_to"]
+            isOneToOne: false
+            referencedRelation: "messages_with_details"
             referencedColumns: ["id"]
           },
         ]
@@ -864,6 +913,13 @@ export type Database = {
             referencedRelation: "messages"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "starred_messages_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages_with_details"
+            referencedColumns: ["id"]
+          },
         ]
       }
       user_blocks: {
@@ -915,10 +971,96 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "conversations_last_message_id_fkey"
+            columns: ["last_message_id"]
+            isOneToOne: false
+            referencedRelation: "messages_with_details"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "fk_conversations_last_message"
             columns: ["last_message_id"]
             isOneToOne: false
             referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_conversations_last_message"
+            columns: ["last_message_id"]
+            isOneToOne: false
+            referencedRelation: "messages_with_details"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages_with_details: {
+        Row: {
+          body: string | null
+          client_id: string | null
+          conversation_id: string | null
+          created_at: string | null
+          deleted: boolean | null
+          deleted_for_everyone: boolean | null
+          delivered_at: string | null
+          edited: boolean | null
+          edited_at: string | null
+          id: string | null
+          kind: string | null
+          link_preview: Json | null
+          media_url: string | null
+          message_type: string | null
+          meta: Json | null
+          pending: boolean | null
+          reactions: Json | null
+          replied_to_message_id: string | null
+          reply_to: string | null
+          seen_at: string | null
+          sender_avatar_url: string | null
+          sender_display_name: string | null
+          sender_id: string | null
+          sender_username: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations_secure"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_replied_to_message_id_fkey"
+            columns: ["replied_to_message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_replied_to_message_id_fkey"
+            columns: ["replied_to_message_id"]
+            isOneToOne: false
+            referencedRelation: "messages_with_details"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_reply_to_fkey"
+            columns: ["reply_to"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_reply_to_fkey"
+            columns: ["reply_to"]
+            isOneToOne: false
+            referencedRelation: "messages_with_details"
             referencedColumns: ["id"]
           },
         ]
@@ -978,6 +1120,35 @@ export type Database = {
       delete_message_for_everyone: {
         Args: { message_id_param: string }
         Returns: boolean
+      }
+      get_conversation_messages: {
+        Args: { conversation_id_param: string }
+        Returns: {
+          body: string
+          client_id: string
+          conversation_id: string
+          created_at: string
+          deleted: boolean
+          deleted_for_everyone: boolean
+          delivered_at: string
+          edited: boolean
+          edited_at: string
+          id: string
+          kind: string
+          link_preview: Json
+          media_url: string
+          message_type: string
+          meta: Json
+          pending: boolean
+          reactions: Json
+          replied_to_message_id: string
+          reply_to: string
+          seen_at: string
+          sender_avatar_url: string
+          sender_display_name: string
+          sender_id: string
+          sender_username: string
+        }[]
       }
       get_current_user_profile_secure: {
         Args: Record<PropertyKey, never>
@@ -1094,6 +1265,10 @@ export type Database = {
           user_id_param: string
         }
         Returns: number
+      }
+      mark_message_seen_debounced: {
+        Args: { message_id_param: string }
+        Returns: boolean
       }
       track_opportunity_view: {
         Args: { opportunity_id_param: string; viewer_id_param: string }
