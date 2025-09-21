@@ -119,8 +119,10 @@ export const useUpdateApplicationStatus = () => {
     },
     onSuccess: (_, { status }) => {
       queryClient.invalidateQueries({ queryKey: ['opportunityApplications'] });
+      // Remove toast messages as requested by user
     },
     onError: (error: any) => {
+      // Keep error toasts for actual failures
       toast({
         title: "Update failed",
         description: error.message,

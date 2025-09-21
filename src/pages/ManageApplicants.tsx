@@ -34,7 +34,6 @@ export default function ManageApplicants() {
   const { startDirectMessage } = useDirectMessage();
   const [activeTab, setActiveTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [undoTimeout, setUndoTimeout] = useState<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
 
   const { data: currentProfile, isLoading: profileLoading } = useCurrentProfile();
@@ -80,9 +79,10 @@ export default function ManageApplicants() {
   const handleAccept = async (applicationId: string) => {
     try {
       await updateStatus.mutateAsync({ applicationId, status: 'accepted' });
-      showUndoToast("Application accepted", () => handleRevoke(applicationId));
+      // Remove toast messages as requested by user
     } catch (error) {
       console.error('Failed to accept application:', error);
+      // Keep error toasts for actual failures
       toast({
         title: "Action failed",
         description: "Please try again.",
@@ -94,9 +94,10 @@ export default function ManageApplicants() {
   const handleReject = async (applicationId: string) => {
     try {
       await updateStatus.mutateAsync({ applicationId, status: 'rejected' });
-      showUndoToast("Application rejected", () => handleRevoke(applicationId));
+      // Remove toast messages as requested by user
     } catch (error) {
       console.error('Failed to reject application:', error);
+      // Keep error toasts for actual failures
       toast({
         title: "Action failed",
         description: "Please try again.",
@@ -108,10 +109,7 @@ export default function ManageApplicants() {
   const handleRevoke = async (applicationId: string) => {
     try {
       await updateStatus.mutateAsync({ applicationId, status: 'pending' });
-      toast({
-        title: "Status reverted",
-        description: "Application status has been reset to pending."
-      });
+      // Remove toast messages as requested by user
     } catch (error) {
       console.error('Failed to revoke status:', error);
     }
@@ -131,37 +129,6 @@ export default function ManageApplicants() {
 
   const handleMessage = (userId: string) => {
     startDirectMessage(userId);
-  };
-
-  const showUndoToast = (message: string, undoFn: () => void) => {
-    if (undoTimeout) {
-      clearTimeout(undoTimeout);
-    }
-
-    const { dismiss } = toast({
-      title: message,
-      description: "Undo within 6 seconds",
-      action: (
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => {
-            undoFn();
-            dismiss();
-            if (undoTimeout) clearTimeout(undoTimeout);
-          }}
-        >
-          Undo
-        </Button>
-      ),
-      duration: 6000
-    });
-
-    const timeout = setTimeout(() => {
-      dismiss();
-    }, 6000);
-    
-    setUndoTimeout(timeout);
   };
 
   const filteredApplications = applications.filter(app => {

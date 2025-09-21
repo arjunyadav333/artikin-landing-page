@@ -16,11 +16,11 @@ import {
   Trash2 
 } from "lucide-react";
 import { Application } from "@/hooks/useApplications";
+import { useDirectMessage } from "@/hooks/useDirectMessage";
 
 interface ApplicantActionsMenuProps {
   application: Application;
   onViewProfile: (userId: string) => void;
-  onMessage: (userId: string) => void;
   onAccept: (applicationId: string) => void;
   onReject: (applicationId: string) => void;
   onRevoke: (applicationId: string) => void;
@@ -31,7 +31,6 @@ interface ApplicantActionsMenuProps {
 export function ApplicantActionsMenu({
   application,
   onViewProfile,
-  onMessage,
   onAccept,
   onReject,
   onRevoke,
@@ -40,6 +39,7 @@ export function ApplicantActionsMenu({
 }: ApplicantActionsMenuProps) {
   const profile = application.profiles;
   const status = application.status;
+  const { startDirectMessage, isLoading: messageLoading } = useDirectMessage();
 
   return (
     <DropdownMenu>
@@ -60,9 +60,12 @@ export function ApplicantActionsMenu({
           View Profile
         </DropdownMenuItem>
         
-        <DropdownMenuItem onClick={() => profile?.id && onMessage(profile.id)}>
+        <DropdownMenuItem 
+          onClick={() => application.user_id && startDirectMessage(application.user_id)}
+          disabled={!application.user_id || messageLoading(application.user_id)}
+        >
           <MessageSquare className="h-4 w-4 mr-3" />
-          Message
+          {messageLoading(application.user_id || '') ? 'Loading...' : 'Message'}
         </DropdownMenuItem>
         
         <DropdownMenuSeparator />

@@ -30,6 +30,7 @@ import {
 import { useOpportunityApplications, useUpdateApplicationStatus } from "@/hooks/useApplications";
 import { Application } from "@/hooks/useApplications";
 import { formatDistanceToNow } from "date-fns";
+import { useDirectMessage } from "@/hooks/useDirectMessage";
 
 interface ApplicantManagementProps {
   opportunityId: string;
@@ -43,6 +44,7 @@ export function ApplicantManagement({ opportunityId, opportunityTitle }: Applica
   
   const { data: applications, isLoading } = useOpportunityApplications(opportunityId);
   const updateStatus = useUpdateApplicationStatus();
+  const { startDirectMessage, isLoading: messageLoading } = useDirectMessage();
 
   const filteredApplications = applications?.filter(app => {
     const matchesSearch = !searchQuery || 
@@ -324,9 +326,13 @@ export function ApplicantManagement({ opportunityId, opportunityTitle }: Applica
                               </Button>
                             </div>
                           )}
-                          <Button variant="outline">
+                          <Button 
+                            variant="outline"
+                            onClick={() => selectedApplicant?.user_id && startDirectMessage(selectedApplicant.user_id)}
+                            disabled={!selectedApplicant?.user_id || messageLoading(selectedApplicant?.user_id || '')}
+                          >
                             <MessageSquare className="h-4 w-4 mr-2" />
-                            Message Artist
+                            {messageLoading(selectedApplicant?.user_id || '') ? 'Loading...' : 'Message Artist'}
                           </Button>
                         </DialogFooter>
                       </DialogContent>
