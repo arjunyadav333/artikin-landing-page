@@ -5,6 +5,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { MapPin, Calendar, Eye, Trash2 } from "lucide-react";
 import { Application } from "@/hooks/useApplications";
 import { formatDistanceToNow } from "date-fns";
+import { useDirectMessage } from "@/hooks/useDirectMessage";
 
 interface ApplicationCardProps {
   application: Application;
@@ -19,6 +20,7 @@ export function ApplicationCard({
   onRemoveApplication, 
   className = "" 
 }: ApplicationCardProps) {
+  const { startDirectMessage, isLoading } = useDirectMessage();
   const getStatusColor = (status: string) => {
     const statusColors: Record<string, string> = {
       pending: "bg-blue-500/10 text-blue-600 border-blue-500/20",
@@ -102,17 +104,15 @@ export function ApplicationCard({
           </div>
           
           <div className="flex items-center gap-2">
-            {application.status === 'accepted' && (
+            {application.status === 'accepted' && application.opportunities?.user_id && (
               <Button 
                 variant="default"
                 size="sm"
-                onClick={() => {
-                  // Navigate to messaging with opportunity context
-                  window.location.href = `/messages?opportunity=${application.opportunity_id}`;
-                }}
+                onClick={() => startDirectMessage(application.opportunities.user_id)}
+                disabled={isLoading(application.opportunities.user_id)}
                 className="text-xs bg-green-600 hover:bg-green-700"
               >
-                Message
+                {isLoading(application.opportunities.user_id) ? 'Loading...' : 'Message'}
               </Button>
             )}
             <Button 

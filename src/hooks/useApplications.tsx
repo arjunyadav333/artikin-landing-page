@@ -19,6 +19,7 @@ export interface Application {
     company?: string;
     type: string;
     location?: string;
+    user_id: string;
     profiles?: {
       display_name: string;
       avatar_url?: string;
@@ -55,6 +56,7 @@ export const useUserApplications = () => {
             location,
             image_url,
             status,
+            user_id,
             profiles (
               display_name,
               avatar_url

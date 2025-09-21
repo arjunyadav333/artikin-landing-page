@@ -25,6 +25,7 @@ import { formatDistanceToNow } from "date-fns";
 import { ShareOpportunityModal } from "./share-opportunity-modal";
 import { ConfirmDeleteModal } from "./confirm-delete-modal";
 import { useNavigate } from "react-router-dom";
+import { useDirectMessage } from "@/hooks/useDirectMessage";
 
 interface OpportunityData {
   id: string;
@@ -84,6 +85,7 @@ export function OpportunityCard({
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const navigate = useNavigate();
+  const { startDirectMessage, isLoading } = useDirectMessage();
   
   // Determine if current user is the owner and role-based behavior
   const isOwner = currentUserId === opportunity.user_id;
@@ -331,10 +333,11 @@ export function OpportunityCard({
                   {opportunity.user_applied ? (
                     opportunity.application_status === 'accepted' ? (
                       <Button 
-                        onClick={() => navigate(`/messages?opportunity=${opportunity.id}`)}
+                        onClick={() => startDirectMessage(opportunity.user_id)}
+                        disabled={isLoading(opportunity.user_id)}
                         className="flex-1 h-11 min-h-[44px] text-sm font-medium bg-green-600 text-white hover:bg-green-700"
                       >
-                        Message
+                        {isLoading(opportunity.user_id) ? 'Loading...' : 'Message'}
                       </Button>
                     ) : (
                       <Button 
