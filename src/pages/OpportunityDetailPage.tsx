@@ -199,9 +199,6 @@ export default function OpportunityDetailPage() {
                 <span className="font-medium min-w-[120px]">Organization:</span>
                 <span>{opportunity.company}</span>
               </div>
-
-              {/* City & State */}
-              {foundOpportunity?.city || foundOpportunity?.state}
               
               {/* Location */}
               <div className="flex items-start gap-2">
