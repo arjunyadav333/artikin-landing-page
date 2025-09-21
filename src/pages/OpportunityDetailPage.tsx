@@ -14,6 +14,8 @@ import { LinkRenderer } from "@/components/ui/link-renderer";
 import { ApplyJobModal } from "@/components/opportunities/apply-job-modal";
 import { ShareBottomSheet } from "@/components/ui/share-bottom-sheet";
 import { supabase } from "@/integrations/supabase/client";
+import { useDirectMessage } from "@/hooks/useDirectMessage";
+import { useUserApplications } from "@/hooks/useApplications";
 export default function OpportunityDetailPage() {
   console.log("OpportunityDetailPage rendering - Bookmark should not be referenced");
   const {
@@ -44,6 +46,8 @@ export default function OpportunityDetailPage() {
     data: organizationOpportunities
   } = useOrganizationOpportunities();
   const applyToOpportunity = useApplyToOpportunity();
+  const { startDirectMessage, isLoading: messageLoading } = useDirectMessage();
+  const { data: userApplications } = useUserApplications();
 
   // Find the opportunity and transform data structure
   const foundOpportunity = opportunities?.find(opp => opp.id === id) || organizationOpportunities?.find(opp => opp.id === id);
@@ -68,12 +72,13 @@ export default function OpportunityDetailPage() {
     image_url: foundOpportunity.image_url || null
   } : null;
   useEffect(() => {
-    if (foundOpportunity) {
-      setHasApplied(foundOpportunity.user_applied || false);
-      // Handle case where application_status might not exist
-      setApplicationStatus('pending'); // Default since application_status is not in the current schema
+    if (foundOpportunity && userApplications) {
+      // Find application for this opportunity
+      const application = userApplications.find((app: any) => app.opportunity_id === foundOpportunity.id);
+      setHasApplied(!!application);
+      setApplicationStatus(application?.status || 'pending');
     }
-  }, [foundOpportunity]);
+  }, [foundOpportunity, userApplications]);
 
   // Realtime subscription for opportunity updates
   useEffect(() => {
@@ -99,6 +104,12 @@ export default function OpportunityDetailPage() {
   };
   const handleShare = () => {
     setShowShareSheet(true);
+  };
+
+  const handleMessage = () => {
+    if (opportunity?.posted_by) {
+      startDirectMessage(opportunity.posted_by);
+    }
   };
   if (!opportunity) {
     return <div className="min-h-screen bg-background flex items-center justify-center">
@@ -142,15 +153,6 @@ export default function OpportunityDetailPage() {
               <Badge variant={opportunity.status === "Open" ? "default" : "secondary"} className="mx-0 px-[5px] py-0 my-0">
                 {opportunity.status}
               </Badge>
-              {/* Art Forms */}
-              {opportunity.art_forms && opportunity.art_forms.length > 0 && <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 rounded-full">
-                    {opportunity.art_forms[0]}
-                  </Badge>
-                  {opportunity.art_forms.length > 1 && <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 rounded-full">
-                      {opportunity.art_forms[1]}
-                    </Badge>}
-                </div>}
             </div>
           </div>
         </CardHeader>
@@ -161,18 +163,19 @@ export default function OpportunityDetailPage() {
               <img src={opportunity.image_url} alt={opportunity.title} className="w-full h-full object-cover" />
             </div>}
 
-          {/* Tags */}
+          {/* Art Forms Tags */}
           <div className="flex gap-2 flex-wrap">
-            {opportunity.experience_level && <Badge variant="outline">{opportunity.experience_level}</Badge>}
+            {opportunity.art_forms && opportunity.art_forms.length > 0 && opportunity.art_forms.map((artForm: string) => (
+              <Badge key={artForm} variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                {artForm}
+              </Badge>
+            ))}
           </div>
 
           {/* Requirements & Details */}
           <div>
             <h3 className="font-semibold mb-3">Opportunity Details</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-muted-foreground">
-              {/* Art Forms */}
-              
-              
               {/* Experience Level */}
               <div className="flex items-start gap-2">
                 <span className="font-medium min-w-[120px]">Experience:</span>
@@ -238,9 +241,15 @@ export default function OpportunityDetailPage() {
           {/* Action Buttons */}
           {user && opportunity.posted_by !== user.id && opportunity.status === "Open" && <div className="flex gap-3 pt-4 border-t">
               <Button onClick={handleQuickApply} disabled={hasApplied || isApplying} className="flex-1">
-                {isApplying ? "Applying..." : hasApplied ? applicationStatus === 'Accepted' ? "Accepted" : "Applied" : "Apply Now"}
+                {isApplying ? "Applying..." : hasApplied ? applicationStatus === 'accepted' ? "Accepted" : "Applied" : "Apply Now"}
               </Button>
-              {hasApplied && applicationStatus === 'Accepted' && <Button variant="outline" size="icon" onClick={() => navigate(`/messages?user=${opportunity.posted_by}`)} title="Message employer">
+              {hasApplied && applicationStatus === 'accepted' && <Button 
+                variant="outline" 
+                size="icon" 
+                onClick={handleMessage} 
+                disabled={messageLoading(opportunity.posted_by)}
+                title="Message employer"
+              >
                   <MessageCircle className="w-4 h-4" />
                 </Button>}
               <Button variant="outline" size="icon" onClick={handleShare}>
@@ -248,9 +257,9 @@ export default function OpportunityDetailPage() {
               </Button>
             </div>}
 
-          {hasApplied && <div className={`border rounded-lg p-4 ${applicationStatus === 'Accepted' ? 'bg-blue-50 border-blue-200' : 'bg-green-50 border-green-200'}`}>
-              <p className={`font-medium ${applicationStatus === 'Accepted' ? 'text-blue-800' : 'text-green-800'}`}>
-                {applicationStatus === 'Accepted' ? '🎉 Your application has been accepted!' : '✓ You have already applied to this opportunity'}
+          {hasApplied && <div className={`border rounded-lg p-4 ${applicationStatus === 'accepted' ? 'bg-blue-50 border-blue-200' : 'bg-green-50 border-green-200'}`}>
+              <p className={`font-medium ${applicationStatus === 'accepted' ? 'text-blue-800' : 'text-green-800'}`}>
+                {applicationStatus === 'accepted' ? '🎉 Your application has been accepted!' : '✓ You have already applied to this opportunity'}
               </p>
             </div>}
         </CardContent>
