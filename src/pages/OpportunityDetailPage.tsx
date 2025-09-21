@@ -239,7 +239,7 @@ export default function OpportunityDetailPage() {
           </div>
 
           {/* Action Buttons */}
-          {user && opportunity.posted_by !== user.id && opportunity.status === "Open" && <div className="flex gap-3 pt-4 border-t">
+          {user && opportunity.posted_by !== user.id && opportunity.status === "Active" && <div className="flex gap-3 pt-4 border-t">
               <Button onClick={handleQuickApply} disabled={hasApplied || isApplying} className="flex-1">
                 {isApplying ? "Applying..." : hasApplied ? applicationStatus === 'accepted' ? "Accepted" : "Applied" : "Apply Now"}
               </Button>
