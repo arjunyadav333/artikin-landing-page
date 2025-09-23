@@ -1,5 +1,22 @@
+// src/pages/HomePage.jsx
 import React, { useState, useEffect } from "react";
-import { Menu, X, ArrowRight, Play, Palette, Briefcase, Users, Facebook, Twitter, Instagram, Linkedin, Mail } from "lucide-react";
+
+// ICONS from lucide-react
+import {
+  Menu,
+  X,
+  ArrowRight,
+  Play,
+  Palette,
+  Briefcase,
+  Users,
+  Facebook,
+  Twitter,
+  Instagram,
+  Linkedin,
+} from "lucide-react";
+
+// SWIPER imports
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
 import "swiper/css";
@@ -54,9 +71,21 @@ const HomePage = () => {
   ];
 
   const features = [
-    { icon: Palette, title: "Portfolio Builder", description: "Create stunning portfolios with drag-and-drop media." },
-    { icon: Briefcase, title: "Find Opportunities", description: "Discover casting calls, gigs, and projects." },
-    { icon: Users, title: "Build Your Network", description: "Connect with artists and industry professionals." },
+    {
+      icon: Palette,
+      title: "Portfolio Builder",
+      description: "Create stunning portfolios with drag-and-drop media.",
+    },
+    {
+      icon: Briefcase,
+      title: "Find Opportunities",
+      description: "Discover casting calls, gigs, and projects.",
+    },
+    {
+      icon: Users,
+      title: "Build Your Network",
+      description: "Connect with artists and industry professionals.",
+    },
   ];
 
   const socialLinks = [
@@ -82,36 +111,61 @@ const HomePage = () => {
           <span className="text-2xl font-bold cursor-pointer">Artikin</span>
           <nav className="hidden md:flex gap-6">
             {navLinks.map((link) => (
-              <button key={link.name} onClick={() => handleNavClick(link.href)} className="hover:text-blue-500">
+              <button
+                key={link.name}
+                onClick={() => handleNavClick(link.href)}
+                className="hover:text-blue-500"
+              >
                 {link.name}
               </button>
             ))}
           </nav>
-          <button className="hidden md:inline bg-blue-500 text-white px-4 py-2 rounded">Get Started</button>
-          <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="md:hidden">
+          <button className="hidden md:inline bg-blue-500 text-white px-4 py-2 rounded">
+            Get Started
+          </button>
+          <button
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="md:hidden"
+          >
             {isMenuOpen ? <X /> : <Menu />}
           </button>
         </div>
         {isMenuOpen && (
           <div className="md:hidden bg-white shadow px-4 py-3 space-y-2">
             {navLinks.map((link) => (
-              <button key={link.name} onClick={() => handleNavClick(link.href)} className="block w-full text-left py-2 hover:bg-gray-100 rounded">
+              <button
+                key={link.name}
+                onClick={() => handleNavClick(link.href)}
+                className="block w-full text-left py-2 hover:bg-gray-100 rounded"
+              >
                 {link.name}
               </button>
             ))}
-            <button className="w-full bg-blue-500 text-white px-4 py-2 rounded">Get Started</button>
+            <button className="w-full bg-blue-500 text-white px-4 py-2 rounded">
+              Get Started
+            </button>
           </div>
         )}
       </header>
 
       {/* HERO */}
-      <section id="home" className="min-h-screen flex flex-col justify-center items-center text-center bg-gray-50 pt-20">
-        <h1 className="text-4xl md:text-6xl font-bold mb-4">Connecting creativity <span className="text-blue-500">with Opportunity</span></h1>
-        <h3 className="text-xl md:text-2xl mb-6">{displayedText}<span className="animate-pulse">|</span></h3>
+      <section
+        id="home"
+        className="min-h-screen flex flex-col justify-center items-center text-center bg-gray-50 pt-20"
+      >
+        <h1 className="text-4xl md:text-6xl font-bold mb-4">
+          Connecting creativity <span className="text-blue-500">with Opportunity</span>
+        </h1>
+        <h3 className="text-xl md:text-2xl mb-6">
+          {displayedText}
+          <span className="animate-pulse">|</span>
+        </h3>
         <div className="flex gap-4">
-          <button className="bg-blue-500 text-white px-6 py-3 rounded">Join Artikin <ArrowRight className="inline ml-2"/></button>
+          <button className="bg-blue-500 text-white px-6 py-3 rounded">
+            Join Artikin <ArrowRight className="inline ml-2" />
+          </button>
           <button className="flex items-center px-6 py-3 border rounded hover:text-blue-500">
-            <Play className="mr-2"/> Watch Trailer
+            <Play className="mr-2" /> Watch Trailer
           </button>
         </div>
       </section>
@@ -126,12 +180,20 @@ const HomePage = () => {
           navigation
           pagination={{ clickable: true }}
           autoplay={{ delay: 3000 }}
-          breakpoints={{ 640: { slidesPerView: 2 }, 1024: { slidesPerView: 3 } }}
+          breakpoints={{
+            640: { slidesPerView: 2 },
+            1024: { slidesPerView: 3 },
+          }}
         >
           {artforms.map((art, index) => (
             <SwiperSlide key={index}>
               <div className="bg-white rounded-lg shadow hover:shadow-lg transition overflow-hidden">
-                <img src={art.image} alt={art.title} className="w-full h-48 object-cover" loading="lazy"/>
+                <img
+                  src={art.image}
+                  alt={art.title}
+                  className="w-full h-48 object-cover"
+                  loading="lazy"
+                />
                 <div className="p-4">
                   <h3 className="font-bold">{art.title}</h3>
                 </div>
@@ -146,8 +208,11 @@ const HomePage = () => {
         <h2 className="text-3xl font-bold text-center mb-12">Detailed Features</h2>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto px-4">
           {features.map((feature, index) => (
-            <div key={index} className="text-center p-6 bg-gray-50 rounded-lg shadow hover:shadow-lg transition">
-              <feature.icon className="w-10 h-10 text-blue-500 mx-auto mb-4"/>
+            <div
+              key={index}
+              className="text-center p-6 bg-gray-50 rounded-lg shadow hover:shadow-lg transition"
+            >
+              <feature.icon className="w-10 h-10 text-blue-500 mx-auto mb-4" />
               <h3 className="font-bold mb-2">{feature.title}</h3>
               <p className="text-gray-600 text-sm">{feature.description}</p>
             </div>
@@ -161,8 +226,13 @@ const HomePage = () => {
           <p>© 2025 Artikin. All rights reserved.</p>
           <div className="flex gap-3 mt-4 md:mt-0">
             {socialLinks.map((social) => (
-              <a key={social.label} href={social.href} aria-label={social.label} className="p-2 bg-gray-800 rounded hover:bg-blue-500">
-                <social.icon className="w-5 h-5"/>
+              <a
+                key={social.label}
+                href={social.href}
+                aria-label={social.label}
+                className="p-2 bg-gray-800 rounded hover:bg-blue-500"
+              >
+                <social.icon className="w-5 h-5" />
               </a>
             ))}
           </div>
