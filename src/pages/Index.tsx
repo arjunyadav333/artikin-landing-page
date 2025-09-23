@@ -245,7 +245,7 @@ const HomePage = () => {
           <p className="text-base sm:text-lg lg:text-xl text-muted-foreground mb-8 sm:mb-10 max-w-3xl mx-auto leading-relaxed px-2">
             Connect with industry professionals and showcase your talent to the world.
           </p>
-          <Button variant="cta" size="lg" onClick={()=>navigateWithScrollSave("/auth")} className="h-12 sm:h-14 px-8 sm:px-10 text-base sm:text-lg font-semibold rounded-xl touch-manipulation">Create Your Profile</Button>
+          <Button variant="default" size="lg" onClick={()=>navigateWithScrollSave("/auth")} className="h-12 sm:h-14 px-8 sm:px-10 text-base sm:text-lg font-semibold rounded-xl touch-manipulation">Create Your Profile</Button>
         </div>
       </section>
 
@@ -276,7 +276,7 @@ const HomePage = () => {
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-4xl md:text-5xl font-bold mb-8">Ready to elevate your creative journey?</h2>
           <p className="text-xl mb-12 max-w-2xl mx-auto opacity-90">Join thousands of artists who are already building their careers on Artikin.</p>
-          <Button variant="outline" size="xl" className="bg-white/10 border-white/30 text-white hover:bg-white hover:text-primary font-semibold" onClick={()=>navigateWithScrollSave("/auth")}>Get Started</Button>
+          <Button variant="outline" size="lg" className="bg-white/10 border-white/30 text-white hover:bg-white hover:text-primary font-semibold" onClick={()=>navigateWithScrollSave("/auth")}>Get Started</Button>
         </div>
       </section>
 
