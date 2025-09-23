@@ -21,7 +21,7 @@ import photographySlide from "@/assets/photography-slide.jpg";
 import videographySlide from "@/assets/videography-slide.jpg";
 import voiceSlide from "@/assets/voice-slide.jpg";
 
-const HomePage = () => {
+const Index = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
   const { navigateWithScrollSave } = useScrollRestoration();
@@ -322,4 +322,4 @@ const HomePage = () => {
   );
 };
 
-export default HomePage;
+export default Index;
