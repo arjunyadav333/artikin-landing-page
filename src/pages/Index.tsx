@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Menu, X, ArrowRight, Play, Palette, Briefcase, Users, Facebook, Twitter, Instagram, Linkedin, Mail } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useScrollRestoration } from "@/hooks/useScrollRestoration";
@@ -204,7 +206,7 @@ const HomePage = () => {
             </div>
           </div>
           <div className="relative flex-1" style={{ minHeight: 340 }}>
-            <div className="h-full rounded-3xl shadow-xl flex flex-col justify-center items-start px-14 py-12" style={{ background: "linear-gradient(90deg, #1d194aff 0%, #0073cf 100%)" }}>
+            <div className="absolute inset-0 rounded-3xl shadow-xl flex flex-col justify-center items-start px-14 py-12" style={{ background: "linear-gradient(90deg, #1d194aff 0%, #0073cf 100%)" }}>
               <div className="absolute top-6 right-6 z-20">
                 <div className="inline-flex items-center justify-center px-4 py-2 rounded-full bg-white/20 backdrop-blur-sm text-white font-medium">The vision</div>
               </div>
