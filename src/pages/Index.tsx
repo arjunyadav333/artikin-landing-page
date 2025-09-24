@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Menu, X, ArrowRight, Play, Palette, Briefcase, Users, Facebook, Twitter, Instagram, Linkedin, Mail } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useScrollRestoration } from "@/hooks/useScrollRestoration";
