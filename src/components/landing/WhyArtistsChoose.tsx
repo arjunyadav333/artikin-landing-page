@@ -40,14 +40,15 @@ const FeaturesAndCTASection = () => {
             Connect with industry professionals and showcase your talent to the world.
           </p>
 
-          <Button
-            variant="cta"
-            size="lg"
-            onClick={() => navigateWithScrollSave("/auth")}
-            className="h-12 sm:h-14 px-8 sm:px-10 text-base sm:text-lg font-semibold rounded-xl touch-manipulation font-bold text-blue-500 mb-2"
-          >
-            Create Your Profile
-          </Button>
+<Button
+  variant="cta"
+  size="lg"
+  onClick={() => navigateWithScrollSave("/auth")}
+  className="h-12 sm:h-14 px-8 sm:px-10 text-base sm:text-lg font-semibold rounded-xl touch-manipulation font-bold bg-blue-500 text-white hover:bg-blue-600 mb-2"
+>
+  Create Your Profile
+</Button>
+
         </div>
       </section>
 
