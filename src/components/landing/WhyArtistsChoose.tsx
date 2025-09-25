@@ -1,60 +1,94 @@
-import React from "react";
+import { Button } from "@/components/ui/button";
+import { useScrollRestoration } from "@/hooks/useScrollRestoration";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Palette, Briefcase, Users, Heart } from "lucide-react";
+import { Palette, Briefcase, Users } from "lucide-react";
 
-const WhyArtistsChoose = () => {
-  const features = [
-    {
-      icon: Palette,
-      title: "Portfolio Builder",
-      description: "Create a professional showcase for your work with our intuitive portfolio builder and customizable layouts."
-    },
-    {
-      icon: Briefcase,
-      title: "Find Opportunities",
-      description: "Access jobs, gigs, and collaborations that match your skills and artistic vision from organizations worldwide."
-    },
-    {
-      icon: Users,
-      title: "Build Your Network",
-      description: "Connect with other creatives and organizations to grow your career and expand your artistic horizons."
-    },
-    {
-      icon: Heart,
-      title: "Community Support",
-      description: "A safe space to learn, grow, and share with like-minded artists in a supportive creative community."
-    }
-  ];
+const features = [
+  {
+    icon: Palette,
+    title: "Portfolio Builder",
+    description:
+      "Create stunning portfolios with drag-and-drop media and customizable layouts to showcase your best work.",
+  },
+  {
+    icon: Briefcase,
+    title: "Find Opportunities",
+    description:
+      "Discover casting calls, gigs, and projects that match your skills and artistic vision.",
+  },
+  {
+    icon: Users,
+    title: "Build Your Network",
+    description:
+      "Connect with like-minded artists, collaborators, and industry professionals to grow your career.",
+  },
+];
+
+const FeaturesAndCTASection = () => {
+  const { navigateWithScrollSave } = useScrollRestoration();
 
   return (
-    <section id="features" className="py-20 bg-white">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="text-3xl md:text-5xl font-bold text-center mb-16 text-gray-900 font-inter">
-          Why Artists Choose Artikin?
-        </h2>
-        
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
-          {features.map((feature, index) => (
-            <Card key={index} className="text-center hover:shadow-lg transition-all duration-300 border border-gray-200 bg-white">
-              <CardHeader className="pb-4">
-                <div className="w-16 h-16 mx-auto mb-4 bg-primary rounded-2xl flex items-center justify-center">
-                  <feature.icon className="w-8 h-8 text-white" />
-                </div>
-                <CardTitle className="text-xl font-bold text-gray-900 font-inter">
-                  {feature.title}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CardDescription className="text-gray-600 leading-relaxed font-inter">
-                  {feature.description}
-                </CardDescription>
-              </CardContent>
-            </Card>
-          ))}
+    <>
+      {/* Features Section */}
+      <section className="py-16 sm:py-20 lg:py-24 bg-muted/30">
+        <div className="container mx-auto px-4 sm:px-6">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-center mb-12 sm:mb-16 bg-gradient-secondary bg-clip-text text-transparent leading-tight">
+            Detailed Features
+          </h2>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-7xl mx-auto">
+            {features.map((feature, index) => (
+              <Card
+                key={index}
+                className="text-center hover:shadow-soft transition-all duration-200 hover:scale-[1.02] border-0 shadow-soft bg-background/80 backdrop-blur-sm p-6 sm:p-8"
+              >
+                <CardHeader className="pb-4">
+                  <a
+                    href="https://preview--artikin-artist.lovable.app/auth"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-14 h-14 sm:w-16 sm:h-16 mx-auto mb-4 bg-gradient-primary rounded-2xl flex items-center justify-center hover:scale-105 transition-transform"
+                  >
+                    <feature.icon className="w-7 h-7 sm:w-8 sm:h-8 text-white" />
+                  </a>
+                  <CardTitle className="text-lg sm:text-xl font-bold leading-tight">
+                    {feature.title}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <CardDescription className="text-muted-foreground leading-relaxed text-sm sm:text-base">
+                    {feature.description}
+                  </CardDescription>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+
+      {/* Secondary CTA Section */}
+      <section className="py-16 sm:py-20 lg:py-24 bg-muted/30">
+        <div className="container mx-auto px-4 sm:px-6 text-center">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-6 sm:mb-8 text-foreground leading-tight">
+            Start building your creative portfolio today
+          </h2>
+
+          <p className="text-base sm:text-lg lg:text-xl text-muted-foreground mb-8 sm:mb-10 max-w-3xl mx-auto leading-relaxed px-2">
+            Connect with industry professionals and showcase your talent to the world.
+          </p>
+
+          <Button
+            variant="cta"
+            size="lg"
+            onClick={() => navigateWithScrollSave("/auth")}
+            className="h-12 sm:h-14 px-8 sm:px-10 text-base sm:text-lg font-semibold rounded-xl touch-manipulation"
+          >
+            Create Your Profile
+          </Button>
+        </div>
+      </section>
+    </>
   );
 };
 
-export default WhyArtistsChoose;
+export default FeaturesAndCTASection;
