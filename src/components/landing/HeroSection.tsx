@@ -2,9 +2,11 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight, Play, X } from 'lucide-react';
 import { useScrollRestoration } from "@/hooks/useScrollRestoration";
+import VideoModal from "@/components/ui/video-modal";
 import React, { useState, useEffect } from "react";
 const HeroSection = () => {
   const { navigateWithScrollSave } = useScrollRestoration();
+  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
   return (
     <>
       <section id="home" className="relative min-h-screen xs:min-h-[100dvh] flex items-start md:items-center justify-center overflow-hidden pt-20 xs:pt-24 sm:pt-32 md:pt-0">
@@ -40,10 +42,8 @@ const HeroSection = () => {
               </button>
 
               <button
-                onClick={() =>
-                  window.open("https://www.youtube.com/watch?v=lu58Um79-N4", "Ayejude")
-                }
-                className="group flex items-center px-8 py-4 text-gray-700 font-semibold text-lg hover:text-blue-400 transition-colors duration-300"
+                onClick={() => setIsVideoModalOpen(true)}
+                className="group flex items-center px-8 py-4 text-gray-700 font-semibold text-lg hover:text-blue-400 transition-colors duration-300 hover:scale-105 transform"
               >
                 <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg mr-3 group-hover:shadow-xl transition-shadow duration-300">
                   <Play className="w-5 h-5 text-blue-400 ml-1" />
@@ -72,6 +72,14 @@ const HeroSection = () => {
             </div>
           </div>
         </div>
+
+        {/* Video Modal */}
+        <VideoModal
+          isOpen={isVideoModalOpen}
+          onClose={() => setIsVideoModalOpen(false)}
+          videoUrl="https://www.youtube.com/watch?v=lu58Um79-N4"
+          title="Artikin Trailer"
+        />
 
         {/* Scroll Indicator */}
         <div className="absolute bottom-4 xs:bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce hidden sm:block">
