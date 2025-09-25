@@ -17,7 +17,7 @@ const FinalCTA = () => {
         </p>
 
 <Button
-  className="bg-white/10 border-white/30 text-white hover:bg-white hover:text-primary font-semibold"
+  className="h-12 sm:h-14 px-8 sm:px-10 text-base sm:text-lg font-semibold rounded-xl touch-manipulation font-bold bg-blue-500 text-white hover:bg-blue-600 mb-2"
   onClick={() => navigateWithScrollSave("/auth")}
 >
   Get Started
