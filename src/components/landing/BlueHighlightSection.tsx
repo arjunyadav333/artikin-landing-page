@@ -40,7 +40,7 @@ const HumanoidSection = () => {
 
   return (
     <section
-      className="w-full h-screen py-0 md:py-0 overflow-hidden bg-white sticky top-0"
+      className="w-full h-screen py-0 md:py-0 overflow-hidden bg-white"
       id="why-humanoid"
     >
       <div className="container px-6 lg:px-8 mx-auto h-full flex flex-col">
