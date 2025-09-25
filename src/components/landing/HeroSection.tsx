@@ -34,7 +34,7 @@ const HeroSection = () => {
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
-              <button className="group bg-blue-400 text-white px-8 py-4 rounded-full font-semibold text-lg hover:bg-blue-500 transform hover:scale-105 transition-all duration-300 shadow-xl hover:shadow-2xl flex items-center" onClick={() => navigateWithScrollSave("/auth")}>
+              <button className="group bg-blue-400 text-white px-8 py-4 rounded-full font-semibold text-lg hover:bg-blue-500 transform hover:scale-110 transition-all duration-300 shadow-xl hover:shadow-2xl flex items-center hover:-translate-y-1" onClick={() => navigateWithScrollSave("/auth")}>
                 Join Artikin
                 <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
               </button>

@@ -58,7 +58,7 @@ const Header = () => {
           <div className="hidden md:block">
             <Button 
               onClick={() => navigate("/auth")} 
-              className="bg-primary hover:bg-primary/90 text-white font-semibold px-6 py-2 rounded-lg font-inter"
+              className="bg-primary hover:bg-primary/90 text-white font-semibold px-6 py-2 rounded-lg font-inter hover:scale-110 hover:-translate-y-1 transition-all duration-300 shadow-lg hover:shadow-xl"
             >
               Get Started
             </Button>
@@ -89,7 +89,7 @@ const Header = () => {
               <div className="pt-2">
                 <Button 
                   onClick={() => { navigate("/auth"); setIsMenuOpen(false); }} 
-                  className="w-full bg-primary hover:bg-primary/90 text-white font-semibold font-inter"
+                  className="w-full bg-primary hover:bg-primary/90 text-white font-semibold font-inter hover:scale-105 transition-all duration-300"
                 >
                   Get Started
                 </Button>

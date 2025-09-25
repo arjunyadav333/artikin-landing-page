@@ -44,7 +44,7 @@ const FeaturesAndCTASection = () => {
   variant="default"
   size="lg"
   onClick={() => navigateWithScrollSave("/auth")}
-  className="h-12 sm:h-14 px-8 sm:px-10 text-base sm:text-lg font-semibold rounded-xl touch-manipulation font-bold bg-primary text-white hover:bg-primary/90 mb-2"
+  className="h-12 sm:h-14 px-8 sm:px-10 text-base sm:text-lg font-semibold rounded-xl touch-manipulation font-bold bg-primary text-white hover:bg-primary/90 hover:scale-110 hover:-translate-y-1 transition-all duration-300 shadow-lg hover:shadow-xl mb-2"
 >
   Create Your Profile
 </Button>
