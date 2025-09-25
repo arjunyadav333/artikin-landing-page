@@ -6,7 +6,7 @@ const FinalCTA = () => {
   const { navigateWithScrollSave } = useScrollRestoration();
 
   return (
-    <section className="py-20 bg-gradient-blue-500 text-white">
+    <section className="py-20 bg-gradient-secondary-blue text-white">
       <div className="container mx-auto px-4 text-center">
         <h2 className="text-4xl md:text-5xl font-bold mb-8">
           Ready to elevate your creative journey?
