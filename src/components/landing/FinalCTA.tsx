@@ -16,14 +16,13 @@ const FinalCTA = () => {
           Join thousands of artists who are already building their careers on Artikin.
         </p>
 
-        <Button 
-          variant="outline" 
-          size="xl" 
-          className="bg-white/10 border-white/30 text-white hover:bg-white hover:text-primary font-semibold"
-          onClick={() => navigateWithScrollSave("/auth")}
-        >
-          Get Started
-        </Button>
+<Button
+  size="xl"
+  className="bg-white text-[#6A5ACD] hover:bg-gray-200 font-semibold"
+  onClick={() => navigateWithScrollSave("/auth")}
+>
+  Get Started
+</Button>
       </div>
     </section>
   );
