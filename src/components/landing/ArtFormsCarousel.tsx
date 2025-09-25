@@ -30,7 +30,7 @@ const ArtFormsCarousel = () => {
   return (
     <section className="py-16 sm:py-20 lg:py-24 bg-muted/30">
         <div className="container mx-auto px-4 sm:px-6">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-center mb-12 sm:mb-16 bg-gradient-secondary bg-clip-text text-transparent leading-tight">Explore Art Forms</h2>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-center mb-12 sm:mb-16  bg-clip-text text-transparent leading-tight">Explore Art Forms</h2>
           <Swiper modules={[Navigation, Pagination, Autoplay]} slidesPerView={1} spaceBetween={20} navigation pagination={{ clickable: true }} autoplay={{ delay: 3000 }} breakpoints={{640:{slidesPerView:2},1024:{slidesPerView:3}}}>
             {artforms.map((art, index)=>(
               <SwiperSlide key={index}>
