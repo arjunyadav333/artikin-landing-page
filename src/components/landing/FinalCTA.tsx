@@ -17,9 +17,7 @@ const FinalCTA = () => {
         </p>
 
 <Button
-  className="bg-white text-[#4F8FF0] font-semibold
-             px-8 py-3 rounded-xl border-2 border-[#6A5ACD]
-             hover:bg-gray-100 transition-colors duration-200"
+  className="bg-white/10 border-white/30 text-white hover:bg-white hover:text-primary font-semibold"
   onClick={() => navigateWithScrollSave("/auth")}
 >
   Get Started
