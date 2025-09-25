@@ -55,7 +55,7 @@ const FeaturesAndCTASection = () => {
       {/* Features Section */}
       <section className="py-16 sm:py-20 lg:py-24 bg-muted/30">
         <div className="container mx-auto px-4 sm:px-6">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-center mb-12 sm:mb-16 bg-gradient-secondary bg-clip-text text-transparent leading-tight">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-center mb-12 sm:mb-16 font-bold text-blue-500 mb-2">
             Detailed Features
           </h2>
 
