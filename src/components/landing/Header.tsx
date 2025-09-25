@@ -29,7 +29,7 @@ const Header = () => {
           {/* Logo */}
           <div className="flex items-center gap-3">
             <img src="/lovable-uploads/a487fdea-ba9d-4e8a-81e2-02c61e755218.png" alt="Artikin Logo" className="w-10 h-10 object-contain rounded-lg cursor-pointer" onClick={handleLogoClick} />
-            <span onClick={handleLogoClick} className="font-bold  text-transparent cursor-pointer text-3xl">
+            <span onClick={handleLogoClick} className="font-bold text-primary cursor-pointer text-3xl">
               Artikin
             </span>
           </div>
