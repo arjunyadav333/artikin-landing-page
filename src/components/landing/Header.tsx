@@ -30,11 +30,11 @@ const Header = () => {
             <img 
               src="/src/assets/artikin-logo.jpg" 
               alt="Artikin Logo" 
-              className="w-12 h-12 object-contain rounded-lg cursor-pointer" 
-              onClick={() => navigate("/")} 
+              className="w-16 h-16 object-contain rounded-lg cursor-pointer" 
+              onClick={() => window.location.reload()} 
             />
             <span 
-              onClick={() => navigate("/")} 
+              onClick={() => window.location.reload()} 
               className="font-bold text-primary cursor-pointer text-2xl font-inter"
             >
               Artikin
