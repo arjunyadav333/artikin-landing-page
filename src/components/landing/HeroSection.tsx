@@ -20,7 +20,7 @@ const HeroSection = () => {
             {/* Badge */}
 
             {/* Main Heading */}
-            <h1 className="text-5xl md:text-7xl font-bold text-gray-900 mb-6 leading-tight">
+            <h1 className="text-5xl md:text-7xl text-3xl font-bold text-blue-500 mb-2 leading-tight">
               Connecting creativity
               <span className="block text-blue-400 animate-gradient-text">
                 with Oppurtunity
