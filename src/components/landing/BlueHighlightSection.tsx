@@ -1,65 +1,88 @@
 import React, { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
 
-const BlueHighlightSection = () => {
-  const navigate = useNavigate();
-  
+const HumanoidSection = () => {
   const words = [
-    "Actors", "Dancers", "Models", "Photographers", 
-    "Videographers", "Instrumentalists", "Singers", "Painters", "Creators"
+    "Showcase your art, Connect with opportunities, Grow with Artikin.",
+    "Empowering artists with portfolios, connections, and real opportunities.",
+    "A creative hub for artists to shine and organizations to discover talent.",
   ];
-  
-  const [currentWordIndex, setCurrentWordIndex] = useState(0);
-  const [displayText, setDisplayText] = useState("");
-  const [isDeleting, setIsDeleting] = useState(false);
+
+  const [currentWord, setCurrentWord] = useState(0);
+  const [displayedText, setDisplayedText] = useState("");
+  const [pause, setPause] = useState(false);
 
   useEffect(() => {
-    const currentWord = words[currentWordIndex];
-    const speed = isDeleting ? 100 : 150;
+    const current = words[currentWord];
+    let speed = 120; // typing speed
 
-    const timeout = setTimeout(() => {
-      if (!isDeleting) {
-        setDisplayText(currentWord.slice(0, displayText.length + 1));
-        
-        if (displayText === currentWord) {
-          setTimeout(() => setIsDeleting(true), 2000);
-        }
-      } else {
-        setDisplayText(currentWord.slice(0, displayText.length - 1));
-        
-        if (displayText === "") {
-          setIsDeleting(false);
-          setCurrentWordIndex((prev) => (prev + 1) % words.length);
+    if (pause) speed = 1000; // pause speed
+
+    const handleTyping = setTimeout(() => {
+      if (!pause) {
+        // typing forward
+        setDisplayedText(current.slice(0, displayedText.length + 1));
+
+        if (displayedText === current) {
+          // when fully typed
+          setPause(true);
+          setTimeout(() => {
+            setPause(false);
+            // go to next word
+            setCurrentWord((prev) => (prev + 1) % words.length);
+            setDisplayedText(""); // reset for next word
+          }, 2000); // stay visible for 2s
         }
       }
     }, speed);
 
-    return () => clearTimeout(timeout);
-  }, [displayText, isDeleting, currentWordIndex, words]);
+    return () => clearTimeout(handleTyping);
+  }, [displayedText, pause, words, currentWord]);
 
   return (
-    <section className="py-20 bg-gradient-to-r from-primary to-blue-600 text-white">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl md:text-5xl lg:text-6xl font-bold mb-8 font-inter">
-            Showcase your art, Connect with{" "}
-            <span className="inline-block min-w-[200px] text-left">
-              {displayText}
-              <span className="animate-pulse">|</span>
-            </span>
+    <section
+      className="w-full h-screen py-0 md:py-0 overflow-hidden bg-white sticky top-0"
+      id="why-humanoid"
+    >
+      <div className="container px-6 lg:px-8 mx-auto h-full flex flex-col">
+        <div className="flex flex-col items-center">
+          <h2 className="section-title text-3xl sm:text-4xl md:text-5xl font-display font-bold mb-1 md:mb-2 block text-blue-400 animate-gradient-text">
+            Why Artikin?
           </h2>
-          
-          <Button 
-            onClick={() => navigate("/auth")} 
-            className="bg-white text-primary hover:bg-gray-100 px-8 py-4 text-lg font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 font-inter"
+          <div className="flex items-center gap-4 pt-8 sm:pt-6 md:pt-4">
+            <div
+              className="pulse-chip opacity-0 animate-fade-in"
+              style={{ animationDelay: "0.1s" }}
+            >
+              <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-pulse-500 text-white mr-2">
+                
+              </span>
+              <span>Artikin</span>
+            </div>
+          </div>
+        </div>
+        <div className="relative flex-1" style={{ minHeight: 340 }}>
+          <div
+            className="absolute inset-0 rounded-3xl shadow-xl flex flex-col justify-center items-start px-14 py-12"
+            style={{
+              background: "linear-gradient(90deg, #1d194aff 0%, #0073cf 100%)",
+            }}
           >
-            Start Building Your Portfolio
-          </Button>
+            <div className="absolute top-6 right-6 z-20">
+              <div className="inline-flex items-center justify-center px-4 py-2 rounded-full bg-white/20 backdrop-blur-sm text-white font-medium">
+                The vision
+              </div>
+            </div>
+            <div className="relative z-10">
+              <h3 className="text-4xl sm:text-5xl md:text-6xl font-display text-white font-bold leading-tight mb-4">
+                {displayedText}
+                <span className="animate-blink ml-1">|</span>
+              </h3>
+            </div>
+          </div>
         </div>
       </div>
     </section>
   );
 };
 
-export default BlueHighlightSection;
+export default HumanoidSection;
