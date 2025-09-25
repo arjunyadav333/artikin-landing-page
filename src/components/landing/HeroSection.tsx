@@ -41,7 +41,7 @@ const HeroSection = () => {
 
               <button
                 onClick={() =>
-                  window.open("https://youtu.be/lu58Um79-N4?si=g6JycaokuKJKDpcd", "Ayejude")
+                  window.open("https://www.youtube.com/watch?v=lu58Um79-N4", "Ayejude")
                 }
                 className="group flex items-center px-8 py-4 text-gray-700 font-semibold text-lg hover:text-blue-400 transition-colors duration-300"
               >
