@@ -1,5 +1,5 @@
 import React from 'react';
-import { Facebook, Twitter, Instagram, Linkedin, Mail } from 'lucide-react';
+import { Facebook, Twitter, Instagram, Linkedin, Mail, Youtube } from 'lucide-react';
 
 const Footer = () => {
   const footerLinks = {
@@ -8,10 +8,11 @@ const Footer = () => {
   };
 
   const socialLinks = [
-    { icon: Facebook, href: '#', label: 'Facebook' },
-    { icon: Twitter, href: '#', label: 'Twitter' },
+    { icon: Facebook, href: 'https://facebook.com/artikinofficial', label: 'Facebook' },
+    { icon: Twitter, href: 'https://twitter.com/artikinofficial', label: 'Twitter' },
     { icon: Instagram, href: 'https://www.instagram.com/artikinofficial?utm_source=ig_web_button_share_sheet&igsh=MmEzNzBucmF2Z28w', label: 'Instagram' },
-    { icon: Linkedin, href: '#', label: 'LinkedIn' }
+    { icon: Youtube, href: 'https://youtube.com/@artikinofficial', label: 'YouTube' },
+    { icon: Linkedin, href: 'https://linkedin.com/company/artikin', label: 'LinkedIn' }
   ];
 
   return (
@@ -75,6 +76,8 @@ const Footer = () => {
               <a
                 key={social.label}
                 href={social.href}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="w-10 h-10 bg-gray-800 hover:bg-[#0073cf] rounded-lg flex items-center justify-center transition-colors duration-300"
                 aria-label={social.label}
               >

@@ -28,7 +28,7 @@ const Header = () => {
           {/* Logo */}
           <div className="flex items-center gap-3">
             <img 
-              src="/lovable-uploads/a487fdea-ba9d-4e8a-81e2-02c61e755218.png" 
+              src="/src/assets/artikin-logo.jpg" 
               alt="Artikin Logo" 
               className="w-10 h-10 object-contain rounded-lg cursor-pointer" 
               onClick={() => navigate("/")} 
