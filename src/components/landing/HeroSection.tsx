@@ -39,119 +39,17 @@ const HeroSection = () => {
                 <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
               </button>
 
-<button
-  id="watch-trailer-btn"
-  class="group flex items-center px-8 py-4 text-gray-700 font-semibold text-lg hover:text-blue-400 transition-colors duration-300"
->
-  <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg mr-3 group-hover:shadow-xl transition-shadow duration-300">
-    <svg class="w-5 h-5 text-blue-400 ml-1" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg>
-  </div>
-  Watch Trailer
-</button>
-
-<div id="video-modal" class="modal-overlay">
-  <div class="modal-content">
-    <button id="close-btn" class="close-button">&times;</button>
-    <div class="video-container">
-      <iframe 
-        id="youtube-video"
-        width="560" 
-        height="315" 
-        src="" 
-        title="YouTube video player" 
-        frameborder="0" 
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-        allowfullscreen>
-      </iframe>
-    </div>
-  </div>
-</div>
-
-<style>
-  .modal-overlay {
-    /* Hidden by default */
-    display: none; 
-    
-    /* Pop-up styling */
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0, 0, 0, 0.8);
-    
-    /* For centering the video */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-
-  .modal-content {
-    position: relative;
-    width: 90%;
-    max-width: 800px;
-  }
-
-  .close-button {
-    position: absolute;
-    top: -20px;
-    right: -10px;
-    color: #fff;
-    font-size: 35px;
-    font-weight: bold;
-    background: none;
-    border: none;
-    cursor: pointer;
-  }
-  
-  .video-container {
-    position: relative;
-    padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
-    height: 0;
-    overflow: hidden;
-  }
-
-  .video-container iframe {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-  }
-</style>
-
-<script>
-  // Get the elements
-  const modal = document.getElementById("video-modal");
-  const openBtn = document.getElementById("watch-trailer-btn");
-  const closeBtn = document.getElementById("close-btn");
-  const video = document.getElementById("youtube-video");
-
-  // The YouTube video URL
-  const videoURL = "https://www.youtube.com/embed/lu58Um79-N4";
-
-  // When the user clicks the button, open the modal 
-  openBtn.onclick = function() {
-    modal.style.display = "flex";
-    video.src = videoURL + "?autoplay=1"; // Add autoplay
-  }
-
-  // When the user clicks on <span> (x), close the modal
-  closeBtn.onclick = function() {
-    modal.style.display = "none";
-    video.src = ""; // Stop the video
-  }
-
-  // When the user clicks anywhere outside of the modal content, close it
-  window.onclick = function(event) {
-    if (event.target == modal) {
-      modal.style.display = "none";
-      video.src = ""; // Stop the video
-    }
-  }
-</script>
+              <button
+                onClick={() =>
+                  window.open("https://youtu.be/lu58Um79-N4?si=g6JycaokuKJKDpcd", "Ayejude")
+                }
+                className="group flex items-center px-8 py-4 text-gray-700 font-semibold text-lg hover:text-blue-400 transition-colors duration-300"
+              >
+                <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg mr-3 group-hover:shadow-xl transition-shadow duration-300">
+                  <Play className="w-5 h-5 text-blue-400 ml-1" />
+                </div>
+                Watch Trailer
+              </button>
             </div>
 
             {/* Stats */}
