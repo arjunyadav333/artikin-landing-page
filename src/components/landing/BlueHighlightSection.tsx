@@ -45,7 +45,7 @@ const HumanoidSection = () => {
     >
       <div className="container px-6 lg:px-8 mx-auto h-full flex flex-col">
         <div className="flex flex-col items-center">
-          <h2 className="section-title text-3xl sm:text-4xl md:text-5xl font-display font-bold mb-1 md:mb-2 font-bold text-blue-500 animate-gradient-text">
+          <h2 className="section-title text-3xl sm:text-4xl md:text-5xl font-display font-bold mb-1 md:mb-2 font-bold text-blue-500">
             Why Artikin?
           </h2>
           <div className="flex items-center gap-4 pt-8 sm:pt-6 md:pt-4">
