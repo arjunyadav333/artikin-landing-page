@@ -5,7 +5,7 @@ const WhatIsArtikin = () => {
     <section id="about" className="py-20 bg-gray-50">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <div className="max-w-4xl mx-auto">
-         <h2 className="text-3xl md:text-5xl font-bold mb-8 text-[#4da6ff] font-inter">
+         <h2 className="text-3xl font-bold text-blue-500 mb-2] font-inter">
   What is Artikin?
 </h2>
 
