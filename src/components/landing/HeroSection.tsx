@@ -25,7 +25,7 @@ const HeroSection = () => {
             <h1 className="text-5xl md:text-7xl font-bold text-gray-900 mb-6 leading-tight">
               Connecting creativity
               <span className="block font-bold text-blue-500 mb-2">
-                with Oppurtunity
+                with Opportunity
               </span>
             </h1>
 
