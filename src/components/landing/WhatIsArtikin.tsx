@@ -9,12 +9,9 @@ const WhatIsArtikin = () => {
   What is Artikin?
 </h2>
 
-          <p className="text-lg md:text-xl text-gray-600 leading-relaxed font-inter">
-            Artikin is a creative network platform designed for artists to showcase their work, 
-            connect with organizations, explore opportunities, and grow their careers. Whether you're 
-            a dancer, singer, actor, or creator, Artikin provides the tools to highlight your talent 
-            and build connections that matter.
-          </p>
+          <div className="max-w-4xl mx-auto">
+          <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-muted-foreground leading-relaxed px-2">Artikin is a creative networking platform designed for artists to showcase their work, build meaningful connections, and discover opportunities with organizations. It acts as a bridge between creativity and industry helping artists gain visibility while enabling organizations to find the right talent.</p>
+        </div>
         </div>
       </div>
     </section>
