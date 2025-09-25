@@ -1,27 +1,29 @@
-import React from "react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { useScrollRestoration } from "@/hooks/useScrollRestoration";
 
 const FinalCTA = () => {
-  const navigate = useNavigate();
+  const { navigateWithScrollSave } = useScrollRestoration();
 
   return (
-    <section className="py-20 bg-gradient-to-r from-primary to-blue-600 text-white">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl md:text-5xl font-bold mb-8 font-inter">
-            Ready to Elevate Your Creative Journey?
-          </h2>
-          <p className="text-lg md:text-xl mb-12 opacity-90 font-inter">
-            Join thousands of artists who are building their careers with Artikin today.
-          </p>
-          <Button 
-            onClick={() => navigate("/auth")} 
-            className="bg-white text-primary hover:bg-gray-100 px-8 py-4 text-lg font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 font-inter"
-          >
-            Get Started
-          </Button>
-        </div>
+    <section className="py-20 bg-gradient-secondary text-white">
+      <div className="container mx-auto px-4 text-center">
+        <h2 className="text-4xl md:text-5xl font-bold mb-8">
+          Ready to elevate your creative journey?
+        </h2>
+        
+        <p className="text-xl mb-12 max-w-2xl mx-auto opacity-90">
+          Join thousands of artists who are already building their careers on Artikin.
+        </p>
+
+        <Button 
+          variant="outline" 
+          size="xl" 
+          className="bg-white/10 border-white/30 text-white hover:bg-white hover:text-primary font-semibold"
+          onClick={() => navigateWithScrollSave("/auth")}
+        >
+          Get Started
+        </Button>
       </div>
     </section>
   );
