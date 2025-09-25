@@ -29,6 +29,28 @@ const FeaturesAndCTASection = () => {
 
   return (
     <>
+      {/* CTA Section */}
+      <section className="py-16 sm:py-20 lg:py-24 bg-muted/30">
+        <div className="container mx-auto px-4 sm:px-6 text-center">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-6 sm:mb-8 text-foreground leading-tight">
+            Start building your creative portfolio today
+          </h2>
+
+          <p className="text-base sm:text-lg lg:text-xl text-muted-foreground mb-8 sm:mb-10 max-w-3xl mx-auto leading-relaxed px-2">
+            Connect with industry professionals and showcase your talent to the world.
+          </p>
+
+          <Button
+            variant="cta"
+            size="lg"
+            onClick={() => navigateWithScrollSave("/auth")}
+            className="h-12 sm:h-14 px-8 sm:px-10 text-base sm:text-lg font-semibold rounded-xl touch-manipulation"
+          >
+            Create Your Profile
+          </Button>
+        </div>
+      </section>
+
       {/* Features Section */}
       <section className="py-16 sm:py-20 lg:py-24 bg-muted/30">
         <div className="container mx-auto px-4 sm:px-6">
@@ -63,28 +85,6 @@ const FeaturesAndCTASection = () => {
               </Card>
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* Secondary CTA Section */}
-      <section className="py-16 sm:py-20 lg:py-24 bg-muted/30">
-        <div className="container mx-auto px-4 sm:px-6 text-center">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-6 sm:mb-8 text-foreground leading-tight">
-            Start building your creative portfolio today
-          </h2>
-
-          <p className="text-base sm:text-lg lg:text-xl text-muted-foreground mb-8 sm:mb-10 max-w-3xl mx-auto leading-relaxed px-2">
-            Connect with industry professionals and showcase your talent to the world.
-          </p>
-
-          <Button
-            variant="cta"
-            size="lg"
-            onClick={() => navigateWithScrollSave("/auth")}
-            className="h-12 sm:h-14 px-8 sm:px-10 text-base sm:text-lg font-semibold rounded-xl touch-manipulation"
-          >
-            Create Your Profile
-          </Button>
         </div>
       </section>
     </>
