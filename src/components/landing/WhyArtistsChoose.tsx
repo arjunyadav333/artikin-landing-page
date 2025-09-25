@@ -32,7 +32,7 @@ const FeaturesAndCTASection = () => {
       {/* CTA Section */}
       <section className="py-16 sm:py-20 lg:py-24 bg-muted/30">
         <div className="container mx-auto px-4 sm:px-6 text-center">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-6 sm:mb-8 text-foreground leading-tight">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-6 sm:mb-8 font-bold text-black-500 mb-2">
             Start building your creative portfolio today
           </h2>
 
@@ -44,7 +44,7 @@ const FeaturesAndCTASection = () => {
             variant="cta"
             size="lg"
             onClick={() => navigateWithScrollSave("/auth")}
-            className="h-12 sm:h-14 px-8 sm:px-10 text-base sm:text-lg font-semibold rounded-xl touch-manipulation"
+            className="h-12 sm:h-14 px-8 sm:px-10 text-base sm:text-lg font-semibold rounded-xl touch-manipulation font-bold text-blue-500 mb-2"
           >
             Create Your Profile
           </Button>
