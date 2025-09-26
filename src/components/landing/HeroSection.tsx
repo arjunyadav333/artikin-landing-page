@@ -77,7 +77,7 @@ const HeroSection = () => {
         <VideoModal
           isOpen={isVideoModalOpen}
           onClose={() => setIsVideoModalOpen(false)}
-          videoUrl=
+          videoUrl="https://www.youtube.com/watch?v=lu58Um79-N4"
           title="Artikin Trailer"
         />
 
