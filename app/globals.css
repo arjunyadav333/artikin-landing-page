@@ -12,37 +12,37 @@
   --card-foreground: 30 41 59;
   --popover: 255 255 255;
   --popover-foreground: 30 41 59;
-  --primary: 59 130 246;
+  --primary: 207 100% 41%;
   --primary-foreground: 255 255 255;
   --secondary: 241 245 249;
   --secondary-foreground: 71 85 105;
   --muted: 248 250 252;
   --muted-foreground: 100 116 139;
-  --accent: 14 165 233;
+  --accent: 207 100% 50%;
   --accent-foreground: 255 255 255;
   --destructive: 239 68 68;
   --destructive-foreground: 255 255 255;
   --border: 226 232 240;
   --input: 226 232 240;
-  --ring: 59 130 246;
+  --ring: 207 100% 41%;
   --radius: 0.5rem;
   
   /* Brand-specific colors */
-  --creative: 99 102 241;
+  --creative: 207 100% 41%;
   --creative-foreground: 255 255 255;
-  --opportunity: 8 145 178;
+  --opportunity: 207 80% 50%;
   --opportunity-foreground: 255 255 255;
-  --connection: 5 150 105;
+  --connection: 207 70% 55%;
   --connection-foreground: 255 255 255;
   
   /* Blue gradients */
-  --gradient-primary: linear-gradient(135deg, hsl(217 91% 60%) 0%, hsl(212 97% 87%) 100%);
-  --gradient-blue: linear-gradient(135deg, hsl(221 83% 53%) 0%, hsl(204 94% 94%) 100%);
-  --gradient-accent: linear-gradient(135deg, hsl(199 89% 48%) 0%, hsl(198 93% 60%) 100%);
+  --gradient-primary: linear-gradient(135deg, hsl(207 100% 41%) 0%, hsl(207 100% 70%) 100%);
+  --gradient-blue: linear-gradient(135deg, hsl(207 100% 41%) 0%, hsl(207 100% 85%) 100%);
+  --gradient-accent: linear-gradient(135deg, hsl(207 100% 35%) 0%, hsl(207 100% 50%) 100%);
   
   /* Blue shadows */
-  --shadow-blue: 0 4px 14px 0 rgba(59, 130, 246, 0.15);
-  --shadow-blue-lg: 0 10px 25px -3px rgba(59, 130, 246, 0.1);
+  --shadow-blue: 0 4px 14px 0 rgba(0, 115, 207, 0.15);
+  --shadow-blue-lg: 0 10px 25px -3px rgba(0, 115, 207, 0.1);
   
   /* Smooth transitions */
   --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -56,24 +56,24 @@
   --card-foreground: 248 250 252;
   --popover: 30 41 59;
   --popover-foreground: 248 250 252;
-  --primary: 96 165 250;
+  --primary: 207 100% 60%;
   --primary-foreground: 15 23 42;
   --secondary: 51 65 85;
   --secondary-foreground: 226 232 240;
   --muted: 51 65 85;
   --muted-foreground: 148 163 184;
-  --accent: 56 189 248;
+  --accent: 207 100% 65%;
   --accent-foreground: 15 23 42;
   --destructive: 248 113 113;
   --destructive-foreground: 15 23 42;
   --border: 51 65 85;
   --input: 51 65 85;
-  --ring: 96 165 250;
+  --ring: 207 100% 60%;
   
   /* Dark mode brand colors */
-  --creative: 129 140 248;
-  --opportunity: 56 189 248;
-  --connection: 52 211 153;
+  --creative: 207 100% 60%;
+  --opportunity: 207 80% 65%;
+  --connection: 207 70% 70%;
 }
 
 * {
@@ -106,11 +106,11 @@ body {
 
 /* Blue glow utilities */
 .glow-blue {
-  box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 0 20px rgba(0, 115, 207, 0.3);
 }
 
 .glow-blue-lg {
-  box-shadow: 0 0 40px rgba(59, 130, 246, 0.2);
+  box-shadow: 0 0 40px rgba(0, 115, 207, 0.2);
 }
 
 /* Smooth focus styles */
@@ -124,7 +124,7 @@ body {
 }
 
 .bg-gradient-blue-subtle {
-  background: linear-gradient(135deg, hsl(214 100% 97%) 0%, hsl(221 39% 97%) 100%);
+  background: linear-gradient(135deg, hsl(207 100% 97%) 0%, hsl(207 50% 97%) 100%);
 }
 
 /* Animation classes */
@@ -240,7 +240,7 @@ body {
 /* High contrast mode support */
 @media (prefers-contrast: high) {
   :root {
-    --primary: 37 99 235;
+    --primary: 207 100% 35%;
     --border: 100 116 139;
   }
 }
