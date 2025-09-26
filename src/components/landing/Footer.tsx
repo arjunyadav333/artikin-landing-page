@@ -11,7 +11,7 @@ const Footer = () => {
     { icon: Facebook, href: 'https://facebook.com/artikinofficial', label: 'Facebook' },
     { icon: Twitter, href: 'https://twitter.com/artikinofficial', label: 'Twitter' },
     { icon: Instagram, href: 'https://www.instagram.com/artikinofficial?utm_source=ig_web_button_share_sheet&igsh=MmEzNzBucmF2Z28w', label: 'Instagram' },
-    { icon: Youtube, href: 'https://youtube.com/@artikinofficial', label: 'YouTube' },
+    { icon: Youtube, href: 'https://www.youtube.com/@Artikinofficial', label: 'YouTube' },
     { icon: Linkedin, href: 'https://linkedin.com/company/artikin', label: 'LinkedIn' }
   ];
 
