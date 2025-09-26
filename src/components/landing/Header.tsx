@@ -30,7 +30,7 @@ const Header = () => {
           {/* Logo */}
           <div className="flex items-center gap-3">
             <img src={artikinLogo} alt="Artikin Logo" className="w-10 h-10 object-contain rounded-lg cursor-pointer" onClick={handleLogoClick} />
-            <span onClick={handleLogoClick} className="font-bold text-blue-600 cursor-pointer text-3xl">
+            <span onClick={handleLogoClick} className="font-bold text-blue-500 cursor-pointer text-3xl">
               Artikin
             </span>
           </div>
