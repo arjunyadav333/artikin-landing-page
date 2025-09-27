@@ -49,23 +49,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   useEffect(() => {
-    // Check cache first to avoid unnecessary API calls
-    if (userCache && Date.now() - userCache.timestamp < CACHE_DURATION) {
-      setUser(userCache.user);
-      setSession(userCache.user ? { user: userCache.user } as Session : null);
-      setLoading(false);
-      return;
-    }
-
-    // Set up auth state listener with optimized callback
+    console.log('Auth provider initializing...');
+    
+    // Set up auth state listener first (before checking cache)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
+        console.log('Auth state changed:', event, !!session);
         setAuthState(session);
       }
     );
 
-    // Get initial session only if cache is empty or expired
+    // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('Initial session check:', !!session);
       setAuthState(session);
     });
 
@@ -74,6 +70,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signUp = useCallback(async (email: string, password: string, metadata?: any) => {
     try {
+      console.log('Attempting sign up for:', email);
       const redirectUrl = `${window.location.origin}/`;
       
       const { error } = await supabase.auth.signUp({
@@ -85,25 +82,36 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
       });
 
-      // Remove toast notifications
+      if (error) {
+        console.error('Sign up error:', error);
+      } else {
+        console.log('Sign up successful');
+      }
 
       return { error };
     } catch (error: any) {
+      console.error('Sign up exception:', error);
       return { error };
     }
   }, []);
 
   const signIn = useCallback(async (email: string, password: string) => {
     try {
+      console.log('Attempting sign in for:', email);
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password
       });
 
-      // Remove toast notifications
+      if (error) {
+        console.error('Sign in error:', error);
+      } else {
+        console.log('Sign in successful');
+      }
 
       return { error };
     } catch (error: any) {
+      console.error('Sign in exception:', error);
       return { error };
     }
   }, []);
