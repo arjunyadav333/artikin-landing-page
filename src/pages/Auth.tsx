@@ -39,18 +39,7 @@ const Auth = () => {
     const { error } = await signIn(email, password);
     setLoading(false);
 
-    if (error) {
-      console.error('Auth page sign in error:', error);
-      toast({
-        title: 'Sign In Failed',
-        description: error.message || 'Failed to sign in. Please check your credentials.',
-        variant: 'destructive'
-      });
-    } else {
-      toast({
-        title: 'Welcome back!',
-        description: 'You have successfully signed in.',
-      });
+    if (!error) {
       navigate('/');
     }
   };

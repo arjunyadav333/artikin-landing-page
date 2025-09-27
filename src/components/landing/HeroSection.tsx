@@ -42,6 +42,7 @@ const HeroSection = () => {
               </button>
 
               <button
+                onClick={() => setIsVideoModalOpen(true)}
                 className="group flex items-center px-8 py-4 text-gray-700 font-semibold text-lg hover:text-blue-400 transition-colors duration-300 hover:scale-105 transform"
               >
                 <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg mr-3 group-hover:shadow-xl transition-shadow duration-300">

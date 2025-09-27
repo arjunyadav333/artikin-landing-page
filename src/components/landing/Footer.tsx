@@ -11,12 +11,12 @@ const Footer = () => {
     { icon: Facebook, href: 'https://facebook.com/artikinofficial', label: 'Facebook' },
     { icon: Twitter, href: 'https://twitter.com/artikinofficial', label: 'Twitter' },
     { icon: Instagram, href: 'https://www.instagram.com/artikinofficial?utm_source=ig_web_button_share_sheet&igsh=MmEzNzBucmF2Z28w', label: 'Instagram' },
-    { icon: Youtube, href: 'https://www.youtube.com/@Artikinofficial', label: 'YouTube' },
+    { icon: Youtube, href: 'https://youtube.com/@artikinofficial', label: 'YouTube' },
     { icon: Linkedin, href: 'https://linkedin.com/company/artikin', label: 'LinkedIn' }
   ];
 
   return (
-    <footer id="contact" className="bg-gray-900 text-white">
+    <footer className="bg-gray-900 text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8">
           {/* Brand Section */}

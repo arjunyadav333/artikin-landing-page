@@ -45,16 +45,16 @@
   }
 
   .bg-gradient-blue {
-    background: linear-gradient(135deg, hsl(207 100% 41%), hsl(207 100% 60%));
+    background: linear-gradient(135deg, hsl(214 100% 50%), hsl(205 100% 67%));
   }
 
   /* Shadow utilities */
   .shadow-blue {
-    box-shadow: 0 4px 14px 0 hsl(207 100% 41% / 0.15);
+    box-shadow: 0 4px 14px 0 hsl(214 100% 50% / 0.15);
   }
 
   .hover\:shadow-blue-lg:hover {
-    box-shadow: 0 8px 25px 0 hsl(207 100% 41% / 0.25);
+    box-shadow: 0 8px 25px 0 hsl(214 100% 50% / 0.25);
   }
 
   /* Soft shadow utility */
@@ -311,37 +311,37 @@ All colors MUST be HSL.
     --card-foreground: 30 41 59;
     --popover: 255 255 255;
     --popover-foreground: 30 41 59;
-    --primary: 207 100% 41%; /* #0073cf blue as specified */
+    --primary: 214 100% 50%; /* #2563EB sky blue as specified */
     --primary-foreground: 255 255 255;
-    --secondary: 207 100% 60%;
+    --secondary: 205 100% 67%;
     --secondary-foreground: 255 255 255;
     --muted: 248 250 252;
     --muted-foreground: 100 116 139;
-    --accent: 207 100% 50%; /* Lighter blue for hover effects */
+    --accent: 260 88% 58%; /* #9333EA purple for hover effects */
     --accent-foreground: 255 255 255;
     
     /* Custom sidebar colors */
-    --sidebar-active: 207 100% 41%; /* #0073cf */
+    --sidebar-active: 213 93% 49%; /* #1A73E8 */
     --sidebar-inactive: 220 9% 38%; /* #5F6368 */
-    --sidebar-hover: 207 50% 97%; /* Light blue hover */
+    --sidebar-hover: 210 20% 97%; /* #F7F8FA */
 
     --destructive: 0 100% 62%; /* #FF3B3B */
     --destructive-foreground: 0 0% 98%;
 
     --border: 220 13% 91%;
     --input: 220 13% 91%;
-    --ring: 207 100% 41%;
+    --ring: 210 100% 56%;
 
     --radius: 0.75rem;
 
     /* Artist-specific brand colors */
-    --creative: 207 100% 41%;
+    --creative: 291 64% 42%;
     --creative-foreground: 0 0% 98%;
     
-    --opportunity: 207 80% 50%;
+    --opportunity: 39 80% 52%;
     --opportunity-foreground: 0 0% 98%;
     
-    --connection: 207 70% 55%;
+    --connection: 217 91% 60%;
     --connection-foreground: 0 0% 98%;
 
     --sidebar-background: 0 0% 98%;
@@ -358,7 +358,7 @@ All colors MUST be HSL.
 
     --sidebar-border: 220 13% 91%;
 
-    --sidebar-ring: 207 100% 41%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
     
     /* Opportunities Page Colors */
     --opportunities-active: 221 84% 95%;
@@ -375,7 +375,7 @@ All colors MUST be HSL.
     --popover: 240 10% 3.9%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 207 100% 60%; /* #0073cf blue - lighter for dark mode */
+    --primary: 214 100% 50%; /* #2563EB sky blue */
     --primary-foreground: 0 0% 98%;
 
     --secondary: 240 4% 16%;
@@ -384,11 +384,11 @@ All colors MUST be HSL.
     --muted: 240 4% 16%;
     --muted-foreground: 240 5% 65%;
 
-    --accent: 207 100% 65%; /* Lighter blue for hover effects */
+    --accent: 260 88% 58%; /* #9333EA purple for hover effects */
     --accent-foreground: 0 0% 98%;
     
     /* Custom sidebar colors for dark mode */
-    --sidebar-active: 207 100% 60%; /* #0073cf - lighter for dark mode */
+    --sidebar-active: 213 93% 49%; /* #1A73E8 */
     --sidebar-inactive: 240 5% 65%; /* Lighter gray for dark mode */
     --sidebar-hover: 240 3.7% 15.9%; /* Darker gray for dark mode */
 
@@ -397,16 +397,16 @@ All colors MUST be HSL.
 
     --border: 240 4% 16%;
     --input: 240 4% 16%;
-    --ring: 207 100% 60%;
+    --ring: 210 100% 56%;
 
     /* Dark mode artist colors */
-    --creative: 207 100% 60%;
+    --creative: 291 64% 42%;
     --creative-foreground: 0 0% 98%;
     
-    --opportunity: 207 80% 65%;
+    --opportunity: 39 80% 52%;
     --opportunity-foreground: 0 0% 98%;
     
-    --connection: 207 70% 70%;
+    --connection: 217 91% 60%;
     --connection-foreground: 0 0% 98%;
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
@@ -415,7 +415,7 @@ All colors MUST be HSL.
     --sidebar-accent: 240 3.7% 15.9%;
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 207 100% 60%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
     
     /* Opportunities Page Colors - Dark Mode */
     --opportunities-active: 221 84% 15%;
@@ -484,7 +484,7 @@ All colors MUST be HSL.
 }
 
 .animate-gradient-text {
-  background: linear-gradient(-45deg, #0073cf, #0099ff, #0073cf, #0099ff);
+  background: linear-gradient(-45deg, #3B82F6, #8B5CF6, #3B82F6, #10B981);
   background-size: 400% 400%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;

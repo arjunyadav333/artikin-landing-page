@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import artikinLogo from "@/assets/artikin-logo.png";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -29,8 +28,8 @@ const Header = () => {
         <div className="flex items-center justify-between h-16 sm:h-20">
           {/* Logo */}
           <div className="flex items-center gap-3">
-            <img src={artikinLogo} alt="Artikin Logo" className="w-10 h-10 object-contain rounded-lg cursor-pointer" onClick={handleLogoClick} />
-            <span onClick={handleLogoClick} className="font-bold text-blue-500 cursor-pointer text-3xl">
+            <img src="/src/assets/artikin-logo.jpg"alt="Artikin Logo" className="w-10 h-10 object-contain rounded-lg cursor-pointer" onClick={handleLogoClick} />
+            <span onClick={handleLogoClick} className="font-bold text-primary cursor-pointer text-3xl">
               Artikin
             </span>
           </div>

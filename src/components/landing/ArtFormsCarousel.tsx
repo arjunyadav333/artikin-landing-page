@@ -13,10 +13,6 @@ import photographySlide from "@/assets/photography-slide.jpg";
 import videographySlide from "@/assets/videography-slide.jpg";
 import singingSlide from "@/assets/singing-slide.jpg";
 import voiceSlide from "@/assets/voice-slide.jpg";
-import instrumentalistSlide from "@/assets/instrumentalist-slide.jpg";
-import singerSlide from "@/assets/singer-slide.jpg";
-import drawingSlide from "@/assets/drawing-slide.jpg";
-import paintingSlide from "@/assets/painting-slide.jpg";
 
 const ArtFormsCarousel = () => {
   const artforms = [
@@ -25,10 +21,10 @@ const ArtFormsCarousel = () => {
     { title: "Model", description: "They express creativity through presence and pose.", image: singingSlide },
     { title: "Photographer", description: "A photographer captures stories, emotions, and beauty through their lens.", image: photographySlide },
     { title: "Videographer", description: "They create visuals that bring ideas, events, and memories to life.", image: videographySlide },
-    { title: "Instrumentalist", description: "A skilled musician expressing deep emotion through a musical instrument.", image: instrumentalistSlide },
-    { title: "Singer", description: "The voice is their instrument, emotion their song.", image: singerSlide },
-    { title: "Drawing", description: "Using simple tools to bring complex imaginations to life.", image: drawingSlide },
-    { title: "Painting", description: "Bringing a canvas to life with color, light, and emotion.", image: paintingSlide },
+    { title: "Instrumentalist", description: "A skilled musician expressing deep emotion through a musical instrument.", image: voiceSlide },
+    { title: "Singer", description: "The voice is their instrument, emotion their song.", image: voiceSlide },
+    { title: "Drawing", description: "Using simple tools to bring complex imaginations to life.", image: voiceSlide },
+    { title: "Painting", description: "Bringing a canvas to life with color, light, and emotion.", image: voiceSlide },
   ];
 
   return (
