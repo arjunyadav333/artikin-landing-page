@@ -5,7 +5,7 @@ import { Search, ArrowLeft, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { FilterDropdown, FilterOptions } from "@/components/connections/filter-dropdown";
 import { UserCard } from "@/components/connections/user-card";
-import { useSuggestedUsers } from "@/hooks/useConnections";
+import { useSuggestedUsers, useSearchUsers } from "@/hooks/useConnections";
 import { motion } from "framer-motion";
 
 const DiscoverPeople = () => {
@@ -17,23 +17,15 @@ const DiscoverPeople = () => {
     sortBy: 'newest'
   });
 
-  const { data: suggestedUsers = [], isLoading } = useSuggestedUsers();
+  const { data: suggestedUsers = [], isLoading: loadingSuggestions } = useSuggestedUsers();
+  const { data: searchResults = [], isLoading: loadingSearch } = useSearchUsers(searchTerm);
 
-  const filteredUsers = useMemo(() => {
-    if (!suggestedUsers) return [];
+  const displayUsers = useMemo(() => {
+    const users = searchTerm ? searchResults : suggestedUsers;
+    if (!users) return [];
     
-    return suggestedUsers
+    return users
       .filter(user => {
-        // Search filter
-        if (searchTerm) {
-          const searchLower = searchTerm.toLowerCase();
-          const matchesSearch = 
-            user.display_name?.toLowerCase().includes(searchLower) ||
-            user.username?.toLowerCase().includes(searchLower) ||
-            user.bio?.toLowerCase().includes(searchLower);
-          if (!matchesSearch) return false;
-        }
-        
         // Type filters
         if (filters.showArtistsOnly && user.role !== 'artist') return false;
         if (filters.showOrganizationsOnly && user.role !== 'organization') return false;
@@ -57,7 +49,9 @@ const DiscoverPeople = () => {
             return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
         }
       });
-  }, [suggestedUsers, searchTerm, filters]);
+  }, [suggestedUsers, searchResults, searchTerm, filters]);
+
+  const isLoading = searchTerm ? loadingSearch : loadingSuggestions;
 
   const handleBack = () => {
     navigate('/connections');
@@ -111,25 +105,32 @@ const DiscoverPeople = () => {
           </div>
         </motion.div>
 
-        {/* Results */}
+        {/* Suggestions or Search Results */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
         >
+          {!searchTerm && (
+            <div className="mb-4">
+              <h2 className="text-lg font-semibold mb-2">Suggested for you</h2>
+              <p className="text-sm text-muted-foreground">People you might want to follow</p>
+            </div>
+          )}
+          
           <div className="space-y-4">
             {isLoading ? (
               <div className="flex justify-center py-12">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
               </div>
-            ) : filteredUsers.length > 0 ? (
+            ) : displayUsers.length > 0 ? (
               <>
                 <div className="flex items-center justify-between mb-4">
                   <p className="text-sm text-muted-foreground">
-                    {filteredUsers.length} people found
+                    {searchTerm ? `${displayUsers.length} people found` : `${displayUsers.length} suggestions`}
                   </p>
                 </div>
-                {filteredUsers.map((user, index) => (
+                {displayUsers.map((user, index) => (
                   <motion.div
                     key={user.id}
                     initial={{ opacity: 0, y: 20 }}
