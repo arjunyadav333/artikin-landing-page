@@ -237,7 +237,7 @@ export const MessageItem = ({
           
           {/* Message menu - only for own messages */}
           {isOwn && !isOptimistic && !message.deleted_for_everyone && (
-            <div className="absolute -right-8 top-0 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="absolute -right-8 top-0">
               <DropdownMenu open={showMenu} onOpenChange={setShowMenu}>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
