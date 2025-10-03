@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -15,7 +15,8 @@ import {
   Mail,
   ExternalLink,
   Loader2,
-  ArrowLeft
+  ArrowLeft,
+  Pencil
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -55,6 +56,31 @@ export function ProfileHero({
 }: ProfileHeroProps) {
   const navigate = useNavigate();
   const { startDirectMessage, isLoading: isMessageLoading } = useDirectMessage();
+  const { toast } = useToast();
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+  const coverInputRef = useRef<HTMLInputElement>(null);
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    // TODO: Implement actual image upload to storage
+    toast({
+      title: "Upload initiated",
+      description: "Avatar upload functionality will be connected to storage.",
+    });
+  };
+
+  const handleCoverChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    // TODO: Implement actual image upload to storage
+    toast({
+      title: "Upload initiated",
+      description: "Cover image upload functionality will be connected to storage.",
+    });
+  };
 
   const handleExportContact = () => {
     const vcard = `BEGIN:VCARD
@@ -155,14 +181,23 @@ END:VCARD`;
 
         {/* Edit Cover for Own Profile */}
         {isOwnProfile && (
-          <div className="absolute inset-0 bg-black/0 hover:bg-black/5 transition-colors cursor-pointer group">
-            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-              <Button variant="secondary" size="sm" className="bg-white shadow-md rounded-lg">
-                <Edit className="h-4 w-4 mr-2" />
-                Change Cover
-              </Button>
-            </div>
-          </div>
+          <>
+            <input
+              ref={coverInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleCoverChange}
+            />
+            <Button
+              variant="secondary"
+              size="icon"
+              className="absolute bottom-4 right-4 h-10 w-10 rounded-full bg-white/95 backdrop-blur-sm shadow-lg hover:bg-white border-0"
+              onClick={() => coverInputRef.current?.click()}
+            >
+              <Pencil className="h-4 w-4 text-gray-700" />
+            </Button>
+          </>
         )}
       </div>
 
@@ -170,7 +205,7 @@ END:VCARD`;
       <div className="px-4 md:px-6 lg:px-8 pb-8">
         <div className="flex flex-col items-center -mt-16">
           {/* Avatar */}
-          <div className="relative group mb-4">
+          <div className="relative mb-4">
             <Avatar className="h-32 w-32 border-4 border-white shadow-lg">
               <AvatarImage src={profile.avatar_url || ""} alt={profile.display_name} />
               <AvatarFallback className="bg-primary text-white text-3xl font-semibold">
@@ -178,11 +213,23 @@ END:VCARD`;
               </AvatarFallback>
             </Avatar>
             {isOwnProfile && (
-              <div className="absolute inset-0 bg-black/0 hover:bg-black/20 transition-colors rounded-full cursor-pointer group-hover:bg-black/20">
-                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Edit className="h-5 w-5 text-white" />
-                </div>
-              </div>
+              <>
+                <input
+                  ref={avatarInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleAvatarChange}
+                />
+                <Button
+                  variant="secondary"
+                  size="icon"
+                  className="absolute bottom-1 right-1 h-8 w-8 rounded-full bg-white shadow-lg hover:bg-white border-0"
+                  onClick={() => avatarInputRef.current?.click()}
+                >
+                  <Pencil className="h-3.5 w-3.5 text-gray-700" />
+                </Button>
+              </>
             )}
           </div>
 
