@@ -25,12 +25,7 @@ export const useNotifications = () => {
 
   // Fetch notifications
   const fetchNotifications = async () => {
-    if (!user) {
-      setNotifications([]);
-      setUnreadCount(0);
-      setIsLoading(false);
-      return;
-    }
+    if (!user) return;
 
     try {
       const { data, error } = await supabase
@@ -53,16 +48,20 @@ export const useNotifications = () => {
 
   // Mark notification as read
   const markAsRead = async (notificationId: string) => {
+    if (!user) return;
+
     try {
       const { error } = await supabase
         .from('notifications')
         .update({ read: true })
-        .eq('id', notificationId);
+        .eq('id', notificationId)
+        .eq('user_id', user.id);
 
       if (error) throw error;
 
+      // Update local state
       setNotifications(prev =>
-        prev.map(n => (n.id === notificationId ? { ...n, read: true } : n))
+        prev.map(n => n.id === notificationId ? { ...n, read: true } : n)
       );
       setUnreadCount(prev => Math.max(0, prev - 1));
     } catch (error) {
@@ -83,10 +82,35 @@ export const useNotifications = () => {
 
       if (error) throw error;
 
+      // Update local state
       setNotifications(prev => prev.map(n => ({ ...n, read: true })));
       setUnreadCount(0);
     } catch (error) {
       console.error('Error marking all notifications as read:', error);
+    }
+  };
+
+  // Delete notification
+  const deleteNotification = async (notificationId: string) => {
+    if (!user) return;
+
+    try {
+      const { error } = await supabase
+        .from('notifications')
+        .delete()
+        .eq('id', notificationId)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      // Update local state
+      const wasUnread = notifications.find(n => n.id === notificationId)?.read === false;
+      setNotifications(prev => prev.filter(n => n.id !== notificationId));
+      if (wasUnread) {
+        setUnreadCount(prev => Math.max(0, prev - 1));
+      }
+    } catch (error) {
+      console.error('Error deleting notification:', error);
     }
   };
 
@@ -96,8 +120,9 @@ export const useNotifications = () => {
 
     fetchNotifications();
 
+    // Set up real-time subscription
     const channel = supabase
-      .channel('notifications-changes')
+      .channel('notifications')
       .on(
         'postgres_changes',
         {
@@ -123,9 +148,31 @@ export const useNotifications = () => {
         (payload) => {
           const updatedNotification = payload.new as Notification;
           setNotifications(prev =>
-            prev.map(n => (n.id === updatedNotification.id ? updatedNotification : n))
+            prev.map(n => n.id === updatedNotification.id ? updatedNotification : n)
           );
-          if (updatedNotification.read) {
+          // Recalculate unread count
+          setUnreadCount(prev => {
+            const oldNotification = notifications.find(n => n.id === updatedNotification.id);
+            if (oldNotification && !oldNotification.read && updatedNotification.read) {
+              return Math.max(0, prev - 1);
+            }
+            return prev;
+          });
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'DELETE',
+          schema: 'public',
+          table: 'notifications',
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload) => {
+          const deletedId = payload.old.id;
+          const wasUnread = notifications.find(n => n.id === deletedId)?.read === false;
+          setNotifications(prev => prev.filter(n => n.id !== deletedId));
+          if (wasUnread) {
             setUnreadCount(prev => Math.max(0, prev - 1));
           }
         }
@@ -143,6 +190,7 @@ export const useNotifications = () => {
     isLoading,
     markAsRead,
     markAllAsRead,
+    deleteNotification,
     refetch: fetchNotifications,
   };
 };
