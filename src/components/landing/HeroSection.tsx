@@ -90,11 +90,14 @@ const HeroSection = () => {
   );
 };
 
-// Animated stat component
-const AnimatedStat = ({ stat, index }) => {
+// Optimized animated stat component with memo
+const AnimatedStat = React.memo(({ stat, index }: { stat: any; index: number }) => {
   const [count, setCount] = useState(0);
+  const [hasAnimated, setHasAnimated] = useState(false);
 
   useEffect(() => {
+    if (hasAnimated) return; // Only animate once
+    
     let start = 0;
     const end = stat.number;
     const duration = 1200; // ms
@@ -106,13 +109,14 @@ const AnimatedStat = ({ stat, index }) => {
       if (start >= end) {
         clearInterval(timer);
         setCount(end);
+        setHasAnimated(true);
       } else {
         setCount(start);
       }
     }, stepTime);
 
     return () => clearInterval(timer);
-  }, [stat.number]);
+  }, [stat.number, hasAnimated]);
 
   // Display logic
   let displayValue;
@@ -132,6 +136,8 @@ const AnimatedStat = ({ stat, index }) => {
       <div className="text-gray-600">{stat.label}</div>
     </div>
   );
-};
+});
 
-export default HeroSection;
+AnimatedStat.displayName = "AnimatedStat";
+
+export default React.memo(HeroSection);
