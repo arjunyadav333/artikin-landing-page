@@ -21,8 +21,8 @@ import paintingSlide from "@/assets/painting-slide.jpg";
 const ArtFormsCarousel = () => {
   const artforms = [
     { title: "Acting", description: "An actor brings stories to life by expressing emotions, characters, and experiences on stage or screen.", image: actingSlide },
-    { title: "Dancer", description: "A dancer expresses stories and emotions through graceful movements and rhythm.", image: modelingSlide },
-    { title: "Model", description: "They express creativity through presence and pose.", image: singingSlide },
+    { title: "Dancer", description: "A dancer expresses stories and emotions through graceful movements and rhythm.", image: danceSlide },
+    { title: "Model", description: "They express creativity through presence and pose.", image: modelingSlide },
     { title: "Photographer", description: "A photographer captures stories, emotions, and beauty through their lens.", image: photographySlide },
     { title: "Videographer", description: "They create visuals that bring ideas, events, and memories to life.", image: videographySlide },
     { title: "Instrumentalist", description: "A skilled musician expressing deep emotion through a musical instrument.", image: instrumentalistSlide },
