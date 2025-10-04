@@ -18,6 +18,8 @@ import {
   ArrowLeft,
   Pencil
 } from 'lucide-react';
+import { ImageCropModal } from './ImageCropModal';
+import { useImageUpload } from '@/hooks/useImageUpload';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -57,29 +59,109 @@ export function ProfileHero({
   const navigate = useNavigate();
   const { startDirectMessage, isLoading: isMessageLoading } = useDirectMessage();
   const { toast } = useToast();
+  const { user } = useAuth();
+  const { uploadImage, isUploading } = useImageUpload();
+  
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
+  
+  const [avatarCropModalOpen, setAvatarCropModalOpen] = useState(false);
+  const [coverCropModalOpen, setCoverCropModalOpen] = useState(false);
+  const [selectedAvatarImage, setSelectedAvatarImage] = useState<string>('');
+  const [selectedCoverImage, setSelectedCoverImage] = useState<string>('');
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    
-    // TODO: Implement actual image upload to storage
-    toast({
-      title: "Upload initiated",
-      description: "Avatar upload functionality will be connected to storage.",
-    });
+
+    // Validate file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: "Please select an image smaller than 5MB.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Invalid file type",
+        description: "Please select an image file.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const imageUrl = URL.createObjectURL(file);
+    setSelectedAvatarImage(imageUrl);
+    setAvatarCropModalOpen(true);
   };
 
   const handleCoverChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    
-    // TODO: Implement actual image upload to storage
-    toast({
-      title: "Upload initiated",
-      description: "Cover image upload functionality will be connected to storage.",
-    });
+
+    // Validate file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: "Please select an image smaller than 5MB.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Invalid file type",
+        description: "Please select an image file.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const imageUrl = URL.createObjectURL(file);
+    setSelectedCoverImage(imageUrl);
+    setCoverCropModalOpen(true);
+  };
+
+  const handleAvatarCropComplete = async (croppedImage: Blob) => {
+    if (!user) return;
+
+    try {
+      await uploadImage(croppedImage, {
+        bucket: 'profile-pictures',
+        userId: user.id,
+        type: 'avatar',
+        maxWidth: 800,
+        maxHeight: 800,
+      });
+      setAvatarCropModalOpen(false);
+      URL.revokeObjectURL(selectedAvatarImage);
+    } catch (error) {
+      console.error('Avatar upload error:', error);
+    }
+  };
+
+  const handleCoverCropComplete = async (croppedImage: Blob) => {
+    if (!user) return;
+
+    try {
+      await uploadImage(croppedImage, {
+        bucket: 'cover-pictures',
+        userId: user.id,
+        type: 'cover',
+        maxWidth: 1920,
+        maxHeight: 640,
+      });
+      setCoverCropModalOpen(false);
+      URL.revokeObjectURL(selectedCoverImage);
+    } catch (error) {
+      console.error('Cover upload error:', error);
+    }
   };
 
   const handleExportContact = () => {
@@ -302,6 +384,33 @@ END:VCARD`;
           </div>
         </div>
       </div>
+
+      {/* Image Crop Modals */}
+      <ImageCropModal
+        open={avatarCropModalOpen}
+        onClose={() => {
+          setAvatarCropModalOpen(false);
+          URL.revokeObjectURL(selectedAvatarImage);
+        }}
+        imageSrc={selectedAvatarImage}
+        onCropComplete={handleAvatarCropComplete}
+        aspectRatio={1}
+        title="Crop Profile Picture"
+        isUploading={isUploading}
+      />
+
+      <ImageCropModal
+        open={coverCropModalOpen}
+        onClose={() => {
+          setCoverCropModalOpen(false);
+          URL.revokeObjectURL(selectedCoverImage);
+        }}
+        imageSrc={selectedCoverImage}
+        onCropComplete={handleCoverCropComplete}
+        aspectRatio={3}
+        title="Crop Cover Image"
+        isUploading={isUploading}
+      />
     </div>
   );
 }
