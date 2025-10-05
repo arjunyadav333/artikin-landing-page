@@ -42,9 +42,16 @@ const Create = () => {
 
   const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    const validFiles = files.filter(file => 
-      file.type.startsWith('image/') || file.type.startsWith('video/')
-    ).slice(0, 4); // Max 4 files
+    const validFiles = files.filter(file => {
+      if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
+        return false;
+      }
+      if (file.size > 50 * 1024 * 1024) {
+        alert(`File ${file.name} is too large. Maximum size is 50MB per file`);
+        return false;
+      }
+      return true;
+    }).slice(0, 10); // Max 10 files
 
     setMediaFiles(validFiles);
 
@@ -172,10 +179,10 @@ const Create = () => {
                   <div className="space-y-2">
                     <Upload className="h-8 w-8 mx-auto text-muted-foreground" />
                     <p className="text-sm text-muted-foreground">
-                      Upload photos or videos (max 4)
+                      Upload photos or videos (max 10)
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      JPG, PNG, GIF, MP4 up to 10MB each
+                      JPG, PNG, GIF, MP4 up to 50MB each
                     </p>
                   </div>
                 </div>
