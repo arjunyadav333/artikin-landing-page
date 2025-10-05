@@ -220,17 +220,6 @@ END:VCARD`;
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="bg-white border-gray-200 shadow-lg rounded-lg">
-              {isOwnProfile && (
-                <>
-                  <EditProfileModal profile={profile}>
-                    <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                      <Edit className="h-4 w-4 mr-2" />
-                      Edit Profile
-                    </DropdownMenuItem>
-                  </EditProfileModal>
-                  <DropdownMenuSeparator />
-                </>
-              )}
               <ShareModal profile={profile}>
                 <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                   <Share className="h-4 w-4 mr-2" />
