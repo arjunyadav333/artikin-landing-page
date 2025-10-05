@@ -7,6 +7,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { HomeFeedPost } from '@/hooks/useHomeFeed';
+import { getTimeAgo } from '@/lib/timeUtils';
 
 interface Comment {
   id: string;
@@ -236,10 +237,7 @@ export const CommentSheet: React.FC<CommentSheetProps> = ({
                     <p className="text-sm text-foreground">{comment.content}</p>
                   </div>
                   <p className="text-xs text-muted-foreground mt-1 ml-3">
-                    {new Date(comment.created_at).toLocaleTimeString([], {
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })}
+                    {getTimeAgo(comment.created_at)}
                   </p>
                 </div>
               </div>
