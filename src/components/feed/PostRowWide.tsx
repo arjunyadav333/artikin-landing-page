@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, memo, useCallback } from 'react';
 import { Heart, MessageCircle, Share2, MoreVertical, Edit, Trash2, Copy, Share } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { HomeFeedPost, useLikePost } from '@/hooks/useHomeFeed';
@@ -16,7 +16,7 @@ interface PostRowWideProps {
   post: HomeFeedPost;
 }
 
-export const PostRowWide = ({ post }: PostRowWideProps) => {
+export const PostRowWide = memo(({ post }: PostRowWideProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const isOwner = user?.id === post.user_id;
@@ -32,7 +32,7 @@ export const PostRowWide = ({ post }: PostRowWideProps) => {
   const deletePostMutation = useDeletePost();
   const connectionStatus = useConnectionStatus(post.user_id);
 
-  const handleFollow = (e: React.MouseEvent) => {
+  const handleFollow = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     if (!user) {
@@ -47,9 +47,9 @@ export const PostRowWide = ({ post }: PostRowWideProps) => {
       targetUserId: post.user_id, 
       isCurrentlyFollowing: currentFollowingState 
     });
-  };
+  }, [user, post.user_id, connectionStatus.data?.isFollowing, post.is_following, followMutation]);
 
-  const handleLike = () => {
+  const handleLike = useCallback(() => {
     if (!user) {
       return;
     }
@@ -59,17 +59,17 @@ export const PostRowWide = ({ post }: PostRowWideProps) => {
       postId: post.id, 
       isLiked: post.user_liked || false 
     });
-  };
+  }, [user, post.id, post.user_liked, likeMutation]);
 
-  const handleComment = () => {
+  const handleComment = useCallback(() => {
     setCommentSheetOpen(true);
-  };
+  }, []);
 
-  const handleShare = () => {
+  const handleShare = useCallback(() => {
     setSocialShareModalOpen(true);
-  };
+  }, []);
 
-  const handleMenuAction = (action: string) => {
+  const handleMenuAction = useCallback((action: string) => {
     setMenuOpen(false);
     
     switch (action) {
@@ -86,13 +86,13 @@ export const PostRowWide = ({ post }: PostRowWideProps) => {
         setSocialShareModalOpen(true);
         break;
     }
-  };
+  }, [post.id]);
 
-  const handleDeletePost = () => {
+  const handleDeletePost = useCallback(() => {
     deletePostMutation.mutate(post.id);
-  };
+  }, [post.id, deletePostMutation]);
 
-  const formatText = (text: string) => {
+  const formatText = useCallback((text: string) => {
     return text.split(' ').map((word, index) => {
       if (word.startsWith('#')) {
         return (
@@ -123,7 +123,7 @@ export const PostRowWide = ({ post }: PostRowWideProps) => {
       }
       return word + ' ';
     });
-  };
+  }, []);
 
   const shouldTruncate = (post.content || '').length > 200;
   const displayText = shouldTruncate && !isExpanded 
@@ -410,4 +410,17 @@ export const PostRowWide = ({ post }: PostRowWideProps) => {
       </AlertDialog>
     </article>
   );
-};
+}, (prevProps, nextProps) => {
+  // Custom comparison for memoization
+  return (
+    prevProps.post.id === nextProps.post.id &&
+    prevProps.post.likes_count === nextProps.post.likes_count &&
+    prevProps.post.comments_count === nextProps.post.comments_count &&
+    prevProps.post.shares_count === nextProps.post.shares_count &&
+    prevProps.post.user_liked === nextProps.post.user_liked &&
+    prevProps.post.is_following === nextProps.post.is_following &&
+    prevProps.post.content === nextProps.post.content
+  );
+});
+
+PostRowWide.displayName = 'PostRowWide';

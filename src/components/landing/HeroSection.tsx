@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowRight, Play } from "lucide-react";
 import { useScrollRestoration } from "@/hooks/useScrollRestoration";
 import VideoModal from "@/components/ui/video-modal";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, memo } from "react";
 
 const HeroSection = () => {
   const { navigateWithScrollSave } = useScrollRestoration();
@@ -90,8 +90,17 @@ const HeroSection = () => {
   );
 };
 
-// Animated stat component
-const AnimatedStat = ({ stat, index }) => {
+// Animated stat component - memoized to prevent re-renders
+interface AnimatedStatProps {
+  stat: {
+    number: number;
+    label: string;
+    display: string;
+  };
+  index: number;
+}
+
+const AnimatedStat = memo(({ stat, index }: AnimatedStatProps) => {
   const [count, setCount] = useState(0);
 
   useEffect(() => {
@@ -132,6 +141,8 @@ const AnimatedStat = ({ stat, index }) => {
       <div className="text-gray-600">{stat.label}</div>
     </div>
   );
-};
+});
 
-export default HeroSection;
+AnimatedStat.displayName = 'AnimatedStat';
+
+export default memo(HeroSection);

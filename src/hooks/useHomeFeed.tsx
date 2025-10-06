@@ -126,8 +126,10 @@ export const useHomeFeed = (limit = 20) => {
     getNextPageParam: (lastPage, pages) => {
       return lastPage.length === limit ? pages.length : undefined;
     },
-    staleTime: 30 * 1000, // 30 seconds
+    staleTime: 5 * 60 * 1000, // 5 minutes - much longer cache
+    gcTime: 10 * 60 * 1000, // 10 minutes
     refetchOnWindowFocus: false,
+    refetchOnMount: false,
   });
 
   // Realtime subscriptions with reconnection and fallback

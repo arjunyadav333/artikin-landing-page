@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, memo } from "react";
 
-const HumanoidSection = () => {
+const HumanoidSection = memo(() => {
   const words = [
     "Showcase your art, Connect with opportunities, Grow with Artikin.",
     "Empowering artists with portfolios, connections, and real opportunities.",
@@ -83,6 +83,8 @@ const HumanoidSection = () => {
       </div>
     </section>
   );
-};
+});
+
+HumanoidSection.displayName = 'HumanoidSection';
 
 export default HumanoidSection;

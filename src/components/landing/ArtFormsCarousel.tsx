@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
 import "swiper/css";
@@ -39,7 +39,13 @@ const ArtFormsCarousel = () => {
             {artforms.map((art, index)=>(
               <SwiperSlide key={index}>
                 <div className="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300">
-                  <img src={art.image} alt={art.title} className="w-full h-56 object-cover"/>
+                  <img 
+                    src={art.image} 
+                    alt={art.title} 
+                    className="w-full h-56 object-cover"
+                    loading="lazy"
+                    decoding="async"
+                  />
                   <div className="p-6">
                     <h3 className="text-xl font-bold mb-2">{art.title}</h3>
                     <p className="text-gray-600">{art.description}</p>
@@ -53,4 +59,4 @@ const ArtFormsCarousel = () => {
   );
 };
 
-export default ArtFormsCarousel;
+export default memo(ArtFormsCarousel);
