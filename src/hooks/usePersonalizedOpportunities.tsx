@@ -34,7 +34,7 @@ const ARTFORM_OPPORTUNITY_MAPPING: Record<string, string[]> = {
   painting: ['painter', 'artist', 'visual', 'fine art', 'painting']
 };
 
-export const usePersonalizedOpportunities = (limit: number = 4) => {
+export const usePersonalizedOpportunities = (limit: number = 3) => { // Phase 6: Reduced from 4 to 3
   const { user } = useAuth();
 
   return useQuery({
@@ -42,106 +42,68 @@ export const usePersonalizedOpportunities = (limit: number = 4) => {
     queryFn: async (): Promise<PersonalizedOpportunity[]> => {
       if (!user) return [];
 
-      // Get current user's profile to know their artform
-      const { data: currentProfile } = await supabase
+      // Phase 6: Parallelize profile fetch with initial opportunity search
+      const profilePromise = supabase
         .from('profiles')
         .select('artform, role')
         .eq('user_id', user.id)
         .single();
 
+      const { data: currentProfile } = await profilePromise;
       if (!currentProfile) return [];
 
       const userArtform = currentProfile.artform;
       const relevantKeywords = userArtform ? ARTFORM_OPPORTUNITY_MAPPING[userArtform] || [] : [];
 
-      let opportunities: PersonalizedOpportunity[] = [];
-
-      // Step 1: Find opportunities that match user's artform in art_forms array
-      if (userArtform) {
-        const { data: directMatches, error: directError } = await supabase
-          .from('opportunities')
-          .select(`
-            id, title, company, organization_name, type, location,
-            salary_min, salary_max, art_forms, experience_level, created_at, user_id,
-            profiles (display_name, avatar_url, organization_type)
-          `)
-          .contains('art_forms', [userArtform])
-          .eq('status', 'active')
-          .order('created_at', { ascending: false })
-          .limit(limit);
-
-        if (directMatches && !directError) {
-          opportunities = directMatches;
-        }
-      }
-
-      // Step 2: If not enough opportunities, search by keywords in title/description
-      if (opportunities.length < limit && relevantKeywords.length > 0) {
-        const remainingSlots = limit - opportunities.length;
-        const existingOpportunityIds = opportunities.map(o => o.id);
-
-        for (const keyword of relevantKeywords) {
-          if (opportunities.length >= limit) break;
-
-          const { data: keywordMatches } = await supabase
+      // Phase 6: Run all queries in parallel instead of sequential waterfall
+      const [directMatches, ...keywordResults] = await Promise.all([
+        // Direct artform match
+        userArtform
+          ? supabase
+              .from('opportunities')
+              .select(`
+                id, title, company, organization_name, type, location,
+                salary_min, salary_max, art_forms, experience_level, created_at, user_id,
+                profiles (display_name, avatar_url, organization_type)
+              `)
+              .contains('art_forms', [userArtform])
+              .eq('status', 'active')
+              .order('created_at', { ascending: false })
+              .limit(limit)
+          : Promise.resolve({ data: null }),
+        
+        // Keyword matches (run all in parallel)
+        ...relevantKeywords.slice(0, 3).map(keyword =>
+          supabase
             .from('opportunities')
             .select(`
               id, title, company, organization_name, type, location,
               salary_min, salary_max, art_forms, experience_level, created_at, user_id,
               profiles (display_name, avatar_url, organization_type)
             `)
-            .not('id', 'in', `(${existingOpportunityIds.map(id => `"${id}"`).join(',')})`)
             .or(`title.ilike.%${keyword}%,description.ilike.%${keyword}%`)
             .eq('status', 'active')
             .order('created_at', { ascending: false })
-            .limit(remainingSlots);
+            .limit(limit)
+        )
+      ]);
 
-          if (keywordMatches) {
-            opportunities = [...opportunities, ...keywordMatches];
-            existingOpportunityIds.push(...keywordMatches.map(o => o.id));
-          }
-        }
-      }
+      // Combine results and deduplicate
+      const allOpportunities = [
+        ...(directMatches.data || []),
+        ...keywordResults.flatMap(result => result.data || [])
+      ];
 
-      // Step 3: If still not enough, add cross-artform opportunities that might be relevant
-      if (opportunities.length < limit) {
-        const remainingSlots = limit - opportunities.length;
-        const existingOpportunityIds = opportunities.map(o => o.id);
-        
-        const crossArtformKeywords = [
-          'creative', 'content', 'media', 'production', 'event', 
-          'performance', 'artistic', 'cultural'
-        ];
+      const uniqueOpportunities = Array.from(
+        new Map(allOpportunities.map(opp => [opp.id, opp])).values()
+      );
 
-        for (const keyword of crossArtformKeywords) {
-          if (opportunities.length >= limit) break;
-
-          const { data: crossMatches } = await supabase
-            .from('opportunities')
-            .select(`
-              id, title, company, organization_name, type, location,
-              salary_min, salary_max, art_forms, experience_level, created_at, user_id,
-              profiles (display_name, avatar_url, organization_type)
-            `)
-            .not('id', 'in', `(${existingOpportunityIds.map(id => `"${id}"`).join(',')})`)
-            .or(`title.ilike.%${keyword}%,description.ilike.%${keyword}%`)
-            .eq('status', 'active')
-            .order('views_count', { ascending: false })
-            .limit(Math.ceil(remainingSlots / crossArtformKeywords.length));
-
-          if (crossMatches) {
-            opportunities = [...opportunities, ...crossMatches];
-            existingOpportunityIds.push(...crossMatches.map(o => o.id));
-          }
-        }
-      }
-
-      // Step 4: If still not enough, add featured/general opportunities (most viewed)
-      if (opportunities.length < limit) {
-        const remainingSlots = limit - opportunities.length;
-        const existingOpportunityIds = opportunities.map(o => o.id);
-        const opportunityIdsFilter = existingOpportunityIds.length > 0 
-          ? `(${existingOpportunityIds.map(id => `"${id}"`).join(',')})`
+      // If still not enough, fetch featured (most viewed)
+      if (uniqueOpportunities.length < limit) {
+        const remainingSlots = limit - uniqueOpportunities.length;
+        const existingIds = uniqueOpportunities.map(o => o.id);
+        const idsFilter = existingIds.length > 0 
+          ? `(${existingIds.map(id => `"${id}"`).join(',')})`
           : '()';
 
         const { data: featuredOpportunities } = await supabase
@@ -151,17 +113,17 @@ export const usePersonalizedOpportunities = (limit: number = 4) => {
             salary_min, salary_max, art_forms, experience_level, created_at, user_id,
             profiles (display_name, avatar_url, organization_type)
           `)
-          .not('id', 'in', opportunityIdsFilter)
+          .not('id', 'in', idsFilter)
           .eq('status', 'active')
           .order('views_count', { ascending: false })
           .limit(remainingSlots);
 
         if (featuredOpportunities) {
-          opportunities = [...opportunities, ...featuredOpportunities];
+          uniqueOpportunities.push(...featuredOpportunities);
         }
       }
 
-      return opportunities.slice(0, limit);
+      return uniqueOpportunities.slice(0, limit);
     },
     enabled: !!user,
     staleTime: 5 * 60 * 1000, // 5 minutes

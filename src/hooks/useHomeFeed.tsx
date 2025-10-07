@@ -40,7 +40,7 @@ export interface HomeFeedPost {
   is_following?: boolean;
 }
 
-export const useHomeFeed = (limit = 20) => {
+export const useHomeFeed = (limit = 10) => { // Phase 6: Reduced from 20 to 10
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { user } = useAuth();
@@ -132,25 +132,44 @@ export const useHomeFeed = (limit = 20) => {
     refetchOnMount: false,
   });
 
-  // Realtime subscriptions with reconnection and fallback
+  // Phase 7: Optimized realtime subscriptions with debouncing and visibility detection
   useEffect(() => {
     if (!user) return;
 
     let reconnectAttempts = 0;
-    const maxReconnectAttempts = 3;
+    const maxReconnectAttempts = 1; // Phase 7: Reduced from 3 to 1
     let isSubscribed = true;
+    let updateQueue: Array<() => void> = [];
+    let debounceTimer: NodeJS.Timeout | null = null;
+
+    // Phase 7: Debounce updates to batch multiple changes
+    const debouncedUpdate = (updateFn: () => void) => {
+      updateQueue.push(updateFn);
+      
+      if (debounceTimer) clearTimeout(debounceTimer);
+      
+      debounceTimer = setTimeout(() => {
+        updateQueue.forEach(fn => fn());
+        updateQueue = [];
+      }, 100); // 100ms debounce
+    };
+
+    // Phase 7: Check if page is visible
+    const isPageVisible = () => document.visibilityState === 'visible';
 
     const setupSubscriptions = () => {
-      const channels = [
-        // New posts
-        supabase
-          .channel('posts-changes')
-          .on('postgres_changes', { 
-            event: '*', 
-            schema: 'public', 
-            table: 'posts' 
-          }, (payload) => {
-            
+      if (!isPageVisible()) return []; // Don't subscribe if tab is inactive
+      // Phase 7: Single combined subscription channel instead of 5 separate ones
+      const channel = supabase
+        .channel('feed-updates')
+        .on('postgres_changes', { 
+          event: '*', 
+          schema: 'public', 
+          table: 'posts' 
+        }, (payload) => {
+          if (!isPageVisible()) return; // Skip if tab inactive
+          
+          debouncedUpdate(() => {
             const { eventType, new: newPost, old: oldPost } = payload;
             
             queryClient.setQueryData(['homeFeed', limit], (old: any) => {
@@ -179,38 +198,21 @@ export const useHomeFeed = (limit = 20) => {
               
               return { ...old, pages };
             });
-          })
-          .subscribe((status) => {
-            
-            if (status === 'SUBSCRIBED') {
-              reconnectAttempts = 0;
-            } else if (status === 'CLOSED' && isSubscribed && reconnectAttempts < maxReconnectAttempts) {
-              reconnectAttempts++;
-              
-              setTimeout(() => {
-                if (isSubscribed) setupSubscriptions();
-              }, Math.pow(2, reconnectAttempts) * 1000);
-            }
-          }),
-
-        // Likes changes
-        supabase
-          .channel('likes-changes')
-          .on('postgres_changes', { 
-            event: '*', 
-            schema: 'public', 
-            table: 'likes' 
-          }, (payload) => {
-            
+          });
+        })
+        .on('postgres_changes', { 
+          event: '*', 
+          schema: 'public', 
+          table: 'likes' 
+        }, (payload) => {
+          if (!isPageVisible()) return;
+          
+          debouncedUpdate(() => {
             const postId = (payload.new as any)?.post_id || (payload.old as any)?.post_id;
             const isInsert = payload.eventType === 'INSERT';
             const affectedUserId = (payload.new as any)?.user_id || (payload.old as any)?.user_id;
             
-            // Only update if this is not the current user's action (to avoid double counting with optimistic updates)
-            if (affectedUserId === user.id) {
-              
-              return;
-            }
+            if (affectedUserId === user.id) return;
             
             queryClient.setQueryData(['homeFeed', limit], (old: any) => {
               if (!old) return old;
@@ -229,17 +231,16 @@ export const useHomeFeed = (limit = 20) => {
                 )
               };
             });
-          })
-          .subscribe(),
-
-        // Comments changes
-        supabase
-          .channel('comments-changes')
-          .on('postgres_changes', { 
-            event: 'INSERT', 
-            schema: 'public', 
-            table: 'comments' 
-          }, (payload) => {
+          });
+        })
+        .on('postgres_changes', { 
+          event: 'INSERT', 
+          schema: 'public', 
+          table: 'comments' 
+        }, (payload) => {
+          if (!isPageVisible()) return;
+          
+          debouncedUpdate(() => {
             queryClient.setQueryData(['homeFeed', limit], (old: any) => {
               if (!old) return old;
               
@@ -254,17 +255,16 @@ export const useHomeFeed = (limit = 20) => {
                 )
               };
             });
-          })
-          .subscribe(),
-
-        // Shares changes
-        supabase
-          .channel('shares-changes')
-          .on('postgres_changes', { 
-            event: 'INSERT', 
-            schema: 'public', 
-            table: 'shares' 
-          }, (payload) => {            
+          });
+        })
+        .on('postgres_changes', { 
+          event: 'INSERT', 
+          schema: 'public', 
+          table: 'shares' 
+        }, (payload) => {
+          if (!isPageVisible()) return;
+          
+          debouncedUpdate(() => {
             queryClient.setQueryData(['homeFeed', limit], (old: any) => {
               if (!old) return old;
               
@@ -279,17 +279,16 @@ export const useHomeFeed = (limit = 20) => {
                 )
               };
             });
-          })
-          .subscribe(),
-
-        // Follows changes
-        supabase
-          .channel('follows-changes')
-          .on('postgres_changes', { 
-            event: '*', 
-            schema: 'public', 
-            table: 'connections' 
-          }, (payload) => {
+          });
+        })
+        .on('postgres_changes', { 
+          event: '*', 
+          schema: 'public', 
+          table: 'connections' 
+        }, (payload) => {
+          if (!isPageVisible()) return;
+          
+          debouncedUpdate(() => {
             const { eventType, new: newConnection, old: oldConnection } = payload;
             
             if (user?.id && ((newConnection as any)?.follower_id === user.id || (oldConnection as any)?.follower_id === user.id)) {
@@ -310,29 +309,52 @@ export const useHomeFeed = (limit = 20) => {
                 return { ...old, pages };
               });
               
-              // Also invalidate connections queries
               queryClient.invalidateQueries({ queryKey: ['connections'] });
             }
-          })
-          .subscribe()
-      ];
+          });
+        })
+        .subscribe((status) => {
+          if (status === 'SUBSCRIBED') {
+            reconnectAttempts = 0;
+          } else if (status === 'CLOSED' && isSubscribed && reconnectAttempts < maxReconnectAttempts) {
+            reconnectAttempts++;
+            setTimeout(() => {
+              if (isSubscribed) setupSubscriptions();
+            }, Math.pow(2, reconnectAttempts) * 1000);
+          }
+        });
 
-      return channels;
+      return [channel];
     };
 
-    const channels = setupSubscriptions();
+    let channels = setupSubscriptions();
+
+    // Phase 7: Re-subscribe when tab becomes visible
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && isSubscribed && channels.length === 0) {
+        channels = setupSubscriptions();
+      } else if (document.visibilityState === 'hidden') {
+        // Unsubscribe when tab is hidden to save resources
+        channels.forEach(channel => supabase.removeChannel(channel));
+        channels = [];
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
       isSubscribed = false;
+      if (debounceTimer) clearTimeout(debounceTimer);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
       channels.forEach(channel => supabase.removeChannel(channel));
     };
-  }, [user, queryClient]);
+  }, [user, queryClient, limit]);
 
   return feedQuery;
 };
 
 // Like post mutation with optimistic updates
-export const useLikePost = (limit = 20) => {
+export const useLikePost = (limit = 10) => { // Phase 6: Match new limit
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { user } = useAuth();
