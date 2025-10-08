@@ -58,8 +58,8 @@ const DiscoverPeople = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 pb-20 md:pb-8">
-      <div className="w-full max-w-4xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 pb-20 md:pb-8 overflow-x-hidden">
+      <div className="w-full max-w-4xl mx-auto px-2 sm:px-4 py-4 sm:py-6">
         {/* Header */}
         <motion.div 
           initial={{ opacity: 0, x: -20 }}
