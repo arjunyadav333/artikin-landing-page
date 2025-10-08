@@ -1,4 +1,4 @@
-import { useState, memo, useCallback } from 'react';
+import { useState, memo, useCallback, lazy, Suspense } from 'react';
 import { Heart, MessageCircle, Share2, MoreVertical, Edit, Trash2, Copy, Share } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { HomeFeedPost, useLikePost } from '@/hooks/useHomeFeed';
@@ -6,11 +6,13 @@ import { useFollowUser, useConnectionStatus } from '@/hooks/useConnections';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useDeletePost } from '@/hooks/useDeletePost';
-import { MediaCarousel } from './MediaCarousel';
-import { InstagramCommentModal } from './InstagramCommentModal';
-import { EditPostModal } from './EditPostModal';
-import { SocialShareModal } from './SocialShareModal';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+
+// Phase 5: Lazy load heavy components
+const MediaCarousel = lazy(() => import('./MediaCarousel').then(m => ({ default: m.MediaCarousel })));
+const InstagramCommentModal = lazy(() => import('./InstagramCommentModal').then(m => ({ default: m.InstagramCommentModal })));
+const EditPostModal = lazy(() => import('./EditPostModal').then(m => ({ default: m.EditPostModal })));
+const SocialShareModal = lazy(() => import('./SocialShareModal').then(m => ({ default: m.SocialShareModal })));
 
 interface PostRowWideProps {
   post: HomeFeedPost;
@@ -299,11 +301,13 @@ export const PostRowWide = memo(({ post }: PostRowWideProps) => {
 
         {post.media_urls && post.media_urls.length > 0 && (
           <div className="post__media w-full">
-            <MediaCarousel 
-              mediaUrls={post.media_urls} 
-              mediaTypes={post.media_types}
-              postId={post.id}
-            />
+            <Suspense fallback={<div className="w-full h-64 bg-muted animate-pulse rounded-lg" />}>
+              <MediaCarousel 
+                mediaUrls={post.media_urls} 
+                mediaTypes={post.media_types}
+                postId={post.id}
+              />
+            </Suspense>
           </div>
         )}
       </div>
@@ -367,25 +371,37 @@ export const PostRowWide = memo(({ post }: PostRowWideProps) => {
       </footer>
 
       {/* Instagram Comment Modal */}
-      <InstagramCommentModal
-        post={post}
-        isOpen={commentSheetOpen}
-        onClose={() => setCommentSheetOpen(false)}
-      />
+      {commentSheetOpen && (
+        <Suspense fallback={null}>
+          <InstagramCommentModal
+            post={post}
+            isOpen={commentSheetOpen}
+            onClose={() => setCommentSheetOpen(false)}
+          />
+        </Suspense>
+      )}
 
       {/* Edit Post Modal */}
-      <EditPostModal
-        isOpen={editModalOpen}
-        onClose={() => setEditModalOpen(false)}
-        post={post}
-      />
+      {editModalOpen && (
+        <Suspense fallback={null}>
+          <EditPostModal
+            isOpen={editModalOpen}
+            onClose={() => setEditModalOpen(false)}
+            post={post}
+          />
+        </Suspense>
+      )}
 
       {/* Social Share Modal */}
-      <SocialShareModal
-        isOpen={socialShareModalOpen}
-        onClose={() => setSocialShareModalOpen(false)}
-        post={post}
-      />
+      {socialShareModalOpen && (
+        <Suspense fallback={null}>
+          <SocialShareModal
+            isOpen={socialShareModalOpen}
+            onClose={() => setSocialShareModalOpen(false)}
+            post={post}
+          />
+        </Suspense>
+      )}
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
@@ -411,15 +427,24 @@ export const PostRowWide = memo(({ post }: PostRowWideProps) => {
     </article>
   );
 }, (prevProps, nextProps) => {
-  // Custom comparison for memoization
+  // Phase 1: Comprehensive comparison for memoization
+  const prev = prevProps.post;
+  const next = nextProps.post;
+  
   return (
-    prevProps.post.id === nextProps.post.id &&
-    prevProps.post.likes_count === nextProps.post.likes_count &&
-    prevProps.post.comments_count === nextProps.post.comments_count &&
-    prevProps.post.shares_count === nextProps.post.shares_count &&
-    prevProps.post.user_liked === nextProps.post.user_liked &&
-    prevProps.post.is_following === nextProps.post.is_following &&
-    prevProps.post.content === nextProps.post.content
+    prev.id === next.id &&
+    prev.likes_count === next.likes_count &&
+    prev.comments_count === next.comments_count &&
+    prev.shares_count === next.shares_count &&
+    prev.user_liked === next.user_liked &&
+    prev.is_following === next.is_following &&
+    prev.content === next.content &&
+    prev.title === next.title &&
+    prev.updated_at === next.updated_at &&
+    JSON.stringify(prev.media_urls) === JSON.stringify(next.media_urls) &&
+    JSON.stringify(prev.tags) === JSON.stringify(next.tags) &&
+    prev.profiles?.avatar_url === next.profiles?.avatar_url &&
+    prev.profiles?.display_name === next.profiles?.display_name
   );
 });
 

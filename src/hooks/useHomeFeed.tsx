@@ -126,10 +126,11 @@ export const useHomeFeed = (limit = 10) => { // Phase 6: Reduced from 20 to 10
     getNextPageParam: (lastPage, pages) => {
       return lastPage.length === limit ? pages.length : undefined;
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes - much longer cache
-    gcTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: 10 * 60 * 1000, // Phase 4: 10 minutes - aggressive caching
+    gcTime: 30 * 60 * 1000, // 30 minutes
     refetchOnWindowFocus: false,
     refetchOnMount: false,
+    refetchOnReconnect: false,
   });
 
   // Phase 7: Optimized realtime subscriptions with debouncing and visibility detection
@@ -137,21 +138,35 @@ export const useHomeFeed = (limit = 10) => { // Phase 6: Reduced from 20 to 10
     if (!user) return;
 
     let reconnectAttempts = 0;
-    const maxReconnectAttempts = 1; // Phase 7: Reduced from 3 to 1
+    const maxReconnectAttempts = 1;
     let isSubscribed = true;
     let updateQueue: Array<() => void> = [];
     let debounceTimer: NodeJS.Timeout | null = null;
+    let inactivityTimer: NodeJS.Timeout | null = null;
+    let isActive = true;
 
-    // Phase 7: Debounce updates to batch multiple changes
+    // Phase 3: Aggressive debounce - 500ms
     const debouncedUpdate = (updateFn: () => void) => {
       updateQueue.push(updateFn);
       
       if (debounceTimer) clearTimeout(debounceTimer);
       
       debounceTimer = setTimeout(() => {
+        if (!isActive) return; // Skip if inactive
         updateQueue.forEach(fn => fn());
         updateQueue = [];
-      }, 100); // 100ms debounce
+      }, 500); // Phase 3: Increased from 100ms to 500ms
+    };
+
+    // Phase 3: Pause subscriptions after 5s of inactivity
+    const resetInactivityTimer = () => {
+      if (inactivityTimer) clearTimeout(inactivityTimer);
+      isActive = true;
+      
+      inactivityTimer = setTimeout(() => {
+        isActive = false;
+        console.log('Feed inactive - pausing realtime updates');
+      }, 5000); // 5 seconds
     };
 
     // Phase 7: Check if page is visible
@@ -329,23 +344,39 @@ export const useHomeFeed = (limit = 10) => { // Phase 6: Reduced from 20 to 10
 
     let channels = setupSubscriptions();
 
-    // Phase 7: Re-subscribe when tab becomes visible
+    // Phase 3: Re-subscribe when tab becomes visible
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible' && isSubscribed && channels.length === 0) {
         channels = setupSubscriptions();
+        resetInactivityTimer();
       } else if (document.visibilityState === 'hidden') {
         // Unsubscribe when tab is hidden to save resources
         channels.forEach(channel => supabase.removeChannel(channel));
         channels = [];
+        if (inactivityTimer) clearTimeout(inactivityTimer);
       }
     };
 
+    // Phase 3: Reset inactivity on user interaction
+    const handleUserActivity = () => {
+      resetInactivityTimer();
+    };
+
     document.addEventListener('visibilitychange', handleVisibilityChange);
+    document.addEventListener('scroll', handleUserActivity, { passive: true });
+    document.addEventListener('mousemove', handleUserActivity, { passive: true });
+    document.addEventListener('touchstart', handleUserActivity, { passive: true });
+
+    resetInactivityTimer(); // Start timer
 
     return () => {
       isSubscribed = false;
       if (debounceTimer) clearTimeout(debounceTimer);
+      if (inactivityTimer) clearTimeout(inactivityTimer);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
+      document.removeEventListener('scroll', handleUserActivity);
+      document.removeEventListener('mousemove', handleUserActivity);
+      document.removeEventListener('touchstart', handleUserActivity);
       channels.forEach(channel => supabase.removeChannel(channel));
     };
   }, [user, queryClient, limit]);
