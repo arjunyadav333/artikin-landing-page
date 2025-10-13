@@ -91,8 +91,8 @@ const Create = () => {
         const uploadPromises = mediaFiles.map(async (file, index) => {
           try {
             const fileExt = file.name.split('.').pop();
-            const fileName = `${Date.now()}_${index}.${fileExt}`;
             const bucket = file.type.startsWith('video/') ? 'post-videos' : 'post-images';
+            const fileName = `${bucket}/${Date.now()}_${index}.${fileExt}`;
             
             const { data, error } = await supabase.storage
               .from('posts')

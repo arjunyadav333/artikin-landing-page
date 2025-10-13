@@ -17,14 +17,14 @@ export const useDeletePost = () => {
       if (post?.media_urls && post.media_urls.length > 0) {
         const deletePromises = post.media_urls.map(async (url: string) => {
           try {
-            // Extract filename from URL
-            const urlParts = url.split('/');
-            const fileName = urlParts[urlParts.length - 1];
+            // Extract full path including subfolder (post-images/ or post-videos/)
+            const pathParts = url.split('/posts/');
+            const filePath = pathParts[pathParts.length - 1];
             
-            if (fileName) {
+            if (filePath) {
               await supabase.storage
                 .from('posts')
-                .remove([fileName]);
+                .remove([filePath]);
             }
           } catch (error) {
             console.error('Failed to delete media file:', url, error);
