@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -15,8 +15,11 @@ import {
   Mail,
   ExternalLink,
   Loader2,
-  ArrowLeft
+  ArrowLeft,
+  Pencil
 } from 'lucide-react';
+import { ImageCropModal } from './ImageCropModal';
+import { useImageUpload } from '@/hooks/useImageUpload';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -55,6 +58,111 @@ export function ProfileHero({
 }: ProfileHeroProps) {
   const navigate = useNavigate();
   const { startDirectMessage, isLoading: isMessageLoading } = useDirectMessage();
+  const { toast } = useToast();
+  const { user } = useAuth();
+  const { uploadImage, isUploading } = useImageUpload();
+  
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+  const coverInputRef = useRef<HTMLInputElement>(null);
+  
+  const [avatarCropModalOpen, setAvatarCropModalOpen] = useState(false);
+  const [coverCropModalOpen, setCoverCropModalOpen] = useState(false);
+  const [selectedAvatarImage, setSelectedAvatarImage] = useState<string>('');
+  const [selectedCoverImage, setSelectedCoverImage] = useState<string>('');
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: "Please select an image smaller than 5MB.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Invalid file type",
+        description: "Please select an image file.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const imageUrl = URL.createObjectURL(file);
+    setSelectedAvatarImage(imageUrl);
+    setAvatarCropModalOpen(true);
+  };
+
+  const handleCoverChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: "Please select an image smaller than 5MB.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Invalid file type",
+        description: "Please select an image file.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const imageUrl = URL.createObjectURL(file);
+    setSelectedCoverImage(imageUrl);
+    setCoverCropModalOpen(true);
+  };
+
+  const handleAvatarCropComplete = async (croppedImage: Blob) => {
+    if (!user) return;
+
+    try {
+      await uploadImage(croppedImage, {
+        bucket: 'profile-pictures',
+        userId: user.id,
+        type: 'avatar',
+        maxWidth: 800,
+        maxHeight: 800,
+      });
+      setAvatarCropModalOpen(false);
+      URL.revokeObjectURL(selectedAvatarImage);
+    } catch (error) {
+      console.error('Avatar upload error:', error);
+    }
+  };
+
+  const handleCoverCropComplete = async (croppedImage: Blob) => {
+    if (!user) return;
+
+    try {
+      await uploadImage(croppedImage, {
+        bucket: 'cover-pictures',
+        userId: user.id,
+        type: 'cover',
+        maxWidth: 1920,
+        maxHeight: 640,
+      });
+      setCoverCropModalOpen(false);
+      URL.revokeObjectURL(selectedCoverImage);
+    } catch (error) {
+      console.error('Cover upload error:', error);
+    }
+  };
 
   const handleExportContact = () => {
     const vcard = `BEGIN:VCARD
@@ -112,17 +220,6 @@ END:VCARD`;
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="bg-white border-gray-200 shadow-lg rounded-lg">
-              {isOwnProfile && (
-                <>
-                  <EditProfileModal profile={profile}>
-                    <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                      <Edit className="h-4 w-4 mr-2" />
-                      Edit Profile
-                    </DropdownMenuItem>
-                  </EditProfileModal>
-                  <DropdownMenuSeparator />
-                </>
-              )}
               <ShareModal profile={profile}>
                 <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                   <Share className="h-4 w-4 mr-2" />
@@ -155,14 +252,23 @@ END:VCARD`;
 
         {/* Edit Cover for Own Profile */}
         {isOwnProfile && (
-          <div className="absolute inset-0 bg-black/0 hover:bg-black/5 transition-colors cursor-pointer group">
-            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-              <Button variant="secondary" size="sm" className="bg-white shadow-md rounded-lg">
-                <Edit className="h-4 w-4 mr-2" />
-                Change Cover
-              </Button>
-            </div>
-          </div>
+          <>
+            <input
+              ref={coverInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleCoverChange}
+            />
+            <Button
+              variant="secondary"
+              size="icon"
+              className="absolute bottom-4 right-4 h-10 w-10 rounded-full bg-white/95 backdrop-blur-sm shadow-lg hover:bg-white border-0"
+              onClick={() => coverInputRef.current?.click()}
+            >
+              <Pencil className="h-4 w-4 text-gray-700" />
+            </Button>
+          </>
         )}
       </div>
 
@@ -170,7 +276,7 @@ END:VCARD`;
       <div className="px-4 md:px-6 lg:px-8 pb-8">
         <div className="flex flex-col items-center -mt-16">
           {/* Avatar */}
-          <div className="relative group mb-4">
+          <div className="relative mb-4">
             <Avatar className="h-32 w-32 border-4 border-white shadow-lg">
               <AvatarImage src={profile.avatar_url || ""} alt={profile.display_name} />
               <AvatarFallback className="bg-primary text-white text-3xl font-semibold">
@@ -178,11 +284,23 @@ END:VCARD`;
               </AvatarFallback>
             </Avatar>
             {isOwnProfile && (
-              <div className="absolute inset-0 bg-black/0 hover:bg-black/20 transition-colors rounded-full cursor-pointer group-hover:bg-black/20">
-                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Edit className="h-5 w-5 text-white" />
-                </div>
-              </div>
+              <>
+                <input
+                  ref={avatarInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleAvatarChange}
+                />
+                <Button
+                  variant="secondary"
+                  size="icon"
+                  className="absolute bottom-1 right-1 h-8 w-8 rounded-full bg-white shadow-lg hover:bg-white border-0"
+                  onClick={() => avatarInputRef.current?.click()}
+                >
+                  <Pencil className="h-3.5 w-3.5 text-gray-700" />
+                </Button>
+              </>
             )}
           </div>
 
@@ -255,6 +373,33 @@ END:VCARD`;
           </div>
         </div>
       </div>
+
+      {/* Image Crop Modals */}
+      <ImageCropModal
+        open={avatarCropModalOpen}
+        onClose={() => {
+          setAvatarCropModalOpen(false);
+          URL.revokeObjectURL(selectedAvatarImage);
+        }}
+        imageSrc={selectedAvatarImage}
+        onCropComplete={handleAvatarCropComplete}
+        aspectRatio={1}
+        title="Crop Profile Picture"
+        isUploading={isUploading}
+      />
+
+      <ImageCropModal
+        open={coverCropModalOpen}
+        onClose={() => {
+          setCoverCropModalOpen(false);
+          URL.revokeObjectURL(selectedCoverImage);
+        }}
+        imageSrc={selectedCoverImage}
+        onCropComplete={handleCoverCropComplete}
+        aspectRatio={3}
+        title="Crop Cover Image"
+        isUploading={isUploading}
+      />
     </div>
   );
 }

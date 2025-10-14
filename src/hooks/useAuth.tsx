@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, useMemo, useCallback } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 
 interface AuthContextType {
   user: User | null;
@@ -84,13 +85,27 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       if (error) {
         console.error('Sign up error:', error);
+        toast({
+          title: "Sign Up Failed",
+          description: error.message || "An error occurred during sign up",
+          variant: "destructive",
+        });
       } else {
         console.log('Sign up successful');
+        toast({
+          title: "Success",
+          description: "Please check your email to verify your account",
+        });
       }
 
       return { error };
     } catch (error: any) {
       console.error('Sign up exception:', error);
+      toast({
+        title: "Sign Up Failed", 
+        description: "An unexpected error occurred",
+        variant: "destructive",
+      });
       return { error };
     }
   }, []);
@@ -105,13 +120,27 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       if (error) {
         console.error('Sign in error:', error);
+        toast({
+          title: "Sign In Failed",
+          description: error.message || "Invalid email or password",
+          variant: "destructive",
+        });
       } else {
         console.log('Sign in successful');
+        toast({
+          title: "Welcome back!",
+          description: "You have been signed in successfully",
+        });
       }
 
       return { error };
     } catch (error: any) {
       console.error('Sign in exception:', error);
+      toast({
+        title: "Sign In Failed",
+        description: "An unexpected error occurred",
+        variant: "destructive",
+      });
       return { error };
     }
   }, []);
@@ -119,10 +148,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signOut = useCallback(async () => {
     try {
       await supabase.auth.signOut();
+      toast({
+        title: "Signed out",
+        description: "You have been signed out successfully",
+      });
       // Use window.location for navigation since we're outside Router context
       window.location.href = '/';
     } catch (error: any) {
-      // Silent error handling
+      console.error('Sign out error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to sign out",
+        variant: "destructive",
+      });
     }
   }, []);
 

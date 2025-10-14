@@ -1,5 +1,6 @@
 import React, { memo, useMemo, useCallback } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { 
   Home, 
@@ -25,18 +26,24 @@ const navigation: NavigationItem[] = [
   { name: "Messages", href: "/messages", icon: MessageSquare },
 ];
 
-// Memoized navigation item component
+// Memoized navigation item component with Phase 8: Route prefetching
 const NavigationItemComponent = memo(({ 
   item, 
-  isActive 
+  isActive,
+  onPrefetch 
 }: { 
   item: NavigationItem; 
-  isActive: boolean; 
+  isActive: boolean;
+  onPrefetch: (href: string) => void;
 }) => {
   const Icon = item.icon;
   
+  const handleMouseEnter = useCallback(() => {
+    onPrefetch(item.href);
+  }, [item.href, onPrefetch]);
+  
   return (
-    <Link key={item.name} to={item.href} className="flex-1">
+    <Link key={item.name} to={item.href} className="flex-1" onMouseEnter={handleMouseEnter}>
       <div
         className={`
           flex items-center justify-center py-3 px-2 rounded-lg transition-colors
@@ -55,6 +62,23 @@ NavigationItemComponent.displayName = "NavigationItem";
 
 export const MobileBottomNav = memo(() => {
   const location = useLocation();
+  const queryClient = useQueryClient();
+
+  // Phase 8: Prefetch data on hover for instant navigation
+  const handlePrefetch = useCallback((href: string) => {
+    if (href === '/home') {
+      // Prefetch home feed data
+      queryClient.prefetchInfiniteQuery({
+        queryKey: ['homeFeed', 10],
+        initialPageParam: 0,
+      });
+    } else if (href === '/opportunities') {
+      // Prefetch opportunities data
+      queryClient.prefetchQuery({
+        queryKey: ['personalized-opportunities'],
+      });
+    }
+  }, [queryClient]);
 
   // Memoize navigation items to prevent re-creation
   const navigationItems = useMemo(() => {
@@ -65,10 +89,11 @@ export const MobileBottomNav = memo(() => {
           key={item.name}
           item={item}
           isActive={isActive}
+          onPrefetch={handlePrefetch}
         />
       );
     });
-  }, [location.pathname]);
+  }, [location.pathname, handlePrefetch]);
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden">

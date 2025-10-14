@@ -1,6 +1,6 @@
-import React from "react";
+import React, { memo } from "react";
 
-const WhatIsArtikin = () => {
+const WhatIsArtikin = memo(() => {
   return (
     <section id="about" className="py-20 bg-gray-50">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -16,6 +16,8 @@ const WhatIsArtikin = () => {
       </div>
     </section>
   );
-};
+});
+
+WhatIsArtikin.displayName = 'WhatIsArtikin';
 
 export default WhatIsArtikin;

@@ -65,16 +65,38 @@ export function EditProfileModal({ profile, children }: EditProfileModalProps) {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const uploadImage = async (file: File, bucket: string, path: string) => {
+  const uploadImage = async (file: File, bucket: string, oldUrl?: string) => {
+    // Validate file size (5MB for avatar, 10MB for cover)
+    const maxSize = bucket === 'profile-pictures' ? 5 * 1024 * 1024 : 10 * 1024 * 1024;
+    if (file.size > maxSize) {
+      throw new Error(`File size exceeds ${bucket === 'profile-pictures' ? '5MB' : '10MB'} limit`);
+    }
+
+    // Delete old file if exists
+    if (oldUrl) {
+      try {
+        const oldPath = oldUrl.split('/').pop();
+        if (oldPath) {
+          await supabase.storage.from(bucket).remove([`${profile.user_id}/${oldPath}`]);
+        }
+      } catch (error) {
+        console.error('Failed to delete old file:', error);
+      }
+    }
+
+    // Upload new file with timestamp to prevent caching
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${profile.user_id}/${Date.now()}.${fileExt}`;
+    
     const { data, error } = await supabase.storage
       .from(bucket)
-      .upload(path, file, { upsert: true });
+      .upload(fileName, file);
     
     if (error) throw error;
 
     const { data: { publicUrl } } = supabase.storage
       .from(bucket)
-      .getPublicUrl(path);
+      .getPublicUrl(fileName);
     
     return publicUrl;
   };
@@ -89,14 +111,12 @@ export function EditProfileModal({ profile, children }: EditProfileModalProps) {
 
       // Upload avatar if changed
       if (avatarFile) {
-        const avatarPath = `${profile.user_id}/avatar.${avatarFile.name.split('.').pop()}`;
-        avatarUrl = await uploadImage(avatarFile, 'profile-pictures', avatarPath);
+        avatarUrl = await uploadImage(avatarFile, 'profile-pictures', profile.avatar_url);
       }
 
       // Upload cover if changed
       if (coverFile) {
-        const coverPath = `${profile.user_id}/cover.${coverFile.name.split('.').pop()}`;
-        coverUrl = await uploadImage(coverFile, 'cover-pictures', coverPath);
+        coverUrl = await uploadImage(coverFile, 'cover-pictures', profile.cover_url);
       }
 
       // Update profile
@@ -174,9 +194,22 @@ export function EditProfileModal({ profile, children }: EditProfileModalProps) {
                 type="file"
                 accept="image/*"
                 className="hidden"
-                onChange={(e) => setAvatarFile(e.target.files?.[0] || null)}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    if (file.size > 5 * 1024 * 1024) {
+                      toast({
+                        title: "File too large",
+                        description: "Avatar must be less than 5MB",
+                        variant: "destructive"
+                      });
+                      return;
+                    }
+                    setAvatarFile(file);
+                  }
+                }}
               />
-              <p className="text-xs text-muted-foreground mt-1">Max 5MB</p>
+              <p className="text-xs text-muted-foreground mt-1">JPG, PNG up to 5MB</p>
             </div>
           </div>
 
@@ -404,7 +437,20 @@ export function EditProfileModal({ profile, children }: EditProfileModalProps) {
                 type="file"
                 accept="image/*"
                 className="hidden"
-                onChange={(e) => setCoverFile(e.target.files?.[0] || null)}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    if (file.size > 10 * 1024 * 1024) {
+                      toast({
+                        title: "File too large",
+                        description: "Cover image must be less than 10MB",
+                        variant: "destructive"
+                      });
+                      return;
+                    }
+                    setCoverFile(file);
+                  }
+                }}
               />
             </div>
           </div>

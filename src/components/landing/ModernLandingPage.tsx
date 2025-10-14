@@ -1,13 +1,16 @@
-import React from "react";
+import React, { lazy, Suspense } from "react";
 import { useScrollRestoration } from "@/hooks/useScrollRestoration";
+import { ContentSpinner } from "@/components/ui/loading-spinner";
 import Header from "./Header";
 import HeroSection from "./HeroSection";
-import BlueHighlightSection from "./BlueHighlightSection";
-import ArtFormsCarousel from "./ArtFormsCarousel";
-import WhatIsArtikin from "./WhatIsArtikin";
-import WhyArtistsChoose from "./WhyArtistsChoose";
-import FinalCTA from "./FinalCTA";
-import Footer from "./Footer";
+
+// Lazy load sections for better performance
+const BlueHighlightSection = lazy(() => import("./BlueHighlightSection"));
+const ArtFormsCarousel = lazy(() => import("./ArtFormsCarousel"));
+const WhatIsArtikin = lazy(() => import("./WhatIsArtikin"));
+const WhyArtistsChoose = lazy(() => import("./WhyArtistsChoose"));
+const FinalCTA = lazy(() => import("./FinalCTA"));
+const Footer = lazy(() => import("./Footer"));
 
 const ModernLandingPage = () => {
   // Initialize scroll restoration hook
@@ -18,13 +21,17 @@ const ModernLandingPage = () => {
       <Header />
       <main>
         <HeroSection />
-        <WhatIsArtikin />
-        <BlueHighlightSection />
-        <ArtFormsCarousel />
-        <WhyArtistsChoose />
-        <FinalCTA />
+        <Suspense fallback={<ContentSpinner />}>
+          <WhatIsArtikin />
+          <BlueHighlightSection />
+          <ArtFormsCarousel />
+          <WhyArtistsChoose />
+          <FinalCTA />
+        </Suspense>
       </main>
-      <Footer />
+      <Suspense fallback={<ContentSpinner />}>
+        <Footer />
+      </Suspense>
     </div>
   );
 };

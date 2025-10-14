@@ -78,8 +78,16 @@ const Footer = () => {
                 href={social.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 bg-gray-800 hover:bg-[#0073cf] rounded-lg flex items-center justify-center transition-colors duration-300"
                 aria-label={social.label}
+                className={`
+                  w-10 h-10 rounded-lg flex items-center justify-center transition-colors duration-300
+                  bg-gray-800 text-white
+                  ${social.label === "Facebook" ? "hover:bg-[#1877F2]" : ""}
+                  ${social.label === "Twitter" ? "hover:bg-[#1DA1F2]" : ""}
+                  ${social.label === "Instagram" ? "hover:bg-gradient-to-tr hover:from-[#F58529] hover:via-[#DD2A7B] hover:to-[#8134AF]" : ""}
+                  ${social.label === "YouTube" ? "hover:bg-[#FF0000]" : ""}
+                  ${social.label === "LinkedIn" ? "hover:bg-[#0A66C2]" : ""}
+                `}
               >
                 <social.icon className="w-5 h-5" />
               </a>

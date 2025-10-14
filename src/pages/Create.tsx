@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Image, X, Upload, Loader2, ArrowLeft } from "lucide-react";
 import { useCurrentProfile } from "@/hooks/useProfiles";
 import { useCreatePost } from "@/hooks/usePosts";
+import { supabase } from "@/integrations/supabase/client";
 
 const Create = () => {
   const navigate = useNavigate();
@@ -42,9 +43,16 @@ const Create = () => {
 
   const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    const validFiles = files.filter(file => 
-      file.type.startsWith('image/') || file.type.startsWith('video/')
-    ).slice(0, 4); // Max 4 files
+    const validFiles = files.filter(file => {
+      if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
+        return false;
+      }
+      if (file.size > 50 * 1024 * 1024) {
+        alert(`File ${file.name} is too large. Maximum size is 50MB per file`);
+        return false;
+      }
+      return true;
+    }).slice(0, 10); // Max 10 files
 
     setMediaFiles(validFiles);
 
@@ -74,29 +82,70 @@ const Create = () => {
   const handleSubmit = useCallback(async () => {
     if (!content.trim()) return;
 
-    // For now, we'll create the post without media upload
-    // In a real app, you'd upload files to Supabase Storage first
-    const postData = {
-      content: content.trim(),
-      tags: tags.length > 0 ? tags : undefined,
-      media_urls: mediaPreview.length > 0 ? mediaPreview : undefined,
-      media_type: mediaFiles.length > 0 ? 'image' : 'text'
-    };
+    try {
+      // Upload media files to Supabase Storage
+      let uploadedUrls: string[] = [];
+      let mediaTypes: string[] = [];
+      
+      if (mediaFiles.length > 0) {
+        const uploadPromises = mediaFiles.map(async (file, index) => {
+          try {
+            const fileExt = file.name.split('.').pop();
+            const bucket = file.type.startsWith('video/') ? 'post-videos' : 'post-images';
+            const fileName = `${bucket}/${Date.now()}_${index}.${fileExt}`;
+            
+            const { data, error } = await supabase.storage
+              .from('posts')
+              .upload(fileName, file);
 
-    createPostMutation.mutate(postData, {
-      onSuccess: () => {
-        // Reset form
-        setContent("");
-        setTags([]);
-        setCurrentTag("");
-        setMediaFiles([]);
-        setMediaPreview([]);
+            if (error) throw error;
+
+            const { data: urlData } = supabase.storage
+              .from('posts')
+              .getPublicUrl(fileName);
+
+            return {
+              url: urlData.publicUrl,
+              type: file.type.startsWith('video/') ? 'video' : 'image'
+            };
+          } catch (error) {
+            console.error('Failed to upload file:', file.name, error);
+            return null;
+          }
+        });
+
+        const results = await Promise.all(uploadPromises);
+        const successfulUploads = results.filter(r => r !== null);
         
-        // Navigate back to home feed
-        navigate("/home");
+        uploadedUrls = successfulUploads.map(r => r!.url);
+        mediaTypes = successfulUploads.map(r => r!.type);
       }
-    });
-  }, [content, tags, mediaPreview, mediaFiles, createPostMutation, navigate]);
+
+      const postData = {
+        content: content.trim(),
+        tags: tags.length > 0 ? tags : undefined,
+        media_urls: uploadedUrls.length > 0 ? uploadedUrls : undefined,
+        media_types: mediaTypes.length > 0 ? mediaTypes : undefined,
+        media_type: uploadedUrls.length > 0 ? mediaTypes[0] : 'text'
+      };
+
+      createPostMutation.mutate(postData, {
+        onSuccess: () => {
+          // Reset form
+          setContent("");
+          setTags([]);
+          setCurrentTag("");
+          setMediaFiles([]);
+          setMediaPreview([]);
+          
+          // Navigate back to home feed
+          navigate("/home");
+        }
+      });
+    } catch (error) {
+      console.error('Failed to create post:', error);
+    }
+  }, [content, tags, mediaFiles, createPostMutation, navigate]);
 
   const getUserDisplayInfo = () => {
     if (!profile) return { name: "Loading...", username: "@loading", avatar: "" };
@@ -172,10 +221,10 @@ const Create = () => {
                   <div className="space-y-2">
                     <Upload className="h-8 w-8 mx-auto text-muted-foreground" />
                     <p className="text-sm text-muted-foreground">
-                      Upload photos or videos (max 4)
+                      Upload photos or videos (max 10)
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      JPG, PNG, GIF, MP4 up to 10MB each
+                      JPG, PNG, GIF, MP4 up to 50MB each
                     </p>
                   </div>
                 </div>

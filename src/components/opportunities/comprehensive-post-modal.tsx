@@ -53,7 +53,7 @@ const formSchema = z.object({
   languagePreference: z.array(z.string()).optional(),
   deadline: z.date({ required_error: "Application deadline is required" }),
   description: z.string().min(1, "Description is required").max(1000, "Description must be less than 1000 characters"),
-  image: z.any().optional(),
+  image: z.instanceof(File).optional().nullable(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -114,10 +114,20 @@ export function ComprehensivePostModal({ open, onOpenChange, trigger }: Comprehe
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        form.setError("image", { message: "Please upload an image file" });
+        return;
+      }
+      
+      // Validate file size
       if (file.size > 5 * 1024 * 1024) {
         form.setError("image", { message: "Image must be less than 5MB" });
         return;
       }
+      
+      // Clear any previous errors
+      form.clearErrors("image");
       
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -131,7 +141,8 @@ export function ComprehensivePostModal({ open, onOpenChange, trigger }: Comprehe
 
   const removeImage = () => {
     setImagePreview(null);
-    form.setValue("image", undefined);
+    form.setValue("image", null);
+    form.clearErrors("image");
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -190,24 +201,29 @@ export function ComprehensivePostModal({ open, onOpenChange, trigger }: Comprehe
     try {
       // Handle image upload if present
       let imageUrl = undefined;
-      if (data.image) {
-        const fileExt = data.image.name.split('.').pop();
-        const fileName = `${Date.now()}.${fileExt}`;
-        
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('opportunities')
-          .upload(fileName, data.image);
+      if (data.image && data.image instanceof File) {
+        try {
+          const fileExt = data.image.name.split('.').pop();
+          const fileName = `opportunity_${Date.now()}_${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
+          
+          const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('opportunities')
+            .upload(fileName, data.image);
 
-        if (uploadError) {
-          console.error('Image upload error:', uploadError);
-          throw new Error('Failed to upload image');
+          if (uploadError) {
+            console.error('Image upload error:', uploadError);
+            // Continue without image instead of failing entire submission
+          } else {
+            const { data: urlData } = supabase.storage
+              .from('opportunities')
+              .getPublicUrl(uploadData.path);
+
+            imageUrl = urlData.publicUrl;
+          }
+        } catch (uploadError) {
+          console.error('Image upload failed:', uploadError);
+          // Continue posting opportunity without image
         }
-
-        const { data: urlData } = supabase.storage
-          .from('opportunities')
-          .getPublicUrl(uploadData.path);
-
-        imageUrl = urlData.publicUrl;
       }
 
       const opportunityData = {
@@ -605,7 +621,7 @@ export function ComprehensivePostModal({ open, onOpenChange, trigger }: Comprehe
 
               {/* Image Upload */}
               <div>
-                <Label className="text-sm font-medium">Image for Opportunity</Label>
+                <Label className="text-sm font-medium">Image for Opportunity (Optional)</Label>
                 <div className="mt-2">
                   {imagePreview ? (
                     <div className="relative w-full h-48 rounded-lg overflow-hidden border border-border/50">
@@ -630,7 +646,7 @@ export function ComprehensivePostModal({ open, onOpenChange, trigger }: Comprehe
                       className="w-full h-48 border-2 border-dashed border-border/50 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-primary/50 transition-colors"
                     >
                       <ImageIcon className="h-12 w-12 text-muted-foreground mb-4" />
-                      <p className="text-sm text-muted-foreground mb-2">Click to upload image</p>
+                      <p className="text-sm text-muted-foreground mb-2">Click to upload image (optional)</p>
                       <p className="text-xs text-muted-foreground">JPG, PNG up to 5MB</p>
                     </div>
                   )}
@@ -642,6 +658,9 @@ export function ComprehensivePostModal({ open, onOpenChange, trigger }: Comprehe
                     className="hidden"
                   />
                 </div>
+                {form.formState.errors.image && (
+                  <p className="text-sm text-destructive mt-2">{form.formState.errors.image.message as string}</p>
+                )}
               </div>
 
               {/* Description */}

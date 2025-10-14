@@ -1,3 +1,4 @@
+import React, { memo } from "react";
 import { Button } from "@/components/ui/button";
 import { useScrollRestoration } from "@/hooks/useScrollRestoration";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,7 +25,7 @@ const features = [
   },
 ];
 
-const FeaturesAndCTASection = () => {
+const FeaturesAndCTASection = memo(() => {
   const { navigateWithScrollSave } = useScrollRestoration();
 
   return (
@@ -90,6 +91,8 @@ const FeaturesAndCTASection = () => {
       </section>
     </>
   );
-};
+});
+
+FeaturesAndCTASection.displayName = 'FeaturesAndCTASection';
 
 export default FeaturesAndCTASection;

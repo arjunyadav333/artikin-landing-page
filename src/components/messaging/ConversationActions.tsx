@@ -115,7 +115,7 @@ export const ConversationActions = ({
 
   const handleViewProfile = () => {
     if (otherParticipant) {
-      navigate(`/profile/${otherParticipant.username}`);
+      navigate(`/profile/${otherParticipant.user_id || otherParticipant.id}`);
       setOpen(false);
     }
   };
