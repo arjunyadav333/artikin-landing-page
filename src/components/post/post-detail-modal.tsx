@@ -5,7 +5,6 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Post } from "@/hooks/usePosts";
 import { useLikePost } from "@/hooks/usePosts";
-import { getTimeAgo } from "@/lib/timeUtils";
 // import { CommentDrawer } from "@/components/post/comment-drawer";
 
 interface PostDetailModalProps {
@@ -90,7 +89,7 @@ export function PostDetailModal({ post, onClose }: PostDetailModalProps) {
                     {post.profiles?.display_name || 'User'}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    {post.profiles?.role === 'artist' ? 'Artist' : 'Organization'} • {getTimeAgo(post.created_at)}
+                    {post.profiles?.role === 'artist' ? 'Artist' : 'Organization'} • {new Date(post.created_at).toLocaleDateString()}
                   </p>
                 </div>
               </div>

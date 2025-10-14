@@ -1,9 +1,8 @@
-import React, { memo } from "react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useScrollRestoration } from "@/hooks/useScrollRestoration";
 
-const FinalCTA = memo(() => {
+const FinalCTA = () => {
   const { navigateWithScrollSave } = useScrollRestoration();
 
   return (
@@ -26,8 +25,6 @@ const FinalCTA = memo(() => {
       </div>
     </section>
   );
-});
-
-FinalCTA.displayName = 'FinalCTA';
+};
 
 export default FinalCTA;

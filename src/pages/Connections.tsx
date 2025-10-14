@@ -1,5 +1,4 @@
 import { useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { 
   DropdownMenu,
@@ -8,7 +7,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Search, Filter, ChevronDown, UserPlus } from "lucide-react";
+import { Search, Filter, ChevronDown } from "lucide-react";
 import { UserRow } from "@/components/connections/user-row";
 import { useConnections } from "@/hooks/useConnections";
 import { useCurrentProfile } from "@/hooks/useProfiles";
@@ -17,7 +16,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 type SortOption = 'newest' | 'alphabetical' | 'relevant';
 
 const Connections = () => {
-  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState<SortOption>('newest');
   const [activeTab, setActiveTab] = useState('following');
@@ -134,18 +132,6 @@ const Connections = () => {
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-        </div>
-
-        {/* Discover People Button */}
-        <div className="mb-4">
-          <Button
-            onClick={() => navigate('/connections/discover')}
-            variant="outline"
-            className="w-full h-10 rounded-xl flex items-center justify-center gap-2"
-          >
-            <UserPlus className="h-4 w-4" />
-            <span>Discover New People</span>
-          </Button>
         </div>
 
         {/* Following and Followers Buttons */}

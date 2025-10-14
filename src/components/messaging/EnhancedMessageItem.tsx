@@ -346,7 +346,7 @@ export const EnhancedMessageItem: React.FC<EnhancedMessageItemProps> = ({
                   <Button 
                     variant="ghost" 
                     size="sm" 
-                    className="h-6 w-6 p-0"
+                    className="opacity-0 group-hover:opacity-100 h-6 w-6 p-0"
                   >
                     <MoreVertical className="h-3 w-3" />
                   </Button>

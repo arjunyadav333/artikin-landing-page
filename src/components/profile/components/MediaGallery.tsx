@@ -32,32 +32,25 @@ export function MediaGallery({
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [newMedia, setNewMedia] = useState({
-    files: [] as File[]
+    file: null as File | null
   });
 
   // Empty media items - users need to add their own
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    const validFiles = files.filter(file => {
-      if (!file.type.startsWith('image/')) {
-        return false;
+    const file = e.target.files?.[0];
+    if (file && file.type.startsWith('image/')) {
+      if (file.size > 10 * 1024 * 1024) {
+        alert('File too large. Maximum size is 10MB');
+        return;
       }
-      if (file.size > 50 * 1024 * 1024) {
-        alert(`File ${file.name} is too large. Maximum size is 50MB per image`);
-        return false;
-      }
-      return true;
-    }).slice(0, 10); // Max 10 files
-
-    if (validFiles.length > 0) {
-      setNewMedia(prev => ({ ...prev, files: validFiles }));
+      setNewMedia(prev => ({ ...prev, file }));
     }
   };
 
   const handleUpload = async () => {
-    if (newMedia.files.length === 0) return;
+    if (!newMedia.file) return;
 
     setIsUploading(true);
     setUploadProgress(0);
@@ -74,19 +67,19 @@ export function MediaGallery({
 
     try {
       setTimeout(() => {
-        const newItems: MediaItem[] = newMedia.files.map((file, index) => ({
-          id: `${Date.now()}-${index}`,
-          url: URL.createObjectURL(file)
-        }));
+        const newItem: MediaItem = {
+          id: Date.now().toString(),
+          url: URL.createObjectURL(newMedia.file!)
+        };
 
-        setMediaItems(prev => [...newItems, ...prev]);
+        setMediaItems(prev => [newItem, ...prev]);
         setUploadProgress(100);
         
         setTimeout(() => {
           setIsUploadModalOpen(false);
           setIsUploading(false);
           setUploadProgress(0);
-          setNewMedia({ files: [] });
+          setNewMedia({ file: null });
         }, 500);
       }, 1000);
     } catch (error) {
@@ -173,19 +166,16 @@ export function MediaGallery({
                     >
                       <FileUp className="h-8 w-8 mx-auto mb-2 text-gray-400" />
                       <p className="text-sm text-gray-600">
-                        {newMedia.files.length > 0 
-                          ? `${newMedia.files.length} image${newMedia.files.length > 1 ? 's' : ''} selected` 
-                          : "Click to upload images"}
+                        {newMedia.file ? newMedia.file.name : "Click to upload image"}
                       </p>
                       <p className="text-xs text-gray-400 mt-1">
-                        Select up to 10 images (JPG, PNG, WebP) up to 50MB each
+                        Images only (JPG, PNG, WebP) up to 10MB
                       </p>
                     </div>
                     <input
                       ref={fileInputRef}
                       type="file"
                       accept="image/*"
-                      multiple
                       onChange={handleFileSelect}
                       className="hidden"
                     />
@@ -211,10 +201,10 @@ export function MediaGallery({
                 <div className="flex gap-2 pt-4 border-t bg-white flex-shrink-0 mt-4">
                   <Button 
                     onClick={handleUpload} 
-                    disabled={newMedia.files.length === 0 || isUploading}
+                    disabled={!newMedia.file || isUploading}
                     className="rounded-2xl"
                   >
-                    {isUploading ? 'Uploading...' : `Upload ${newMedia.files.length} image${newMedia.files.length > 1 ? 's' : ''}`}
+                    {isUploading ? 'Uploading...' : 'Upload'}
                   </Button>
                   <Button 
                     variant="outline" 

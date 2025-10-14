@@ -7,7 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { UserPlus, UserCheck, MoreHorizontal, Eye, UserX, Flag } from "lucide-react";
+import { UserPlus, UserCheck, MoreHorizontal, MessageCircle, Eye, UserX, Flag, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useFollowUser, useConnectionStatus } from "@/hooks/useConnections";
 import { useToast } from "@/hooks/use-toast";
@@ -44,12 +44,17 @@ export function UserCard({
   const { toast } = useToast();
   const followUser = useFollowUser();
   const { data: connectionStatus } = useConnectionStatus(user.user_id);
+  const { startDirectMessage, isLoading: isMessageLoading } = useDirectMessage();
   const currentUserId = useUserId();
   
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const handleViewProfile = () => {
     navigate(`/profile/${user.user_id}`);
+  };
+
+  const handleMessage = () => {
+    startDirectMessage(user.user_id);
   };
 
   const handleFollow = (e: React.MouseEvent) => {
@@ -113,8 +118,8 @@ export function UserCard({
   const followButtonState = getFollowButtonState();
 
   return (
-    <div className="bg-card border rounded-lg p-3 sm:p-4 hover:shadow-md transition-shadow">
-      <div className="flex items-start gap-3 sm:gap-4 relative">
+    <div className="bg-card border rounded-lg p-4 hover:shadow-md transition-shadow">
+      <div className="flex items-start gap-4 relative">
         {/* Profile Picture */}
         <Avatar className="h-12 w-12 cursor-pointer" onClick={handleViewProfile}>
           <AvatarImage src={user.avatar_url} alt={user.display_name} />
@@ -152,17 +157,35 @@ export function UserCard({
         </div>
 
         {/* Actions */}
-        <div className="flex items-center gap-1 sm:gap-2 pointer-events-auto relative z-10 shrink-0">
+        <div className="flex items-center gap-2 pointer-events-auto relative z-10">
+          {/* Message Button - visible for non-self users */}
+          {currentUserId !== user.user_id && (
+            <Button 
+              size="sm" 
+              variant="outline"
+              onClick={handleMessage}
+              disabled={isMessageLoading(user.user_id)}
+              className="border-primary text-primary hover:bg-primary/10"
+            >
+              {isMessageLoading(user.user_id) ? (
+                <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+              ) : (
+                <MessageCircle className="h-4 w-4 mr-1" />
+              )}
+              Message
+            </Button>
+          )}
+
           {showFollowButton && currentUserId !== user.user_id && (
             <Button 
               size="sm" 
               variant={followButtonState.variant}
               onClick={handleFollow}
               disabled={followUser.isPending}
-              className={`h-8 px-2 sm:px-3 text-xs sm:text-sm ${followButtonState.variant === 'default' ? 'bg-connection hover:bg-connection/90 text-white border-0' : ''}`}
+              className={followButtonState.variant === 'default' ? 'bg-connection hover:bg-connection/90 text-white border-0' : ''}
             >
-              <followButtonState.icon className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-1" />
-              <span className="hidden sm:inline">{followButtonState.text}</span>
+              <followButtonState.icon className="h-4 w-4 mr-1" />
+              {followButtonState.text}
             </Button>
           )}
 
@@ -177,6 +200,16 @@ export function UserCard({
                 <Eye className="h-4 w-4 mr-2" />
                 View Profile
               </DropdownMenuItem>
+              {currentUserId !== user.user_id && (
+                <DropdownMenuItem onClick={handleMessage} disabled={isMessageLoading(user.user_id)}>
+                  {isMessageLoading(user.user_id) ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <MessageCircle className="h-4 w-4 mr-2" />
+                  )}
+                  Message
+                </DropdownMenuItem>
+              )}
               {isFollower && onRemoveFollower && (
                 <DropdownMenuItem onClick={handleRemoveFollower} className="text-destructive">
                   <UserX className="h-4 w-4 mr-2" />

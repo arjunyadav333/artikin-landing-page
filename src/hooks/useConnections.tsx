@@ -324,33 +324,10 @@ export const useSuggestedUsers = () => {
         .from('profiles')
         .select('*')
         .not('user_id', 'in', `(${followingIds.join(',')})`)
-        .limit(5);
+        .limit(10);
 
       if (error) throw error;
       return profiles || [];
     }
-  });
-};
-
-export const useSearchUsers = (searchTerm: string) => {
-  return useQuery({
-    queryKey: ['searchUsers', searchTerm],
-    queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user || !searchTerm) return [];
-
-      const searchLower = searchTerm.toLowerCase();
-
-      const { data: profiles, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .neq('user_id', user.id)
-        .or(`display_name.ilike.%${searchLower}%,username.ilike.%${searchLower}%,bio.ilike.%${searchLower}%`)
-        .limit(50);
-
-      if (error) throw error;
-      return profiles || [];
-    },
-    enabled: searchTerm.length > 0
   });
 };

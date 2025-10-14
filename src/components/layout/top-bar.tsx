@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Search, Plus, LogOut, User, Settings, Menu } from "lucide-react";
+import { Search, Plus, Bell, LogOut, User, Settings, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useAuth } from "@/hooks/useAuth";
-import { NotificationsDropdown } from "@/components/notifications/notifications-dropdown";
 
 export function TopBar() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -44,7 +43,10 @@ export function TopBar() {
           {/* Mobile Right: Notifications + Hamburger */}
           <div className="flex items-center gap-2">
             {/* Notifications */}
-            <NotificationsDropdown />
+            <Button variant="ghost" size="sm" className="relative rounded-full h-9 w-9">
+              <Bell className="h-4 w-4" />
+              <span className="absolute -top-1 -right-1 h-3 w-3 bg-destructive rounded-full text-xs"></span>
+            </Button>
 
             {/* Hamburger Menu with Settings */}
             <DropdownMenu>
@@ -98,7 +100,10 @@ export function TopBar() {
           {/* Desktop Actions */}
           <div className="flex items-center gap-2">
             {/* Notifications */}
-            <NotificationsDropdown />
+            <Button variant="ghost" size="sm" className="relative rounded-full h-9 w-9">
+              <Bell className="h-4 w-4" />
+              <span className="absolute -top-1 -right-1 h-3 w-3 bg-destructive rounded-full text-xs"></span>
+            </Button>
 
             {/* Create Post Button */}
             <Link to="/create">

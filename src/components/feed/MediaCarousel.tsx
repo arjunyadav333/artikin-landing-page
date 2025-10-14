@@ -1,7 +1,6 @@
-import { useState, memo } from 'react';
+import { useState } from 'react';
 import { ChevronLeft, ChevronRight, Play, X, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { OptimizedImage } from '@/components/ui/optimized-image';
 
 interface MediaCarouselProps {
   mediaUrls: string[];
@@ -9,7 +8,7 @@ interface MediaCarouselProps {
   postId: string;
 }
 
-export const MediaCarousel = memo(({ mediaUrls, mediaTypes, postId }: MediaCarouselProps) => {
+export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -73,11 +72,12 @@ export const MediaCarousel = memo(({ mediaUrls, mediaTypes, postId }: MediaCarou
 
     return (
       <figure className="media media--image w-full">
-        <OptimizedImage
+        <img
           src={url}
           alt={`Media ${index + 1}`}
           className={`media__img w-full ${isViewer ? 'max-h-[96vh] object-contain' : 'max-h-[70vh] object-contain'} ${!isViewer ? 'cursor-pointer' : ''}`}
           onClick={!isViewer ? openFullscreen : undefined}
+          loading="lazy"
           data-media-index={index}
           style={{ background: 'var(--media-bg, #f8f9fa)' }}
         />
@@ -198,10 +198,4 @@ export const MediaCarousel = memo(({ mediaUrls, mediaTypes, postId }: MediaCarou
       )}
     </div>
   );
-}, (prevProps, nextProps) => {
-  return prevProps.postId === nextProps.postId &&
-    prevProps.mediaUrls.length === nextProps.mediaUrls.length &&
-    prevProps.mediaUrls.every((url, i) => url === nextProps.mediaUrls[i]);
-});
-
-MediaCarousel.displayName = 'MediaCarousel';
+};

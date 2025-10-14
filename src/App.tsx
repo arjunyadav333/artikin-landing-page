@@ -11,7 +11,6 @@ import { HomePageSkeleton, ProfilePageSkeleton, ConnectionsPageSkeleton } from "
 import NotFound from "./pages/NotFound";
 
 const ManageApplicants = lazy(() => import("./pages/ManageApplicants"));
-const Notifications = lazy(() => import("./pages/Notifications"));
 
 // Lazy load components for better performance and code splitting
 const Index = lazy(() => import("./pages/Index"));
@@ -282,15 +281,6 @@ const AppRoutes = () => {
             <AppLayout>
               <Suspense fallback={<DefaultLoader />}>
                 <Settings />
-              </Suspense>
-            </AppLayout>
-          </ProtectedRoute>
-        } />
-        <Route path="/notifications" element={
-          <ProtectedRoute>
-            <AppLayout>
-              <Suspense fallback={<DefaultLoader />}>
-                <Notifications />
               </Suspense>
             </AppLayout>
           </ProtectedRoute>

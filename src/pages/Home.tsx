@@ -5,14 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Home as HomeIcon } from "lucide-react";
 import { LoadingSpinner, ContentSpinner } from "@/components/ui/loading-spinner";
-import { useMemo } from 'react';
+import { SuggestedArtistsSection } from "@/components/home/suggested-artists-section";
+import { PersonalizedOpportunitiesSection } from "@/components/home/personalized-opportunities-section";
 
 const Home = () => {
   const { user } = useAuth();
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useHomeFeed();
   
-  // Phase 1-5: Memoize posts to prevent recalculation
-  const posts = useMemo(() => data?.pages?.flat() || [], [data]);
+  const posts = data?.pages?.flat() || [];
 
   if (isLoading && posts.length === 0) {
     return (
@@ -57,34 +57,69 @@ const Home = () => {
 
   return (
     <div className="w-full min-h-screen bg-background">
-      <main className="mx-auto px-4" style={{ maxWidth: 'var(--feed-max-width)' }}>
-        {/* Phase 1-5: Optimized feed rendering */}
-        <div className="divide-y divide-border bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden">
-          {posts.map((post) => (
-            <PostRowWide key={post.id} post={post} />
-          ))}
-        </div>
-        
-        {hasNextPage && (
-          <div className="text-center py-6 px-4">
-            <Button 
-              onClick={() => fetchNextPage()}
-              variant="outline"
-              disabled={isFetchingNextPage}
-              className="min-w-[120px] rounded-full shadow-sm hover:shadow-md transition-all duration-200"
-            >
-              {isFetchingNextPage ? (
-                <>
-                  <LoadingSpinner size="sm" className="mr-2" />
-                  Loading...
-                </>
-              ) : (
-                'Load More Posts'
-              )}
-            </Button>
+      {/* Desktop: Main feed in center column, personalized sections in right sidebar */}
+      <div className="hidden xl:block">
+        <main className="mx-auto px-4" style={{ maxWidth: 'var(--feed-max-width)' }}>
+          <div className="divide-y divide-border bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden">
+            {posts.map((post) => (
+              <PostRowWide key={post.id} post={post} />
+            ))}
           </div>
-        )}
-      </main>
+          
+          {hasNextPage && (
+            <div className="text-center py-6 px-4">
+              <Button 
+                onClick={() => fetchNextPage()}
+                variant="outline"
+                disabled={isFetchingNextPage}
+                className="min-w-[120px] rounded-full shadow-sm hover:shadow-md transition-all duration-200"
+              >
+                {isFetchingNextPage ? (
+                  <>
+                    <LoadingSpinner size="sm" className="mr-2" />
+                    Loading...
+                  </>
+                ) : (
+                  'Load More Posts'
+                )}
+              </Button>
+            </div>
+          )}
+        </main>
+      </div>
+
+      {/* Mobile: Stacked layout with feed, then suggested artists, then opportunities */}
+      <div className="xl:hidden">
+        <main className="mx-auto px-4" style={{ maxWidth: 'var(--feed-max-width)' }}>
+          {/* Feed */}
+          <div className="divide-y divide-border bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden mb-6">
+            {posts.map((post) => (
+              <PostRowWide key={post.id} post={post} />
+            ))}
+          </div>
+          
+          {hasNextPage && (
+            <div className="text-center py-4 mb-6">
+              <Button 
+                onClick={() => fetchNextPage()}
+                variant="outline"
+                disabled={isFetchingNextPage}
+                className="min-w-[120px] rounded-full shadow-sm hover:shadow-md transition-all duration-200"
+              >
+                {isFetchingNextPage ? (
+                  <>
+                    <LoadingSpinner size="sm" className="mr-2" />
+                    Loading...
+                  </>
+                ) : (
+                  'Load More Posts'
+                )}
+              </Button>
+            </div>
+          )}
+
+        </main>
+      </div>
     </div>
   );
 };
