@@ -9,7 +9,6 @@ import { Badge } from "@/components/ui/badge";
 import { Image, X, Upload, Loader2, ArrowLeft } from "lucide-react";
 import { useCurrentProfile } from "@/hooks/useProfiles";
 import { useCreatePost } from "@/hooks/usePosts";
-import { supabase } from "@/integrations/supabase/client";
 
 const Create = () => {
   const navigate = useNavigate();
@@ -82,70 +81,29 @@ const Create = () => {
   const handleSubmit = useCallback(async () => {
     if (!content.trim()) return;
 
-    try {
-      // Upload media files to Supabase Storage
-      let uploadedUrls: string[] = [];
-      let mediaTypes: string[] = [];
-      
-      if (mediaFiles.length > 0) {
-        const uploadPromises = mediaFiles.map(async (file, index) => {
-          try {
-            const fileExt = file.name.split('.').pop();
-            const bucket = file.type.startsWith('video/') ? 'post-videos' : 'post-images';
-            const fileName = `${bucket}/${Date.now()}_${index}.${fileExt}`;
-            
-            const { data, error } = await supabase.storage
-              .from('posts')
-              .upload(fileName, file);
+    // For now, we'll create the post without media upload
+    // In a real app, you'd upload files to Supabase Storage first
+    const postData = {
+      content: content.trim(),
+      tags: tags.length > 0 ? tags : undefined,
+      media_urls: mediaPreview.length > 0 ? mediaPreview : undefined,
+      media_type: mediaFiles.length > 0 ? 'image' : 'text'
+    };
 
-            if (error) throw error;
-
-            const { data: urlData } = supabase.storage
-              .from('posts')
-              .getPublicUrl(fileName);
-
-            return {
-              url: urlData.publicUrl,
-              type: file.type.startsWith('video/') ? 'video' : 'image'
-            };
-          } catch (error) {
-            console.error('Failed to upload file:', file.name, error);
-            return null;
-          }
-        });
-
-        const results = await Promise.all(uploadPromises);
-        const successfulUploads = results.filter(r => r !== null);
+    createPostMutation.mutate(postData, {
+      onSuccess: () => {
+        // Reset form
+        setContent("");
+        setTags([]);
+        setCurrentTag("");
+        setMediaFiles([]);
+        setMediaPreview([]);
         
-        uploadedUrls = successfulUploads.map(r => r!.url);
-        mediaTypes = successfulUploads.map(r => r!.type);
+        // Navigate back to home feed
+        navigate("/home");
       }
-
-      const postData = {
-        content: content.trim(),
-        tags: tags.length > 0 ? tags : undefined,
-        media_urls: uploadedUrls.length > 0 ? uploadedUrls : undefined,
-        media_types: mediaTypes.length > 0 ? mediaTypes : undefined,
-        media_type: uploadedUrls.length > 0 ? mediaTypes[0] : 'text'
-      };
-
-      createPostMutation.mutate(postData, {
-        onSuccess: () => {
-          // Reset form
-          setContent("");
-          setTags([]);
-          setCurrentTag("");
-          setMediaFiles([]);
-          setMediaPreview([]);
-          
-          // Navigate back to home feed
-          navigate("/home");
-        }
-      });
-    } catch (error) {
-      console.error('Failed to create post:', error);
-    }
-  }, [content, tags, mediaFiles, createPostMutation, navigate]);
+    });
+  }, [content, tags, mediaPreview, mediaFiles, createPostMutation, navigate]);
 
   const getUserDisplayInfo = () => {
     if (!profile) return { name: "Loading...", username: "@loading", avatar: "" };
