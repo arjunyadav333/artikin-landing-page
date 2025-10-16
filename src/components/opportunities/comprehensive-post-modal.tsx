@@ -204,7 +204,8 @@ export function ComprehensivePostModal({ open, onOpenChange, trigger }: Comprehe
       if (data.image && data.image instanceof File) {
         try {
           const fileExt = data.image.name.split('.').pop();
-          const fileName = `opportunity_${Date.now()}_${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
+          // Include user ID for ownership tracking and prevent filename collisions
+          const fileName = `opportunity_${currentProfile?.user_id}_${Date.now()}_${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
           
           const { data: uploadData, error: uploadError } = await supabase.storage
             .from('opportunities')
