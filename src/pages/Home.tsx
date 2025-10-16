@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Home as HomeIcon } from "lucide-react";
 import { LoadingSpinner, ContentSpinner } from "@/components/ui/loading-spinner";
-import { FeedErrorBoundary } from "@/components/error-boundary";
 import { useMemo } from 'react';
 
 const Home = () => {
@@ -58,35 +57,21 @@ const Home = () => {
 
   return (
     <div className="w-full min-h-screen bg-background">
-      <main 
-        className="mx-auto px-4" 
-        style={{ maxWidth: 'var(--feed-max-width)' }}
-        role="feed"
-        aria-label="Home feed"
-        aria-busy={isLoading}
-      >
-        <FeedErrorBoundary>
-          <div className="divide-y divide-border bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden">
-            {posts.map((post) => (
-              <PostRowWide key={post.id} post={post} />
-            ))}
-          </div>
-        </FeedErrorBoundary>
+      <main className="mx-auto px-4" style={{ maxWidth: 'var(--feed-max-width)' }}>
+        {/* Phase 1-5: Optimized feed rendering */}
+        <div className="divide-y divide-border bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden">
+          {posts.map((post) => (
+            <PostRowWide key={post.id} post={post} />
+          ))}
+        </div>
         
         {hasNextPage && (
-          <div className="text-center py-8 px-4">
-            <div className="mb-3">
-              <p className="text-sm text-muted-foreground">
-                {isFetchingNextPage ? 'Loading more posts...' : 'More posts available'}
-              </p>
-            </div>
+          <div className="text-center py-6 px-4">
             <Button 
               onClick={() => fetchNextPage()}
               variant="outline"
               disabled={isFetchingNextPage}
-              className="min-w-[160px] rounded-full shadow-sm hover:shadow-md transition-all duration-200"
-              size="lg"
-              aria-label={isFetchingNextPage ? 'Loading more posts' : 'Load more posts'}
+              className="min-w-[120px] rounded-full shadow-sm hover:shadow-md transition-all duration-200"
             >
               {isFetchingNextPage ? (
                 <>
@@ -94,10 +79,7 @@ const Home = () => {
                   Loading...
                 </>
               ) : (
-                <>
-                  Load More Posts
-                  <span className="ml-2 text-xs text-muted-foreground" aria-hidden="true">↓</span>
-                </>
+                'Load More Posts'
               )}
             </Button>
           </div>

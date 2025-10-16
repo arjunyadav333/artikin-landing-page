@@ -4,16 +4,13 @@ import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Briefcase, Search, X } from "lucide-react";
+import { Plus, Briefcase } from "lucide-react";
 import { useOrganizationOpportunities, useUpdateOpportunityStatus, useDeleteOpportunity } from "@/hooks/useOrganizationOpportunities";
 import { ComprehensivePostModal } from "./comprehensive-post-modal";
 import { EditOpportunityModal } from "./edit-opportunity-modal";
 import { OpportunityCard } from "./opportunity-card";
 import { ShareOpportunityModal } from "./share-opportunity-modal";
-import { DashboardAnalytics } from "./dashboard-analytics";
 import { formatDistanceToNow, format } from "date-fns";
 
 export function OrganizationDashboard() {
@@ -22,9 +19,6 @@ export function OrganizationDashboard() {
   const [shareOpportunity, setShareOpportunity] = useState<any | null>(null);
   const [activeFilter, setActiveFilter] = useState("all");
   const [showPostModal, setShowPostModal] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [dateFilter, setDateFilter] = useState("all");
-  const [artFormFilter, setArtFormFilter] = useState("all");
   const {
     data: opportunities,
     isLoading
@@ -32,7 +26,7 @@ export function OrganizationDashboard() {
   const updateStatus = useUpdateOpportunityStatus();
   const deleteOpportunity = useDeleteOpportunity();
 
-  // Filter opportunities with search, date, and art form filters
+  // Filter opportunities based on status
   const filteredOpportunities = useMemo(() => {
     if (!opportunities) return [];
     let filtered = opportunities;
@@ -44,75 +38,22 @@ export function OrganizationDashboard() {
       filtered = filtered.filter(opp => opp.status === "closed");
     }
 
-    // Search filter
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(opp => 
-        opp.title.toLowerCase().includes(query) ||
-        opp.description?.toLowerCase().includes(query) ||
-        opp.organization_name?.toLowerCase().includes(query)
-      );
-    }
-
-    // Date filter
-    if (dateFilter !== "all") {
-      const now = new Date();
-      const daysAgo = dateFilter === "7days" ? 7 : 30;
-      const cutoffDate = new Date(now.setDate(now.getDate() - daysAgo));
-      filtered = filtered.filter(opp => 
-        new Date(opp.created_at) >= cutoffDate
-      );
-    }
-
-    // Art form filter
-    if (artFormFilter !== "all") {
-      filtered = filtered.filter(opp => 
-        opp.art_forms?.includes(artFormFilter)
-      );
-    }
-
     return filtered;
-  }, [opportunities, activeFilter, searchQuery, dateFilter, artFormFilter]);
+  }, [opportunities, activeFilter]);
 
-  // Count opportunities by status and analytics data
-  const { opportunityCounts, analytics } = useMemo(() => {
+  // Count opportunities by status
+  const opportunityCounts = useMemo(() => {
     if (!opportunities) return {
-      opportunityCounts: { all: 0, active: 0, closed: 0 },
-      analytics: { totalViews: 0, totalApplications: 0 }
+      all: 0,
+      active: 0,
+      closed: 0
     };
-    
-    const counts = {
+    return {
       all: opportunities.length,
       active: opportunities.filter(opp => opp.status === "active").length,
       closed: opportunities.filter(opp => opp.status === "closed").length
     };
-    
-    const totalViews = opportunities.reduce((sum, opp) => sum + (opp.views_count || 0), 0);
-    const totalApplications = opportunities.reduce((sum, opp) => sum + (opp.applications_count || 0), 0);
-    
-    return {
-      opportunityCounts: counts,
-      analytics: { totalViews, totalApplications }
-    };
   }, [opportunities]);
-
-  // Get unique art forms for filter
-  const artForms = useMemo(() => {
-    if (!opportunities) return [];
-    const forms = new Set<string>();
-    opportunities.forEach(opp => {
-      opp.art_forms?.forEach((form: string) => forms.add(form));
-    });
-    return Array.from(forms).sort();
-  }, [opportunities]);
-
-  const hasActiveFilters = searchQuery || dateFilter !== "all" || artFormFilter !== "all";
-
-  const clearAllFilters = () => {
-    setSearchQuery("");
-    setDateFilter("all");
-    setArtFormFilter("all");
-  };
 
   const handleStatusToggle = async (opportunityId: string, currentStatus: string) => {
     const newStatus = currentStatus === 'active' ? 'closed' : 'active';
@@ -146,14 +87,6 @@ export function OrganizationDashboard() {
     <div className="min-h-screen bg-background">
       {/* Centered container with max-width 1080px */}
       <div className="max-w-[1080px] mx-auto px-6 md:px-6 lg:px-6 py-8">
-        {/* Analytics Dashboard */}
-        <DashboardAnalytics
-          totalOpportunities={opportunityCounts.all}
-          activeOpportunities={opportunityCounts.active}
-          totalViews={analytics.totalViews}
-          totalApplications={analytics.totalApplications}
-        />
-
         {/* Post New Job Opportunity CTA */}
         <div className="mb-6 md:mb-8">
           <ComprehensivePostModal 
@@ -169,63 +102,6 @@ export function OrganizationDashboard() {
               </Button>
             } 
           />
-        </div>
-
-        {/* Search and Filters */}
-        <div className="mb-6 space-y-4">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search opportunities..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            
-            <Select value={dateFilter} onValueChange={setDateFilter}>
-              <SelectTrigger className="w-full md:w-48">
-                <SelectValue placeholder="Date Range" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Time</SelectItem>
-                <SelectItem value="7days">Last 7 Days</SelectItem>
-                <SelectItem value="30days">Last 30 Days</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select value={artFormFilter} onValueChange={setArtFormFilter}>
-              <SelectTrigger className="w-full md:w-48">
-                <SelectValue placeholder="Art Form" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Art Forms</SelectItem>
-                {artForms.map((form) => (
-                  <SelectItem key={form} value={form}>
-                    {form}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {hasActiveFilters && (
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">
-                {filteredOpportunities.length} result{filteredOpportunities.length !== 1 ? 's' : ''} found
-              </p>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={clearAllFilters}
-                className="h-8 text-sm"
-              >
-                <X className="h-4 w-4 mr-2" />
-                Clear Filters
-              </Button>
-            </div>
-          )}
         </div>
 
         {/* Filter Tabs */}
@@ -284,6 +160,7 @@ export function OrganizationDashboard() {
                       applications_count: opportunity.applications_count,
                       views_count: opportunity.views_count || 0
                     }}
+                    currentUserRole="organization"
                     currentUserId={opportunity.user_id}
                     onEdit={() => handleEdit(opportunity)}
                     onManageApplicants={handleManageApplicants}

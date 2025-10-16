@@ -1,3 +1,4 @@
+// Opportunity Detail Page - Updated to remove all Bookmark references
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useDirectMessage } from "@/hooks/useDirectMessage";
 import { useUserApplications } from "@/hooks/useApplications";
 export default function OpportunityDetailPage() {
+  console.log("OpportunityDetailPage rendering - Bookmark should not be referenced");
   const {
     id
   } = useParams<{

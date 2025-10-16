@@ -92,8 +92,7 @@ const Create = () => {
           try {
             const fileExt = file.name.split('.').pop();
             const bucket = file.type.startsWith('video/') ? 'post-videos' : 'post-images';
-            // Phase 1.1 Fix: Include user_id in path for proper RLS policy matching
-            const fileName = `${profile?.user_id}/${bucket}/${Date.now()}_${index}.${fileExt}`;
+            const fileName = `${bucket}/${Date.now()}_${index}.${fileExt}`;
             
             const { data, error } = await supabase.storage
               .from('posts')

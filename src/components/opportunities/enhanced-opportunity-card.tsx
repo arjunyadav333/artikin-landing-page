@@ -3,13 +3,14 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { MapPin, Clock, Users, Eye, Star } from "lucide-react";
+import { MapPin, Clock, Users, Eye, Bookmark, Star } from "lucide-react";
 import { Opportunity } from "@/hooks/useOpportunities";
 import { formatDistanceToNow } from "date-fns";
 
 interface EnhancedOpportunityCardProps {
   opportunity: Opportunity;
   onApply: (id: string) => void;
+  onSave?: (id: string) => void;
   index: number;
   className?: string;
 }
@@ -17,6 +18,7 @@ interface EnhancedOpportunityCardProps {
 export function EnhancedOpportunityCard({ 
   opportunity, 
   onApply, 
+  onSave, 
   index,
   className = "" 
 }: EnhancedOpportunityCardProps) {
@@ -115,6 +117,19 @@ export function EnhancedOpportunityCard({
               >
                 {opportunity.type}
               </Badge>
+              
+              {onSave && (
+                <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => onSave(opportunity.id)}
+                    className="h-8 w-8 p-0 text-muted-foreground hover:text-accent hover:bg-accent/10"
+                  >
+                    <Bookmark className="h-4 w-4" />
+                  </Button>
+                </motion.div>
+              )}
             </div>
           </div>
         </CardHeader>

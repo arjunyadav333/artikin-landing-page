@@ -9,8 +9,6 @@ export interface Profile {
   display_name: string;
   full_name?: string;
   bio?: string;
-  // NOTE: role is DEPRECATED - use useUserRoles() hook instead for security
-  // This field is kept for backward compatibility during transition
   role?: 'artist' | 'organization';
   location?: string;
   website?: string;

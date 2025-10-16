@@ -4,22 +4,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 
-// Realtime payload types for type safety
-interface PostPayload {
-  id: string;
-  user_id: string;
-  content: string;
-  title?: string;
-  media_urls?: string[];
-  media_types?: string[];
-  tags?: string[];
-}
-
-interface InteractionPayload {
-  post_id: string;
-  user_id: string;
-}
-
 export interface PostProfile {
   id: string;
   user_id: string;
@@ -105,9 +89,9 @@ export const useHomeFeed = (limit = 10) => { // Phase 6: Reduced from 20 to 10
       user_id: post.user_id,
       title: post.title,
       content: post.content,
-      media_urls: post.media_urls || [],
-      media_types: post.media_types || [],
-      tags: post.tags || [],
+      media_urls: post.media_urls,
+      media_types: post.media_urls ? post.media_urls.map(() => 'image') : [], // Default to image type
+      tags: post.tags,
       visibility: 'public',
       likes_count: post.likes_count || 0,
       comments_count: post.comments_count || 0,
@@ -125,6 +109,7 @@ export const useHomeFeed = (limit = 10) => { // Phase 6: Reduced from 20 to 10
         art_form: post.profile_artform,
         avatar_url: post.profile_avatar_url,
         profile_pic: post.profile_avatar_url,
+        role: post.profile_role,
         artform: post.profile_artform,
         organization_type: post.profile_organization_type,
         location: post.profile_location
@@ -152,7 +137,6 @@ export const useHomeFeed = (limit = 10) => { // Phase 6: Reduced from 20 to 10
   useEffect(() => {
     if (!user) return;
 
-    const abortController = new AbortController();
     let reconnectAttempts = 0;
     const maxReconnectAttempts = 1;
     let isSubscribed = true;
@@ -231,18 +215,17 @@ export const useHomeFeed = (limit = 10) => { // Phase 6: Reduced from 20 to 10
             });
           });
         })
-      .on('postgres_changes', { 
-        event: '*', 
-        schema: 'public', 
-        table: 'likes' 
-      }, (payload) => {
-        if (!isPageVisible()) return;
-        
-        debouncedUpdate(() => {
-          const likeData = (payload.new || payload.old) as InteractionPayload;
-          const postId = likeData?.post_id;
-          const isInsert = payload.eventType === 'INSERT';
-          const affectedUserId = likeData?.user_id;
+        .on('postgres_changes', { 
+          event: '*', 
+          schema: 'public', 
+          table: 'likes' 
+        }, (payload) => {
+          if (!isPageVisible()) return;
+          
+          debouncedUpdate(() => {
+            const postId = (payload.new as any)?.post_id || (payload.old as any)?.post_id;
+            const isInsert = payload.eventType === 'INSERT';
+            const affectedUserId = (payload.new as any)?.user_id || (payload.old as any)?.user_id;
             
             if (affectedUserId === user.id) return;
             
@@ -266,17 +249,13 @@ export const useHomeFeed = (limit = 10) => { // Phase 6: Reduced from 20 to 10
           });
         })
         .on('postgres_changes', { 
-          event: '*', 
+          event: 'INSERT', 
           schema: 'public', 
           table: 'comments' 
         }, (payload) => {
           if (!isPageVisible()) return;
           
           debouncedUpdate(() => {
-            const commentData = (payload.new || payload.old) as InteractionPayload;
-            const postId = commentData?.post_id;
-            const isInsert = payload.eventType === 'INSERT';
-            
             queryClient.setQueryData(['homeFeed', limit], (old: any) => {
               if (!old) return old;
               
@@ -284,11 +263,8 @@ export const useHomeFeed = (limit = 10) => { // Phase 6: Reduced from 20 to 10
                 ...old,
                 pages: old.pages.map((page: HomeFeedPost[]) =>
                   page.map(post => 
-                    post.id === postId 
-                      ? { 
-                          ...post, 
-                          comments_count: Math.max(0, post.comments_count + (isInsert ? 1 : -1))
-                        }
+                    post.id === (payload.new as any).post_id 
+                      ? { ...post, comments_count: post.comments_count + 1 }
                       : post
                   )
                 )
@@ -297,17 +273,13 @@ export const useHomeFeed = (limit = 10) => { // Phase 6: Reduced from 20 to 10
           });
         })
         .on('postgres_changes', { 
-          event: '*', 
+          event: 'INSERT', 
           schema: 'public', 
           table: 'shares' 
         }, (payload) => {
           if (!isPageVisible()) return;
           
           debouncedUpdate(() => {
-            const shareData = (payload.new || payload.old) as InteractionPayload;
-            const postId = shareData?.post_id;
-            const isInsert = payload.eventType === 'INSERT';
-            
             queryClient.setQueryData(['homeFeed', limit], (old: any) => {
               if (!old) return old;
               
@@ -315,11 +287,8 @@ export const useHomeFeed = (limit = 10) => { // Phase 6: Reduced from 20 to 10
                 ...old,
                 pages: old.pages.map((page: HomeFeedPost[]) =>
                   page.map(post => 
-                    post.id === postId 
-                      ? { 
-                          ...post, 
-                          shares_count: Math.max(0, post.shares_count + (isInsert ? 1 : -1))
-                        }
+                    post.id === (payload.new as any)?.post_id 
+                      ? { ...post, shares_count: post.shares_count + 1 }
                       : post
                   )
                 )
@@ -327,7 +296,7 @@ export const useHomeFeed = (limit = 10) => { // Phase 6: Reduced from 20 to 10
             });
           });
         })
-        .on('postgres_changes', {
+        .on('postgres_changes', { 
           event: '*', 
           schema: 'public', 
           table: 'connections' 
@@ -401,7 +370,6 @@ export const useHomeFeed = (limit = 10) => { // Phase 6: Reduced from 20 to 10
     resetInactivityTimer(); // Start timer
 
     return () => {
-      abortController.abort();
       isSubscribed = false;
       if (debounceTimer) clearTimeout(debounceTimer);
       if (inactivityTimer) clearTimeout(inactivityTimer);

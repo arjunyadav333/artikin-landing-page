@@ -26,6 +26,7 @@ export interface Post {
     location?: string;
   };
   user_liked?: boolean;
+  user_saved?: boolean;
   is_following?: boolean;
 }
 
@@ -88,6 +89,7 @@ export const usePosts = (limit = 10) => {
         ...post,
         profiles: profileMap.get(post.user_id),
         user_liked: likedPostIds.has(post.id),
+        user_saved: false, // Will be updated when save functionality is implemented
         is_following: followedUserIds.has(post.user_id)
       }));
 
@@ -158,6 +160,7 @@ export const useUserPosts = (userId: string) => {
         ...post,
         profiles: profile,
         user_liked: likedPostIds.has(post.id),
+        user_saved: false,
         is_following: false
       }));
     },
@@ -179,7 +182,6 @@ export const useCreatePost = () => {
       title?: string;
       content: string;
       media_urls?: string[];
-      media_types?: string[]; // Add media_types support
       media_type?: string;
       tags?: string[];
     }) => {
@@ -208,6 +210,7 @@ export const useCreatePost = () => {
         ...data,
         profiles: profile,
         user_liked: false,
+        user_saved: false,
         is_following: false
       };
     },

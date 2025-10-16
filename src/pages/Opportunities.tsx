@@ -15,7 +15,6 @@ import { RoleSelectionModal } from "@/components/auth/role-selection-modal";
 import { useOpportunities, useApplyToOpportunity } from "@/hooks/useOpportunities";
 import { useUserApplications, useDeleteApplication } from "@/hooks/useApplications";
 import { useCurrentProfile } from "@/hooks/useProfiles";
-import { useCurrentUserRole } from "@/hooks/useUserRoles";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -26,7 +25,6 @@ const Opportunities = () => {
   const [showRoleModal, setShowRoleModal] = useState(false);
   
   const { data: currentProfile, isLoading: profileLoading } = useCurrentProfile();
-  const { role: userRole, isLoading: roleLoading, isArtist, isOrganization } = useCurrentUserRole();
   const { data: opportunities, isLoading: opportunitiesLoading } = useOpportunities();
   const { data: applications, isLoading: applicationsLoading } = useUserApplications();
   const applyToOpportunity = useApplyToOpportunity();
@@ -36,10 +34,13 @@ const Opportunities = () => {
   const navigate = useNavigate();
 
   // Handle role determination with null/undefined role support
+  const userRole = currentProfile?.role;
   const hasValidRole = userRole === 'artist' || userRole === 'organization';
+  const isArtist = userRole === 'artist';
+  const isOrganization = userRole === 'organization';
 
   // Show role selection modal if user doesn't have a valid role
-  const shouldShowRoleModal = !profileLoading && !roleLoading && currentProfile && !hasValidRole;
+  const shouldShowRoleModal = !profileLoading && currentProfile && !hasValidRole;
 
   // Filter and sort opportunities based on search query and sort preference
   const filteredOpportunities = useMemo(() => {
@@ -119,7 +120,7 @@ const Opportunities = () => {
   };
 
   // Wait for profile to load before showing role-specific content
-  if (profileLoading || roleLoading) {
+  if (profileLoading) {
     return (
       <div className="min-h-screen bg-background pb-20 md:pb-8 flex items-center justify-center">
         <div className="text-center space-y-4">
@@ -252,17 +253,18 @@ const Opportunities = () => {
                         {filteredOpportunities.map((opportunity, index) => (
                            <OpportunityCard
                              key={opportunity.id}
-                            opportunity={{
-                              ...opportunity,
-                              user_id: opportunity.user_id,
-                              created_at: opportunity.created_at,
-                              applications_count: opportunity.applications_count,
-                              views_count: opportunity.views_count || 0
-                            }}
-                            currentUserId={currentProfile?.user_id}
-                            onApply={handleApply}
-                            onManageApplicants={handleManageApplicants}
-                            />
+                           opportunity={{
+                             ...opportunity,
+                             user_id: opportunity.user_id,
+                             created_at: opportunity.created_at,
+                             applications_count: opportunity.applications_count,
+                             views_count: opportunity.views_count || 0
+                           }}
+                           currentUserRole={currentProfile?.role}
+                           currentUserId={currentProfile?.user_id}
+                           onApply={handleApply}
+                           onManageApplicants={handleManageApplicants}
+                           />
                         ))}
                       </AnimatePresence>
                     </div>
