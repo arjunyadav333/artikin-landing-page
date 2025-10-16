@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useCurrentProfile, useUpdateProfile } from '@/hooks/useProfiles';
+import { useCurrentUserRole } from '@/hooks/useUserRoles';
 import { useAuth } from '@/hooks/useAuth';
 import { ArrowLeft, Camera, Upload } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -16,6 +17,7 @@ export default function ProfileEdit() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { data: profile, isLoading } = useCurrentProfile();
+  const { role: userRole } = useCurrentUserRole(); // Get role from secure table
   const updateProfileMutation = useUpdateProfile();
   const { toast } = useToast();
 
@@ -37,14 +39,14 @@ export default function ProfileEdit() {
     contact_email: '',
     pronouns: '',
     phone_number: '',
-    role: '',
+    // Note: role is not editable here - managed via user_roles table
     artform: '',
     organization_type: ''
   });
 
   useEffect(() => {
     if (profile) {
-      // Existing profile - populate form with current data
+      // Existing profile - populate form with current data (role excluded - managed separately)
       setFormData({
         display_name: profile.display_name || '',
         username: profile.username || '',
@@ -56,7 +58,6 @@ export default function ProfileEdit() {
         contact_email: profile.contact_email || '',
         pronouns: profile.pronouns || '',
         phone_number: profile.phone_number || '',
-        role: profile.role || '',
         artform: profile.artform || '',
         organization_type: profile.organization_type || ''
       });
@@ -80,12 +81,28 @@ export default function ProfileEdit() {
     e.preventDefault();
     
     try {
-      await updateProfileMutation.mutateAsync({
-        ...formData,
-        role: formData.role as 'artist' | 'organization',
-        artform: formData.artform as any, // Type assertion to fix build error
-        organization_type: formData.organization_type as any // Type assertion to fix build error
-      });
+      // Don't send role - it's managed in user_roles table separately
+      const updates: any = {
+        display_name: formData.display_name,
+        username: formData.username,
+        full_name: formData.full_name,
+        headline: formData.headline,
+        bio: formData.bio,
+        location: formData.location,
+        website: formData.website,
+        contact_email: formData.contact_email,
+        pronouns: formData.pronouns,
+        phone_number: formData.phone_number
+      };
+      
+      // Add artform or organization_type based on user's role
+      if (userRole === 'artist') {
+        updates.artform = formData.artform || null;
+      } else if (userRole === 'organization') {
+        updates.organization_type = formData.organization_type || null;
+      }
+      
+      await updateProfileMutation.mutateAsync(updates);
       navigate('/profile/me');
     } catch (error) {
       console.error('Failed to update profile:', error);
@@ -240,23 +257,20 @@ export default function ProfileEdit() {
               <CardTitle>Professional Information</CardTitle>
             </CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Role is read-only, managed via user_roles table */}
               <div className="space-y-2">
-                <Label htmlFor="role">Role *</Label>
-                <Select
-                  value={formData.role}
-                  onValueChange={(value) => handleInputChange('role', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select your role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="artist">Artist</SelectItem>
-                    <SelectItem value="organization">Organization</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Label>Role</Label>
+                <Input 
+                  value={userRole === 'artist' ? 'Artist' : userRole === 'organization' ? 'Organization' : 'Not Set'}
+                  disabled
+                  className="bg-muted"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Role cannot be changed here. Contact support if you need to change your account type.
+                </p>
               </div>
 
-              {formData.role === 'artist' && (
+              {userRole === 'artist' && (
                 <div className="space-y-2">
                   <Label htmlFor="artform">Art Form</Label>
                   <Select
@@ -281,7 +295,7 @@ export default function ProfileEdit() {
                 </div>
               )}
 
-              {formData.role === 'organization' && (
+              {userRole === 'organization' && (
                 <div className="space-y-2">
                   <Label htmlFor="organization_type">Organization Type</Label>
                   <Select

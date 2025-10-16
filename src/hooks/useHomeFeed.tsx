@@ -33,6 +33,7 @@ export interface HomeFeedPost {
   likes_count: number;
   comments_count: number;
   shares_count: number;
+  saves_count: number; // Add saves_count field
   created_at: string;
   updated_at: string;
   profiles: PostProfile;

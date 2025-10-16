@@ -182,6 +182,7 @@ export const useCreatePost = () => {
       title?: string;
       content: string;
       media_urls?: string[];
+      media_types?: string[]; // Add media_types support
       media_type?: string;
       tags?: string[];
     }) => {

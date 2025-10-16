@@ -785,6 +785,57 @@ export type Database = {
         }
         Relationships: []
       }
+      portfolios: {
+        Row: {
+          created_at: string
+          description: string | null
+          featured: boolean | null
+          id: string
+          likes_count: number | null
+          media_meta: Json | null
+          media_types: string[]
+          media_urls: string[]
+          tags: string[] | null
+          title: string
+          updated_at: string
+          user_id: string
+          views_count: number | null
+          visibility: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          featured?: boolean | null
+          id?: string
+          likes_count?: number | null
+          media_meta?: Json | null
+          media_types?: string[]
+          media_urls?: string[]
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+          user_id: string
+          views_count?: number | null
+          visibility?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          featured?: boolean | null
+          id?: string
+          likes_count?: number | null
+          media_meta?: Json | null
+          media_types?: string[]
+          media_urls?: string[]
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+          views_count?: number | null
+          visibility?: string | null
+        }
+        Relationships: []
+      }
       posts: {
         Row: {
           comments_count: number | null
@@ -919,6 +970,42 @@ export type Database = {
           website?: string | null
         }
         Relationships: []
+      }
+      saves: {
+        Row: {
+          created_at: string
+          id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saves_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "saves_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts_with_profiles_secure"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       shares: {
         Row: {
