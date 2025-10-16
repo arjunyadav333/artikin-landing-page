@@ -94,7 +94,6 @@ export default function OpportunityCardDemo() {
             <h2 className="text-xl font-semibold mb-4">Organization View (Owner)</h2>
             <OpportunityCard
               opportunity={sampleOpportunities[0]}
-              currentUserRole="organization"
               currentUserId="org1"
               onEdit={handleEdit}
               onManageApplicants={handleManageApplicants}
@@ -106,7 +105,6 @@ export default function OpportunityCardDemo() {
             <h2 className="text-xl font-semibold mb-4">Artist View (Non-owner)</h2>
             <OpportunityCard
               opportunity={sampleOpportunities[1]}
-              currentUserRole="artist"
               currentUserId="artist1"
               onApply={handleApply}
             />

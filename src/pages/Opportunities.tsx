@@ -252,18 +252,17 @@ const Opportunities = () => {
                         {filteredOpportunities.map((opportunity, index) => (
                            <OpportunityCard
                              key={opportunity.id}
-                           opportunity={{
-                             ...opportunity,
-                             user_id: opportunity.user_id,
-                             created_at: opportunity.created_at,
-                             applications_count: opportunity.applications_count,
-                             views_count: opportunity.views_count || 0
-                           }}
-                           currentUserRole={currentProfile?.role}
-                           currentUserId={currentProfile?.user_id}
-                           onApply={handleApply}
-                           onManageApplicants={handleManageApplicants}
-                           />
+                            opportunity={{
+                              ...opportunity,
+                              user_id: opportunity.user_id,
+                              created_at: opportunity.created_at,
+                              applications_count: opportunity.applications_count,
+                              views_count: opportunity.views_count || 0
+                            }}
+                            currentUserId={currentProfile?.user_id}
+                            onApply={handleApply}
+                            onManageApplicants={handleManageApplicants}
+                            />
                         ))}
                       </AnimatePresence>
                     </div>

@@ -160,7 +160,6 @@ export function OrganizationDashboard() {
                       applications_count: opportunity.applications_count,
                       views_count: opportunity.views_count || 0
                     }}
-                    currentUserRole="organization"
                     currentUserId={opportunity.user_id}
                     onEdit={() => handleEdit(opportunity)}
                     onManageApplicants={handleManageApplicants}
