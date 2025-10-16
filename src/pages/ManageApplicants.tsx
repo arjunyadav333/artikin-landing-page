@@ -18,6 +18,7 @@ import {
 import { useOpportunityApplications, useUpdateApplicationStatus, useDeleteApplication } from "@/hooks/useApplications";
 import { useOrganizationOpportunities } from "@/hooks/useOrganizationOpportunities";
 import { useCurrentProfile } from "@/hooks/useProfiles";
+import { useHasRole } from "@/hooks/useUserRoles";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -37,6 +38,7 @@ export default function ManageApplicants() {
   const { toast } = useToast();
 
   const { data: currentProfile, isLoading: profileLoading } = useCurrentProfile();
+  const { hasRole: isOrganization, isLoading: roleLoading } = useHasRole('organization');
   const { data: opportunities, isLoading: opportunitiesLoading } = useOrganizationOpportunities();
   const { data: applications = [], isLoading: applicationsLoading } = useOpportunityApplications(id || '');
   const updateStatus = useUpdateApplicationStatus();
@@ -163,7 +165,7 @@ export default function ManageApplicants() {
   }
 
   // Authorization error state
-  if (!currentProfile || currentProfile.role !== 'organization') {
+  if (!currentProfile || roleLoading || !isOrganization) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center space-y-4">

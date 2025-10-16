@@ -12,12 +12,33 @@ export interface UserRole {
 }
 
 /**
- * Hook to fetch the current user's roles from the secure user_roles table
- * This prevents privilege escalation attacks by keeping roles separate from profiles
+ * Hook to fetch a user's roles from the user_roles table
+ * This replaces checking roles from the profiles table for security
  */
-export const useUserRoles = () => {
+export const useUserRoles = (userId?: string) => {
   return useQuery({
-    queryKey: ['userRoles'],
+    queryKey: ['userRoles', userId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('*')
+        .eq('user_id', userId!);
+      
+      if (error) throw error;
+      return data as UserRole[];
+    },
+    enabled: !!userId,
+    staleTime: 15 * 60 * 1000, // 15 minutes
+    gcTime: 60 * 60 * 1000, // 1 hour
+  });
+};
+
+/**
+ * Hook to fetch the current user's roles
+ */
+export const useCurrentUserRoles = () => {
+  return useQuery({
+    queryKey: ['currentUserRoles'],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
@@ -30,35 +51,32 @@ export const useUserRoles = () => {
       if (error) throw error;
       return data as UserRole[];
     },
-    staleTime: 15 * 60 * 1000, // 15 minutes
-    gcTime: 60 * 60 * 1000, // 1 hour cache time
+    staleTime: 15 * 60 * 1000,
+    gcTime: 60 * 60 * 1000,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   });
 };
 
 /**
- * Hook to get the primary role of the current user
- * Returns the first role found or null if no roles exist
+ * Helper hook to check if current user has a specific role
  */
-export const useCurrentUserRole = () => {
-  const { data: roles, ...rest } = useUserRoles();
+export const useHasRole = (role: AppRole) => {
+  const { data: roles, isLoading } = useCurrentUserRoles();
   
-  return {
-    ...rest,
-    role: roles?.[0]?.role || null,
-    hasRole: (role: AppRole) => roles?.some(r => r.role === role) || false,
-    isArtist: roles?.some(r => r.role === 'artist') || false,
-    isOrganization: roles?.some(r => r.role === 'organization') || false,
-  };
+  const hasRole = roles?.some(r => r.role === role) ?? false;
+  
+  return { hasRole, isLoading };
 };
 
 /**
- * Hook to check if user has a specific role
+ * Helper hook to get the current user's primary role
+ * Returns the first role if user has multiple roles
  */
-export const useHasRole = (roleToCheck: AppRole) => {
-  const { data: roles, isLoading } = useUserRoles();
+export const useCurrentUserRole = () => {
+  const { data: roles, isLoading } = useCurrentUserRoles();
   
-  return {
-    hasRole: roles?.some(r => r.role === roleToCheck) || false,
-    isLoading,
-  };
+  const role = roles?.[0]?.role;
+  
+  return { role, isLoading, isArtist: role === 'artist', isOrganization: role === 'organization' };
 };

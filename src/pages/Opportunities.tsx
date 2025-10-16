@@ -15,6 +15,7 @@ import { RoleSelectionModal } from "@/components/auth/role-selection-modal";
 import { useOpportunities, useApplyToOpportunity } from "@/hooks/useOpportunities";
 import { useUserApplications, useDeleteApplication } from "@/hooks/useApplications";
 import { useCurrentProfile } from "@/hooks/useProfiles";
+import { useCurrentUserRole } from "@/hooks/useUserRoles";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -25,6 +26,7 @@ const Opportunities = () => {
   const [showRoleModal, setShowRoleModal] = useState(false);
   
   const { data: currentProfile, isLoading: profileLoading } = useCurrentProfile();
+  const { role: userRole, isLoading: roleLoading, isArtist, isOrganization } = useCurrentUserRole();
   const { data: opportunities, isLoading: opportunitiesLoading } = useOpportunities();
   const { data: applications, isLoading: applicationsLoading } = useUserApplications();
   const applyToOpportunity = useApplyToOpportunity();
@@ -34,13 +36,10 @@ const Opportunities = () => {
   const navigate = useNavigate();
 
   // Handle role determination with null/undefined role support
-  const userRole = currentProfile?.role;
   const hasValidRole = userRole === 'artist' || userRole === 'organization';
-  const isArtist = userRole === 'artist';
-  const isOrganization = userRole === 'organization';
 
   // Show role selection modal if user doesn't have a valid role
-  const shouldShowRoleModal = !profileLoading && currentProfile && !hasValidRole;
+  const shouldShowRoleModal = !profileLoading && !roleLoading && currentProfile && !hasValidRole;
 
   // Filter and sort opportunities based on search query and sort preference
   const filteredOpportunities = useMemo(() => {
@@ -120,7 +119,7 @@ const Opportunities = () => {
   };
 
   // Wait for profile to load before showing role-specific content
-  if (profileLoading) {
+  if (profileLoading || roleLoading) {
     return (
       <div className="min-h-screen bg-background pb-20 md:pb-8 flex items-center justify-center">
         <div className="text-center space-y-4">

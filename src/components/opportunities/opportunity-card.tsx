@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useCurrentUserRole } from '@/hooks/useUserRoles';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -63,7 +64,6 @@ interface OpportunityData {
 
 interface OpportunityCardProps {
   opportunity: OpportunityData;
-  currentUserRole?: string;
   currentUserId?: string;
   onApply?: (id: string) => void;
   onEdit?: (id: string) => void;
@@ -74,7 +74,6 @@ interface OpportunityCardProps {
 
 export function OpportunityCard({ 
   opportunity, 
-  currentUserRole,
   currentUserId,
   onApply,
   onEdit,
@@ -86,11 +85,10 @@ export function OpportunityCard({
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const navigate = useNavigate();
   const { startDirectMessage, isLoading } = useDirectMessage();
+  const { role: currentUserRole, isArtist, isOrganization } = useCurrentUserRole();
   
   // Determine if current user is the owner and role-based behavior
   const isOwner = currentUserId === opportunity.user_id;
-  const isOrganization = currentUserRole === 'organization';
-  const isArtist = currentUserRole === 'artist';
 
   const handleViewDetails = () => {
     navigate(`/opportunities/${opportunity.id}`);
