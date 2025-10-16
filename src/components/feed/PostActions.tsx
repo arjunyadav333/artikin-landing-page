@@ -1,10 +1,9 @@
 import { useState } from 'react';
-import { Heart, MessageCircle, Share2, Bookmark } from 'lucide-react';
+import { Heart, MessageCircle, Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { HomeFeedPost, useLikePost, useSharePost } from '@/hooks/useHomeFeed';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { useToggleSave, useIsPostSaved } from '@/hooks/useSaves';
 
 interface PostActionsProps {
   post: HomeFeedPost;
@@ -15,8 +14,6 @@ export const PostActions = ({ post }: PostActionsProps) => {
   const { toast } = useToast();
   const likeMutation = useLikePost(20);
   const shareMutation = useSharePost();
-  const toggleSave = useToggleSave();
-  const { data: isSaved = false } = useIsPostSaved(post.id);
   const [showComments, setShowComments] = useState(false);
 
   const handleLike = () => {
@@ -54,22 +51,6 @@ export const PostActions = ({ post }: PostActionsProps) => {
     toast({
       title: "Link copied",
       description: "Post link copied to clipboard"
-    });
-  };
-
-  const handleSave = () => {
-    if (!user) {
-      toast({
-        title: "Sign in required",
-        description: "Please sign in to save posts",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    toggleSave.mutate({ 
-      postId: post.id, 
-      isSaved: isSaved 
     });
   };
 
@@ -134,31 +115,6 @@ export const PostActions = ({ post }: PostActionsProps) => {
               data-count-type="shares"
             >
               {post.shares_count}
-            </span>
-          </button>
-
-          {/* Save Button */}
-          <button
-            onClick={handleSave}
-            disabled={toggleSave.isPending}
-            className="flex items-center space-x-2 group hover:text-yellow-500 transition-colors min-h-[44px] min-w-[44px]"
-            data-action="save"
-            aria-label={isSaved ? 'Unsave post' : 'Save post'}
-            aria-pressed={isSaved}
-          >
-            <Bookmark 
-              className={`h-5 w-5 transition-all group-hover:scale-110 ${
-                isSaved 
-                  ? 'fill-yellow-500 text-yellow-500' 
-                  : 'text-muted-foreground group-hover:text-yellow-500'
-              }`} 
-            />
-            <span 
-              className="text-muted-foreground group-hover:text-yellow-500"
-              style={{ fontSize: 'var(--fs-action)' }}
-              data-count-type="saves"
-            >
-              {post.saves_count || 0}
             </span>
           </button>
         </div>

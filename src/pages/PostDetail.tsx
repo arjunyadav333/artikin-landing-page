@@ -67,7 +67,6 @@ const PostDetail = () => {
         likes_count: data.likes_count || 0,
         comments_count: data.comments_count || 0,
         shares_count: data.shares_count || 0,
-        saves_count: data.saves_count || 0,
         created_at: data.created_at,
         updated_at: data.updated_at,
         profiles: data.profiles as any, // The profiles should be properly joined

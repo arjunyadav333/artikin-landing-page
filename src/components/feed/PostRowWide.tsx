@@ -436,7 +436,6 @@ export const PostRowWide = memo(({ post }: PostRowWideProps) => {
     prev.likes_count === next.likes_count &&
     prev.comments_count === next.comments_count &&
     prev.shares_count === next.shares_count &&
-    prev.saves_count === next.saves_count &&
     prev.user_liked === next.user_liked &&
     prev.is_following === next.is_following &&
     prev.content === next.content &&

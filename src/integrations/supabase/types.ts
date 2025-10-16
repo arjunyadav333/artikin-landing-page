@@ -846,7 +846,6 @@ export type Database = {
           media_type: string | null
           media_types: string[] | null
           media_urls: string[] | null
-          saves_count: number | null
           shares_count: number | null
           tags: string[] | null
           title: string | null
@@ -863,7 +862,6 @@ export type Database = {
           media_type?: string | null
           media_types?: string[] | null
           media_urls?: string[] | null
-          saves_count?: number | null
           shares_count?: number | null
           tags?: string[] | null
           title?: string | null
@@ -880,7 +878,6 @@ export type Database = {
           media_type?: string | null
           media_types?: string[] | null
           media_urls?: string[] | null
-          saves_count?: number | null
           shares_count?: number | null
           tags?: string[] | null
           title?: string | null
@@ -970,42 +967,6 @@ export type Database = {
           website?: string | null
         }
         Relationships: []
-      }
-      saves: {
-        Row: {
-          created_at: string
-          id: string
-          post_id: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          post_id: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          post_id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "saves_post_id_fkey"
-            columns: ["post_id"]
-            isOneToOne: false
-            referencedRelation: "posts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "saves_post_id_fkey"
-            columns: ["post_id"]
-            isOneToOne: false
-            referencedRelation: "posts_with_profiles_secure"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       shares: {
         Row: {
@@ -1262,7 +1223,6 @@ export type Database = {
             | null
           profile_role: Database["public"]["Enums"]["user_role"] | null
           profile_username: string | null
-          saves_count: number | null
           shares_count: number | null
           tags: string[] | null
           title: string | null

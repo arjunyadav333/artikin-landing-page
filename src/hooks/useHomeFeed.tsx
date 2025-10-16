@@ -49,7 +49,6 @@ export interface HomeFeedPost {
   likes_count: number;
   comments_count: number;
   shares_count: number;
-  saves_count: number; // Add saves_count field
   created_at: string;
   updated_at: string;
   profiles: PostProfile;
@@ -113,7 +112,6 @@ export const useHomeFeed = (limit = 10) => { // Phase 6: Reduced from 20 to 10
       likes_count: post.likes_count || 0,
       comments_count: post.comments_count || 0,
       shares_count: post.shares_count || 0,
-      saves_count: post.saves_count || 0,
       created_at: post.created_at,
       updated_at: post.updated_at,
       profiles: {
@@ -329,42 +327,7 @@ export const useHomeFeed = (limit = 10) => { // Phase 6: Reduced from 20 to 10
             });
           });
         })
-        .on('postgres_changes', { 
-          event: '*', 
-          schema: 'public', 
-          table: 'saves' 
-        }, (payload) => {
-          if (!isPageVisible()) return;
-          
-          debouncedUpdate(() => {
-            const saveData = (payload.new || payload.old) as InteractionPayload;
-            const postId = saveData?.post_id;
-            const isInsert = payload.eventType === 'INSERT';
-            const affectedUserId = saveData?.user_id;
-            
-            // Don't update if current user saved/unsaved (already optimistically updated)
-            if (affectedUserId === user.id) return;
-            
-            queryClient.setQueryData(['homeFeed', limit], (old: any) => {
-              if (!old) return old;
-              
-              return {
-                ...old,
-                pages: old.pages.map((page: HomeFeedPost[]) =>
-                  page.map(post => 
-                    post.id === postId 
-                      ? {
-                          ...post,
-                          saves_count: Math.max(0, post.saves_count + (isInsert ? 1 : -1))
-                        }
-                      : post
-                  )
-                )
-              };
-            });
-          });
-        })
-        .on('postgres_changes', { 
+        .on('postgres_changes', {
           event: '*', 
           schema: 'public', 
           table: 'connections' 
