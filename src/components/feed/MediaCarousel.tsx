@@ -97,7 +97,7 @@ export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselPr
             <Button
               variant="secondary"
               size="sm"
-              className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white border-0"
+              className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white border-0 !transition-none !duration-0"
               onClick={prevImage}
               aria-label="Previous media"
             >
@@ -107,7 +107,7 @@ export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselPr
             <Button
               variant="secondary"
               size="sm"
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white border-0"
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white border-0 !transition-none !duration-0"
               onClick={nextImage}
               aria-label="Next media"
             >
@@ -175,7 +175,7 @@ export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselPr
                 <Button
                   variant="secondary"
                   size="sm"
-                  className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white border-0"
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white border-0 !transition-none !duration-0"
                   onClick={prevImage}
                   aria-label="Previous media"
                 >
@@ -185,7 +185,7 @@ export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselPr
                 <Button
                   variant="secondary"
                   size="sm"
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white border-0"
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white border-0 !transition-none !duration-0"
                   onClick={nextImage}
                   aria-label="Next media"
                 >
