@@ -290,6 +290,7 @@ export function MediaGallery({
 
             {/* Image */}
             <img 
+              key={currentIndex}
               src={currentItem.url} 
               alt={`Portfolio image ${currentIndex + 1}`}
               className="max-w-full max-h-full object-contain rounded"

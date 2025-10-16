@@ -99,7 +99,7 @@ export function MediaLightbox({
         <>
           <button
             onClick={goToPrevious}
-            className="absolute left-4 text-white hover:text-gray-300 transition-colors z-10"
+            className="absolute left-4 text-white hover:text-gray-300 z-10"
             aria-label="Previous"
           >
             <ChevronLeft className="h-12 w-12" />
@@ -107,7 +107,7 @@ export function MediaLightbox({
           
           <button
             onClick={goToNext}
-            className="absolute right-16 text-white hover:text-gray-300 transition-colors z-10"
+            className="absolute right-16 text-white hover:text-gray-300 z-10"
             aria-label="Next"
           >
             <ChevronRight className="h-12 w-12" />

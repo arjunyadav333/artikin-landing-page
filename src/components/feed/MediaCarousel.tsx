@@ -89,7 +89,7 @@ export const MediaCarousel = memo(({ mediaUrls, mediaTypes, postId }: MediaCarou
 
   return (
     <div className="post__media w-full" role="region" aria-label="Post media">
-      <div className="relative rounded-lg overflow-hidden bg-muted">
+      <div key={currentIndex} className="relative rounded-lg overflow-hidden bg-muted">
         {renderMedia(mediaUrls[currentIndex], currentIndex, true)}
 
         {mediaUrls.length > 1 && (
@@ -198,10 +198,6 @@ export const MediaCarousel = memo(({ mediaUrls, mediaTypes, postId }: MediaCarou
       )}
     </div>
   );
-}, (prevProps, nextProps) => {
-  return prevProps.postId === nextProps.postId &&
-    prevProps.mediaUrls.length === nextProps.mediaUrls.length &&
-    prevProps.mediaUrls.every((url, i) => url === nextProps.mediaUrls[i]);
 });
 
 MediaCarousel.displayName = 'MediaCarousel';
