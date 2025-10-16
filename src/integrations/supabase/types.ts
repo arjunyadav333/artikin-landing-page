@@ -1250,7 +1250,7 @@ export type Database = {
           created_at: string | null
           id: string | null
           likes_count: number | null
-          media_type: string | null
+          media_types: string[] | null
           media_urls: string[] | null
           profile_artform: Database["public"]["Enums"]["artform_type"] | null
           profile_avatar_url: string | null
