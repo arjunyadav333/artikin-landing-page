@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { X, Heart, MessageCircle, Share2, Bookmark, MoreHorizontal, UserPlus } from "lucide-react";
+import { X, Heart, MessageCircle, Share2, MoreHorizontal, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -16,7 +16,6 @@ interface PostDetailModalProps {
 export function PostDetailModal({ post, onClose }: PostDetailModalProps) {
   const [showComments, setShowComments] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
-  const [isSaved, setIsSaved] = useState(false);
   
   const likeMutation = useLikePost();
 
@@ -163,15 +162,6 @@ export function PostDetailModal({ post, onClose }: PostDetailModalProps) {
                   <Share2 className="h-5 w-5" />
                 </Button>
               </div>
-              
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsSaved(!isSaved)}
-                className="hover:text-primary transition-colors"
-              >
-                <Bookmark className={`h-5 w-5 ${isSaved ? 'fill-current text-primary' : ''}`} />
-              </Button>
             </div>
           </div>
         </div>

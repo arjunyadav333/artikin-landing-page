@@ -83,6 +83,7 @@ export function OpportunityCard({
 }: OpportunityCardProps) {
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const navigate = useNavigate();
   const { startDirectMessage, isLoading } = useDirectMessage();
   const { role: currentUserRole, isArtist, isOrganization } = useCurrentUserRole();
@@ -102,9 +103,16 @@ export function OpportunityCard({
     setDeleteModalOpen(true);
   };
 
-  const confirmDelete = () => {
-    onDelete?.(opportunity.id);
-    setDeleteModalOpen(false);
+  const confirmDelete = async () => {
+    setIsDeleting(true);
+    try {
+      await onDelete?.(opportunity.id);
+      setDeleteModalOpen(false);
+    } catch (error) {
+      console.error('Delete failed:', error);
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const truncateDescription = (description?: string) => {
@@ -378,6 +386,7 @@ export function OpportunityCard({
         onOpenChange={setDeleteModalOpen}
         onConfirm={confirmDelete}
         opportunityTitle={opportunity.title}
+        isLoading={isDeleting}
       />
     </>
   );

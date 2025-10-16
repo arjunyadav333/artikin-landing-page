@@ -24,13 +24,15 @@ interface ConfirmDeleteModalProps {
   onOpenChange: (open: boolean) => void;
   onConfirm: () => void;
   opportunityTitle: string;
+  isLoading?: boolean;
 }
 
 export function ConfirmDeleteModal({
   open,
   onOpenChange,
   onConfirm,
-  opportunityTitle
+  opportunityTitle,
+  isLoading = false
 }: ConfirmDeleteModalProps) {
   const [showFinalConfirm, setShowFinalConfirm] = useState(false);
 
@@ -73,9 +75,10 @@ export function ConfirmDeleteModal({
           </div>
 
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleFirstConfirm}
+              disabled={isLoading}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Delete
@@ -105,12 +108,13 @@ export function ConfirmDeleteModal({
         </AlertDialogHeader>
 
         <AlertDialogFooter>
-          <AlertDialogCancel onClick={handleCancel}>Cancel</AlertDialogCancel>
+          <AlertDialogCancel onClick={handleCancel} disabled={isLoading}>Cancel</AlertDialogCancel>
           <AlertDialogAction
             onClick={handleFinalConfirm}
+            disabled={isLoading}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
-            Confirm Delete
+            {isLoading ? 'Deleting...' : 'Confirm Delete'}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
