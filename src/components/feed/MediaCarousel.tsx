@@ -89,7 +89,7 @@ export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselPr
 
   return (
     <div className="post__media w-full" role="region" aria-label="Post media">
-      <div className="relative rounded-lg overflow-hidden bg-muted">
+      <div key={currentIndex} className="relative rounded-lg overflow-hidden bg-muted">
         {renderMedia(mediaUrls[currentIndex], currentIndex, true)}
 
         {mediaUrls.length > 1 && (
@@ -97,7 +97,7 @@ export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselPr
             <Button
               variant="secondary"
               size="sm"
-              className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white border-0 !transition-none !duration-0"
+              className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white border-0 !transition-none !duration-0 active:scale-100"
               onClick={prevImage}
               aria-label="Previous media"
             >
@@ -107,7 +107,7 @@ export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselPr
             <Button
               variant="secondary"
               size="sm"
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white border-0 !transition-none !duration-0"
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white border-0 !transition-none !duration-0 active:scale-100"
               onClick={nextImage}
               aria-label="Next media"
             >
@@ -144,7 +144,7 @@ export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselPr
             if (e.target === e.currentTarget) setIsFullscreen(false);
           }}
         >
-          <div className="relative max-w-[96vw] max-h-[96vh] flex items-center justify-center">
+          <div key={currentIndex} className="relative max-w-[96vw] max-h-[96vh] flex items-center justify-center">
             {renderMedia(mediaUrls[currentIndex], currentIndex, true, true)}
             
             {/* Controls */}
@@ -175,7 +175,7 @@ export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselPr
                 <Button
                   variant="secondary"
                   size="sm"
-                  className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white border-0 !transition-none !duration-0"
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white border-0 !transition-none !duration-0 active:scale-100"
                   onClick={prevImage}
                   aria-label="Previous media"
                 >
@@ -185,7 +185,7 @@ export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselPr
                 <Button
                   variant="secondary"
                   size="sm"
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white border-0 !transition-none !duration-0"
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white border-0 !transition-none !duration-0 active:scale-100"
                   onClick={nextImage}
                   aria-label="Next media"
                 >
