@@ -1,7 +1,6 @@
-import { useState, memo } from 'react';
+import { useState } from 'react';
 import { ChevronLeft, ChevronRight, Play, X, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { OptimizedImage } from '@/components/ui/optimized-image';
 
 interface MediaCarouselProps {
   mediaUrls: string[];
@@ -9,7 +8,7 @@ interface MediaCarouselProps {
   postId: string;
 }
 
-export const MediaCarousel = memo(({ mediaUrls, mediaTypes, postId }: MediaCarouselProps) => {
+export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -54,7 +53,7 @@ export const MediaCarousel = memo(({ mediaUrls, mediaTypes, postId }: MediaCarou
         <figure className="media media--video w-full">
           <video
             src={url}
-            className={`media__video w-full ${isViewer ? 'max-h-[90vh] object-contain' : 'max-h-[500px] md:max-h-[600px] object-cover'}`}
+            className={`media__video w-full ${isViewer ? 'max-h-[96vh] object-contain' : 'max-h-[70vh] object-contain'}`}
             controls={isActive}
             preload="metadata"
             muted
@@ -73,11 +72,12 @@ export const MediaCarousel = memo(({ mediaUrls, mediaTypes, postId }: MediaCarou
 
     return (
       <figure className="media media--image w-full">
-        <OptimizedImage
+        <img
           src={url}
           alt={`Media ${index + 1}`}
-          className={`media__img w-full ${isViewer ? 'max-h-[90vh] object-contain' : 'max-h-[500px] md:max-h-[600px] object-cover aspect-auto'} ${!isViewer ? 'cursor-pointer' : ''}`}
+          className={`media__img w-full ${isViewer ? 'max-h-[96vh] object-contain' : 'max-h-[70vh] object-contain'} ${!isViewer ? 'cursor-pointer' : ''}`}
           onClick={!isViewer ? openFullscreen : undefined}
+          loading="lazy"
           data-media-index={index}
           style={{ background: 'var(--media-bg, #f8f9fa)' }}
         />
@@ -89,7 +89,7 @@ export const MediaCarousel = memo(({ mediaUrls, mediaTypes, postId }: MediaCarou
 
   return (
     <div className="post__media w-full" role="region" aria-label="Post media">
-      <div key={currentIndex} className="relative rounded-lg overflow-hidden bg-muted">
+      <div className="relative rounded-lg overflow-hidden bg-muted">
         {renderMedia(mediaUrls[currentIndex], currentIndex, true)}
 
         {mediaUrls.length > 1 && (
@@ -97,7 +97,7 @@ export const MediaCarousel = memo(({ mediaUrls, mediaTypes, postId }: MediaCarou
             <Button
               variant="secondary"
               size="sm"
-              className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white border-0 !transition-none !duration-0"
+              className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white border-0"
               onClick={prevImage}
               aria-label="Previous media"
             >
@@ -107,7 +107,7 @@ export const MediaCarousel = memo(({ mediaUrls, mediaTypes, postId }: MediaCarou
             <Button
               variant="secondary"
               size="sm"
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white border-0 !transition-none !duration-0"
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white border-0"
               onClick={nextImage}
               aria-label="Next media"
             >
@@ -118,7 +118,7 @@ export const MediaCarousel = memo(({ mediaUrls, mediaTypes, postId }: MediaCarou
               {mediaUrls.map((_, index) => (
                 <button
                   key={index}
-                  className={`w-2 h-2 rounded-full ${
+                  className={`w-2 h-2 rounded-full transition-all ${
                     index === currentIndex ? 'bg-white' : 'bg-white/50'
                   }`}
                   onClick={() => setCurrentIndex(index)}
@@ -152,7 +152,7 @@ export const MediaCarousel = memo(({ mediaUrls, mediaTypes, postId }: MediaCarou
               <Button
                 variant="secondary"
                 size="sm"
-                className="bg-black/50 hover:bg-black/70 text-white border-0 !transition-none !duration-0"
+                className="bg-black/50 hover:bg-black/70 text-white border-0"
                 onClick={() => handleDownload(mediaUrls[currentIndex], currentIndex)}
                 aria-label="Download media"
               >
@@ -161,7 +161,7 @@ export const MediaCarousel = memo(({ mediaUrls, mediaTypes, postId }: MediaCarou
               <Button
                 variant="secondary"
                 size="sm"
-                className="bg-black/50 hover:bg-black/70 text-white border-0 !transition-none !duration-0"
+                className="bg-black/50 hover:bg-black/70 text-white border-0"
                 onClick={() => setIsFullscreen(false)}
                 aria-label="Close viewer"
               >
@@ -175,7 +175,7 @@ export const MediaCarousel = memo(({ mediaUrls, mediaTypes, postId }: MediaCarou
                 <Button
                   variant="secondary"
                   size="sm"
-                  className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white border-0 !transition-none !duration-0"
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white border-0"
                   onClick={prevImage}
                   aria-label="Previous media"
                 >
@@ -185,7 +185,7 @@ export const MediaCarousel = memo(({ mediaUrls, mediaTypes, postId }: MediaCarou
                 <Button
                   variant="secondary"
                   size="sm"
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white border-0 !transition-none !duration-0"
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white border-0"
                   onClick={nextImage}
                   aria-label="Next media"
                 >
@@ -198,6 +198,4 @@ export const MediaCarousel = memo(({ mediaUrls, mediaTypes, postId }: MediaCarou
       )}
     </div>
   );
-});
-
-MediaCarousel.displayName = 'MediaCarousel';
+};

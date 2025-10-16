@@ -7,7 +7,6 @@ import { useAuth } from '@/hooks/useAuth';
 import { useComments, useCreateComment, Comment } from '@/hooks/useComments';
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { getTimeAgo } from '@/lib/timeUtils';
 
 interface InstagramCommentModalProps {
   post: HomeFeedPost;
@@ -98,6 +97,20 @@ export function InstagramCommentModal({ post, isOpen, onClose }: InstagramCommen
       e.preventDefault();
       handleSubmitComment(e as any);
     }
+  };
+
+  const getInstagramTimeAgo = (dateString: string): string => {
+    const now = new Date();
+    const date = new Date(dateString);
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+    if (diffInSeconds < 60) return `${diffInSeconds}s`;
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m`;
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h`;
+    if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d`;
+    if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 604800)}w`;
+    
+    return `${Math.floor(diffInSeconds / 2592000)}mo`;
   };
 
   // Combine pending and real comments, most recent first
@@ -222,7 +235,7 @@ export function InstagramCommentModal({ post, isOpen, onClose }: InstagramCommen
                         {comment.profiles?.display_name || comment.profiles?.username}
                       </Link>
                       <span className="text-muted-foreground text-sm">
-                        {getTimeAgo(comment.created_at)}
+                        {getInstagramTimeAgo(comment.created_at)}
                       </span>
                     </div>
                     <p className="text-sm break-words leading-5">

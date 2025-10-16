@@ -58,25 +58,25 @@ const DiscoverPeople = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 pb-20 md:pb-8 overflow-x-hidden">
-      <div className="w-full max-w-4xl mx-auto px-2 sm:px-4 py-4 sm:py-6">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 pb-20 md:pb-8">
+      <div className="container max-w-4xl mx-auto px-4 py-6">
         {/* Header */}
         <motion.div 
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="flex items-center gap-2 sm:gap-4 mb-4 sm:mb-6"
+          className="flex items-center gap-4 mb-6"
         >
           <Button 
             variant="ghost" 
             size="sm" 
             onClick={handleBack}
-            className="p-2 shrink-0"
+            className="p-2"
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <div className="min-w-0">
-            <h1 className="text-xl sm:text-2xl font-bold truncate">Discover People</h1>
-            <p className="text-sm text-muted-foreground hidden sm:block">Find new people to connect with</p>
+          <div>
+            <h1 className="text-2xl font-bold">Discover People</h1>
+            <p className="text-muted-foreground">Find new people to connect with</p>
           </div>
         </motion.div>
 
@@ -85,25 +85,23 @@ const DiscoverPeople = () => {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="mb-4 sm:mb-6"
+          className="mb-6"
         >
-          <div className="flex gap-2 sm:gap-4 items-center">
-            <div className="relative flex-1 min-w-0">
+          <div className="flex gap-4 items-center">
+            <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search people..."
+                placeholder="Search for new people to follow..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 text-sm"
+                className="pl-10"
               />
             </div>
-            <div className="shrink-0">
-              <FilterDropdown 
-                filters={filters} 
-                onFiltersChange={setFilters} 
-                showPopularitySort={true}
-              />
-            </div>
+            <FilterDropdown 
+              filters={filters} 
+              onFiltersChange={setFilters} 
+              showPopularitySort={true}
+            />
           </div>
         </motion.div>
 

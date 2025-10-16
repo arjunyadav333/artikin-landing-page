@@ -7,7 +7,6 @@ import { Post } from "@/hooks/usePosts";
 import { useAuth } from "@/hooks/useAuth";
 import { useComments, useCreateComment, useLikeComment } from "@/hooks/useComments";
 import { Link } from "react-router-dom";
-import { getTimeAgo } from "@/lib/timeUtils";
 
 interface CommentModalProps {
   post: Post;
@@ -97,7 +96,7 @@ export function CommentModal({ post, isOpen, onClose }: CommentModalProps) {
                   {post.profiles?.display_name}
                 </Link>
                 <span className="text-xs text-muted-foreground">
-                  {getTimeAgo(post.created_at)}
+                  {new Date(post.created_at).toLocaleDateString()}
                 </span>
               </div>
               <p className="text-sm">{formatText(post.content)}</p>
@@ -203,4 +202,17 @@ export function CommentModal({ post, isOpen, onClose }: CommentModalProps) {
       </DialogContent>
     </Dialog>
   );
+}
+
+function getTimeAgo(dateString: string): string {
+  const now = new Date();
+  const commentDate = new Date(dateString);
+  const diffInSeconds = Math.floor((now.getTime() - commentDate.getTime()) / 1000);
+
+  if (diffInSeconds < 60) return `${diffInSeconds}s`;
+  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m`;
+  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h`;
+  if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d`;
+  
+  return commentDate.toLocaleDateString();
 }
