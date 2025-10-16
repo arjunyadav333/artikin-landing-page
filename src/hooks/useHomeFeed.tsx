@@ -97,6 +97,7 @@ export const useHomeFeed = (limit = 10) => { // Phase 6: Reduced from 20 to 10
       likes_count: post.likes_count || 0,
       comments_count: post.comments_count || 0,
       shares_count: post.shares_count || 0,
+      saves_count: post.saves_count || 0,
       created_at: post.created_at,
       updated_at: post.updated_at,
       profiles: {
