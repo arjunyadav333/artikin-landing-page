@@ -19,6 +19,13 @@ export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselPr
   const [touchEnd, setTouchEnd] = useState(0);
   const [failedImages, setFailedImages] = useState<Set<number>>(new Set());
   const [loadingImages, setLoadingImages] = useState<Set<number>>(new Set([0]));
+  
+  // Instagram-style swipe states
+  const [dragOffset, setDragOffset] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const [touchStartTime, setTouchStartTime] = useState(0);
+  const [swipeVelocity, setSwipeVelocity] = useState(0);
+  
   const { toast } = useToast();
 
   // Memoized helper to get media type
@@ -60,23 +67,59 @@ export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselPr
     setTimeout(() => setIsTransitioning(false), 300);
   }, [isTransitioning, mediaUrls.length, hasInteracted]);
 
-  // Handle touch gestures for mobile swipe
+  // Handle touch gestures for mobile swipe - Instagram style
   const handleTouchStart = (e: React.TouchEvent) => {
-    setTouchStart(e.touches[0].clientX);
-    setTouchEnd(e.touches[0].clientX);
+    const touch = e.touches[0].clientX;
+    setTouchStart(touch);
+    setTouchEnd(touch);
+    setTouchStartTime(Date.now());
+    setIsDragging(true);
+    setDragOffset(0);
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    setTouchEnd(e.touches[0].clientX);
+    if (!isDragging) return;
+    
+    const currentTouch = e.touches[0].clientX;
+    setTouchEnd(currentTouch);
+    
+    // Calculate real-time drag offset as percentage
+    const diff = currentTouch - touchStart;
+    const containerWidth = e.currentTarget.getBoundingClientRect().width;
+    const percentOffset = (diff / containerWidth) * 100;
+    
+    // Apply rubber-banding at boundaries
+    const isAtStart = currentIndex === 0 && diff > 0;
+    const isAtEnd = currentIndex === mediaUrls.length - 1 && diff < 0;
+    
+    if (isAtStart || isAtEnd) {
+      // 30% resistance at boundaries
+      setDragOffset(percentOffset * 0.3);
+    } else {
+      setDragOffset(percentOffset);
+    }
   };
 
   const handleTouchEnd = () => {
-    if (touchStart - touchEnd > 75) {
+    if (!isDragging) return;
+    setIsDragging(false);
+    
+    const swipeDistance = touchStart - touchEnd;
+    const swipeTime = Date.now() - touchStartTime;
+    const velocity = Math.abs(swipeDistance / swipeTime);
+    setSwipeVelocity(velocity);
+    
+    // Dynamic threshold based on velocity (fast swipe = lower threshold)
+    const threshold = velocity > 0.5 ? 30 : 50;
+    
+    if (swipeDistance > threshold && currentIndex < mediaUrls.length - 1) {
       nextImage();
-    }
-    if (touchStart - touchEnd < -75) {
+    } else if (swipeDistance < -threshold && currentIndex > 0) {
       prevImage();
     }
+    
+    // Reset drag offset with animation
+    setDragOffset(0);
   };
 
   const openFullscreen = useCallback(() => {
@@ -177,7 +220,11 @@ export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselPr
           onLoad={(e) => handleImageLoad(e, index)}
           onError={() => handleImageError(index)}
           data-media-index={index}
-          style={{ background: 'var(--media-bg, #f8f9fa)' }}
+          style={{ 
+            background: 'var(--media-bg, #f8f9fa)',
+            pointerEvents: 'none',
+            userSelect: 'none'
+          }}
         />
       </figure>
     );
@@ -192,14 +239,19 @@ export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselPr
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
-        style={{ minHeight: containerHeight ? `${containerHeight}px` : '300px' }}
+        style={{ 
+          minHeight: containerHeight ? `${containerHeight}px` : '300px',
+          touchAction: 'pan-y pinch-zoom',
+          userSelect: 'none'
+        }}
       >
         {/* Sliding container with transform-based animation */}
         <div className="relative overflow-hidden w-full">
           <div 
-            className={`flex ${hasInteracted ? 'transition-transform duration-300 ease-out' : ''}`}
+            className={`flex ${!isDragging && hasInteracted ? 'transition-transform duration-300 ease-out' : ''}`}
             style={{ 
-              transform: `translateX(-${currentIndex * 100}%)`
+              transform: `translateX(calc(-${currentIndex * 100}% + ${dragOffset}%))`,
+              transition: isDragging ? 'none' : undefined
             }}
           >
             {mediaUrls.map((url, index) => (
@@ -282,9 +334,10 @@ export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselPr
             {/* Sliding container for fullscreen */}
             <div className="relative overflow-hidden w-full">
               <div 
-                className={`flex ${hasInteracted ? 'transition-transform duration-300 ease-out' : ''}`}
+                className={`flex ${!isDragging && hasInteracted ? 'transition-transform duration-300 ease-out' : ''}`}
                 style={{ 
-                  transform: `translateX(-${currentIndex * 100}%)`
+                  transform: `translateX(calc(-${currentIndex * 100}% + ${dragOffset}%))`,
+                  transition: isDragging ? 'none' : undefined
                 }}
               >
                 {mediaUrls.map((url, index) => (
