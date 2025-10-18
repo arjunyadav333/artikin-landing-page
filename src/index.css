@@ -119,7 +119,7 @@
     --sp-lg: clamp(16px, 2.4vw, 24px);
 
     /* Artikin Design System - Layout */
-    --feed-max-width: 920px;
+    --feed-max-width: 100%;
   }
 
   /* Mobile viewport height fix for iOS Safari */

@@ -27,9 +27,7 @@ const Home = () => {
   if (isLoading && posts.length === 0) {
     return (
       <div className="w-full min-h-screen bg-background">
-        <div className="mx-auto" style={{ maxWidth: 'var(--feed-max-width)' }}>
-          <ContentSpinner />
-        </div>
+        <ContentSpinner />
       </div>
     );
   }
@@ -37,7 +35,7 @@ const Home = () => {
   if (posts.length === 0) {
     return (
       <div className="w-full min-h-screen bg-background">
-        <div className="mx-auto px-4 py-12" style={{ maxWidth: 'var(--feed-max-width)' }}>
+        <div className="mx-auto py-12 max-w-2xl px-4">
           <div className="text-center bg-card rounded-2xl border border-border/50 shadow-sm p-12">
             <div className="mb-6">
               <div className="w-16 h-16 bg-gradient-to-br from-primary/10 to-secondary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
@@ -66,7 +64,7 @@ const Home = () => {
 
   return (
     <div className="w-full min-h-screen bg-background">
-      <main className="mx-auto px-4" style={{ maxWidth: 'var(--feed-max-width)' }}>
+      <main className="w-full">
         {/* Step 1: Refresh button to replace realtime updates */}
         <div className="flex justify-end mb-4 pt-4">
           <Button

@@ -16,34 +16,13 @@ export const AppLayout = memo(({ children }: AppLayoutProps) => {
   
   // Hide mobile nav on conversation pages
   const hidesMobileNav = location.pathname.startsWith('/messages/');
-  const isHomePage = location.pathname === '/home' || location.pathname === '/';
-
-  // Memoize right sidebar content - only show on home page
-  const rightSidebar = useMemo(() => {
-    if (!isHomePage) return null;
-    
-    return (
-      <div className="hidden xl:block w-80 sticky top-20 h-fit ml-8">
-        <SuggestedArtistsSection />
-        <PersonalizedOpportunitiesSection />
-      </div>
-    );
-  }, [isHomePage]);
 
   // Memoize main content structure
   const contentStructure = useMemo(() => (
     <div className="w-full">
-      <div className="flex">
-        {/* Center Column - Main Content */}
-        <div className={`flex-1 min-w-0 ${isHomePage ? 'max-w-none' : 'max-w-4xl mx-auto'}`}>
-          {children}
-        </div>
-        
-        {/* Right Column - Personalized Suggestions (Home page only) */}
-        {rightSidebar}
-      </div>
+      {children}
     </div>
-  ), [children, isHomePage, rightSidebar]);
+  ), [children]);
 
   return (
     <SidebarProvider>
