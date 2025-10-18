@@ -785,6 +785,57 @@ export type Database = {
         }
         Relationships: []
       }
+      portfolios: {
+        Row: {
+          created_at: string
+          description: string | null
+          featured: boolean | null
+          id: string
+          likes_count: number | null
+          media_meta: Json | null
+          media_types: string[]
+          media_urls: string[]
+          tags: string[] | null
+          title: string
+          updated_at: string
+          user_id: string
+          views_count: number | null
+          visibility: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          featured?: boolean | null
+          id?: string
+          likes_count?: number | null
+          media_meta?: Json | null
+          media_types?: string[]
+          media_urls?: string[]
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+          user_id: string
+          views_count?: number | null
+          visibility?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          featured?: boolean | null
+          id?: string
+          likes_count?: number | null
+          media_meta?: Json | null
+          media_types?: string[]
+          media_urls?: string[]
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+          views_count?: number | null
+          visibility?: string | null
+        }
+        Relationships: []
+      }
       posts: {
         Row: {
           comments_count: number | null
@@ -795,7 +846,6 @@ export type Database = {
           media_type: string | null
           media_types: string[] | null
           media_urls: string[] | null
-          saves_count: number | null
           shares_count: number | null
           tags: string[] | null
           title: string | null
@@ -812,7 +862,6 @@ export type Database = {
           media_type?: string | null
           media_types?: string[] | null
           media_urls?: string[] | null
-          saves_count?: number | null
           shares_count?: number | null
           tags?: string[] | null
           title?: string | null
@@ -829,12 +878,62 @@ export type Database = {
           media_type?: string | null
           media_types?: string[] | null
           media_urls?: string[] | null
-          saves_count?: number | null
           shares_count?: number | null
           tags?: string[] | null
           title?: string | null
           updated_at?: string | null
           user_id?: string
+          visibility?: string | null
+        }
+        Relationships: []
+      }
+      posts_backup_phase1: {
+        Row: {
+          comments_count: number | null
+          content: string | null
+          created_at: string | null
+          id: string | null
+          likes_count: number | null
+          media_type: string | null
+          media_types: string[] | null
+          media_urls: string[] | null
+          shares_count: number | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+          user_id: string | null
+          visibility: string | null
+        }
+        Insert: {
+          comments_count?: number | null
+          content?: string | null
+          created_at?: string | null
+          id?: string | null
+          likes_count?: number | null
+          media_type?: string | null
+          media_types?: string[] | null
+          media_urls?: string[] | null
+          shares_count?: number | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+          visibility?: string | null
+        }
+        Update: {
+          comments_count?: number | null
+          content?: string | null
+          created_at?: string | null
+          id?: string | null
+          likes_count?: number | null
+          media_type?: string | null
+          media_types?: string[] | null
+          media_urls?: string[] | null
+          shares_count?: number | null
+          tags?: string[] | null
+          title?: string | null
+          updated_at?: string | null
+          user_id?: string | null
           visibility?: string | null
         }
         Relationships: []
@@ -1007,6 +1106,30 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       conversations_secure: {
@@ -1139,7 +1262,7 @@ export type Database = {
           created_at: string | null
           id: string | null
           likes_count: number | null
-          media_type: string | null
+          media_types: string[] | null
           media_urls: string[] | null
           profile_artform: Database["public"]["Enums"]["artform_type"] | null
           profile_avatar_url: string | null
@@ -1151,12 +1274,12 @@ export type Database = {
             | null
           profile_role: Database["public"]["Enums"]["user_role"] | null
           profile_username: string | null
-          saves_count: number | null
           shares_count: number | null
           tags: string[] | null
           title: string | null
           updated_at: string | null
           user_id: string | null
+          visibility: string | null
         }
         Relationships: []
       }
@@ -1325,6 +1448,13 @@ export type Database = {
           username: string
         }[]
       }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       mark_conversation_messages_read: {
         Args: {
           conversation_id_param: string
@@ -1358,6 +1488,7 @@ export type Database = {
       }
     }
     Enums: {
+      app_role: "artist" | "organization"
       artform_type:
         | "actor"
         | "dancer"
@@ -1506,6 +1637,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["artist", "organization"],
       artform_type: [
         "actor",
         "dancer",
