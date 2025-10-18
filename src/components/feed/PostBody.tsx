@@ -85,6 +85,7 @@ export const PostBody = ({ post }: PostBodyProps) => {
 
       {post.media_urls && post.media_urls.length > 0 && (
         <MediaCarousel 
+          key={post.id}
           mediaUrls={post.media_urls} 
           mediaTypes={post.media_types}
           postId={post.id}

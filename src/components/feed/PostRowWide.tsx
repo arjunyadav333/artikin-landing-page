@@ -300,6 +300,7 @@ export const PostRowWide = ({ post }: PostRowWideProps) => {
         {post.media_urls && post.media_urls.length > 0 && (
           <div className="post__media w-full">
             <MediaCarousel 
+              key={post.id}
               mediaUrls={post.media_urls} 
               mediaTypes={post.media_types}
               postId={post.id}

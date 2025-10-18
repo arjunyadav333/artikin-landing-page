@@ -28,6 +28,18 @@ export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselPr
   
   const { toast } = useToast();
 
+  // Reset carousel state when post changes
+  useEffect(() => {
+    setCurrentIndex(0);
+    setDragOffset(0);
+    setIsDragging(false);
+    setIsFullscreen(false);
+    setHasInteracted(false);
+    setIsTransitioning(false);
+    setFailedImages(new Set());
+    setLoadingImages(new Set([0]));
+  }, [postId]);
+
   // Memoized helper to get media type
   const getMediaType = useCallback((index: number) => {
     return mediaTypes?.[index] || 'image';
