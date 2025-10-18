@@ -183,6 +183,10 @@ export const EnhancedMessageItem: React.FC<EnhancedMessageItemProps> = ({
         <LinkRenderer 
           text={message.content || message.body || 'Message'}
           className="text-sm break-words"
+          linkClassName={isOwn 
+            ? "text-blue-200 underline hover:text-blue-100 hover:no-underline" 
+            : "text-primary underline hover:no-underline"
+          }
         />
         {message.edited && (
           <span className="text-xs opacity-70 ml-2">(edited)</span>

@@ -187,6 +187,10 @@ export const MessageItem = ({
             <LinkRenderer 
               text={message.body}
               className="text-sm whitespace-pre-wrap break-words"
+              linkClassName={isOwn
+                ? "text-blue-200 underline hover:text-blue-100 hover:no-underline"
+                : "text-primary underline hover:no-underline"
+              }
             />
           )}
           
