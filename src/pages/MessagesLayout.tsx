@@ -117,13 +117,31 @@ const MessagesLayout = () => {
   // Find current conversation (first try cache, then fallback to direct fetch)
   const conversation = conversations.find(c => c.id === chatId) || currentConversation;
 
-  // Auto-scroll to bottom when new messages arrive
+  // Auto-scroll to bottom instantly when messages change
   useEffect(() => {
-    const scrollToBottom = () => {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
-    };
-    scrollToBottom();
-  }, [messages]);
+    if (messages.length > 0) {
+      requestAnimationFrame(() => {
+        messagesEndRef.current?.scrollIntoView({ 
+          behavior: 'instant',
+          block: 'end' 
+        });
+      });
+    }
+  }, [messages.length]);
+
+  // Initial scroll to bottom when conversation first loads
+  useEffect(() => {
+    if (chatId && messages.length > 0) {
+      const timeoutId = setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ 
+          behavior: 'instant',
+          block: 'end' 
+        });
+      }, 50);
+      
+      return () => clearTimeout(timeoutId);
+    }
+  }, [chatId]);
 
   // Mark messages as seen when conversation is opened
   useEffect(() => {
@@ -471,23 +489,28 @@ const MessagesLayout = () => {
                   >
                     <ArrowLeft className="h-4 w-4" />
                   </Button>
-                  <Avatar className="h-9 w-9">
-                    <AvatarImage 
-                      src={conversation.other_participant?.avatar_url} 
-                      alt={conversation.other_participant?.display_name} 
-                    />
-                    <AvatarFallback className="bg-primary text-primary-foreground text-sm">
-                      {getInitials(conversation.other_participant?.display_name)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="font-semibold text-sm">
-                      {conversation.other_participant?.display_name || 'Unknown User'}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {typingUsers.length > 0 ? 'typing...' : `@${conversation.other_participant?.username || 'unknown'}`}
-                    </p>
-                  </div>
+                  <button 
+                    onClick={() => navigate(`/profile/${conversation.other_participant?.username}`)}
+                    className="flex items-center space-x-3 hover:opacity-80 transition-opacity cursor-pointer"
+                  >
+                    <Avatar className="h-9 w-9 ring-2 ring-transparent hover:ring-primary/20 transition-all">
+                      <AvatarImage 
+                        src={conversation.other_participant?.avatar_url} 
+                        alt={conversation.other_participant?.display_name} 
+                      />
+                      <AvatarFallback className="bg-primary text-primary-foreground text-sm">
+                        {getInitials(conversation.other_participant?.display_name)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="text-left">
+                      <p className="font-semibold text-sm hover:underline cursor-pointer">
+                        {conversation.other_participant?.display_name || 'Unknown User'}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {typingUsers.length > 0 ? 'typing...' : `@${conversation.other_participant?.username || 'unknown'}`}
+                      </p>
+                    </div>
+                  </button>
                 </div>
 
                 <ConversationActions
