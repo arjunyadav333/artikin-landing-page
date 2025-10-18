@@ -161,6 +161,7 @@ export const useCreateOpportunity = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['opportunities'] });
+      queryClient.invalidateQueries({ queryKey: ['organization-opportunities'] });
       toast({
         title: "Opportunity posted",
         description: "Your opportunity has been successfully posted."
