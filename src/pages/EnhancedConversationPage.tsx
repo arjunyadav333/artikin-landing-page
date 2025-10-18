@@ -212,23 +212,28 @@ const EnhancedConversationPage = () => {
             >
               <ArrowLeft className="h-4 w-4" />
             </Button>
-            <Avatar className="h-9 w-9">
-              <AvatarImage 
-                src={conversation.other_participant?.avatar_url} 
-                alt={conversation.other_participant?.display_name} 
-              />
-              <AvatarFallback className="bg-primary text-primary-foreground text-sm">
-                {getInitials(conversation.other_participant?.display_name)}
-              </AvatarFallback>
-            </Avatar>
-            <div>
-              <p className="font-semibold text-sm">
-                {conversation.other_participant?.display_name || 'Unknown User'}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {typingUsers.length > 0 ? 'typing...' : `@${conversation.other_participant?.username || 'unknown'}`}
-              </p>
-            </div>
+            <button 
+              onClick={() => navigate(`/profile/${conversation.other_participant?.username}`)}
+              className="flex items-center space-x-3 hover:opacity-80 transition-opacity"
+            >
+              <Avatar className="h-9 w-9">
+                <AvatarImage 
+                  src={conversation.other_participant?.avatar_url} 
+                  alt={conversation.other_participant?.display_name} 
+                />
+                <AvatarFallback className="bg-primary text-primary-foreground text-sm">
+                  {getInitials(conversation.other_participant?.display_name)}
+                </AvatarFallback>
+              </Avatar>
+              <div className="text-left">
+                <p className="font-semibold text-sm hover:underline">
+                  {conversation.other_participant?.display_name || 'Unknown User'}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {typingUsers.length > 0 ? 'typing...' : `@${conversation.other_participant?.username || 'unknown'}`}
+                </p>
+              </div>
+            </button>
           </div>
 
           <ConversationActions
