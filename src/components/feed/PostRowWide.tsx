@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo, useCallback, memo, lazy, Suspense } from 'react';
 import { Heart, MessageCircle, Share2, MoreVertical, Edit, Trash2, Copy, Share } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { HomeFeedPost, useLikePost } from '@/hooks/useHomeFeed';
@@ -7,16 +7,19 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useDeletePost } from '@/hooks/useDeletePost';
 import { MediaCarousel } from './MediaCarousel';
-import { InstagramCommentModal } from './InstagramCommentModal';
-import { EditPostModal } from './EditPostModal';
-import { SocialShareModal } from './SocialShareModal';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+
+// Step 6: Lazy load modals for bundle optimization
+const InstagramCommentModal = lazy(() => import('./InstagramCommentModal').then(m => ({ default: m.InstagramCommentModal })));
+const EditPostModal = lazy(() => import('./EditPostModal').then(m => ({ default: m.EditPostModal })));
+const SocialShareModal = lazy(() => import('./SocialShareModal').then(m => ({ default: m.SocialShareModal })));
 
 interface PostRowWideProps {
   post: HomeFeedPost;
 }
 
-export const PostRowWide = ({ post }: PostRowWideProps) => {
+// Step 3: Memoized component with custom comparison to prevent unnecessary re-renders
+export const PostRowWide = memo(({ post }: PostRowWideProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const isOwner = user?.id === post.user_id;
@@ -32,44 +35,36 @@ export const PostRowWide = ({ post }: PostRowWideProps) => {
   const deletePostMutation = useDeletePost();
   const connectionStatus = useConnectionStatus(post.user_id);
 
-  const handleFollow = (e: React.MouseEvent) => {
+  // Step 3: Memoized handlers with useCallback to prevent recreation
+  const handleFollow = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!user) {
-      return;
-    }
+    if (!user) return;
     
-    // Use connection status query first, then fallback to post data
     const currentFollowingState = connectionStatus.data?.isFollowing ?? post.is_following ?? false;
-    console.log('Follow button clicked for user:', post.user_id, 'Current following state:', currentFollowingState);
-    
     followMutation.mutate({ 
       targetUserId: post.user_id, 
       isCurrentlyFollowing: currentFollowingState 
     });
-  };
+  }, [user, connectionStatus.data?.isFollowing, post.is_following, post.user_id, followMutation]);
 
-  const handleLike = () => {
-    if (!user) {
-      return;
-    }
-    
-    console.log('Like button clicked for post:', post.id, 'Current liked state:', post.user_liked);
+  const handleLike = useCallback(() => {
+    if (!user) return;
     likeMutation.mutate({ 
       postId: post.id, 
       isLiked: post.user_liked || false 
     });
-  };
+  }, [user, post.id, post.user_liked, likeMutation]);
 
-  const handleComment = () => {
+  const handleComment = useCallback(() => {
     setCommentSheetOpen(true);
-  };
+  }, []);
 
-  const handleShare = () => {
+  const handleShare = useCallback(() => {
     setSocialShareModalOpen(true);
-  };
+  }, []);
 
-  const handleMenuAction = (action: string) => {
+  const handleMenuAction = useCallback((action: string) => {
     setMenuOpen(false);
     
     switch (action) {
@@ -86,54 +81,62 @@ export const PostRowWide = ({ post }: PostRowWideProps) => {
         setSocialShareModalOpen(true);
         break;
     }
-  };
+  }, [post.id]);
 
-  const handleDeletePost = () => {
+  const handleDeletePost = useCallback(() => {
     deletePostMutation.mutate(post.id);
-  };
+  }, [post.id, deletePostMutation]);
 
-  const formatText = (text: string) => {
-    return text.split(' ').map((word, index) => {
-      if (word.startsWith('#')) {
-        return (
-          <span key={index} className="text-primary hover:underline cursor-pointer">
-            {word}{' '}
-          </span>
-        );
-      }
-      if (word.startsWith('@')) {
-        return (
-          <span key={index} className="text-primary hover:underline cursor-pointer">
-            {word}{' '}
-          </span>
-        );
-      }
-      if (word.startsWith('http')) {
-        return (
-          <a 
-            key={index} 
-            href={word} 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="text-primary hover:underline"
-          >
-            {word}{' '}
-          </a>
-        );
-      }
-      return word + ' ';
-    });
-  };
+  // Step 3: Memoized text formatting (expensive computation)
+  const formatText = useMemo(() => {
+    return (text: string) => {
+      return text.split(' ').map((word, index) => {
+        if (word.startsWith('#')) {
+          return (
+            <span key={index} className="text-primary hover:underline cursor-pointer">
+              {word}{' '}
+            </span>
+          );
+        }
+        if (word.startsWith('@')) {
+          return (
+            <span key={index} className="text-primary hover:underline cursor-pointer">
+              {word}{' '}
+            </span>
+          );
+        }
+        if (word.startsWith('http')) {
+          return (
+            <a 
+              key={index} 
+              href={word} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-primary hover:underline"
+            >
+              {word}{' '}
+            </a>
+          );
+        }
+        return word + ' ';
+      });
+    };
+  }, []);
 
-  const shouldTruncate = (post.content || '').length > 200;
-  const displayText = shouldTruncate && !isExpanded 
-    ? (post.content || '').slice(0, 200) + '...' 
-    : (post.content || '');
-
-  const getDisplayRole = () => {
-    if (!post.profiles) return 'User';
-    return post.profiles.account_type === 'artist' ? 'Artist' : 'Organization';
-  };
+  // Step 3: Memoized computed values
+  const { shouldTruncate, displayText, displayRole } = useMemo(() => {
+    const shouldTrunc = (post.content || '').length > 200;
+    const dispText = shouldTrunc && !isExpanded 
+      ? (post.content || '').slice(0, 200) + '...' 
+      : (post.content || '');
+    const dispRole = !post.profiles ? 'User' : (post.profiles.account_type === 'artist' ? 'Artist' : 'Organization');
+    
+    return {
+      shouldTruncate: shouldTrunc,
+      displayText: dispText,
+      displayRole: dispRole
+    };
+  }, [post.content, post.profiles, isExpanded]);
 
   return (
     <article 
@@ -167,7 +170,7 @@ export const PostRowWide = ({ post }: PostRowWideProps) => {
             {post.profiles?.display_name || post.profiles?.full_name || 'Unknown User'}
           </Link>
           <div className="post__role text-muted-foreground text-sm">
-            {getDisplayRole()}
+            {displayRole}
           </div>
         </div>
 
@@ -367,26 +370,32 @@ export const PostRowWide = ({ post }: PostRowWideProps) => {
         </div>
       </footer>
 
-      {/* Instagram Comment Modal */}
-      <InstagramCommentModal
-        post={post}
-        isOpen={commentSheetOpen}
-        onClose={() => setCommentSheetOpen(false)}
-      />
+      {/* Step 6: Lazy loaded modals with Suspense */}
+      <Suspense fallback={null}>
+        {commentSheetOpen && (
+          <InstagramCommentModal
+            post={post}
+            isOpen={commentSheetOpen}
+            onClose={() => setCommentSheetOpen(false)}
+          />
+        )}
 
-      {/* Edit Post Modal */}
-      <EditPostModal
-        isOpen={editModalOpen}
-        onClose={() => setEditModalOpen(false)}
-        post={post}
-      />
+        {editModalOpen && (
+          <EditPostModal
+            isOpen={editModalOpen}
+            onClose={() => setEditModalOpen(false)}
+            post={post}
+          />
+        )}
 
-      {/* Social Share Modal */}
-      <SocialShareModal
-        isOpen={socialShareModalOpen}
-        onClose={() => setSocialShareModalOpen(false)}
-        post={post}
-      />
+        {socialShareModalOpen && (
+          <SocialShareModal
+            isOpen={socialShareModalOpen}
+            onClose={() => setSocialShareModalOpen(false)}
+            post={post}
+          />
+        )}
+      </Suspense>
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
@@ -411,4 +420,16 @@ export const PostRowWide = ({ post }: PostRowWideProps) => {
       </AlertDialog>
     </article>
   );
-};
+}, (prevProps, nextProps) => {
+  // Step 3: Custom comparison function - only re-render if these specific props change
+  return (
+    prevProps.post.id === nextProps.post.id &&
+    prevProps.post.likes_count === nextProps.post.likes_count &&
+    prevProps.post.comments_count === nextProps.post.comments_count &&
+    prevProps.post.shares_count === nextProps.post.shares_count &&
+    prevProps.post.user_liked === nextProps.post.user_liked &&
+    prevProps.post.is_following === nextProps.post.is_following
+  );
+});
+
+PostRowWide.displayName = 'PostRowWide';
