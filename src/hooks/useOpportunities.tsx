@@ -235,6 +235,7 @@ export const useApplyToOpportunity = () => {
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['opportunities'] });
+      queryClient.invalidateQueries({ queryKey: ['userApplications'] });
     }
   });
 };
