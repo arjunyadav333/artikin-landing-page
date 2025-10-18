@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { 
@@ -35,6 +35,7 @@ export function InstagramPost({ post }: InstagramPostProps) {
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
   const [isDoubleTapping, setIsDoubleTapping] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
+  const [isImageLoading, setIsImageLoading] = useState(false);
   const lastTapRef = useRef<number>(0);
   
   const { user } = useAuth();
@@ -140,19 +141,41 @@ export function InstagramPost({ post }: InstagramPostProps) {
     });
   };
 
+  const handleImageLoad = () => {
+    setIsImageLoading(false);
+    setIsNavigating(false);
+  };
+
+  const handleImageError = () => {
+    setIsImageLoading(false);
+    setIsNavigating(false);
+  };
+
   const nextMedia = () => {
     if (isNavigating || !post.media_urls || currentMediaIndex >= post.media_urls.length - 1) return;
     setIsNavigating(true);
+    setIsImageLoading(true);
     setCurrentMediaIndex(currentMediaIndex + 1);
-    setTimeout(() => setIsNavigating(false), 300);
   };
 
   const prevMedia = () => {
     if (isNavigating || currentMediaIndex <= 0) return;
     setIsNavigating(true);
+    setIsImageLoading(true);
     setCurrentMediaIndex(currentMediaIndex - 1);
-    setTimeout(() => setIsNavigating(false), 300);
   };
+
+  // Safety timeout to reset navigation lock
+  useEffect(() => {
+    if (isNavigating) {
+      const timeout = setTimeout(() => {
+        setIsNavigating(false);
+        setIsImageLoading(false);
+      }, 3000);
+      
+      return () => clearTimeout(timeout);
+    }
+  }, [isNavigating, currentMediaIndex]);
 
   return (
     <>
@@ -242,6 +265,13 @@ export function InstagramPost({ post }: InstagramPostProps) {
               className="aspect-square w-full overflow-hidden cursor-pointer relative"
               onClick={handleDoubleTap}
             >
+              {/* Loading overlay */}
+              {isImageLoading && post.media_type !== "video" && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/20 z-10 pointer-events-none">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+                </div>
+              )}
+              
               {post.media_type === "video" ? (
                 <video 
                   src={post.media_urls[currentMediaIndex]} 
@@ -254,8 +284,10 @@ export function InstagramPost({ post }: InstagramPostProps) {
                 <img 
                   src={post.media_urls[currentMediaIndex]} 
                   alt="Post media"
-                  className="w-full h-full object-cover"
-                  loading="lazy"
+                  className={`w-full h-full object-cover ${isImageLoading ? 'opacity-50' : ''}`}
+                  loading="eager"
+                  onLoad={handleImageLoad}
+                  onError={handleImageError}
                 />
               )}
               

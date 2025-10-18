@@ -171,8 +171,15 @@ export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselPr
                   key={index}
                   className={`w-2 h-2 rounded-full transition-all ${
                     index === currentIndex ? 'bg-white' : 'bg-white/50'
-                  }`}
-                  onClick={() => setCurrentIndex(index)}
+                  } ${isNavigating ? 'pointer-events-none opacity-50' : ''}`}
+                  onClick={() => {
+                    if (!isNavigating && index !== currentIndex) {
+                      setIsNavigating(true);
+                      setIsImageLoading(true);
+                      setCurrentIndex(index);
+                    }
+                  }}
+                  disabled={isNavigating}
                   aria-label={`Go to media ${index + 1}`}
                 />
               ))}
