@@ -80,8 +80,21 @@ export const EnhancedMessageInput = React.forwardRef<HTMLInputElement, EnhancedM
   };
 
   const handleSend = useCallback(() => {
-    if ((!value.trim() && attachments.length === 0) || disabled) return;
+    console.log('🎯 EnhancedMessageInput handleSend triggered', {
+      valueLength: value.length,
+      valueTrimmed: value.trim(),
+      attachmentsCount: attachments.length,
+      disabled
+    });
     
+    if (disabled) {
+      console.log('⚠️ Send blocked: input disabled');
+      return;
+    }
+    
+    // Always call onSend - let parent handle validation
+    // The parent (handleSendMessage) has the actual draftText state
+    console.log('✅ Calling onSend from EnhancedMessageInput');
     onSend({
       replyTo: replyingTo?.id,
       attachments: attachments.length > 0 ? attachments : undefined
