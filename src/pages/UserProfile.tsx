@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { useProfile } from "@/hooks/useProfiles";
+import { useProfile, useProfileByUsername } from "@/hooks/useProfiles";
 import { useUserPosts } from "@/hooks/usePosts";
 import { useUserPortfolios } from "@/hooks/usePortfolios";
 import { useAuth } from "@/hooks/useAuth";
@@ -22,8 +22,11 @@ export default function UserProfile() {
   const isOnProfileMeRoute = location.pathname === "/profile/me";
   const isOwnProfile = isOnProfileMeRoute || userId === "me" || userId === user?.id;
   
-  // Set target user ID: use current user's ID for own profile, otherwise use userId param
-  const targetUserId = isOwnProfile ? user?.id : userId;
+  // Check if userId is a UUID (user_id) or username
+  const isUUID = userId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(userId);
+  
+  // Set target user ID: use current user's ID for own profile, otherwise use userId param if it's a UUID
+  const targetUserId = isOwnProfile ? user?.id : (isUUID ? userId : undefined);
   
   // Debug authentication and routing state (development only)
   if (import.meta.env.DEV) {
@@ -38,38 +41,48 @@ export default function UserProfile() {
     });
   }
   
-  // Fetch profile data
-  const { data: profile, isLoading: profileLoading } = useProfile(targetUserId);
-  const { data: posts, isLoading: postsLoading } = useUserPosts(targetUserId!);
+  // Fetch profile data - use username or user_id based on what we have
+  const { data: profileByUsername, isLoading: profileByUsernameLoading } = useProfileByUsername(
+    !isOwnProfile && !isUUID ? userId : undefined
+  );
+  const { data: profileByUserId, isLoading: profileByUserIdLoading } = useProfile(targetUserId);
+  
+  // Use whichever profile query returned data
+  const profile = profileByUsername || profileByUserId;
+  const profileLoading = profileByUsernameLoading || profileByUserIdLoading;
+  
+  // If we loaded by username, get the user_id for other queries
+  const actualUserId = profile?.user_id || targetUserId;
+  const { data: posts, isLoading: postsLoading } = useUserPosts(actualUserId!);
   const { data: portfolios, isLoading: portfoliosLoading } = useUserPortfolios();
   
   // Connection status and follow functionality
-  const { data: connectionStatus } = useConnectionStatus(targetUserId);
-  const { data: followers } = useConnections(targetUserId, 'followers');
-  const { data: following } = useConnections(targetUserId, 'following');
+  const { data: connectionStatus } = useConnectionStatus(actualUserId);
+  const { data: followers } = useConnections(actualUserId, 'followers');
+  const { data: following } = useConnections(actualUserId, 'following');
   const followMutation = useFollowUser();
   const trackViewMutation = useTrackProfileView();
   const { startDirectMessage } = useDirectMessage();
 
   // Track profile view
   useEffect(() => {
-    if (targetUserId && !isOwnProfile) {
+    if (actualUserId && !isOwnProfile) {
       trackViewMutation.mutate();
     }
-  }, [targetUserId, isOwnProfile]);
+  }, [actualUserId, isOwnProfile]);
   
   const handleFollow = () => {
-    if (!targetUserId) return;
+    if (!actualUserId) return;
     followMutation.mutate({
-      targetUserId,
+      targetUserId: actualUserId,
       isCurrentlyFollowing: connectionStatus?.isFollowing || false
     });
   };
 
   const handleMessage = async () => {
-    if (!targetUserId || !user) return;
+    if (!actualUserId || !user) return;
     
-    startDirectMessage(targetUserId);
+    startDirectMessage(actualUserId);
   };
 
   // Handle authentication loading
