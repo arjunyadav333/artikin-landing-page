@@ -133,14 +133,14 @@ export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselPr
           alt={`Media ${index + 1}`}
           className={`media__img w-full ${isViewer ? 'max-h-[96vh]' : 'max-h-[70vh]'} object-contain ${!isViewer ? 'cursor-pointer' : ''}`}
           onClick={!isViewer ? openFullscreen : undefined}
-          loading={index === 0 ? "eager" : "lazy"}
+          loading="eager"
           onLoad={index === 0 ? handleFirstImageLoad : undefined}
           data-media-index={index}
           style={{ background: 'var(--media-bg, #f8f9fa)' }}
         />
       </figure>
     );
-  }, [containerHeight]);
+  }, [containerHeight, mediaTypes, openFullscreen]);
 
   if (mediaUrls.length === 0) return null;
 
@@ -151,22 +151,20 @@ export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselPr
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
-        style={{ minHeight: containerHeight ? `${containerHeight}px` : 'auto' }}
+        style={{ minHeight: containerHeight ? `${containerHeight}px` : '300px' }}
       >
         {/* Sliding container with transform-based animation */}
-        <div className="relative overflow-hidden">
+        <div className="relative overflow-hidden w-full">
           <div 
             className="flex transition-transform duration-300 ease-out"
             style={{ 
-              transform: `translateX(-${currentIndex * 100}%)`,
-              width: `${mediaUrls.length * 100}%`
+              transform: `translateX(-${currentIndex * 100}%)`
             }}
           >
             {mediaUrls.map((url, index) => (
               <div 
                 key={`${postId}-${index}`}
-                className="flex-shrink-0 flex items-center justify-center"
-                style={{ width: `${100 / mediaUrls.length}%` }}
+                className="flex-shrink-0 w-full flex items-center justify-center"
               >
                 {renderMedia(url, index, index === currentIndex)}
               </div>
@@ -244,15 +242,13 @@ export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselPr
               <div 
                 className="flex transition-transform duration-300 ease-out"
                 style={{ 
-                  transform: `translateX(-${currentIndex * 100}%)`,
-                  width: `${mediaUrls.length * 100}%`
+                  transform: `translateX(-${currentIndex * 100}%)`
                 }}
               >
                 {mediaUrls.map((url, index) => (
                   <div 
                     key={`fullscreen-${postId}-${index}`}
-                    className="flex-shrink-0 flex items-center justify-center"
-                    style={{ width: `${100 / mediaUrls.length}%` }}
+                    className="flex-shrink-0 w-full flex items-center justify-center"
                   >
                     {renderMedia(url, index, index === currentIndex, true)}
                   </div>
