@@ -490,8 +490,13 @@ const MessagesLayout = () => {
                     <ArrowLeft className="h-4 w-4" />
                   </Button>
                   <button 
-                    onClick={() => navigate(`/profile/${conversation.other_participant?.username}`)}
+                    onClick={() => {
+                      if (conversation.other_participant?.username) {
+                        navigate(`/profile/${conversation.other_participant.username}`);
+                      }
+                    }}
                     className="flex items-center space-x-3 hover:opacity-80 transition-opacity cursor-pointer"
+                    type="button"
                   >
                     <Avatar className="h-9 w-9 ring-2 ring-transparent hover:ring-primary/20 transition-all">
                       <AvatarImage 
