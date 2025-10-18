@@ -4,7 +4,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, MapPin, Calendar, Clock, Users, Star, Share2, MessageCircle } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { ArrowLeft, MapPin, Calendar, Clock, Users, Star, Share2, MessageCircle, X } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useOpportunities, useApplyToOpportunity, Opportunity } from "@/hooks/useOpportunities";
 import { useOrganizationOpportunities } from "@/hooks/useOrganizationOpportunities";
@@ -34,6 +35,7 @@ export default function OpportunityDetailPage() {
   // State for modals and UI
   const [showApplyModal, setShowApplyModal] = useState(false);
   const [showShareSheet, setShowShareSheet] = useState(false);
+  const [showImageModal, setShowImageModal] = useState(false);
   const [hasApplied, setHasApplied] = useState(false);
   const [applicationStatus, setApplicationStatus] = useState<string>('pending');
   const [isApplying, setIsApplying] = useState(false);
@@ -159,7 +161,10 @@ export default function OpportunityDetailPage() {
         
         <CardContent className="space-y-6">
           {/* Opportunity Image */}
-          {opportunity.image_url && <div className="w-full h-48 rounded-lg overflow-hidden">
+          {opportunity.image_url && <div 
+              className="w-full h-48 rounded-lg overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
+              onClick={() => setShowImageModal(true)}
+            >
               <img src={opportunity.image_url} alt={opportunity.title} className="w-full h-full object-cover" />
             </div>}
 
@@ -273,5 +278,26 @@ export default function OpportunityDetailPage() {
       title: opportunity?.title,
       company: opportunity?.company
     }} />
+
+      {/* Image Modal */}
+      <Dialog open={showImageModal} onOpenChange={setShowImageModal}>
+        <DialogContent className="max-w-7xl w-full p-0 bg-black/95 border-none">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute right-4 top-4 z-50 text-white hover:bg-white/20"
+            onClick={() => setShowImageModal(false)}
+          >
+            <X className="h-6 w-6" />
+          </Button>
+          {opportunity?.image_url && (
+            <img 
+              src={opportunity.image_url} 
+              alt={opportunity.title} 
+              className="w-full h-auto max-h-[90vh] object-contain"
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>;
 }
