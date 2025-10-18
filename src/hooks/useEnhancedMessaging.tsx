@@ -430,27 +430,40 @@ export const useSendEnhancedMessage = () => {
         body_length: content?.length
       });
 
-      // Use RPC for faster message creation
-      const { data, error } = await supabase.rpc('create_message_with_client_id', {
-        conversation_id_param: conversationId,
-        sender_id_param: user.id,
-        client_id_param: clientId,
-        kind_param: messageType,
-        body_param: content
-      });
+      // Direct insert instead of RPC
+      const { data, error } = await supabase
+        .from('messages')
+        .insert({
+          conversation_id: conversationId,
+          sender_id: user.id,
+          client_id: clientId,
+          kind: messageType,
+          body: content,
+          message_type: messageType,
+          replied_to_message_id: replyToMessageId,
+          created_at: new Date().toISOString(),
+          pending: false
+        })
+        .select()
+        .single();
 
       if (error) {
-        console.error('❌ RPC Error:', error);
+        console.error('❌ Insert Error Details:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
         throw error;
       }
-      
-      if (!data || data.length === 0) {
-        console.error('❌ No data returned from RPC');
+
+      if (!data) {
+        console.error('❌ No data returned from insert');
         throw new Error('Failed to create message');
       }
 
-      console.log('✅ Message sent successfully:', data[0]);
-      return data[0];
+      console.log('✅ Message created successfully:', data);
+      return data;
     },
     onSuccess: async (data, variables) => {
       console.log('✅ Message sent successfully:', {
