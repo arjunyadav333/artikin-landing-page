@@ -91,7 +91,7 @@ export const useEnhancedConversations = () => {
         .from('conversations')
         .select('*')
         .or(`participant_a.eq.${user.id},participant_b.eq.${user.id}`)
-        .order('updated_at', { ascending: false });
+        .order('last_message_at', { ascending: false });
 
       if (conversationsError) {
         console.error('Error fetching conversations:', conversationsError);
@@ -452,9 +452,15 @@ export const useSendEnhancedMessage = () => {
       console.log('✅ Message sent successfully:', data[0]);
       return data[0];
     },
-    onSuccess: (data, variables) => {
-      // Update conversation query to move it to top
-      queryClient.invalidateQueries({ queryKey: ['enhanced-conversations'] });
+    onSuccess: async (data, variables) => {
+      // Fetch the actual user profile for accurate sender info
+      const { data: senderProfile } = await supabase
+        .from('profiles')
+        .select('user_id, username, display_name, avatar_url')
+        .eq('user_id', user!.id)
+        .single();
+
+      console.log('✅ Fetched sender profile:', senderProfile);
       
       // Optimistically add message to the messages query
       const queryKey = ['enhanced-messages', variables.conversationId];
@@ -473,17 +479,21 @@ export const useSendEnhancedMessage = () => {
           created_at: data.created_at || new Date().toISOString(),
           updated_at: data.created_at || new Date().toISOString(),
           content: variables.content,
-          sender: {
+          sender: senderProfile || {
             user_id: user!.id,
-            username: user!.user_metadata?.username || 'You',
-            display_name: user!.user_metadata?.display_name || 'You',
-            avatar_url: user!.user_metadata?.avatar_url
+            username: 'You',
+            display_name: 'You',
+            avatar_url: null
           },
           reactions: []
         };
         
         return [...oldData, newMessage];
       });
+
+      // Force refetch to ensure message appears and conversation list updates
+      queryClient.refetchQueries({ queryKey: ['enhanced-messages', variables.conversationId] });
+      queryClient.refetchQueries({ queryKey: ['enhanced-conversations'] });
     },
     onError: (error: any) => {
       console.error('Message send error:', error);
