@@ -55,11 +55,19 @@ export const useProfileByUsername = (username?: string) => {
   return useQuery({
     queryKey: ['profile', 'username', username],
     queryFn: async () => {
+      if (!username) return null;
+      
       const { data, error } = await supabase
-        .rpc('get_profile_by_username', { username_param: username! });
+        .rpc('get_profile_by_username', { username_param: username });
       
       if (error) throw error;
-      return data?.[0] as Profile;
+      
+      // RPC returns an array, get the first item
+      if (Array.isArray(data) && data.length > 0) {
+        return data[0] as Profile;
+      }
+      
+      return null;
     },
     enabled: !!username,
     staleTime: 10 * 60 * 1000, // 10 minutes
