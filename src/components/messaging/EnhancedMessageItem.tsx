@@ -32,6 +32,7 @@ import {
   ThumbsUp,
   Laugh
 } from 'lucide-react';
+import { LinkRenderer } from '@/components/ui/link-renderer';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { EnhancedMessage } from '@/hooks/useEnhancedMessaging';
@@ -179,12 +180,13 @@ export const EnhancedMessageItem: React.FC<EnhancedMessageItemProps> = ({
         )}
 
         {/* Message content */}
-        <div className="text-sm break-words">
-          {message.content || message.body || 'Message'}
-          {message.edited && (
-            <span className="text-xs opacity-70 ml-2">(edited)</span>
-          )}
-        </div>
+        <LinkRenderer 
+          text={message.content || message.body || 'Message'}
+          className="text-sm break-words"
+        />
+        {message.edited && (
+          <span className="text-xs opacity-70 ml-2">(edited)</span>
+        )}
 
         {/* Media content */}
         {message.message_type === 'image' && message.media_url && (

@@ -5,6 +5,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Check, CheckCheck, MoreVertical, Trash2, AlertCircle, RotateCcw, Copy } from "lucide-react";
 import { MessageAttachments } from "@/components/messaging/message-attachments";
+import { LinkRenderer } from "@/components/ui/link-renderer";
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
@@ -183,9 +184,10 @@ export const MessageItem = ({
         >
           {/* Message content */}
           {message.body && (
-            <p className="text-sm whitespace-pre-wrap break-words">
-              {message.body}
-            </p>
+            <LinkRenderer 
+              text={message.body}
+              className="text-sm whitespace-pre-wrap break-words"
+            />
           )}
           
           {/* Message attachments */}
