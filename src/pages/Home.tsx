@@ -3,26 +3,16 @@ import { useAuth } from "@/hooks/useAuth";
 import { PostRowWide } from "@/components/feed/PostRowWide";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { Home as HomeIcon, RefreshCw } from "lucide-react";
+import { Home as HomeIcon } from "lucide-react";
 import { LoadingSpinner, ContentSpinner } from "@/components/ui/loading-spinner";
-import { useToast } from "@/hooks/use-toast";
-import { useCallback } from "react";
+import { SuggestedArtistsSection } from "@/components/home/suggested-artists-section";
+import { PersonalizedOpportunitiesSection } from "@/components/home/personalized-opportunities-section";
 
 const Home = () => {
   const { user } = useAuth();
-  const { toast } = useToast();
-  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage, refetch, isRefetching } = useHomeFeed();
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useHomeFeed();
   
   const posts = data?.pages?.flat() || [];
-
-  // Step 1: Manual refresh instead of realtime
-  const handleRefresh = useCallback(() => {
-    refetch();
-    toast({
-      title: "Refreshing feed...",
-      description: "Getting latest posts"
-    });
-  }, [refetch, toast]);
 
   if (isLoading && posts.length === 0) {
     return (
@@ -59,6 +49,7 @@ const Home = () => {
               </p>
             </div>
           </div>
+
         </div>
       </div>
     );
@@ -66,51 +57,69 @@ const Home = () => {
 
   return (
     <div className="w-full min-h-screen bg-background">
-      <main className="mx-auto px-4" style={{ maxWidth: 'var(--feed-max-width)' }}>
-        {/* Step 1: Refresh button to replace realtime updates */}
-        <div className="flex justify-end mb-4 pt-4">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleRefresh}
-            disabled={isRefetching}
-            className="gap-2"
-          >
-            <RefreshCw className={`w-4 h-4 ${isRefetching ? 'animate-spin' : ''}`} />
-            {isRefetching ? 'Refreshing...' : 'Refresh Feed'}
-          </Button>
-        </div>
-
-        {/* Desktop & Mobile: Optimized feed with React.memo components */}
-        <div className="bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden mb-6">
-          {/* Step 3 & 5: Each PostRowWide is now memoized and uses lazy loading */}
-          <div className="divide-y divide-border">
+      {/* Desktop: Main feed in center column, personalized sections in right sidebar */}
+      <div className="hidden xl:block">
+        <main className="mx-auto px-4" style={{ maxWidth: 'var(--feed-max-width)' }}>
+          <div className="divide-y divide-border bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden">
             {posts.map((post) => (
               <PostRowWide key={post.id} post={post} />
             ))}
           </div>
-        </div>
-        
-        {hasNextPage && (
-          <div className="text-center py-4 mb-6">
-            <Button 
-              onClick={() => fetchNextPage()}
-              variant="outline"
-              disabled={isFetchingNextPage}
-              className="min-w-[120px] rounded-full shadow-sm hover:shadow-md transition-all duration-200"
-            >
-              {isFetchingNextPage ? (
-                <>
-                  <LoadingSpinner size="sm" className="mr-2" />
-                  Loading...
-                </>
-              ) : (
-                'Load More Posts'
-              )}
-            </Button>
+          
+          {hasNextPage && (
+            <div className="text-center py-6 px-4">
+              <Button 
+                onClick={() => fetchNextPage()}
+                variant="outline"
+                disabled={isFetchingNextPage}
+                className="min-w-[120px] rounded-full shadow-sm hover:shadow-md transition-all duration-200"
+              >
+                {isFetchingNextPage ? (
+                  <>
+                    <LoadingSpinner size="sm" className="mr-2" />
+                    Loading...
+                  </>
+                ) : (
+                  'Load More Posts'
+                )}
+              </Button>
+            </div>
+          )}
+        </main>
+      </div>
+
+      {/* Mobile: Stacked layout with feed, then suggested artists, then opportunities */}
+      <div className="xl:hidden">
+        <main className="mx-auto px-4" style={{ maxWidth: 'var(--feed-max-width)' }}>
+          {/* Feed */}
+          <div className="divide-y divide-border bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden mb-6">
+            {posts.map((post) => (
+              <PostRowWide key={post.id} post={post} />
+            ))}
           </div>
-        )}
-      </main>
+          
+          {hasNextPage && (
+            <div className="text-center py-4 mb-6">
+              <Button 
+                onClick={() => fetchNextPage()}
+                variant="outline"
+                disabled={isFetchingNextPage}
+                className="min-w-[120px] rounded-full shadow-sm hover:shadow-md transition-all duration-200"
+              >
+                {isFetchingNextPage ? (
+                  <>
+                    <LoadingSpinner size="sm" className="mr-2" />
+                    Loading...
+                  </>
+                ) : (
+                  'Load More Posts'
+                )}
+              </Button>
+            </div>
+          )}
+
+        </main>
+      </div>
     </div>
   );
 };
