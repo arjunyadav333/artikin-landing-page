@@ -3,26 +3,14 @@ import { useAuth } from "@/hooks/useAuth";
 import { PostRowWide } from "@/components/feed/PostRowWide";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { Home as HomeIcon, RefreshCw } from "lucide-react";
+import { Home as HomeIcon } from "lucide-react";
 import { LoadingSpinner, ContentSpinner } from "@/components/ui/loading-spinner";
-import { useToast } from "@/hooks/use-toast";
-import { useCallback } from "react";
 
 const Home = () => {
   const { user } = useAuth();
-  const { toast } = useToast();
-  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage, refetch, isRefetching } = useHomeFeed();
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useHomeFeed();
   
   const posts = data?.pages?.flat() || [];
-
-  // Step 1: Manual refresh instead of realtime
-  const handleRefresh = useCallback(() => {
-    refetch();
-    toast({
-      title: "Refreshing feed...",
-      description: "Getting latest posts"
-    });
-  }, [refetch, toast]);
 
   if (isLoading && posts.length === 0) {
     return (
@@ -64,21 +52,7 @@ const Home = () => {
 
   return (
     <div className="w-full min-h-screen bg-background">
-      <main className="w-full">
-        {/* Step 1: Refresh button to replace realtime updates */}
-        <div className="flex justify-end mb-4 pt-4">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleRefresh}
-            disabled={isRefetching}
-            className="gap-2"
-          >
-            <RefreshCw className={`w-4 h-4 ${isRefetching ? 'animate-spin' : ''}`} />
-            {isRefetching ? 'Refreshing...' : 'Refresh Feed'}
-          </Button>
-        </div>
-
+      <main className="w-full pt-4">
         {/* Desktop & Mobile: Optimized feed with React.memo components */}
         <div className="bg-card rounded-2xl shadow-sm border border-border/50 overflow-hidden mb-6">
           {/* Step 3 & 5: Each PostRowWide is now memoized and uses lazy loading */}
