@@ -113,84 +113,92 @@ export const useEnhancedConversations = () => {
         .eq('user_id', user.id)
         .in('conversation_id', conversationIds);
 
-      // Build enhanced conversation objects
-      const result = await Promise.all(
-        conversations
-          .filter(conv => {
-            const settings = participantData?.find(p => p.conversation_id === conv.id);
-            return !settings?.deleted;
-          })
-          .map(async (conv) => {
-            const participantSettings = participantData?.find(p => p.conversation_id === conv.id);
+      // Filter out deleted conversations
+      const activeConversations = conversations.filter(conv => {
+        const settings = participantData?.find(p => p.conversation_id === conv.id);
+        return !settings?.deleted;
+      });
 
-            // Get other participant ID and info
-            const otherParticipantId = conv.participant_a === user.id 
-              ? conv.participant_b 
-              : conv.participant_a;
-
-            const { data: profile } = await supabase
-              .from('profiles')
-              .select('user_id, username, display_name, avatar_url, role')
-              .eq('user_id', otherParticipantId)
-              .maybeSingle();
-
-            // If no profile exists, create a default one from auth user data
-            let otherParticipant = profile;
-            if (!profile) {
-              // Try to get basic info from auth.users metadata (fallback)
-              otherParticipant = {
-                user_id: otherParticipantId,
-                username: `user_${otherParticipantId.slice(0, 8)}`,
-                display_name: 'Unknown User',
-                avatar_url: null,
-                role: null
-              };
-            }
-
-            // Get last message with full details
-            let lastMessage = null;
-            if (conv.last_message_id) {
-              const { data: msgData } = await supabase
-                .from('messages')
-                .select('*')
-                .eq('id', conv.last_message_id)
-                .single();
-              
-              if (msgData) {
-                // Get sender info for last message
-                const { data: senderData } = await supabase
-                  .from('profiles')
-                  .select('user_id, username, display_name, avatar_url')
-                  .eq('user_id', msgData.sender_id)
-                  .maybeSingle();
-
-                lastMessage = {
-                  ...msgData,
-                  content: msgData.body,
-                  sender: senderData
-                };
-              }
-            }
-
-            // Calculate unread count for current user
-            const unreadCount = conv.participant_a === user.id 
-              ? conv.unread_count_user1 || 0
-              : conv.unread_count_user2 || 0;
-
-            return {
-              ...conv,
-              other_participant: otherParticipant,
-              last_message: lastMessage,
-              unread_count: unreadCount,
-              participant_settings: participantSettings || {
-                pinned: false,
-                deleted: false,
-                muted: false,
-                archived: false
-              }
-            } as EnhancedConversation;
-          })
+      // Collect all unique user IDs we need to fetch profiles for
+      const participantIds = activeConversations.map(conv => 
+        conv.participant_a === user.id ? conv.participant_b : conv.participant_a
       );
+
+      // Fetch last messages for all conversations that have them
+      const messageIds = activeConversations
+        .map(conv => conv.last_message_id)
+        .filter(Boolean) as string[];
+
+      const { data: messagesData } = await supabase
+        .from('messages')
+        .select('*')
+        .in('id', messageIds);
+
+      // Collect sender IDs from messages
+      const senderIds = messagesData?.map(msg => msg.sender_id) || [];
+      
+      // Get all unique user IDs (participants + message senders)
+      const allUserIds = [...new Set([...participantIds, ...senderIds])];
+
+      // Batch fetch all profiles in one query
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('user_id, username, display_name, avatar_url, role')
+        .in('user_id', allUserIds);
+
+      // Create lookup maps
+      const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
+      const messageMap = new Map(messagesData?.map(m => [m.id, m]) || []);
+
+      // Build enhanced conversation objects
+      const result = activeConversations.map(conv => {
+        const participantSettings = participantData?.find(p => p.conversation_id === conv.id);
+        
+        // Get other participant ID and profile
+        const otherParticipantId = conv.participant_a === user.id 
+          ? conv.participant_b 
+          : conv.participant_a;
+
+        const otherParticipant = profileMap.get(otherParticipantId) || {
+          user_id: otherParticipantId,
+          username: `user_${otherParticipantId.slice(0, 8)}`,
+          display_name: 'Unknown User',
+          avatar_url: null,
+          role: null
+        };
+
+        // Get last message with sender info
+        let lastMessage = null;
+        if (conv.last_message_id) {
+          const msgData = messageMap.get(conv.last_message_id);
+          if (msgData) {
+            const senderProfile = profileMap.get(msgData.sender_id);
+            lastMessage = {
+              ...msgData,
+              content: msgData.body,
+              sender: senderProfile || null
+            };
+          }
+        }
+
+        // Calculate unread count for current user
+        const unreadCount = conv.participant_a === user.id 
+          ? conv.unread_count_user1 || 0
+          : conv.unread_count_user2 || 0;
+
+        return {
+          ...conv,
+          other_participant: otherParticipant,
+          last_message: lastMessage,
+          unread_count: unreadCount,
+          participant_settings: participantSettings || {
+            pinned: false,
+            deleted: false,
+            muted: false,
+            archived: false
+          }
+        } as EnhancedConversation;
+      });
 
       console.log('Enhanced conversations result:', result);
       return result;
