@@ -1,5 +1,5 @@
-import { useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useMemo, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { 
   DropdownMenu,
@@ -18,9 +18,18 @@ type SortOption = 'newest' | 'alphabetical' | 'relevant';
 
 const Connections = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState<SortOption>('newest');
-  const [activeTab, setActiveTab] = useState('following');
+  const [activeTab, setActiveTab] = useState(searchParams.get('tab') === 'followers' ? 'followers' : 'following');
+
+  // Update active tab when URL parameter changes
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab === 'followers' || tab === 'following') {
+      setActiveTab(tab);
+    }
+  }, [searchParams]);
 
   const { data: currentProfile } = useCurrentProfile();
   const { data: following = [], isLoading: followingLoading } = useConnections(
