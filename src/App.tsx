@@ -9,12 +9,12 @@ import { AppLayout } from "./components/layout/app-layout";
 import { PageSpinner } from "@/components/ui/loading-spinner";
 import { HomePageSkeleton, ProfilePageSkeleton, ConnectionsPageSkeleton } from "@/components/ui/page-skeleton";
 import NotFound from "./pages/NotFound";
+import Index from "./pages/Index";
 
 const ManageApplicants = lazy(() => import("./pages/ManageApplicants"));
 const Notifications = lazy(() => import("./pages/Notifications"));
 
 // Lazy load components for better performance and code splitting
-const Index = lazy(() => import("./pages/Index"));
 const Home = lazy(() => import("./pages/Home"));
 const Opportunities = lazy(() => import("./pages/Opportunities"));
 const OpportunityDetailPage = lazy(() => import("./pages/OpportunityDetailPage"));
@@ -111,9 +111,7 @@ const AppRoutes = () => {
               </AppLayout>
             </ProtectedRoute>
           ) : (
-            <Suspense fallback={<DefaultLoader />}>
-              <Index />
-            </Suspense>
+            <Index />
           )
         } />
         
