@@ -453,12 +453,44 @@ export const useSendEnhancedMessage = () => {
       return data[0];
     },
     onSuccess: async (data, variables) => {
-      console.log('✅ Message sent, preparing to update UI...', data);
+      console.log('✅ Message sent successfully:', {
+        messageId: data.id,
+        conversationId: variables.conversationId
+      });
       
-      // Wait briefly for database transaction to complete
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // Immediately update UI with optimistic data
+      const queryKey = ['enhanced-messages', variables.conversationId];
+      queryClient.setQueryData(queryKey, (oldData: any) => {
+        if (!oldData) return oldData;
+        
+        // Check if message already exists (prevent duplicates)
+        const exists = oldData.some((m: any) => m.id === data.id);
+        if (exists) return oldData;
+        
+        const newMessage = {
+          ...data,
+          id: data.id,
+          conversation_id: variables.conversationId,
+          sender_id: user!.id,
+          kind: variables.messageType || 'text',
+          body: variables.content,
+          content: variables.content,
+          created_at: data.created_at || new Date().toISOString(),
+          sender: {
+            user_id: user!.id,
+            username: user!.user_metadata?.username || 'You',
+            display_name: user!.user_metadata?.display_name || user!.user_metadata?.full_name || 'You',
+            avatar_url: user!.user_metadata?.avatar_url
+          },
+          reactions: [],
+          seen_at: null,
+          delivered_at: data.created_at
+        };
+        
+        return [...oldData, newMessage];
+      });
       
-      // Refetch to get fresh data from database
+      // Then refetch to ensure consistency
       await Promise.all([
         queryClient.refetchQueries({ 
           queryKey: ['enhanced-messages', variables.conversationId],
@@ -470,7 +502,7 @@ export const useSendEnhancedMessage = () => {
         })
       ]);
       
-      console.log('✅ UI updated successfully');
+      console.log('✅ Queries refetched');
     },
     onError: (error: any) => {
       console.error('Message send error:', error);

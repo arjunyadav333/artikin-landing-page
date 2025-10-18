@@ -82,30 +82,54 @@ const EnhancedConversationPage = () => {
     replyTo?: string;
     attachments?: File[];
   }) => {
-    if ((!draftText.trim() && (!options?.attachments?.length)) || !chatId || !user) return;
-
+    // Capture message text BEFORE any state changes
     const messageText = draftText.trim();
     
-    // Clear draft immediately
-    await clearDraft();
-    setReplyingTo(null);
-    sendTypingStatus();
+    console.log('🚀 handleSendMessage called', {
+      messageText,
+      messageLength: messageText.length,
+      hasAttachments: options?.attachments?.length,
+      chatId,
+      userId: user?.id,
+      userRole: user?.user_metadata?.role
+    });
+    
+    if (!messageText && !options?.attachments?.length) {
+      console.log('❌ Blocked: No content to send');
+      return;
+    }
+    
+    if (!chatId || !user) {
+      console.log('❌ Blocked: No chatId or user');
+      return;
+    }
 
+    console.log('✅ Proceeding to send message...');
+    
     try {
+      // Send message with captured text
       await sendMessage.mutateAsync({
         conversationId: chatId,
         content: messageText,
         replyToMessageId: options?.replyTo || replyingTo?.id
       });
       
-      // Keep input focused to prevent keyboard from closing
+      console.log('✅ Message sent successfully, clearing draft...');
+      
+      // Clear draft and UI only AFTER successful send
+      clearDraft(); // Don't await
+      setReplyingTo(null);
+      sendTypingStatus();
+      
+      // Keep input focused
       setTimeout(() => {
         inputRef.current?.focus();
         messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
       }, 50);
       
     } catch (error) {
-      console.error('Failed to send message:', error);
+      console.error('❌ Failed to send message:', error);
+      // Don't clear draft on error so user can retry
     }
   };
 
