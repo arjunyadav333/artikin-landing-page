@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, memo } from 'react';
 import { ChevronLeft, ChevronRight, Play, X, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -9,7 +9,8 @@ interface MediaCarouselProps {
   postId: string;
 }
 
-export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselProps) => {
+// Step 3 & 5: Memoized component with lazy loading strategy
+export const MediaCarousel = memo(({ mediaUrls, mediaTypes, postId }: MediaCarouselProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -18,13 +19,12 @@ export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselPr
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
   const [failedImages, setFailedImages] = useState<Set<number>>(new Set());
-  const [loadingImages, setLoadingImages] = useState<Set<number>>(new Set([0]));
+  const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set());
   
   // Instagram-style swipe states
   const [dragOffset, setDragOffset] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [touchStartTime, setTouchStartTime] = useState(0);
-  const [swipeVelocity, setSwipeVelocity] = useState(0);
   
   const { toast } = useToast();
 
@@ -37,7 +37,7 @@ export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselPr
     setHasInteracted(false);
     setIsTransitioning(false);
     setFailedImages(new Set());
-    setLoadingImages(new Set([0]));
+    setLoadedImages(new Set());
   }, [postId]);
 
   // Memoized helper to get media type
@@ -45,22 +45,29 @@ export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselPr
     return mediaTypes?.[index] || 'image';
   }, [mediaTypes]);
 
-  // Preload adjacent images for smooth transitions
+  // Step 5: Lazy load images - only preload current and adjacent images
   useEffect(() => {
     const preloadImage = (index: number) => {
-      if (index >= 0 && index < mediaUrls.length) {
+      if (index >= 0 && index < mediaUrls.length && !loadedImages.has(index)) {
         const mediaType = getMediaType(index);
         if (!mediaType.startsWith('video/')) {
           const img = new Image();
+          img.onload = () => {
+            setLoadedImages(prev => new Set(prev).add(index));
+          };
           img.src = mediaUrls[index];
         }
       }
     };
     
-    // Preload next and previous images
-    preloadImage(currentIndex + 1);
-    preloadImage(currentIndex - 1);
-  }, [currentIndex, mediaUrls, getMediaType]);
+    // Preload current image first
+    preloadImage(currentIndex);
+    // Then preload adjacent images (progressive loading)
+    setTimeout(() => {
+      preloadImage(currentIndex + 1);
+      preloadImage(currentIndex - 1);
+    }, 100);
+  }, [currentIndex, mediaUrls, getMediaType, loadedImages]);
 
   // Navigation with transition lock
   const nextImage = useCallback(() => {
@@ -79,7 +86,7 @@ export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselPr
     setTimeout(() => setIsTransitioning(false), 300);
   }, [isTransitioning, mediaUrls.length, hasInteracted]);
 
-  // Handle touch gestures for mobile swipe - Instagram style
+  // Handle touch gestures for mobile swipe
   const handleTouchStart = (e: React.TouchEvent) => {
     const touch = e.touches[0].clientX;
     setTouchStart(touch);
@@ -95,17 +102,14 @@ export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselPr
     const currentTouch = e.touches[0].clientX;
     setTouchEnd(currentTouch);
     
-    // Calculate real-time drag offset as percentage
     const diff = currentTouch - touchStart;
     const containerWidth = e.currentTarget.getBoundingClientRect().width;
     const percentOffset = (diff / containerWidth) * 100;
     
-    // Apply rubber-banding at boundaries
     const isAtStart = currentIndex === 0 && diff > 0;
     const isAtEnd = currentIndex === mediaUrls.length - 1 && diff < 0;
     
     if (isAtStart || isAtEnd) {
-      // 30% resistance at boundaries
       setDragOffset(percentOffset * 0.3);
     } else {
       setDragOffset(percentOffset);
@@ -119,9 +123,7 @@ export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselPr
     const swipeDistance = touchStart - touchEnd;
     const swipeTime = Date.now() - touchStartTime;
     const velocity = Math.abs(swipeDistance / swipeTime);
-    setSwipeVelocity(velocity);
     
-    // Dynamic threshold based on velocity (fast swipe = lower threshold)
     const threshold = velocity > 0.5 ? 30 : 50;
     
     if (swipeDistance > threshold && currentIndex < mediaUrls.length - 1) {
@@ -130,7 +132,6 @@ export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselPr
       prevImage();
     }
     
-    // Reset drag offset with animation
     setDragOffset(0);
   };
 
@@ -157,14 +158,8 @@ export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselPr
   };
 
   const handleImageLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>, index: number) => {
-    // Remove from loading set
-    setLoadingImages(prev => {
-      const next = new Set(prev);
-      next.delete(index);
-      return next;
-    });
+    setLoadedImages(prev => new Set(prev).add(index));
     
-    // Set container height from current visible image
     if (index === currentIndex && !containerHeight) {
       setContainerHeight(e.currentTarget.height);
     }
@@ -172,11 +167,6 @@ export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselPr
 
   const handleImageError = useCallback((index: number) => {
     setFailedImages(prev => new Set(prev).add(index));
-    setLoadingImages(prev => {
-      const next = new Set(prev);
-      next.delete(index);
-      return next;
-    });
   }, []);
 
   const renderMedia = useCallback((url: string, index: number, isActive: boolean, isViewer: boolean = false) => {
@@ -184,7 +174,8 @@ export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselPr
     
     const mediaType = getMediaType(index);
     const hasFailed = failedImages.has(index);
-    const isLoading = loadingImages.has(index) && index === currentIndex;
+    const isLoaded = loadedImages.has(index);
+    const shouldLoad = Math.abs(index - currentIndex) <= 1; // Only load current and adjacent
     
     if (mediaType.startsWith('video/')) {
       return (
@@ -218,29 +209,33 @@ export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselPr
 
     return (
       <figure className="media media--image w-full h-full flex items-center justify-center relative">
-        {isLoading && (
+        {!isLoaded && shouldLoad && (
           <div className="absolute inset-0 flex items-center justify-center bg-muted animate-pulse z-10">
             <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
           </div>
         )}
-        <img
-          src={url}
-          alt={`Media ${index + 1}`}
-          className={`media__img w-full ${isViewer ? 'max-h-[96vh]' : 'max-h-[70vh]'} object-contain ${!isViewer ? 'cursor-pointer' : ''}`}
-          onClick={!isViewer ? openFullscreen : undefined}
-          loading="eager"
-          onLoad={(e) => handleImageLoad(e, index)}
-          onError={() => handleImageError(index)}
-          data-media-index={index}
-          style={{ 
-            background: 'var(--media-bg, #f8f9fa)',
-            pointerEvents: 'none',
-            userSelect: 'none'
-          }}
-        />
+        {shouldLoad && (
+          <img
+            src={url}
+            alt={`Media ${index + 1}`}
+            className={`media__img w-full ${isViewer ? 'max-h-[96vh]' : 'max-h-[70vh]'} object-contain ${!isViewer ? 'cursor-pointer' : ''}`}
+            onClick={!isViewer ? openFullscreen : undefined}
+            loading="lazy"
+            onLoad={(e) => handleImageLoad(e, index)}
+            onError={() => handleImageError(index)}
+            data-media-index={index}
+            style={{ 
+              background: 'var(--media-bg, #f8f9fa)',
+              pointerEvents: 'none',
+              userSelect: 'none',
+              opacity: isLoaded ? 1 : 0,
+              transition: 'opacity 0.3s ease-in-out'
+            }}
+          />
+        )}
       </figure>
     );
-  }, [containerHeight, getMediaType, openFullscreen, mediaUrls.length, failedImages, loadingImages, currentIndex, handleImageLoad, handleImageError]);
+  }, [containerHeight, getMediaType, openFullscreen, mediaUrls.length, failedImages, loadedImages, currentIndex, handleImageLoad, handleImageError]);
 
   if (mediaUrls.length === 0) return null;
 
@@ -257,7 +252,6 @@ export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselPr
           userSelect: 'none'
         }}
       >
-        {/* Sliding container with transform-based animation */}
         <div className="relative overflow-hidden w-full">
           <div 
             className={`flex ${!isDragging && hasInteracted ? 'transition-transform duration-300 ease-out' : ''}`}
@@ -343,7 +337,6 @@ export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselPr
           onTouchEnd={handleTouchEnd}
         >
           <div className="relative max-w-[96vw] max-h-[96vh] w-full flex items-center justify-center">
-            {/* Sliding container for fullscreen */}
             <div className="relative overflow-hidden w-full">
               <div 
                 className={`flex ${!isDragging && hasInteracted ? 'transition-transform duration-300 ease-out' : ''}`}
@@ -363,7 +356,6 @@ export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselPr
               </div>
             </div>
             
-            {/* Controls */}
             <div className="absolute top-4 right-4 flex gap-2 z-20">
               <Button
                 variant="secondary"
@@ -385,7 +377,6 @@ export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselPr
               </Button>
             </div>
 
-            {/* Navigation in fullscreen */}
             {mediaUrls.length > 1 && (
               <>
                 <Button
@@ -437,4 +428,12 @@ export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselPr
       )}
     </div>
   );
-};
+}, (prevProps, nextProps) => {
+  // Step 3: Custom comparison - only re-render if mediaUrls or postId change
+  return (
+    prevProps.postId === nextProps.postId &&
+    JSON.stringify(prevProps.mediaUrls) === JSON.stringify(nextProps.mediaUrls)
+  );
+});
+
+MediaCarousel.displayName = 'MediaCarousel';

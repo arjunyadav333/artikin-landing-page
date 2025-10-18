@@ -87,6 +87,13 @@ export type Database = {
             foreignKeyName: "comments_post_id_fkey"
             columns: ["post_id"]
             isOneToOne: false
+            referencedRelation: "posts_feed_optimized_secure"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
             referencedRelation: "posts_with_profiles_secure"
             referencedColumns: ["id"]
           },
@@ -298,6 +305,13 @@ export type Database = {
             columns: ["post_id"]
             isOneToOne: false
             referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "likes_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts_feed_optimized_secure"
             referencedColumns: ["id"]
           },
           {
@@ -603,6 +617,13 @@ export type Database = {
             columns: ["post_id"]
             isOneToOne: false
             referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts_feed_optimized_secure"
             referencedColumns: ["id"]
           },
           {
@@ -1050,6 +1071,13 @@ export type Database = {
             foreignKeyName: "shares_post_id_fkey"
             columns: ["post_id"]
             isOneToOne: false
+            referencedRelation: "posts_feed_optimized_secure"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shares_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
             referencedRelation: "posts_with_profiles_secure"
             referencedColumns: ["id"]
           },
@@ -1254,6 +1282,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      posts_feed_optimized_secure: {
+        Row: {
+          comments_count: number | null
+          content: string | null
+          created_at: string | null
+          id: string | null
+          is_following: boolean | null
+          likes_count: number | null
+          media_types: string[] | null
+          media_urls: string[] | null
+          profile_artform: Database["public"]["Enums"]["artform_type"] | null
+          profile_avatar_url: string | null
+          profile_bio: string | null
+          profile_display_name: string | null
+          profile_location: string | null
+          profile_organization_type:
+            | Database["public"]["Enums"]["organization_type"]
+            | null
+          profile_role: Database["public"]["Enums"]["user_role"] | null
+          profile_username: string | null
+          shares_count: number | null
+          tags: string[] | null
+          title: string | null
+          updated_at: string | null
+          user_id: string | null
+          user_liked: boolean | null
+          visibility: string | null
+        }
+        Relationships: []
       }
       posts_with_profiles_secure: {
         Row: {
