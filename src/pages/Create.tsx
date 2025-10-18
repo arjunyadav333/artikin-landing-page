@@ -9,6 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { Image, X, Upload, Loader2, ArrowLeft } from "lucide-react";
 import { useCurrentProfile } from "@/hooks/useProfiles";
 import { useCreatePost } from "@/hooks/usePosts";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const Create = () => {
   const navigate = useNavigate();
@@ -72,36 +74,74 @@ const Create = () => {
   }, []);
 
   const handleSubmit = useCallback(async () => {
-    if (!content.trim()) return;
+    if (!content.trim() || !profile?.user_id) return;
 
-    // Build media_types array corresponding to media_urls
-    const mediaTypes = mediaFiles.map(file => 
-      file.type.startsWith('video/') ? 'video' : 'image'
-    );
+    try {
+      // Upload media files to Supabase Storage
+      let uploadedUrls: string[] = [];
+      let mediaTypes: string[] = [];
 
-    // For now, we'll create the post without media upload
-    // In a real app, you'd upload files to Supabase Storage first
-    const postData = {
-      content: content.trim(),
-      tags: tags.length > 0 ? tags : undefined,
-      media_urls: mediaPreview.length > 0 ? mediaPreview : undefined,
-      media_types: mediaTypes.length > 0 ? mediaTypes : undefined
-    };
+      if (mediaFiles.length > 0) {
+        const uploadPromises = mediaFiles.map(async (file) => {
+          const fileExt = file.name.split('.').pop();
+          const fileName = `${profile.user_id}/${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+          
+          const { data, error } = await supabase.storage
+            .from('posts')
+            .upload(fileName, file, {
+              cacheControl: '3600',
+              upsert: false
+            });
 
-    createPostMutation.mutate(postData, {
-      onSuccess: () => {
-        // Reset form
-        setContent("");
-        setTags([]);
-        setCurrentTag("");
-        setMediaFiles([]);
-        setMediaPreview([]);
-        
-        // Navigate back to home feed
-        navigate("/home");
+          if (error) throw error;
+
+          const { data: { publicUrl } } = supabase.storage
+            .from('posts')
+            .getPublicUrl(fileName);
+
+          return {
+            url: publicUrl,
+            type: file.type.startsWith('video/') ? 'video' : 'image'
+          };
+        });
+
+        const results = await Promise.all(uploadPromises);
+        uploadedUrls = results.map(r => r.url);
+        mediaTypes = results.map(r => r.type);
       }
-    });
-  }, [content, tags, mediaPreview, mediaFiles, createPostMutation, navigate]);
+
+      // Create post with uploaded URLs
+      const postData = {
+        content: content.trim(),
+        tags: tags.length > 0 ? tags : undefined,
+        media_urls: uploadedUrls.length > 0 ? uploadedUrls : undefined,
+        media_types: mediaTypes.length > 0 ? mediaTypes : undefined
+      };
+
+      createPostMutation.mutate(postData, {
+        onSuccess: () => {
+          // Reset form
+          setContent("");
+          setTags([]);
+          setCurrentTag("");
+          setMediaFiles([]);
+          setMediaPreview([]);
+          
+          toast.success("Post created successfully!");
+          
+          // Navigate back to home feed
+          navigate("/home");
+        },
+        onError: (error) => {
+          toast.error("Failed to create post. Please try again.");
+          console.error("Create post error:", error);
+        }
+      });
+    } catch (error) {
+      toast.error("Failed to upload media. Please try again.");
+      console.error("Media upload error:", error);
+    }
+  }, [content, tags, mediaFiles, profile, createPostMutation, navigate]);
 
   const getUserDisplayInfo = () => {
     if (!profile) return { name: "Loading...", username: "@loading", avatar: "" };
