@@ -182,7 +182,7 @@ export const useCreatePost = () => {
       title?: string;
       content: string;
       media_urls?: string[];
-      media_type?: string;
+      media_types?: string[];
       tags?: string[];
     }) => {
       const { data: { user } } = await supabase.auth.getUser();

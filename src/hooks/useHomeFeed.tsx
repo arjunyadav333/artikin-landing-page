@@ -84,13 +84,13 @@ export const useHomeFeed = (limit = 20) => {
     }
 
     // Transform data to match interface
-    return posts.map(post => ({
+    return posts.map((post: any) => ({
       id: post.id,
       user_id: post.user_id,
       title: post.title,
       content: post.content,
       media_urls: post.media_urls,
-      media_types: post.media_urls ? post.media_urls.map(() => 'image') : [], // Default to image type
+      media_types: post.media_types || (post.media_urls ? post.media_urls.map(() => 'image') : []),
       tags: post.tags,
       visibility: 'public',
       likes_count: post.likes_count || 0,

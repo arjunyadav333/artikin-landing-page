@@ -74,13 +74,18 @@ const Create = () => {
   const handleSubmit = useCallback(async () => {
     if (!content.trim()) return;
 
+    // Build media_types array corresponding to media_urls
+    const mediaTypes = mediaFiles.map(file => 
+      file.type.startsWith('video/') ? 'video' : 'image'
+    );
+
     // For now, we'll create the post without media upload
     // In a real app, you'd upload files to Supabase Storage first
     const postData = {
       content: content.trim(),
       tags: tags.length > 0 ? tags : undefined,
       media_urls: mediaPreview.length > 0 ? mediaPreview : undefined,
-      media_type: mediaFiles.length > 0 ? 'image' : 'text'
+      media_types: mediaTypes.length > 0 ? mediaTypes : undefined
     };
 
     createPostMutation.mutate(postData, {
