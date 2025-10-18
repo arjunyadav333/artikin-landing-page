@@ -376,14 +376,12 @@ END:VCARD`;
                 onClick={() => {
                   if (isOwnProfile) {
                     navigate('/connections?tab=followers');
+                  } else {
+                    navigate(`/connections?user=${profile.username}&tab=followers`);
                   }
                 }}
                 type="button"
-                className={`text-center ${
-                  isOwnProfile 
-                    ? 'cursor-pointer hover:bg-gray-50 rounded-lg p-2 -m-2 transition-colors' 
-                    : 'cursor-default pointer-events-none'
-                }`}
+                className="text-center cursor-pointer hover:bg-gray-50 rounded-lg p-2 -m-2 transition-colors"
               >
                 <div className="text-xl font-bold text-gray-900">{followers.length}</div>
                 <div className="text-sm text-gray-500">Followers</div>
@@ -392,14 +390,12 @@ END:VCARD`;
                 onClick={() => {
                   if (isOwnProfile) {
                     navigate('/connections?tab=following');
+                  } else {
+                    navigate(`/connections?user=${profile.username}&tab=following`);
                   }
                 }}
                 type="button"
-                className={`text-center ${
-                  isOwnProfile 
-                    ? 'cursor-pointer hover:bg-gray-50 rounded-lg p-2 -m-2 transition-colors' 
-                    : 'cursor-default pointer-events-none'
-                }`}
+                className="text-center cursor-pointer hover:bg-gray-50 rounded-lg p-2 -m-2 transition-colors"
               >
                 <div className="text-xl font-bold text-gray-900">{following.length}</div>
                 <div className="text-sm text-gray-500">Following</div>

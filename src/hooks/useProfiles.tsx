@@ -51,6 +51,22 @@ export const useProfile = (userId?: string) => {
   });
 };
 
+export const useProfileByUsername = (username?: string) => {
+  return useQuery({
+    queryKey: ['profile', 'username', username],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .rpc('get_profile_by_username', { username_param: username! });
+      
+      if (error) throw error;
+      return data?.[0] as Profile;
+    },
+    enabled: !!username,
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 30 * 60 * 1000, // 30 minutes cache time
+  });
+};
+
 export const useCurrentProfile = () => {
   return useQuery({
     queryKey: ['currentProfile'],

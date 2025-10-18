@@ -8,10 +8,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Search, Filter, ChevronDown, UserPlus } from "lucide-react";
+import { Search, Filter, ChevronDown, UserPlus, ArrowLeft } from "lucide-react";
 import { UserRow } from "@/components/connections/user-row";
 import { useConnections } from "@/hooks/useConnections";
-import { useCurrentProfile } from "@/hooks/useProfiles";
+import { useCurrentProfile, useProfileByUsername } from "@/hooks/useProfiles";
 import { Skeleton } from "@/components/ui/skeleton";
 
 type SortOption = 'newest' | 'alphabetical' | 'relevant';
@@ -23,6 +23,9 @@ const Connections = () => {
   const [sortBy, setSortBy] = useState<SortOption>('newest');
   const [activeTab, setActiveTab] = useState(searchParams.get('tab') === 'followers' ? 'followers' : 'following');
 
+  // Get username from URL parameter if viewing another user's connections
+  const usernameParam = searchParams.get('user');
+  
   // Update active tab when URL parameter changes
   useEffect(() => {
     const tab = searchParams.get('tab');
@@ -32,12 +35,18 @@ const Connections = () => {
   }, [searchParams]);
 
   const { data: currentProfile } = useCurrentProfile();
+  const { data: viewedProfile, isLoading: profileLoading } = useProfileByUsername(usernameParam || undefined);
+  
+  // Determine which user's connections to show
+  const targetUserId = usernameParam ? viewedProfile?.user_id : currentProfile?.user_id;
+  const isOwnProfile = !usernameParam;
+  
   const { data: following = [], isLoading: followingLoading } = useConnections(
-    currentProfile?.user_id, 
+    targetUserId, 
     'following'
   );
   const { data: followers = [], isLoading: followersLoading } = useConnections(
-    currentProfile?.user_id, 
+    targetUserId, 
     'followers'
   );
 
@@ -105,9 +114,25 @@ const Connections = () => {
       <div className="w-full px-4 py-4">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-xl font-bold text-foreground mb-1">My Connections</h1>
+          {!isOwnProfile && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate(`/profile/${usernameParam}`)}
+              className="mb-3 -ml-2"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Profile
+            </Button>
+          )}
+          <h1 className="text-xl font-bold text-foreground mb-1">
+            {isOwnProfile ? 'My Connections' : `${viewedProfile?.display_name || usernameParam}'s Connections`}
+          </h1>
           <p className="text-muted-foreground text-sm">
-            Manage your followers and people you follow
+            {isOwnProfile 
+              ? 'Manage your followers and people you follow'
+              : `View ${viewedProfile?.display_name || usernameParam}'s connections`
+            }
           </p>
         </div>
 
@@ -145,17 +170,19 @@ const Connections = () => {
           </div>
         </div>
 
-        {/* Discover People Button */}
-        <div className="mb-4">
-          <Button
-            onClick={() => navigate('/connections/discover')}
-            variant="outline"
-            className="w-full h-10 rounded-xl flex items-center justify-center gap-2"
-          >
-            <UserPlus className="h-4 w-4" />
-            <span>Discover New People</span>
-          </Button>
-        </div>
+        {/* Discover People Button - only show on own profile */}
+        {isOwnProfile && (
+          <div className="mb-4">
+            <Button
+              onClick={() => navigate('/connections/discover')}
+              variant="outline"
+              className="w-full h-10 rounded-xl flex items-center justify-center gap-2"
+            >
+              <UserPlus className="h-4 w-4" />
+              <span>Discover New People</span>
+            </Button>
+          </div>
+        )}
 
         {/* Following and Followers Buttons */}
         <div className="mb-4">
@@ -181,7 +208,7 @@ const Connections = () => {
         <div>
           {activeTab === 'following' && (
             <div>
-              {followingLoading ? (
+              {(followingLoading || profileLoading) ? (
                 <div className="divide-y divide-border">
                   {Array.from({ length: 8 }).map((_, i) => (
                     <UserRowSkeleton key={i} />
@@ -216,7 +243,7 @@ const Connections = () => {
 
           {activeTab === 'followers' && (
             <div>
-              {followersLoading ? (
+              {(followersLoading || profileLoading) ? (
                 <div className="divide-y divide-border">
                   {Array.from({ length: 8 }).map((_, i) => (
                     <UserRowSkeleton key={i} />
