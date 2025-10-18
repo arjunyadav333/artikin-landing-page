@@ -1,7 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { ChevronLeft, ChevronRight, Play, X, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { useToast } from '@/hooks/use-toast';
 
 interface MediaCarouselProps {
@@ -13,46 +12,62 @@ interface MediaCarouselProps {
 export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [isNavigating, setIsNavigating] = useState(false);
-  const [isImageLoading, setIsImageLoading] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [containerHeight, setContainerHeight] = useState<number | null>(null);
+  const [touchStart, setTouchStart] = useState(0);
+  const [touchEnd, setTouchEnd] = useState(0);
   const { toast } = useToast();
 
-  const nextImage = () => {
-    if (isNavigating || mediaUrls.length <= 1) return;
-    setIsNavigating(true);
-    setIsImageLoading(true);
-    setCurrentIndex((prev) => (prev + 1) % mediaUrls.length);
-  };
-
-  const prevImage = () => {
-    if (isNavigating || mediaUrls.length <= 1) return;
-    setIsNavigating(true);
-    setIsImageLoading(true);
-    setCurrentIndex((prev) => (prev - 1 + mediaUrls.length) % mediaUrls.length);
-  };
-
-  const handleImageLoad = () => {
-    setIsImageLoading(false);
-    setIsNavigating(false);
-  };
-
-  const handleImageError = () => {
-    setIsImageLoading(false);
-    setIsNavigating(false);
-    toast({ title: "Failed to load image", variant: "destructive" });
-  };
-
-  // Safety timeout to reset navigation lock
+  // Preload adjacent images for smooth transitions
   useEffect(() => {
-    if (isNavigating) {
-      const timeout = setTimeout(() => {
-        setIsNavigating(false);
-        setIsImageLoading(false);
-      }, 3000);
-      
-      return () => clearTimeout(timeout);
+    const preloadImage = (index: number) => {
+      if (index >= 0 && index < mediaUrls.length) {
+        const mediaType = getMediaType(index);
+        if (!mediaType.startsWith('video/')) {
+          const img = new Image();
+          img.src = mediaUrls[index];
+        }
+      }
+    };
+    
+    // Preload next and previous images
+    preloadImage(currentIndex + 1);
+    preloadImage(currentIndex - 1);
+  }, [currentIndex, mediaUrls]);
+
+  // Navigation with transition lock
+  const nextImage = useCallback(() => {
+    if (isTransitioning || mediaUrls.length <= 1) return;
+    setIsTransitioning(true);
+    setCurrentIndex((prev) => (prev + 1) % mediaUrls.length);
+    setTimeout(() => setIsTransitioning(false), 300);
+  }, [isTransitioning, mediaUrls.length]);
+
+  const prevImage = useCallback(() => {
+    if (isTransitioning || mediaUrls.length <= 1) return;
+    setIsTransitioning(true);
+    setCurrentIndex((prev) => (prev - 1 + mediaUrls.length) % mediaUrls.length);
+    setTimeout(() => setIsTransitioning(false), 300);
+  }, [isTransitioning, mediaUrls.length]);
+
+  // Handle touch gestures for mobile swipe
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStart(e.touches[0].clientX);
+    setTouchEnd(e.touches[0].clientX);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.touches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    if (touchStart - touchEnd > 75) {
+      nextImage();
     }
-  }, [isNavigating, currentIndex]);
+    if (touchStart - touchEnd < -75) {
+      prevImage();
+    }
+  };
 
   const openFullscreen = () => {
     setIsFullscreen(true);
@@ -76,18 +91,25 @@ export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselPr
       window.URL.revokeObjectURL(downloadUrl);
     } catch (error) {
       console.error('Download failed:', error);
+      toast({ title: "Download failed", variant: "destructive" });
     }
   };
 
-  const renderMedia = (url: string, index: number, isActive: boolean, isViewer: boolean = false) => {
+  const handleFirstImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    if (!containerHeight) {
+      setContainerHeight(e.currentTarget.height);
+    }
+  };
+
+  const renderMedia = useCallback((url: string, index: number, isActive: boolean, isViewer: boolean = false) => {
     const mediaType = getMediaType(index);
     
     if (mediaType.startsWith('video/')) {
       return (
-        <figure className="media media--video w-full">
+        <figure className="media media--video w-full h-full flex items-center justify-center">
           <video
             src={url}
-            className={`media__video w-full ${isViewer ? 'max-h-[96vh] object-contain' : 'max-h-[70vh] object-contain'}`}
+            className={`media__video w-full ${isViewer ? 'max-h-[96vh]' : 'max-h-[70vh]'} object-contain`}
             controls={isActive}
             preload="metadata"
             muted
@@ -105,36 +127,51 @@ export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselPr
     }
 
     return (
-      <figure className="media media--image w-full">
+      <figure className="media media--image w-full h-full flex items-center justify-center">
         <img
           src={url}
           alt={`Media ${index + 1}`}
-          className={`media__img w-full ${isViewer ? 'max-h-[96vh] object-contain' : 'max-h-[70vh] object-contain'} ${!isViewer ? 'cursor-pointer' : ''}`}
+          className={`media__img w-full ${isViewer ? 'max-h-[96vh]' : 'max-h-[70vh]'} object-contain ${!isViewer ? 'cursor-pointer' : ''}`}
           onClick={!isViewer ? openFullscreen : undefined}
-          loading="eager"
-          onLoad={handleImageLoad}
-          onError={handleImageError}
+          loading={index === 0 ? "eager" : "lazy"}
+          onLoad={index === 0 ? handleFirstImageLoad : undefined}
           data-media-index={index}
           style={{ background: 'var(--media-bg, #f8f9fa)' }}
         />
       </figure>
     );
-  };
+  }, [containerHeight]);
 
   if (mediaUrls.length === 0) return null;
 
   return (
     <div className="post__media w-full" role="region" aria-label="Post media">
-      <div className="relative rounded-lg overflow-hidden bg-muted">
-        {/* Loading overlay */}
-        {isImageLoading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/20 z-10">
-            <LoadingSpinner size="lg" />
+      <div 
+        className="relative rounded-lg overflow-hidden bg-muted"
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        style={{ minHeight: containerHeight ? `${containerHeight}px` : 'auto' }}
+      >
+        {/* Sliding container with transform-based animation */}
+        <div className="relative overflow-hidden">
+          <div 
+            className="flex transition-transform duration-300 ease-out"
+            style={{ 
+              transform: `translateX(-${currentIndex * 100}%)`,
+              width: `${mediaUrls.length * 100}%`
+            }}
+          >
+            {mediaUrls.map((url, index) => (
+              <div 
+                key={`${postId}-${index}`}
+                className="flex-shrink-0 flex items-center justify-center"
+                style={{ width: `${100 / mediaUrls.length}%` }}
+              >
+                {renderMedia(url, index, index === currentIndex)}
+              </div>
+            ))}
           </div>
-        )}
-        
-        <div className={isImageLoading ? 'opacity-50 transition-opacity' : 'transition-opacity'}>
-          {renderMedia(mediaUrls[currentIndex], currentIndex, true)}
         </div>
 
         {mediaUrls.length > 1 && (
@@ -142,11 +179,9 @@ export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselPr
             <Button
               variant="secondary"
               size="sm"
-              className={`absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white border-0 !transition-none !duration-0 active:scale-100 ${
-                isNavigating ? 'opacity-50 pointer-events-none' : ''
-              }`}
+              className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white border-0 transition-opacity z-10"
               onClick={prevImage}
-              disabled={isNavigating}
+              disabled={isTransitioning}
               aria-label="Previous media"
             >
               <ChevronLeft className="h-4 w-4" />
@@ -155,31 +190,29 @@ export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselPr
             <Button
               variant="secondary"
               size="sm"
-              className={`absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white border-0 !transition-none !duration-0 active:scale-100 ${
-                isNavigating ? 'opacity-50 pointer-events-none' : ''
-              }`}
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white border-0 transition-opacity z-10"
               onClick={nextImage}
-              disabled={isNavigating}
+              disabled={isTransitioning}
               aria-label="Next media"
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
 
-            <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-1">
+            <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-1 z-10">
               {mediaUrls.map((_, index) => (
                 <button
-                  key={index}
-                  className={`w-2 h-2 rounded-full transition-all ${
-                    index === currentIndex ? 'bg-white' : 'bg-white/50'
-                  } ${isNavigating ? 'pointer-events-none opacity-50' : ''}`}
+                  key={`dot-${index}`}
+                  className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                    index === currentIndex ? 'bg-white w-4' : 'bg-white/50'
+                  }`}
                   onClick={() => {
-                    if (!isNavigating && index !== currentIndex) {
-                      setIsNavigating(true);
-                      setIsImageLoading(true);
+                    if (!isTransitioning && index !== currentIndex) {
+                      setIsTransitioning(true);
                       setCurrentIndex(index);
+                      setTimeout(() => setIsTransitioning(false), 300);
                     }
                   }}
-                  disabled={isNavigating}
+                  disabled={isTransitioning}
                   aria-label={`Go to media ${index + 1}`}
                 />
               ))}
@@ -197,25 +230,38 @@ export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselPr
       {/* Fullscreen Viewer */}
       {isFullscreen && (
         <div 
-          className="viewer fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50"
+          className="viewer fixed inset-0 bg-black bg-opacity-95 flex items-center justify-center z-50"
           onClick={(e) => {
             if (e.target === e.currentTarget) setIsFullscreen(false);
           }}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
         >
-          <div className="relative max-w-[96vw] max-h-[96vh] flex items-center justify-center">
-            {/* Loading overlay for fullscreen */}
-            {isImageLoading && (
-              <div className="absolute inset-0 flex items-center justify-center bg-black/20 z-10">
-                <LoadingSpinner size="xl" />
+          <div className="relative max-w-[96vw] max-h-[96vh] w-full flex items-center justify-center">
+            {/* Sliding container for fullscreen */}
+            <div className="relative overflow-hidden w-full">
+              <div 
+                className="flex transition-transform duration-300 ease-out"
+                style={{ 
+                  transform: `translateX(-${currentIndex * 100}%)`,
+                  width: `${mediaUrls.length * 100}%`
+                }}
+              >
+                {mediaUrls.map((url, index) => (
+                  <div 
+                    key={`fullscreen-${postId}-${index}`}
+                    className="flex-shrink-0 flex items-center justify-center"
+                    style={{ width: `${100 / mediaUrls.length}%` }}
+                  >
+                    {renderMedia(url, index, index === currentIndex, true)}
+                  </div>
+                ))}
               </div>
-            )}
-            
-            <div className={isImageLoading ? 'opacity-50 transition-opacity' : 'transition-opacity'}>
-              {renderMedia(mediaUrls[currentIndex], currentIndex, true, true)}
             </div>
             
             {/* Controls */}
-            <div className="absolute top-4 right-4 flex gap-2">
+            <div className="absolute top-4 right-4 flex gap-2 z-20">
               <Button
                 variant="secondary"
                 size="sm"
@@ -242,11 +288,9 @@ export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselPr
                 <Button
                   variant="secondary"
                   size="sm"
-                  className={`absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white border-0 !transition-none !duration-0 active:scale-100 ${
-                    isNavigating ? 'opacity-50 pointer-events-none' : ''
-                  }`}
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white border-0 transition-opacity z-20"
                   onClick={prevImage}
-                  disabled={isNavigating}
+                  disabled={isTransitioning}
                   aria-label="Previous media"
                 >
                   <ChevronLeft className="h-5 w-5" />
@@ -255,15 +299,33 @@ export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselPr
                 <Button
                   variant="secondary"
                   size="sm"
-                  className={`absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white border-0 !transition-none !duration-0 active:scale-100 ${
-                    isNavigating ? 'opacity-50 pointer-events-none' : ''
-                  }`}
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white border-0 transition-opacity z-20"
                   onClick={nextImage}
-                  disabled={isNavigating}
+                  disabled={isTransitioning}
                   aria-label="Next media"
                 >
                   <ChevronRight className="h-5 w-5" />
                 </Button>
+
+                <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-1 z-20">
+                  {mediaUrls.map((_, index) => (
+                    <button
+                      key={`fullscreen-dot-${index}`}
+                      className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                        index === currentIndex ? 'bg-white w-4' : 'bg-white/50'
+                      }`}
+                      onClick={() => {
+                        if (!isTransitioning && index !== currentIndex) {
+                          setIsTransitioning(true);
+                          setCurrentIndex(index);
+                          setTimeout(() => setIsTransitioning(false), 300);
+                        }
+                      }}
+                      disabled={isTransitioning}
+                      aria-label={`Go to media ${index + 1}`}
+                    />
+                  ))}
+                </div>
               </>
             )}
           </div>
