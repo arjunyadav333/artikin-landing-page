@@ -373,17 +373,33 @@ END:VCARD`;
                 <div className="text-sm text-gray-500">Posts</div>
               </div>
               <button 
-                onClick={() => isOwnProfile && navigate('/connections?tab=followers')}
-                disabled={!isOwnProfile}
-                className={`text-center ${isOwnProfile ? 'cursor-pointer hover:bg-gray-50 rounded-lg p-2 -m-2 transition-colors' : 'cursor-default'}`}
+                onClick={() => {
+                  if (isOwnProfile) {
+                    navigate('/connections?tab=followers');
+                  }
+                }}
+                type="button"
+                className={`text-center ${
+                  isOwnProfile 
+                    ? 'cursor-pointer hover:bg-gray-50 rounded-lg p-2 -m-2 transition-colors' 
+                    : 'cursor-default pointer-events-none'
+                }`}
               >
                 <div className="text-xl font-bold text-gray-900">{followers.length}</div>
                 <div className="text-sm text-gray-500">Followers</div>
               </button>
               <button 
-                onClick={() => isOwnProfile && navigate('/connections?tab=following')}
-                disabled={!isOwnProfile}
-                className={`text-center ${isOwnProfile ? 'cursor-pointer hover:bg-gray-50 rounded-lg p-2 -m-2 transition-colors' : 'cursor-default'}`}
+                onClick={() => {
+                  if (isOwnProfile) {
+                    navigate('/connections?tab=following');
+                  }
+                }}
+                type="button"
+                className={`text-center ${
+                  isOwnProfile 
+                    ? 'cursor-pointer hover:bg-gray-50 rounded-lg p-2 -m-2 transition-colors' 
+                    : 'cursor-default pointer-events-none'
+                }`}
               >
                 <div className="text-xl font-bold text-gray-900">{following.length}</div>
                 <div className="text-sm text-gray-500">Following</div>
