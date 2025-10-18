@@ -59,15 +59,47 @@ const ConversationPage = () => {
   // Find current conversation
   const conversation = conversations.find(c => c.id === chatId);
 
-  // Auto-scroll to bottom when new messages arrive or keyboard opens/closes
+  // Merge server messages and optimistic messages for display
+  const allMessages = [
+    ...messages,
+    ...optimisticMessages.map(opt => ({
+      ...opt,
+      sender: user ? {
+        user_id: user.id,
+        username: user.user_metadata?.username,
+        display_name: user.user_metadata?.display_name || user.email,
+        avatar_url: user.user_metadata?.avatar_url
+      } : undefined,
+      attachments: opt.attachments || [],
+      receipts: []
+    }))
+  ].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+
+  // Auto-scroll to bottom instantly when messages change
   useEffect(() => {
-    const scrollToBottom = () => {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
-    };
-    
-    // Scroll when messages change
-    scrollToBottom();
-  }, [messages, optimisticMessages]);
+    if (allMessages.length > 0) {
+      requestAnimationFrame(() => {
+        messagesEndRef.current?.scrollIntoView({ 
+          behavior: 'instant',
+          block: 'end' 
+        });
+      });
+    }
+  }, [allMessages.length]);
+
+  // Initial scroll to bottom when conversation first loads
+  useEffect(() => {
+    if (chatId && allMessages.length > 0) {
+      const timeoutId = setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ 
+          behavior: 'instant',
+          block: 'end' 
+        });
+      }, 50);
+      
+      return () => clearTimeout(timeoutId);
+    }
+  }, [chatId, allMessages.length]);
 
   // Handle keyboard visibility changes
   useEffect(() => {
@@ -150,22 +182,6 @@ const ConversationPage = () => {
     sendTypingStatus();
   }, [updateDraft, sendTypingStatus]);
 
-  // Merge server messages and optimistic messages for display
-  const allMessages = [
-    ...messages,
-    ...optimisticMessages.map(opt => ({
-      ...opt,
-      sender: user ? {
-        user_id: user.id,
-        username: user.user_metadata?.username,
-        display_name: user.user_metadata?.display_name || user.email,
-        avatar_url: user.user_metadata?.avatar_url
-      } : undefined,
-      attachments: opt.attachments || [],
-      receipts: []
-    }))
-  ].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
-
   const getInitials = (name?: string) => {
     if (!name) return '?';
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
@@ -204,23 +220,28 @@ const ConversationPage = () => {
               >
                 <ArrowLeft className="h-4 w-4" />
               </Button>
-              <Avatar className="h-10 w-10">
-                <AvatarImage 
-                  src={conversation.other_participant?.avatar_url} 
-                  alt={conversation.other_participant?.display_name} 
-                />
-                <AvatarFallback className="bg-primary text-primary-foreground">
-                  {getInitials(conversation.other_participant?.display_name)}
-                </AvatarFallback>
-              </Avatar>
-              <div>
-                <p className="font-semibold">
-                  {conversation.other_participant?.display_name || 'Unknown User'}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  {typingUsers.length > 0 ? 'typing...' : `@${conversation.other_participant?.username || 'unknown'}`}
-                </p>
-              </div>
+              <button 
+                onClick={() => navigate(`/profile/${conversation.other_participant?.username}`)}
+                className="flex items-center space-x-3 hover:opacity-80 transition-opacity cursor-pointer"
+              >
+                <Avatar className="h-10 w-10 ring-2 ring-transparent hover:ring-primary/20 transition-all">
+                  <AvatarImage 
+                    src={conversation.other_participant?.avatar_url} 
+                    alt={conversation.other_participant?.display_name} 
+                  />
+                  <AvatarFallback className="bg-primary text-primary-foreground">
+                    {getInitials(conversation.other_participant?.display_name)}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="font-semibold hover:underline cursor-pointer">
+                    {conversation.other_participant?.display_name || 'Unknown User'}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {typingUsers.length > 0 ? 'typing...' : `@${conversation.other_participant?.username || 'unknown'}`}
+                  </p>
+                </div>
+              </button>
             </div>
 
             <ConversationActions
