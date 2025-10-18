@@ -385,20 +385,71 @@ export const useSendEnhancedMessage = () => {
     }) => {
       if (!user) throw new Error('User not authenticated');
 
+      console.log('🔵 Attempting to send message:', {
+        conversationId,
+        senderId: user.id,
+        userRole: user.user_metadata?.role,
+        messageType,
+        contentLength: content?.length
+      });
+
+      // Verify conversation exists and user is a participant
+      const { data: conv, error: convError } = await supabase
+        .from('conversations')
+        .select('participant_a, participant_b')
+        .eq('id', conversationId)
+        .single();
+
+      if (convError || !conv) {
+        console.error('❌ Conversation not found:', convError);
+        throw new Error('Conversation not found. Please refresh and try again.');
+      }
+
+      // Check if user is a participant
+      const isParticipant = conv.participant_a === user.id || conv.participant_b === user.id;
+      
+      console.log('🔍 Conversation check:', {
+        participant_a: conv.participant_a,
+        participant_b: conv.participant_b,
+        currentUser: user.id,
+        isParticipant
+      });
+
+      if (!isParticipant) {
+        console.error('❌ User is not a participant in this conversation');
+        throw new Error('You are not authorized to send messages in this conversation.');
+      }
+
+      const clientId = `client_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
+      console.log('📤 Sending message with params:', {
+        conversation_id_param: conversationId,
+        sender_id_param: user.id,
+        client_id_param: clientId,
+        kind_param: messageType,
+        body_length: content?.length
+      });
+
       // Use RPC for faster message creation
       const { data, error } = await supabase.rpc('create_message_with_client_id', {
         conversation_id_param: conversationId,
         sender_id_param: user.id,
-        client_id_param: `client_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        client_id_param: clientId,
         kind_param: messageType,
         body_param: content
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ RPC Error:', error);
+        throw error;
+      }
+      
       if (!data || data.length === 0) {
+        console.error('❌ No data returned from RPC');
         throw new Error('Failed to create message');
       }
 
+      console.log('✅ Message sent successfully:', data[0]);
       return data[0];
     },
     onSuccess: (data, variables) => {
