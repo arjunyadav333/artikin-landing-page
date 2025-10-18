@@ -453,47 +453,24 @@ export const useSendEnhancedMessage = () => {
       return data[0];
     },
     onSuccess: async (data, variables) => {
-      // Fetch the actual user profile for accurate sender info
-      const { data: senderProfile } = await supabase
-        .from('profiles')
-        .select('user_id, username, display_name, avatar_url')
-        .eq('user_id', user!.id)
-        .single();
-
-      console.log('✅ Fetched sender profile:', senderProfile);
+      console.log('✅ Message sent, preparing to update UI...', data);
       
-      // Optimistically add message to the messages query
-      const queryKey = ['enhanced-messages', variables.conversationId];
-      queryClient.setQueryData(queryKey, (oldData: any) => {
-        if (!oldData) return oldData;
-        
-        const newMessage = {
-          id: data.id,
-          conversation_id: variables.conversationId,
-          sender_id: user!.id,
-          kind: variables.messageType || 'text',
-          body: variables.content,
-          media_url: variables.mediaUrl,
-          link_preview: variables.linkPreview,
-          replied_to_message_id: variables.replyToMessageId,
-          created_at: data.created_at || new Date().toISOString(),
-          updated_at: data.created_at || new Date().toISOString(),
-          content: variables.content,
-          sender: senderProfile || {
-            user_id: user!.id,
-            username: 'You',
-            display_name: 'You',
-            avatar_url: null
-          },
-          reactions: []
-        };
-        
-        return [...oldData, newMessage];
-      });
-
-      // Force refetch to ensure message appears and conversation list updates
-      queryClient.refetchQueries({ queryKey: ['enhanced-messages', variables.conversationId] });
-      queryClient.refetchQueries({ queryKey: ['enhanced-conversations'] });
+      // Wait briefly for database transaction to complete
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // Refetch to get fresh data from database
+      await Promise.all([
+        queryClient.refetchQueries({ 
+          queryKey: ['enhanced-messages', variables.conversationId],
+          type: 'active' 
+        }),
+        queryClient.refetchQueries({ 
+          queryKey: ['enhanced-conversations'],
+          type: 'active'
+        })
+      ]);
+      
+      console.log('✅ UI updated successfully');
     },
     onError: (error: any) => {
       console.error('Message send error:', error);
