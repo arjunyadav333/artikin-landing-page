@@ -34,6 +34,7 @@ export function InstagramPost({ post }: InstagramPostProps) {
   const [showComments, setShowComments] = useState(false);
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
   const [isDoubleTapping, setIsDoubleTapping] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
   const lastTapRef = useRef<number>(0);
   
   const { user } = useAuth();
@@ -140,15 +141,17 @@ export function InstagramPost({ post }: InstagramPostProps) {
   };
 
   const nextMedia = () => {
-    if (post.media_urls && currentMediaIndex < post.media_urls.length - 1) {
-      setCurrentMediaIndex(currentMediaIndex + 1);
-    }
+    if (isNavigating || !post.media_urls || currentMediaIndex >= post.media_urls.length - 1) return;
+    setIsNavigating(true);
+    setCurrentMediaIndex(currentMediaIndex + 1);
+    setTimeout(() => setIsNavigating(false), 300);
   };
 
   const prevMedia = () => {
-    if (currentMediaIndex > 0) {
-      setCurrentMediaIndex(currentMediaIndex - 1);
-    }
+    if (isNavigating || currentMediaIndex <= 0) return;
+    setIsNavigating(true);
+    setCurrentMediaIndex(currentMediaIndex - 1);
+    setTimeout(() => setIsNavigating(false), 300);
   };
 
   return (
@@ -270,11 +273,14 @@ export function InstagramPost({ post }: InstagramPostProps) {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0 bg-black/50 hover:bg-black/70 text-white"
+                      className={`absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0 bg-black/50 hover:bg-black/70 text-white ${
+                        isNavigating ? 'opacity-50 pointer-events-none' : ''
+                      }`}
                       onClick={(e) => {
                         e.stopPropagation();
                         prevMedia();
                       }}
+                      disabled={isNavigating}
                     >
                       <ChevronLeft className="h-4 w-4" />
                     </Button>
@@ -284,11 +290,14 @@ export function InstagramPost({ post }: InstagramPostProps) {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0 bg-black/50 hover:bg-black/70 text-white"
+                      className={`absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0 bg-black/50 hover:bg-black/70 text-white ${
+                        isNavigating ? 'opacity-50 pointer-events-none' : ''
+                      }`}
                       onClick={(e) => {
                         e.stopPropagation();
                         nextMedia();
                       }}
+                      disabled={isNavigating}
                     >
                       <ChevronRight className="h-4 w-4" />
                     </Button>

@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Play, X, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { useToast } from '@/hooks/use-toast';
 
 interface MediaCarouselProps {
   mediaUrls: string[];
@@ -11,14 +13,46 @@ interface MediaCarouselProps {
 export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
+  const [isImageLoading, setIsImageLoading] = useState(false);
+  const { toast } = useToast();
 
   const nextImage = () => {
+    if (isNavigating || mediaUrls.length <= 1) return;
+    setIsNavigating(true);
+    setIsImageLoading(true);
     setCurrentIndex((prev) => (prev + 1) % mediaUrls.length);
   };
 
   const prevImage = () => {
+    if (isNavigating || mediaUrls.length <= 1) return;
+    setIsNavigating(true);
+    setIsImageLoading(true);
     setCurrentIndex((prev) => (prev - 1 + mediaUrls.length) % mediaUrls.length);
   };
+
+  const handleImageLoad = () => {
+    setIsImageLoading(false);
+    setIsNavigating(false);
+  };
+
+  const handleImageError = () => {
+    setIsImageLoading(false);
+    setIsNavigating(false);
+    toast({ title: "Failed to load image", variant: "destructive" });
+  };
+
+  // Safety timeout to reset navigation lock
+  useEffect(() => {
+    if (isNavigating) {
+      const timeout = setTimeout(() => {
+        setIsNavigating(false);
+        setIsImageLoading(false);
+      }, 3000);
+      
+      return () => clearTimeout(timeout);
+    }
+  }, [isNavigating, currentIndex]);
 
   const openFullscreen = () => {
     setIsFullscreen(true);
@@ -77,7 +111,9 @@ export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselPr
           alt={`Media ${index + 1}`}
           className={`media__img w-full ${isViewer ? 'max-h-[96vh] object-contain' : 'max-h-[70vh] object-contain'} ${!isViewer ? 'cursor-pointer' : ''}`}
           onClick={!isViewer ? openFullscreen : undefined}
-          loading="lazy"
+          loading="eager"
+          onLoad={handleImageLoad}
+          onError={handleImageError}
           data-media-index={index}
           style={{ background: 'var(--media-bg, #f8f9fa)' }}
         />
@@ -89,16 +125,28 @@ export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselPr
 
   return (
     <div className="post__media w-full" role="region" aria-label="Post media">
-      <div key={currentIndex} className="relative rounded-lg overflow-hidden bg-muted">
-        {renderMedia(mediaUrls[currentIndex], currentIndex, true)}
+      <div className="relative rounded-lg overflow-hidden bg-muted">
+        {/* Loading overlay */}
+        {isImageLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/20 z-10">
+            <LoadingSpinner size="lg" />
+          </div>
+        )}
+        
+        <div className={isImageLoading ? 'opacity-50 transition-opacity' : 'transition-opacity'}>
+          {renderMedia(mediaUrls[currentIndex], currentIndex, true)}
+        </div>
 
         {mediaUrls.length > 1 && (
           <>
             <Button
               variant="secondary"
               size="sm"
-              className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white border-0 !transition-none !duration-0 active:scale-100"
+              className={`absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white border-0 !transition-none !duration-0 active:scale-100 ${
+                isNavigating ? 'opacity-50 pointer-events-none' : ''
+              }`}
               onClick={prevImage}
+              disabled={isNavigating}
               aria-label="Previous media"
             >
               <ChevronLeft className="h-4 w-4" />
@@ -107,8 +155,11 @@ export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselPr
             <Button
               variant="secondary"
               size="sm"
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white border-0 !transition-none !duration-0 active:scale-100"
+              className={`absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white border-0 !transition-none !duration-0 active:scale-100 ${
+                isNavigating ? 'opacity-50 pointer-events-none' : ''
+              }`}
               onClick={nextImage}
+              disabled={isNavigating}
               aria-label="Next media"
             >
               <ChevronRight className="h-4 w-4" />
@@ -144,8 +195,17 @@ export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselPr
             if (e.target === e.currentTarget) setIsFullscreen(false);
           }}
         >
-          <div key={currentIndex} className="relative max-w-[96vw] max-h-[96vh] flex items-center justify-center">
-            {renderMedia(mediaUrls[currentIndex], currentIndex, true, true)}
+          <div className="relative max-w-[96vw] max-h-[96vh] flex items-center justify-center">
+            {/* Loading overlay for fullscreen */}
+            {isImageLoading && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/20 z-10">
+                <LoadingSpinner size="xl" />
+              </div>
+            )}
+            
+            <div className={isImageLoading ? 'opacity-50 transition-opacity' : 'transition-opacity'}>
+              {renderMedia(mediaUrls[currentIndex], currentIndex, true, true)}
+            </div>
             
             {/* Controls */}
             <div className="absolute top-4 right-4 flex gap-2">
@@ -175,8 +235,11 @@ export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselPr
                 <Button
                   variant="secondary"
                   size="sm"
-                  className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white border-0 !transition-none !duration-0 active:scale-100"
+                  className={`absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white border-0 !transition-none !duration-0 active:scale-100 ${
+                    isNavigating ? 'opacity-50 pointer-events-none' : ''
+                  }`}
                   onClick={prevImage}
+                  disabled={isNavigating}
                   aria-label="Previous media"
                 >
                   <ChevronLeft className="h-5 w-5" />
@@ -185,8 +248,11 @@ export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselPr
                 <Button
                   variant="secondary"
                   size="sm"
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white border-0 !transition-none !duration-0 active:scale-100"
+                  className={`absolute right-4 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white border-0 !transition-none !duration-0 active:scale-100 ${
+                    isNavigating ? 'opacity-50 pointer-events-none' : ''
+                  }`}
                   onClick={nextImage}
+                  disabled={isNavigating}
                   aria-label="Next media"
                 >
                   <ChevronRight className="h-5 w-5" />

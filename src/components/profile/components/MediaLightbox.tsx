@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight, X, Trash2 } from 'lucide-react';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { useToast } from '@/hooks/use-toast';
 
 interface MediaItem {
   id: string;
@@ -26,6 +28,9 @@ export function MediaLightbox({
   onDelete 
 }: MediaLightboxProps) {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
+  const [isNavigating, setIsNavigating] = useState(false);
+  const [isImageLoading, setIsImageLoading] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     setCurrentIndex(initialIndex);
@@ -37,8 +42,8 @@ export function MediaLightbox({
       
       const handleKeyDown = (e: KeyboardEvent) => {
         if (e.key === 'Escape') onClose();
-        if (e.key === 'ArrowLeft') goToPrevious();
-        if (e.key === 'ArrowRight') goToNext();
+        if (e.key === 'ArrowLeft' && !isNavigating) goToPrevious();
+        if (e.key === 'ArrowRight' && !isNavigating) goToNext();
       };
       
       document.addEventListener('keydown', handleKeyDown);
@@ -47,14 +52,43 @@ export function MediaLightbox({
         document.removeEventListener('keydown', handleKeyDown);
       };
     }
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, isNavigating]);
+
+  // Safety timeout to reset navigation lock
+  useEffect(() => {
+    if (isNavigating) {
+      const timeout = setTimeout(() => {
+        setIsNavigating(false);
+        setIsImageLoading(false);
+      }, 3000);
+      
+      return () => clearTimeout(timeout);
+    }
+  }, [isNavigating, currentIndex]);
 
   const goToNext = () => {
+    if (isNavigating || media.length <= 1) return;
+    setIsNavigating(true);
+    setIsImageLoading(true);
     setCurrentIndex((prev) => (prev + 1) % media.length);
   };
 
   const goToPrevious = () => {
+    if (isNavigating || media.length <= 1) return;
+    setIsNavigating(true);
+    setIsImageLoading(true);
     setCurrentIndex((prev) => (prev - 1 + media.length) % media.length);
+  };
+
+  const handleImageLoad = () => {
+    setIsImageLoading(false);
+    setIsNavigating(false);
+  };
+
+  const handleImageError = () => {
+    setIsImageLoading(false);
+    setIsNavigating(false);
+    toast({ title: "Failed to load image", variant: "destructive" });
   };
 
   const handleDelete = () => {
@@ -99,7 +133,10 @@ export function MediaLightbox({
         <>
           <button
             onClick={goToPrevious}
-            className="absolute left-4 text-white hover:text-gray-300 transition-colors z-10"
+            disabled={isNavigating}
+            className={`absolute left-4 text-white hover:text-gray-300 transition-colors z-10 ${
+              isNavigating ? 'opacity-50 pointer-events-none' : ''
+            }`}
             aria-label="Previous"
           >
             <ChevronLeft className="h-12 w-12" />
@@ -107,7 +144,10 @@ export function MediaLightbox({
           
           <button
             onClick={goToNext}
-            className="absolute right-16 text-white hover:text-gray-300 transition-colors z-10"
+            disabled={isNavigating}
+            className={`absolute right-16 text-white hover:text-gray-300 transition-colors z-10 ${
+              isNavigating ? 'opacity-50 pointer-events-none' : ''
+            }`}
             aria-label="Next"
           >
             <ChevronRight className="h-12 w-12" />
@@ -117,10 +157,20 @@ export function MediaLightbox({
 
       {/* Main Image */}
       <div className="relative max-w-4xl max-h-[90vh] mx-4">
+        {/* Loading overlay */}
+        {isImageLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/20 z-10">
+            <LoadingSpinner size="xl" />
+          </div>
+        )}
+        
         <img
           src={currentMedia.url}
           alt={currentMedia.caption || `Image ${currentIndex + 1}`}
-          className="max-w-full max-h-full object-contain"
+          className={`max-w-full max-h-full object-contain ${isImageLoading ? 'opacity-50' : ''}`}
+          loading="eager"
+          onLoad={handleImageLoad}
+          onError={handleImageError}
         />
         
         {/* Bottom Controls */}
