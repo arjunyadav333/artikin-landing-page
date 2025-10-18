@@ -13,10 +13,18 @@ export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselPr
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [hasInteracted, setHasInteracted] = useState(false);
   const [containerHeight, setContainerHeight] = useState<number | null>(null);
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
+  const [failedImages, setFailedImages] = useState<Set<number>>(new Set());
+  const [loadingImages, setLoadingImages] = useState<Set<number>>(new Set([0]));
   const { toast } = useToast();
+
+  // Memoized helper to get media type
+  const getMediaType = useCallback((index: number) => {
+    return mediaTypes?.[index] || 'image';
+  }, [mediaTypes]);
 
   // Preload adjacent images for smooth transitions
   useEffect(() => {
@@ -33,22 +41,24 @@ export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselPr
     // Preload next and previous images
     preloadImage(currentIndex + 1);
     preloadImage(currentIndex - 1);
-  }, [currentIndex, mediaUrls]);
+  }, [currentIndex, mediaUrls, getMediaType]);
 
   // Navigation with transition lock
   const nextImage = useCallback(() => {
     if (isTransitioning || mediaUrls.length <= 1) return;
+    if (!hasInteracted) setHasInteracted(true);
     setIsTransitioning(true);
     setCurrentIndex((prev) => (prev + 1) % mediaUrls.length);
     setTimeout(() => setIsTransitioning(false), 300);
-  }, [isTransitioning, mediaUrls.length]);
+  }, [isTransitioning, mediaUrls.length, hasInteracted]);
 
   const prevImage = useCallback(() => {
     if (isTransitioning || mediaUrls.length <= 1) return;
+    if (!hasInteracted) setHasInteracted(true);
     setIsTransitioning(true);
     setCurrentIndex((prev) => (prev - 1 + mediaUrls.length) % mediaUrls.length);
     setTimeout(() => setIsTransitioning(false), 300);
-  }, [isTransitioning, mediaUrls.length]);
+  }, [isTransitioning, mediaUrls.length, hasInteracted]);
 
   // Handle touch gestures for mobile swipe
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -69,13 +79,9 @@ export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselPr
     }
   };
 
-  const openFullscreen = () => {
+  const openFullscreen = useCallback(() => {
     setIsFullscreen(true);
-  };
-
-  const getMediaType = (index: number) => {
-    return mediaTypes?.[index] || 'image';
-  };
+  }, []);
 
   const handleDownload = async (url: string, index: number) => {
     try {
@@ -95,14 +101,35 @@ export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselPr
     }
   };
 
-  const handleFirstImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
-    if (!containerHeight) {
+  const handleImageLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>, index: number) => {
+    // Remove from loading set
+    setLoadingImages(prev => {
+      const next = new Set(prev);
+      next.delete(index);
+      return next;
+    });
+    
+    // Set container height from current visible image
+    if (index === currentIndex && !containerHeight) {
       setContainerHeight(e.currentTarget.height);
     }
-  };
+  }, [currentIndex, containerHeight]);
+
+  const handleImageError = useCallback((index: number) => {
+    setFailedImages(prev => new Set(prev).add(index));
+    setLoadingImages(prev => {
+      const next = new Set(prev);
+      next.delete(index);
+      return next;
+    });
+  }, []);
 
   const renderMedia = useCallback((url: string, index: number, isActive: boolean, isViewer: boolean = false) => {
+    if (index < 0 || index >= mediaUrls.length) return null;
+    
     const mediaType = getMediaType(index);
+    const hasFailed = failedImages.has(index);
+    const isLoading = loadingImages.has(index) && index === currentIndex;
     
     if (mediaType.startsWith('video/')) {
       return (
@@ -126,21 +153,35 @@ export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselPr
       );
     }
 
+    if (hasFailed) {
+      return (
+        <div className="w-full h-64 flex items-center justify-center bg-muted">
+          <p className="text-muted-foreground">Failed to load image</p>
+        </div>
+      );
+    }
+
     return (
-      <figure className="media media--image w-full h-full flex items-center justify-center">
+      <figure className="media media--image w-full h-full flex items-center justify-center relative">
+        {isLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-muted animate-pulse z-10">
+            <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+          </div>
+        )}
         <img
           src={url}
           alt={`Media ${index + 1}`}
           className={`media__img w-full ${isViewer ? 'max-h-[96vh]' : 'max-h-[70vh]'} object-contain ${!isViewer ? 'cursor-pointer' : ''}`}
           onClick={!isViewer ? openFullscreen : undefined}
           loading="eager"
-          onLoad={index === 0 ? handleFirstImageLoad : undefined}
+          onLoad={(e) => handleImageLoad(e, index)}
+          onError={() => handleImageError(index)}
           data-media-index={index}
           style={{ background: 'var(--media-bg, #f8f9fa)' }}
         />
       </figure>
     );
-  }, [containerHeight, mediaTypes, openFullscreen]);
+  }, [containerHeight, getMediaType, openFullscreen, mediaUrls.length, failedImages, loadingImages, currentIndex, handleImageLoad, handleImageError]);
 
   if (mediaUrls.length === 0) return null;
 
@@ -156,7 +197,7 @@ export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselPr
         {/* Sliding container with transform-based animation */}
         <div className="relative overflow-hidden w-full">
           <div 
-            className="flex transition-transform duration-300 ease-out"
+            className={`flex ${hasInteracted ? 'transition-transform duration-300 ease-out' : ''}`}
             style={{ 
               transform: `translateX(-${currentIndex * 100}%)`
             }}
@@ -205,6 +246,7 @@ export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselPr
                   }`}
                   onClick={() => {
                     if (!isTransitioning && index !== currentIndex) {
+                      setHasInteracted(true);
                       setIsTransitioning(true);
                       setCurrentIndex(index);
                       setTimeout(() => setIsTransitioning(false), 300);
@@ -240,7 +282,7 @@ export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselPr
             {/* Sliding container for fullscreen */}
             <div className="relative overflow-hidden w-full">
               <div 
-                className="flex transition-transform duration-300 ease-out"
+                className={`flex ${hasInteracted ? 'transition-transform duration-300 ease-out' : ''}`}
                 style={{ 
                   transform: `translateX(-${currentIndex * 100}%)`
                 }}
@@ -312,6 +354,7 @@ export const MediaCarousel = ({ mediaUrls, mediaTypes, postId }: MediaCarouselPr
                       }`}
                       onClick={() => {
                         if (!isTransitioning && index !== currentIndex) {
+                          setHasInteracted(true);
                           setIsTransitioning(true);
                           setCurrentIndex(index);
                           setTimeout(() => setIsTransitioning(false), 300);
