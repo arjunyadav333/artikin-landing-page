@@ -34,10 +34,10 @@ const queryClient = new QueryClient({
       queryKeyHashFn: (queryKey) => JSON.stringify(queryKey),
       retry: (failureCount, error: any) => {
         // Fail fast for auth errors
-        if (error?.message?.includes('JWT') || 
-            error?.message?.includes('auth') ||
-            error?.status === 401 ||
-            error?.status === 403) {
+        if (error?.message?.includes('JWT') ||
+          error?.message?.includes('auth') ||
+          error?.status === 401 ||
+          error?.status === 403) {
           return false;
         }
         return failureCount < 1; // Single retry only
@@ -62,9 +62,9 @@ const AppRoutes = () => {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Index />} />
-        <Route path="/community-guidelines" element={<CommunityGuidelines />} />
-        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-        <Route path="/terms-conditions" element={<TermsAndConditions />} />
+        <Route path="/legal/community-guidelines" element={<CommunityGuidelines />} />
+        <Route path="/legal/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="/legal/terms-conditions" element={<TermsAndConditions />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>

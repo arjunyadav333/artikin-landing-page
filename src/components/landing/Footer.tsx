@@ -9,9 +9,9 @@ const Footer = () => {
       { name: 'Contact Us', path: '/#contact' }
     ],
     Legal: [
-      { name: 'Privacy Policy', path: '/privacy-policy' },
-      { name: 'Terms & Conditions', path: '/terms-conditions' },
-      { name: 'Community Guidelines', path: '/community-guidelines' }
+      { name: 'Privacy Policy', path: '/legal/privacy-policy' },
+      { name: 'Terms & Conditions', path: '/legal/terms-conditions' },
+      { name: 'Community Guidelines', path: '/legal/community-guidelines' }
     ]
   };
 
@@ -35,7 +35,7 @@ const Footer = () => {
             <p className="text-gray-400 mb-6 max-w-md">
               Bridging the gap between art and opportunity, Artikin empowers artists to display their work and collaborate with organizations worldwide.
             </p>
-            
+
             {/* Newsletter Signup */}
             <div className="space-y-3">
               <h4 className="font-semibold">Stay Updated</h4>
@@ -61,7 +61,7 @@ const Footer = () => {
                   <li key={link.name}>
                     <Link
                       to={link.path}
-                      className="text-gray-400 hover:text-white transition-colors duration-300"
+                      className="text-gray-400 hover:text-white transition-colors duration-300 whitespace-nowrap"
                       onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                     >
                       {link.name}
@@ -78,7 +78,7 @@ const Footer = () => {
           <p className="text-gray-400 text-sm mb-4 md:mb-0">
             © 2025 Artikin. All rights reserved.
           </p>
-          
+
           {/* Social Links */}
           <div className="flex space-x-4">
             {socialLinks.map((social) => (
