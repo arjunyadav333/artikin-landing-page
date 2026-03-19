@@ -1,10 +1,18 @@
-import React from 'react';
 import { Facebook, Twitter, Instagram, Linkedin, Mail, Youtube } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Footer = () => {
   const footerLinks = {
-    Company: ['Home', 'About', 'Contact Us'],
-    Legal: ['Privacy', 'Terms', 'Cookie Policy', 'Licenses']
+    Company: [
+      { name: 'Home', path: '/' },
+      { name: 'About', path: '/#about' },
+      { name: 'Contact Us', path: '/#contact' }
+    ],
+    Legal: [
+      { name: 'Privacy Policy', path: '/privacy-policy' },
+      { name: 'Terms & Conditions', path: '/terms-conditions' },
+      { name: 'Community Guidelines', path: '/community-guidelines' }
+    ]
   };
 
   const socialLinks = [
@@ -50,13 +58,14 @@ const Footer = () => {
               <h4 className="font-semibold mb-4">{category}</h4>
               <ul className="space-y-2">
                 {links.map((link) => (
-                  <li key={link}>
-                    <a
-                      href="#"
+                  <li key={link.name}>
+                    <Link
+                      to={link.path}
                       className="text-gray-400 hover:text-white transition-colors duration-300"
+                      onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                     >
-                      {link}
-                    </a>
+                      {link.name}
+                    </Link>
                   </li>
                 ))}
               </ul>

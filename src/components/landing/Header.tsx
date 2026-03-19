@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import artikinLogo from "@/assets/artikin-logo.png";
@@ -29,10 +30,12 @@ const Header = () => {
         <div className="flex items-center justify-between h-16 sm:h-20">
           {/* Logo */}
           <div className="flex items-center gap-3">
-            <img src={artikinLogo} alt="Artikin Logo" className="w-10 h-10 object-contain rounded-lg cursor-pointer" onClick={handleLogoClick} />
-            <span onClick={handleLogoClick} className="font-bold text-blue-500 cursor-pointer text-3xl">
-              Artikin
-            </span>
+            <img src={artikinLogo} alt="Artikin Logo" className="w-10 h-10 object-contain rounded-lg cursor-pointer" />
+          <Link to="/" className="flex items-center space-x-2">
+          <span className="text-2xl font-bold bg-gradient-to-r from-[#0073cf] to-[#4F8FF0] bg-clip-text text-transparent">
+            Artikin
+          </span>
+        </Link>
           </div>
 
           {/* Desktop Navigation */}
@@ -44,7 +47,7 @@ const Header = () => {
 
           {/* Desktop CTA Button */}
           <div className="hidden md:block">
-            <Button variant="default" onClick={() => navigate("/auth")} className="px-6 py-2 font-semibold text-base">
+            <Button variant="default" onClick={() => handleNavClick("#contact")} className="px-6 py-2 font-semibold text-base">
               Get Started
             </Button>
           </div>
@@ -63,7 +66,7 @@ const Header = () => {
                 </button>)}
               <div className="pt-2">
                 <Button variant="default" onClick={() => {
-              navigate("/auth");
+              handleNavClick("#contact");
               setIsMenuOpen(false);
             }} className="w-full font-semibold">
                   Get Started

@@ -1,9 +1,9 @@
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
-import { useScrollRestoration } from "@/hooks/useScrollRestoration";
 
 const FinalCTA = () => {
-  const { navigateWithScrollSave } = useScrollRestoration();
+  const handleGetStarted = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   return (
     <section className="py-20 bg-gradient-to-r from-[#4F8FF0] to-[#4F8FF5] text-white">
@@ -16,12 +16,12 @@ const FinalCTA = () => {
           Join thousands of artists who are already building their careers on Artikin.
         </p>
 
-<Button
-  className="h-12 sm:h-14 px-8 sm:px-10 text-base sm:text-lg font-semibold rounded-xl touch-manipulation font-bold bg-white/10 border-white/30 text-white hover:bg-white hover:text-primary hover:scale-110 hover:-translate-y-1 transition-all duration-300 shadow-lg hover:shadow-xl"
-  onClick={() => navigateWithScrollSave("/auth")}
->
-  Get Started
-</Button>
+        <Button
+          className="h-12 sm:h-14 px-8 sm:px-10 text-base sm:text-lg font-semibold rounded-xl touch-manipulation font-bold bg-white/10 border-white/30 text-white hover:bg-white hover:text-primary hover:scale-110 hover:-translate-y-1 transition-all duration-300 shadow-lg hover:shadow-xl"
+          onClick={handleGetStarted}
+        >
+          Get Started
+        </Button>
       </div>
     </section>
   );

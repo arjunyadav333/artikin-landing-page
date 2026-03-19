@@ -29,7 +29,6 @@ export default defineConfig(({ mode }) => ({
           'ui-vendor': ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-tabs'],
           'swiper-vendor': ['swiper'],
           'query-vendor': ['@tanstack/react-query'],
-          'supabase-vendor': ['@supabase/supabase-js'],
         },
       },
     },
@@ -38,7 +37,7 @@ export default defineConfig(({ mode }) => ({
     // Target modern browsers for smaller bundles
     target: 'es2020',
     // Increase chunk size warning limit
-    chunkSizeWarningLimit: 1000,
+    chunkSize_warningLimit: 1000,
     // Enable CSS code splitting
     cssCodeSplit: true,
   },
@@ -49,7 +48,6 @@ export default defineConfig(({ mode }) => ({
       'react-dom', 
       'react-router-dom',
       '@tanstack/react-query',
-      '@supabase/supabase-js',
     ],
   },
 }));

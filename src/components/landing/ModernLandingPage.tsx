@@ -1,5 +1,4 @@
 import React, { lazy, Suspense } from "react";
-import { useScrollRestoration } from "@/hooks/useScrollRestoration";
 import Header from "./Header";
 import HeroSection from "./HeroSection";
 
@@ -21,9 +20,6 @@ const SectionLoader = () => (
 );
 
 const ModernLandingPage = React.memo(() => {
-  // Initialize scroll restoration hook
-  useScrollRestoration();
-
   return (
     <div className="min-h-screen bg-white">
       <Header />
