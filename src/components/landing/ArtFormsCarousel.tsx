@@ -5,37 +5,40 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 
-// Lazy load images - only import when needed
+import actingSlide from "@/assets/acting-slide.jpg";
+import danceSlide from "@/assets/dance-slide.jpg";
+import modelingSlide from "@/assets/modeling-slide.jpg";
+import photographySlide from "@/assets/photography-slide.jpg";
+import videographySlide from "@/assets/videography-slide.jpg";
+import instrumentalistSlide from "@/assets/instrumentalist-slide.jpg";
+import singerSlide from "@/assets/singer-slide.jpg";
+import drawingSlide from "@/assets/drawing-slide.jpg";
+import paintingSlide from "@/assets/painting-slide.jpg";
+
 const artforms = [
-  { title: "Acting", description: "An actor brings stories to life by expressing emotions, characters, and experiences on stage or screen.", imagePath: "/src/assets/acting-slide.jpg" },
-  { title: "Dancer", description: "A dancer expresses stories and emotions through graceful movements and rhythm.", imagePath: "/src/assets/dance-slide.jpg" },
-  { title: "Model", description: "They express creativity through presence and pose.", imagePath: "/src/assets/modeling-slide.jpg" },
-  { title: "Photographer", description: "A photographer captures stories, emotions, and beauty through their lens.", imagePath: "/src/assets/photography-slide.jpg" },
-  { title: "Videographer", description: "They create visuals that bring ideas, events, and memories to life.", imagePath: "/src/assets/videography-slide.jpg" },
-  { title: "Instrumentalist", description: "A skilled musician expressing deep emotion through a musical instrument.", imagePath: "/src/assets/instrumentalist-slide.jpg" },
-  { title: "Singer", description: "The voice is their instrument, emotion their song.", imagePath: "/src/assets/singer-slide.jpg" },
-  { title: "Drawing", description: "Using simple tools to bring complex imaginations to life.", imagePath: "/src/assets/drawing-slide.jpg" },
-  { title: "Painting", description: "Bringing a canvas to life with color, light, and emotion.", imagePath: "/src/assets/painting-slide.jpg" },
+  { title: "Acting", description: "An actor brings stories to life by expressing emotions, characters, and experiences on stage or screen.", imagePath: actingSlide },
+  { title: "Dancer", description: "A dancer expresses stories and emotions through graceful movements and rhythm.", imagePath: danceSlide },
+  { title: "Model", description: "They express creativity through presence and pose.", imagePath: modelingSlide },
+  { title: "Photographer", description: "A photographer captures stories, emotions, and beauty through their lens.", imagePath: photographySlide },
+  { title: "Videographer", description: "They create visuals that bring ideas, events, and memories to life.", imagePath: videographySlide },
+  { title: "Instrumentalist", description: "A skilled musician expressing deep emotion through a musical instrument.", imagePath: instrumentalistSlide },
+  { title: "Singer", description: "The voice is their instrument, emotion their song.", imagePath: singerSlide },
+  { title: "Drawing", description: "Using simple tools to bring complex imaginations to life.", imagePath: drawingSlide },
+  { title: "Painting", description: "Bringing a canvas to life with color, light, and emotion.", imagePath: paintingSlide },
 ];
 
-// Optimized image component with lazy loading and blur placeholder
+// Optimized image component with lazy loading
 const LazyImage = memo(({ src, alt, className }: { src: string; alt: string; className: string }) => {
-  const [imageSrc, setImageSrc] = useState<string>("");
   const [isLoaded, setIsLoaded] = useState(false);
-  const imgRef = useRef<HTMLImageElement>(null);
+  const [shouldLoad, setShouldLoad] = useState(false);
+  const imgRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            // Dynamically import image when it's visible
-            import(`@/assets/${src.split('/').pop()}`).then((module) => {
-              setImageSrc(module.default);
-            }).catch(() => {
-              // Fallback to direct path if import fails
-              setImageSrc(src);
-            });
+            setShouldLoad(true);
             observer.disconnect();
           }
         });
@@ -48,16 +51,16 @@ const LazyImage = memo(({ src, alt, className }: { src: string; alt: string; cla
     }
 
     return () => observer.disconnect();
-  }, [src]);
+  }, []);
 
   return (
-    <div ref={imgRef} className="relative bg-gray-200 overflow-hidden">
+    <div ref={imgRef} className="relative bg-gray-200 overflow-hidden h-56">
       {!isLoaded && (
         <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 animate-pulse" />
       )}
-      {imageSrc && (
+      {shouldLoad && (
         <img
-          src={imageSrc}
+          src={src}
           alt={alt}
           className={`${className} transition-opacity duration-300 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
           onLoad={() => setIsLoaded(true)}
