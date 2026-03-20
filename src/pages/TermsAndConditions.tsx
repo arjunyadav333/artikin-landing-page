@@ -1,9 +1,23 @@
 import React from "react";
-import Header from "@/components/landing/Header";
-import Footer from "@/components/landing/Footer";
+import LegalHeader from "@/components/landing/LegalHeader";
+import LegalFooter from "@/components/landing/LegalFooter";
 import { FileText, ChevronRight } from "lucide-react";
 
 const TermsAndConditions = () => {
+  React.useEffect(() => {
+    const hash = window.location.hash;
+    if (hash) {
+      setTimeout(() => {
+        const element = document.querySelector(hash);
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth" });
+        }
+      }, 100);
+    } else {
+      window.scrollTo(0, 0);
+    }
+  }, []);
+
   const toc = [
     { id: "use", title: "1. Use of the Platform" },
     { id: "account", title: "2. User Accounts" },
@@ -20,7 +34,7 @@ const TermsAndConditions = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 font-inter text-slate-700">
-      <Header />
+      <LegalHeader />
       
       <main className="pt-24 pb-16">
         <div className="container mx-auto px-4 max-w-5xl">
@@ -69,7 +83,7 @@ const TermsAndConditions = () => {
 
           {/* Policy Sections */}
           <div className="space-y-12 bg-white p-8 md:p-12 rounded-3xl shadow-sm border border-slate-100">
-            <section id="use">
+            <section className="scroll-mt-24" id="use">
               <h2 className="text-2xl font-bold text-slate-900 mb-4 flex items-center">
                 <span className="w-1 h-6 bg-blue-600 rounded-full mr-3"></span>
                 1. Use of the Platform
@@ -80,7 +94,7 @@ const TermsAndConditions = () => {
               </div>
             </section>
 
-            <section id="account">
+            <section className="scroll-mt-24" id="account">
               <h2 className="text-2xl font-bold text-slate-900 mb-4 flex items-center">
                 <span className="w-1 h-6 bg-blue-600 rounded-full mr-3"></span>
                 2. User Accounts
@@ -91,7 +105,7 @@ const TermsAndConditions = () => {
               </div>
             </section>
 
-            <section id="content">
+            <section className="scroll-mt-24" id="content">
               <h2 className="text-2xl font-bold text-slate-900 mb-4 flex items-center">
                 <span className="w-1 h-6 bg-blue-600 rounded-full mr-3"></span>
                 3. User Content
@@ -102,7 +116,7 @@ const TermsAndConditions = () => {
               </div>
             </section>
 
-            <section id="conduct">
+            <section className="scroll-mt-24" id="conduct">
               <h2 className="text-2xl font-bold text-slate-900 mb-4 flex items-center">
                 <span className="w-1 h-6 bg-blue-600 rounded-full mr-3"></span>
                 4. Acceptable Use
@@ -140,7 +154,7 @@ const TermsAndConditions = () => {
               </div>
             </section>
 
-            <section id="jobs">
+            <section className="scroll-mt-24" id="jobs">
               <h2 className="text-2xl font-bold text-slate-900 mb-4 flex items-center">
                 <span className="w-1 h-6 bg-blue-600 rounded-full mr-3"></span>
                 5. Jobs and Opportunities
@@ -151,7 +165,7 @@ const TermsAndConditions = () => {
               </div>
             </section>
 
-            <section id="communication">
+            <section className="scroll-mt-24" id="communication">
               <h2 className="text-2xl font-bold text-slate-900 mb-4 flex items-center">
                 <span className="w-1 h-6 bg-blue-600 rounded-full mr-3"></span>
                 6. Messaging and Communication
@@ -161,7 +175,7 @@ const TermsAndConditions = () => {
               </div>
             </section>
 
-            <section id="termination">
+            <section className="scroll-mt-24" id="termination">
               <h2 className="text-2xl font-bold text-slate-900 mb-4 flex items-center">
                 <span className="w-1 h-6 bg-blue-600 rounded-full mr-3"></span>
                 7. Account Suspension or Termination
@@ -172,7 +186,7 @@ const TermsAndConditions = () => {
               </div>
             </section>
 
-            <section id="intellectual">
+            <section className="scroll-mt-24" id="intellectual">
               <h2 className="text-2xl font-bold text-slate-900 mb-4 flex items-center">
                 <span className="w-1 h-6 bg-blue-600 rounded-full mr-3"></span>
                 8. Intellectual Property
@@ -182,7 +196,7 @@ const TermsAndConditions = () => {
               </div>
             </section>
 
-            <section id="liability">
+            <section className="scroll-mt-24" id="liability">
               <h2 className="text-2xl font-bold text-slate-900 mb-4 flex items-center">
                 <span className="w-1 h-6 bg-blue-600 rounded-full mr-3"></span>
                 9. Limitation of Liability
@@ -193,7 +207,7 @@ const TermsAndConditions = () => {
               </div>
             </section>
 
-            <section id="changes">
+            <section className="scroll-mt-24" id="changes">
               <h2 className="text-2xl font-bold text-slate-900 mb-4 flex items-center">
                 <span className="w-1 h-6 bg-blue-600 rounded-full mr-3"></span>
                 10. Changes to Terms
@@ -204,7 +218,7 @@ const TermsAndConditions = () => {
               </div>
             </section>
 
-            <section id="contact">
+            <section className="scroll-mt-24" id="contact">
               <h2 className="text-2xl font-bold text-slate-900 mb-4 flex items-center">
                 <span className="w-1 h-6 bg-blue-600 rounded-full mr-3"></span>
                 11. Contact
@@ -218,7 +232,7 @@ const TermsAndConditions = () => {
         </div>
       </main>
 
-      <Footer />
+      <LegalFooter />
     </div>
   );
 };

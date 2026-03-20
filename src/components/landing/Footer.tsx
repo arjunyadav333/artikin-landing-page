@@ -5,13 +5,13 @@ const Footer = () => {
   const footerLinks = {
     Company: [
       { name: 'Home', path: '/' },
-      { name: 'About', path: '/#about' },
-      { name: 'Contact Us', path: '/#contact' }
+      { name: 'About Us', path: '/about-us' },
+      { name: 'Support', path: '/support' }
     ],
     Legal: [
       { name: 'Privacy Policy', path: '/legal/privacy-policy' },
       { name: 'Terms & Conditions', path: '/legal/terms-conditions' },
-      { name: 'Community Guidelines', path: '/legal/community-guidelines' }
+      { name: 'Community Guidelines', path: '/legal/community-guidelines' },
     ]
   };
 

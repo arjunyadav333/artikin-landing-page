@@ -1,9 +1,23 @@
 import React from "react";
-import Header from "@/components/landing/Header";
-import Footer from "@/components/landing/Footer";
+import LegalHeader from "@/components/landing/LegalHeader";
+import LegalFooter from "@/components/landing/LegalFooter";
 import { Users, CheckCircle, Briefcase, ChevronRight } from "lucide-react";
 
 const CommunityGuidelines = () => {
+  React.useEffect(() => {
+    const hash = window.location.hash;
+    if (hash) {
+      setTimeout(() => {
+        const element = document.querySelector(hash);
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth" });
+        }
+      }, 100);
+    } else {
+      window.scrollTo(0, 0);
+    }
+  }, []);
+
   const cards = [
     {
       icon: <Users className="w-8 h-8" />,
@@ -35,7 +49,7 @@ const CommunityGuidelines = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 font-inter">
-      <Header />
+      <LegalHeader />
       
       <main className="pt-24 pb-16">
         <div className="container mx-auto px-4 max-w-5xl">
@@ -93,7 +107,7 @@ const CommunityGuidelines = () => {
 
           {/* Guideline Sections */}
           <div className="space-y-12 bg-white p-8 md:p-12 rounded-3xl shadow-sm border border-slate-100">
-            <section id="respect">
+            <section className="scroll-mt-24" id="respect">
               <h2 className="text-2xl font-bold text-slate-900 mb-4 flex items-center">
                 <span className="w-1 h-6 bg-blue-600 rounded-full mr-3"></span>
                 1. Respect the Community
@@ -104,7 +118,7 @@ const CommunityGuidelines = () => {
               </div>
             </section>
 
-            <section id="safety">
+            <section className="scroll-mt-24" id="safety">
               <h2 className="text-2xl font-bold text-slate-900 mb-4 flex items-center">
                 <span className="w-1 h-6 bg-blue-600 rounded-full mr-3"></span>
                 2. Safety and Harassment
@@ -115,7 +129,7 @@ const CommunityGuidelines = () => {
               </div>
             </section>
 
-            <section id="illegal">
+            <section className="scroll-mt-24" id="illegal">
               <h2 className="text-2xl font-bold text-slate-900 mb-4 flex items-center">
                 <span className="w-1 h-6 bg-blue-600 rounded-full mr-3"></span>
                 3. Illegal or Harmful Content
@@ -133,7 +147,7 @@ const CommunityGuidelines = () => {
               </div>
             </section>
 
-            <section id="authentic">
+            <section className="scroll-mt-24" id="authentic">
               <h2 className="text-2xl font-bold text-slate-900 mb-4 flex items-center">
                 <span className="w-1 h-6 bg-blue-600 rounded-full mr-3"></span>
                 4. Authentic Profiles
@@ -144,7 +158,7 @@ const CommunityGuidelines = () => {
               </div>
             </section>
 
-            <section id="professional">
+            <section className="scroll-mt-24" id="professional">
               <h2 className="text-2xl font-bold text-slate-900 mb-4 flex items-center">
                 <span className="w-1 h-6 bg-blue-600 rounded-full mr-3"></span>
                 5. Professional Conduct
@@ -155,7 +169,7 @@ const CommunityGuidelines = () => {
               </div>
             </section>
 
-            <section id="spam">
+            <section className="scroll-mt-24" id="spam">
               <h2 className="text-2xl font-bold text-slate-900 mb-4 flex items-center">
                 <span className="w-1 h-6 bg-blue-600 rounded-full mr-3"></span>
                 6. Spam and Misuse
@@ -166,7 +180,7 @@ const CommunityGuidelines = () => {
               </div>
             </section>
 
-            <section id="report">
+            <section className="scroll-mt-24" id="report">
               <h2 className="text-2xl font-bold text-slate-900 mb-4 flex items-center">
                 <span className="w-1 h-6 bg-blue-600 rounded-full mr-3"></span>
                 7. Reporting Violations
@@ -177,7 +191,7 @@ const CommunityGuidelines = () => {
               </div>
             </section>
 
-            <section id="enforcement">
+            <section className="scroll-mt-24" id="enforcement">
               <h2 className="text-2xl font-bold text-slate-900 mb-4 flex items-center">
                 <span className="w-1 h-6 bg-blue-600 rounded-full mr-3"></span>
                 8. Policy Enforcement
@@ -191,7 +205,7 @@ const CommunityGuidelines = () => {
         </div>
       </main>
 
-      <Footer />
+      <LegalFooter />
     </div>
   );
 };

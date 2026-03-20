@@ -9,6 +9,10 @@ import Index from "./pages/Index";
 import CommunityGuidelines from "./pages/CommunityGuidelines";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsAndConditions from "./pages/TermsAndConditions";
+import AboutUs from "./pages/AboutUs";
+import Support from "./pages/Support";
+import AccountDeletion from "./pages/AccountDeletion";
+import { Toaster } from "@/components/ui/sonner";
 
 
 // Optimized loading components for different pages
@@ -57,6 +61,9 @@ const queryClient = new QueryClient({
 });
 
 
+
+
+
 const AppRoutes = () => {
   return (
     <BrowserRouter>
@@ -65,15 +72,22 @@ const AppRoutes = () => {
         <Route path="/legal/community-guidelines" element={<CommunityGuidelines />} />
         <Route path="/legal/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/legal/terms-conditions" element={<TermsAndConditions />} />
+        <Route path="/about-us" element={<AboutUs />} />
+        <Route path="/support" element={<Support />} />
+        <Route path="/account-deletion" element={<AccountDeletion />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   );
 };
 
+
+
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
+      <Toaster position="top-center" expand={false} richColors />
       <AppRoutes />
     </TooltipProvider>
   </QueryClientProvider>

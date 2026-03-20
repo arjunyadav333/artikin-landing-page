@@ -1,9 +1,24 @@
 import React from "react";
-import Header from "@/components/landing/Header";
-import Footer from "@/components/landing/Footer";
+import LegalHeader from "@/components/landing/LegalHeader";
+import LegalFooter from "@/components/landing/LegalFooter";
+import { Link } from "react-router-dom";
 import { Shield, ChevronRight } from "lucide-react";
 
 const PrivacyPolicy = () => {
+  React.useEffect(() => {
+    const hash = window.location.hash;
+    if (hash) {
+      setTimeout(() => {
+        const element = document.querySelector(hash);
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth" });
+        }
+      }, 100);
+    } else {
+      window.scrollTo(0, 0);
+    }
+  }, []);
+
   const toc = [
     { id: "about", title: "1. About Artikin" },
     { id: "data", title: "2. Information We Collect" },
@@ -12,7 +27,7 @@ const PrivacyPolicy = () => {
     { id: "public", title: "5. Public Profiles and Content" },
     { id: "communication", title: "6. Messaging and Communication" },
     { id: "retention", title: "7. Data Retention" },
-    { id: "deletion", title: "8. Account Deletion" },
+    { id: "account-deletion", title: "8. Account Deletion" },
     { id: "children", title: "9. Children's Privacy" },
     { id: "security", title: "10. Security" },
     { id: "changes", title: "11. Changes to This Policy" },
@@ -21,8 +36,8 @@ const PrivacyPolicy = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 font-inter text-slate-700">
-      <Header />
-      
+      <LegalHeader />
+
       <main className="pt-24 pb-16">
         <div className="container mx-auto px-4 max-w-5xl">
           {/* Header Section */}
@@ -56,9 +71,9 @@ const PrivacyPolicy = () => {
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {toc.map((item) => (
-                <a 
-                  key={item.id} 
-                  href={`#${item.id}`} 
+                <a
+                  key={item.id}
+                  href={`#${item.id}`}
                   className="flex items-center text-blue-600 font-medium hover:underline group"
                 >
                   <ChevronRight className="w-4 h-4 mr-1 transition-transform group-hover:translate-x-1" />
@@ -70,7 +85,7 @@ const PrivacyPolicy = () => {
 
           {/* Policy Sections */}
           <div className="space-y-12 bg-white p-8 md:p-12 rounded-3xl shadow-sm border border-slate-100">
-            <section id="about">
+            <section className="scroll-mt-24" id="about">
               <h2 className="text-2xl font-bold text-slate-900 mb-4 flex items-center">
                 <span className="w-1 h-6 bg-blue-600 rounded-full mr-3"></span>
                 1. About Artikin
@@ -81,7 +96,7 @@ const PrivacyPolicy = () => {
               </div>
             </section>
 
-            <section id="data">
+            <section className="scroll-mt-24" id="data">
               <h2 className="text-2xl font-bold text-slate-900 mb-4 flex items-center">
                 <span className="w-1 h-6 bg-blue-600 rounded-full mr-3"></span>
                 2. Information We Collect
@@ -93,7 +108,7 @@ const PrivacyPolicy = () => {
               </div>
             </section>
 
-            <section id="use">
+            <section className="scroll-mt-24" id="use">
               <h2 className="text-2xl font-bold text-slate-900 mb-4 flex items-center">
                 <span className="w-1 h-6 bg-blue-600 rounded-full mr-3"></span>
                 3. How We Use Your Information
@@ -104,7 +119,7 @@ const PrivacyPolicy = () => {
               </div>
             </section>
 
-            <section id="share">
+            <section className="scroll-mt-24" id="share">
               <h2 className="text-2xl font-bold text-slate-900 mb-4 flex items-center">
                 <span className="w-1 h-6 bg-blue-600 rounded-full mr-3"></span>
                 4. How Information Is Shared
@@ -116,7 +131,7 @@ const PrivacyPolicy = () => {
               </div>
             </section>
 
-            <section id="public">
+            <section className="scroll-mt-24" id="public">
               <h2 className="text-2xl font-bold text-slate-900 mb-4 flex items-center">
                 <span className="w-1 h-6 bg-blue-600 rounded-full mr-3"></span>
                 5. Public Profiles and Content
@@ -127,7 +142,7 @@ const PrivacyPolicy = () => {
               </div>
             </section>
 
-            <section id="communication">
+            <section className="scroll-mt-24" id="communication">
               <h2 className="text-2xl font-bold text-slate-900 mb-4 flex items-center">
                 <span className="w-1 h-6 bg-blue-600 rounded-full mr-3"></span>
                 6. Messaging and Communication
@@ -137,7 +152,7 @@ const PrivacyPolicy = () => {
               </div>
             </section>
 
-            <section id="retention">
+            <section className="scroll-mt-24" id="retention">
               <h2 className="text-2xl font-bold text-slate-900 mb-4 flex items-center">
                 <span className="w-1 h-6 bg-blue-600 rounded-full mr-3"></span>
                 7. Data Retention
@@ -147,18 +162,18 @@ const PrivacyPolicy = () => {
               </div>
             </section>
 
-            <section id="deletion">
+            <section className="scroll-mt-24" id="account-deletion">
               <h2 className="text-2xl font-bold text-slate-900 mb-4 flex items-center">
                 <span className="w-1 h-6 bg-blue-600 rounded-full mr-3"></span>
                 8. Account Deletion
               </h2>
               <div className="space-y-4">
-                <p>Users may request account deletion from within the application settings. When a deletion request is made, the account will be deactivated immediately. If the user logs in within thirty days, the account may be restored.</p>
+                <p>Users may request account deletion from within the application settings or directly through our <Link to="/account-deletion" className="text-blue-600 hover:underline font-semibold">Account Deletion Page</Link>. When a deletion request is made, the account will be deactivated immediately. If the user logs in within thirty days, the account may be restored.</p>
                 <p>After thirty days, the account and associated data will be permanently deleted from the platform.</p>
               </div>
             </section>
 
-            <section id="children">
+            <section className="scroll-mt-24" id="children">
               <h2 className="text-2xl font-bold text-slate-900 mb-4 flex items-center">
                 <span className="w-1 h-6 bg-blue-600 rounded-full mr-3"></span>
                 9. Children's Privacy
@@ -168,7 +183,7 @@ const PrivacyPolicy = () => {
               </div>
             </section>
 
-            <section id="security">
+            <section className="scroll-mt-24" id="security">
               <h2 className="text-2xl font-bold text-slate-900 mb-4 flex items-center">
                 <span className="w-1 h-6 bg-blue-600 rounded-full mr-3"></span>
                 10. Security
@@ -178,7 +193,7 @@ const PrivacyPolicy = () => {
               </div>
             </section>
 
-            <section id="changes">
+            <section className="scroll-mt-24" id="changes">
               <h2 className="text-2xl font-bold text-slate-900 mb-4 flex items-center">
                 <span className="w-1 h-6 bg-blue-600 rounded-full mr-3"></span>
                 11. Changes to This Policy
@@ -188,21 +203,21 @@ const PrivacyPolicy = () => {
               </div>
             </section>
 
-            <section id="contact">
+            <section className="scroll-mt-24" id="contact">
               <h2 className="text-2xl font-bold text-slate-900 mb-4 flex items-center">
                 <span className="w-1 h-6 bg-blue-600 rounded-full mr-3"></span>
                 12. Contact Information
               </h2>
               <div className="space-y-4">
                 <p>If you have any questions regarding this Privacy Policy or the handling of your information, you may contact us at:</p>
-                <p className="font-semibold">Email: support@artikin.com</p>
+                <p className="font-semibold">Email: <a href="mailto:support@artikin.com" className="text-blue-600 hover:underline">support@artikin.com</a></p>
               </div>
             </section>
           </div>
         </div>
       </main>
 
-      <Footer />
+      <LegalFooter />
     </div>
   );
 };
