@@ -12,6 +12,7 @@ import TermsAndConditions from "./pages/TermsAndConditions";
 import AboutUs from "./pages/AboutUs";
 import Support from "./pages/Support";
 import AccountDeletion from "./pages/AccountDeletion";
+import ArtistProfile from "./pages/ArtistProfile";
 import { Toaster } from "@/components/ui/sonner";
 
 
@@ -61,9 +62,6 @@ const queryClient = new QueryClient({
 });
 
 
-
-
-
 const AppRoutes = () => {
   return (
     <BrowserRouter>
@@ -75,6 +73,7 @@ const AppRoutes = () => {
         <Route path="/about-us" element={<AboutUs />} />
         <Route path="/support" element={<Support />} />
         <Route path="/account-deletion" element={<AccountDeletion />} />
+        <Route path="/artist/:id" element={<ArtistProfile />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>

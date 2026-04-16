@@ -33,8 +33,8 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
-// const BASE_URL = "https://api.artikin.com";
-const BASE_URL = "http://localhost:4500";
+const BASE_URL = "https://api.artikin.com";
+// const BASE_URL = "http://localhost:4500";
 type FlowState =
   | "LOGIN"
   | "FORGOT_PASSWORD"
@@ -443,70 +443,70 @@ const AccountDeletion = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Deactivation Card */}
-                <Card
-                  className={`relative group cursor-pointer transition-all duration-300 ${actionType === "DEACTIVATE" ? "border-blue-500 bg-blue-50/5 shadow-md" : "border-slate-200 hover:border-slate-300"}`}
-                  onClick={() => setActionType("DEACTIVATE")}
-                >
-                  {actionType === "DEACTIVATE" && (
-                    <div className="absolute top-4 right-4 text-blue-600 animate-in zoom-in-50 duration-300">
-                      <CheckCircle2 size={24} fill="currentColor" className="text-white fill-blue-600" />
-                    </div>
-                  )}
-                  <CardHeader>
-                    <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-4 text-blue-600 transition-transform group-hover:scale-110">
-                      <UserMinus size={24} />
-                    </div>
-                    <CardTitle className="text-xl">Deactivate Account</CardTitle>
-                    <CardDescription>Temporary hiatus</CardDescription>
-                  </CardHeader>
-                  <CardContent className="text-sm text-slate-600">
-                    <ul className="space-y-3">
-                      <li className="flex items-start gap-2">
-                        <div className="mt-1"><CheckCircle2 size={14} className="text-blue-500" /></div>
-                        <span>Your profile will be hidden. Reactivate any time by logging in.</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <div className="mt-1"><CheckCircle2 size={14} className="text-blue-500" /></div>
-                        <span>No data is lost.</span>
-                      </li>
-                    </ul>
-                  </CardContent>
-                </Card>
+              <Card
+                className={`relative group cursor-pointer transition-all duration-300 ${actionType === "DEACTIVATE" ? "border-blue-500 bg-blue-50/5 shadow-md" : "border-slate-200 hover:border-slate-300"}`}
+                onClick={() => setActionType("DEACTIVATE")}
+              >
+                {actionType === "DEACTIVATE" && (
+                  <div className="absolute top-4 right-4 text-blue-600 animate-in zoom-in-50 duration-300">
+                    <CheckCircle2 size={24} fill="currentColor" className="text-white fill-blue-600" />
+                  </div>
+                )}
+                <CardHeader>
+                  <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-4 text-blue-600 transition-transform group-hover:scale-110">
+                    <UserMinus size={24} />
+                  </div>
+                  <CardTitle className="text-xl">Deactivate Account</CardTitle>
+                  <CardDescription>Temporary hiatus</CardDescription>
+                </CardHeader>
+                <CardContent className="text-sm text-slate-600">
+                  <ul className="space-y-3">
+                    <li className="flex items-start gap-2">
+                      <div className="mt-1"><CheckCircle2 size={14} className="text-blue-500" /></div>
+                      <span>Your profile will be hidden. Reactivate any time by logging in.</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <div className="mt-1"><CheckCircle2 size={14} className="text-blue-500" /></div>
+                      <span>No data is lost.</span>
+                    </li>
+                  </ul>
+                </CardContent>
+              </Card>
 
               {/* Deletion Card */}
-                <Card
-                  className={`relative group cursor-pointer transition-all duration-300 ${actionType === "DELETE" ? "border-red-500 bg-red-50/5 shadow-md" : "border-slate-200 hover:border-slate-300"}`}
-                  onClick={() => setActionType("DELETE")}
-                >
-                  {actionType === "DELETE" && (
-                    <div className="absolute top-4 right-4 text-red-600 animate-in zoom-in-50 duration-300">
-                      <CheckCircle2 size={24} fill="currentColor" className="text-white fill-red-600" />
-                    </div>
-                  )}
-                  <CardHeader>
-                    <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center mb-4 text-red-600 transition-transform group-hover:scale-110">
-                      <Trash2 size={24} />
-                    </div>
-                    <CardTitle className="text-xl">Delete Account</CardTitle>
-                    <CardDescription>Permanent removal in 30 days</CardDescription>
-                  </CardHeader>
-                  <CardContent className="text-sm text-slate-600">
-                    <ul className="space-y-3">
-                      <li className="flex items-start gap-2">
-                        <div className="mt-1"><ShieldAlert size={14} className="text-red-500" /></div>
-                        <span className="font-bold text-red-600">Account will be deleted in 30 days. Log in back to cancel.</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <div className="mt-1"><ShieldAlert size={14} className="text-red-500" /></div>
-                        <span>All photos, projects, and connections will be gone forever.</span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <div className="mt-1"><ShieldAlert size={14} className="text-red-500" /></div>
-                        <span>Username will be released for others.</span>
-                      </li>
-                    </ul>
-                  </CardContent>
-                </Card>
+              <Card
+                className={`relative group cursor-pointer transition-all duration-300 ${actionType === "DELETE" ? "border-red-500 bg-red-50/5 shadow-md" : "border-slate-200 hover:border-slate-300"}`}
+                onClick={() => setActionType("DELETE")}
+              >
+                {actionType === "DELETE" && (
+                  <div className="absolute top-4 right-4 text-red-600 animate-in zoom-in-50 duration-300">
+                    <CheckCircle2 size={24} fill="currentColor" className="text-white fill-red-600" />
+                  </div>
+                )}
+                <CardHeader>
+                  <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center mb-4 text-red-600 transition-transform group-hover:scale-110">
+                    <Trash2 size={24} />
+                  </div>
+                  <CardTitle className="text-xl">Delete Account</CardTitle>
+                  <CardDescription>Permanent removal in 30 days</CardDescription>
+                </CardHeader>
+                <CardContent className="text-sm text-slate-600">
+                  <ul className="space-y-3">
+                    <li className="flex items-start gap-2">
+                      <div className="mt-1"><ShieldAlert size={14} className="text-red-500" /></div>
+                      <span className="font-bold text-red-600">Account will be deleted in 30 days. Log in back to cancel.</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <div className="mt-1"><ShieldAlert size={14} className="text-red-500" /></div>
+                      <span>All photos, projects, and connections will be gone forever.</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <div className="mt-1"><ShieldAlert size={14} className="text-red-500" /></div>
+                      <span>Username will be released for others.</span>
+                    </li>
+                  </ul>
+                </CardContent>
+              </Card>
             </div>
 
             <div className="mt-10 flex justify-center">
