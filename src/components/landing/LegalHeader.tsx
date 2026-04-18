@@ -6,14 +6,16 @@ import artikinLogo from "@/assets/artikin-logo.png";
 const LegalHeader = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
+const user = JSON.parse(localStorage.getItem("user") || "{}");
 
-  const navLinks = [
-    { name: "User Agreement", href: "/legal/terms-conditions" },
-    { name: "Privacy Policy", href: "/legal/privacy-policy" },
-    { name: "Community Guidelines", href: "/legal/community-guidelines" },
-    { name: "About Us", href: "/about-us" },
-    { name: "Support", href: "/support" },
-  ];
+const navLinks = [
+  { name: "User Agreement", href: "/legal/terms-conditions" },
+  { name: "Privacy Policy", href: "/legal/privacy-policy" },
+  { name: "Community Guidelines", href: "/legal/community-guidelines" },
+  { name: "About Us", href: "/about-us" },
+  { name: "Support", href: "/support" },
+  { name: "Profile", href: `/org/${user?.id}` }, 
+];
 
   const isActive = (path: string) => location.pathname === path;
 

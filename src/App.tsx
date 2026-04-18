@@ -14,6 +14,7 @@ import Support from "./pages/Support";
 import AccountDeletion from "./pages/AccountDeletion";
 import ArtistProfile from "./pages/ArtistProfile";
 import { Toaster } from "@/components/ui/sonner";
+import OrgProfile from "./pages/OganizationProfile";
 
 
 // Optimized loading components for different pages
@@ -74,6 +75,8 @@ const AppRoutes = () => {
         <Route path="/support" element={<Support />} />
         <Route path="/account-deletion" element={<AccountDeletion />} />
         <Route path="/artist/:id" element={<ArtistProfile />} />
+       <Route path="/org/:id" element={<OrgProfile />} />
+        
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>

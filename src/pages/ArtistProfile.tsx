@@ -66,15 +66,21 @@ interface ProfileData {
     mediaFiles: string[];
   }>;
 }
-
-const normalizeUrl = (url: string) => {
+const BUCKET_URL = 'https://s3.ap-south-1.amazonaws.com/artikin.dev-bucket';
+const normalizeUrl = (url?: string) => {
   if (!url) return '';
-  if (url.startsWith('http://') || url.startsWith('https://')) {
-    return url;
-  }
-  return `https://${url}`;
-};
 
+  // already full URL
+  if (/^https?:\/\//i.test(url)) return url;
+
+  // S3 domain without protocol
+  if (url.startsWith('s3')) {
+    return `https://${url}`;
+  }
+
+  // fallback → attach bucket
+  return `${BUCKET_URL}/${url}`;
+};
 const ArtistProfileSkeleton: React.FC = () => (
   <div className="artist-profile-page">
     <div className="profile-app-container">
@@ -136,7 +142,7 @@ const ArtistProfile: React.FC = () => {
   const { data, isLoading, error } = useQuery({
     queryKey: ['artistProfile', id],
     queryFn: async () => {
-      const response = await fetch(`https://api.artikin.com/api/users/external/profile/${id}`);
+      const response = await fetch(`/api/users/external/profile/${id}`);
       if (!response.ok) {
         throw new Error('Failed to fetch profile');
       }
@@ -240,7 +246,7 @@ const ArtistProfile: React.FC = () => {
         </header>
 
         {/* Main Tab Navigation */}
-        <nav className="main-tabs">
+        <nav className="main-tabs mb-2">
           <button 
             className={`tab-btn ${activeTab === 'posts' ? 'active' : ''}`}
             onClick={() => setActiveTab('posts')}
@@ -440,34 +446,72 @@ const ArtistProfile: React.FC = () => {
         )}
       </div>
 
-      {/* Post Interaction Modal */}
-      {isModalOpen && (
-        <div className="modal-overlay" onClick={closeModal}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <button className="modal-close" onClick={closeModal}><X size={20} /></button>
-            <div className="modal-body">
-              <div className="modal-avatar-wrapper">
-                <img 
-                  src={normalizeUrl(profile.profileImage)} 
-                  alt="User" 
-                  className="modal-avatar" 
-                />
-              </div>
-              <h2 className="modal-title">See this {modalType}</h2>
-              <p className="modal-text">Sign up or log in to see <strong>@{user.username}</strong>'s full {modalType} and interact with the artist.</p>
-              <div className="modal-actions">
-                <button className="btn-primary flex items-center justify-center gap-2">
-                  <Smartphone size={18} /> Get it on Google Play
-                </button>
-                <button className="btn-secondary flex items-center justify-center gap-2">
-                  <Smartphone size={18} /> Download on App Store
-                </button>
-              </div>
-              <p className="modal-footer-text">By continuing, you agree to Artikin's <strong>Terms of Use</strong> and <strong>Privacy Policy</strong>.</p>
-            </div>
-          </div>
+  {/* Post Interaction Modal */}
+{isModalOpen && (
+  <div className="modal-overlay" onClick={closeModal}>
+    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+      
+      {/* Close Button */}
+      <button className="modal-close" onClick={closeModal}>
+        <X size={20} />
+      </button>
+
+      <div className="modal-body">
+
+        {/* Avatar */}
+        <div className="modal-avatar-wrapper">
+          <img
+            src={normalizeUrl(profile.profileImage)}
+            alt="User"
+            className="modal-avatar"
+          />
         </div>
-      )}
+
+        {/* Title */}
+        <h2 className="modal-title">
+          See this {modalType}
+        </h2>
+
+        {/* Description */}
+        <p className="modal-text">
+          Sign up or log in to see <strong>@{user.username}</strong>'s full{" "}
+          {modalType} and interact with the organization.
+        </p>
+
+        {/* Actions */}
+        <div className="modal-actions">
+
+          {/* Google Play */}
+          <button className="btn-store google-play">
+            <img
+              src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg"
+              alt="Google Play"
+              className="store-img"
+            />
+          </button>
+
+          {/* App Store */}
+          <button className="btn-store app-store">
+            <img
+              src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg"
+              alt="App Store"
+              className="store-img"
+            />
+          </button>
+
+        </div>
+
+        {/* Footer */}
+        <p className="modal-footer-text">
+          By continuing, you agree to Artikin's{" "}
+          <strong>Terms of Use</strong> and{" "}
+          <strong>Privacy Policy</strong>.
+        </p>
+
+      </div>
+    </div>
+  </div>
+)}
     </div>
   );
 };
