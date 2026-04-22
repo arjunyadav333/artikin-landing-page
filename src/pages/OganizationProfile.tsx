@@ -73,14 +73,26 @@ const closeModal = () => {
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["orgProfile", id],
-    queryFn: async () => {
-      const res = await fetch(`/api/users/external/profile/${id}`);
-      if (!res.ok) throw new Error("API Failed");
-      const json = await res.json();
-      return json.data as OrgProfileData;
-    },
-    enabled: !!id,
-  });
+  queryFn: async () => {
+  const res = await fetch(`/api/users/external/profile/${id}`);
+
+  console.log("STATUS:", res.status);
+
+  const json = await res.json();
+  console.log("FULL API RESPONSE:", json);
+
+  if (!res.ok) {
+    throw new Error(json?.message || "API Failed");
+  }
+
+  // 🔥 ensure jobs always exists
+  return {
+    ...json.data,
+    jobs: json.data?.jobs || [], // ✅ FIX
+  };
+},
+});
+  
 
   const handleSubTabClick = (tab: string) => {
     setActiveSubTab(tab);
@@ -127,7 +139,7 @@ const { user, posts, portfolio, jobs } = data;
   const profile = user.profile;
 
   return (
-    <div className="artist-profile-page">{/* 🔥 ADD THIS */}
+    <div className="artist-profile-page">
 <header className="main-navbar">
   <div className="navbar-content">
     <a href="/" className="brand-logo">Artikin</a>

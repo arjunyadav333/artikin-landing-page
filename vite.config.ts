@@ -7,47 +7,59 @@ import { componentTagger } from "lovable-tagger";
 export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
-    port: 8080,
+    port: 8081, 
+
+
+    proxy: {
+      "/api": {
+        target: "https://api.artikin.com", 
+        changeOrigin: true,
+        secure: true,
+
+        // optional but safer for some APIs
+        rewrite: (path) => path.replace(/^\/api/, "/api"),
+      },
+    },
   },
+
   plugins: [
     react(),
-    mode === 'development' &&
-    componentTagger(),
+    mode === "development" && componentTagger(),
   ].filter(Boolean),
+
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
   },
+
   build: {
-    // Optimize chunk splitting for better caching
     rollupOptions: {
       output: {
         manualChunks: {
-          // Vendor chunks for better caching
-          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-          'ui-vendor': ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-tabs'],
-          'swiper-vendor': ['swiper'],
-          'query-vendor': ['@tanstack/react-query'],
+          "react-vendor": ["react", "react-dom", "react-router-dom"],
+          "ui-vendor": [
+            "@radix-ui/react-dialog",
+            "@radix-ui/react-dropdown-menu",
+            "@radix-ui/react-tabs",
+          ],
+          "swiper-vendor": ["swiper"],
+          "query-vendor": ["@tanstack/react-query"],
         },
       },
     },
-    // Enable minification
-    minify: 'esbuild',
-    // Target modern browsers for smaller bundles
-    target: 'es2020',
-    // Increase chunk size warning limit
-    chunkSize_warningLimit: 1000,
-    // Enable CSS code splitting
+    minify: "esbuild",
+    target: "es2020",
+    chunkSizeWarningLimit: 1000,
     cssCodeSplit: true,
   },
-  // Optimize dependencies
+
   optimizeDeps: {
     include: [
-      'react', 
-      'react-dom', 
-      'react-router-dom',
-      '@tanstack/react-query',
+      "react",
+      "react-dom",
+      "react-router-dom",
+      "@tanstack/react-query",
     ],
   },
 }));
