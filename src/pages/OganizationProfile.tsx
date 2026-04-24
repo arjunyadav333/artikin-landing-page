@@ -71,28 +71,26 @@ const closeModal = () => {
     awards: useRef<HTMLElement>(null),
   };
 
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ["orgProfile", id],
+const { data, isLoading, isError } = useQuery({
+  queryKey: ["orgProfile", id],
   queryFn: async () => {
-  const res = await fetch(`/api/users/external/profile/${id}`);
+    const res = await fetch(`/api/users/external/profile/${id}`);
+    const json = await res.json();
 
-  console.log("STATUS:", res.status);
+    if (!res.ok) {
+      throw new Error(json?.message || "API Failed");
+    }
 
-  const json = await res.json();
-  console.log("FULL API RESPONSE:", json);
-
-  if (!res.ok) {
-    throw new Error(json?.message || "API Failed");
-  }
-
-  // 🔥 ensure jobs always exists
-  return {
-    ...json.data,
-    jobs: json.data?.jobs || [], // ✅ FIX
-  };
-},
+    return {
+      ...json.data,
+      jobs: json.data?.portfolio?.jobs || [],
+    };
+  },
 });
-  
+
+// ✅ DEBUG HERE
+console.log("FULL DATA 👉", data);
+console.log("JOBS 👉", data?.jobs);
 
   const handleSubTabClick = (tab: string) => {
     setActiveSubTab(tab);
@@ -135,17 +133,30 @@ useEffect(() => {
 }, [activeTab]);
   if (isLoading) return <Skeleton className="h-[400px]" />;
   if (isError || !data) return <p>Error loading profile</p>;
-const { user, posts, portfolio, jobs } = data;
+const user = data?.user;
+const posts = data?.posts || [];
+const portfolio = data?.portfolio || { certificates: [], awards: [] };
+const jobs = data?.jobs || [];
   const profile = user.profile;
 
   return (
     <div className="artist-profile-page">
 <header className="main-navbar">
   <div className="navbar-content">
-    <a href="/" className="brand-logo">Artikin</a>
+    
+    <a href="/" className="brand">
+      <img 
+        src="/ARTIKINLOGO.png" 
+        alt="Artikin Logo" 
+        className="logo"
+      />
+      <span className="brand-text">Artikin</span>
+    </a>
+
     <button className="nav-download-btn">
       Download App Now
     </button>
+
   </div>
 </header>
       <div className="profile-app-container">
@@ -175,8 +186,16 @@ const { user, posts, portfolio, jobs } = data;
               <div className="meta-section">
                 <span className="badge">{profile.organizationType}</span>
                 <span>@{user.username}</span>
+            
               </div>
-
+    <div className="connection-stats">
+  <span>
+    <strong>{user.followersCount}</strong> Followers
+  </span>
+  {/* <span>
+    <strong>{user.followingCount}</strong> Following
+  </span> */}
+</div>
               <p className="profile-bio">{profile.about}</p>
             </div>
           </div>
@@ -321,34 +340,45 @@ const { user, posts, portfolio, jobs } = data;
 {/* JOBS */}
 {activeTab === "jobs" && (
   <div className="portfolio-scroll-container">
-
     <section className="portfolio-section">
+
       <div className="section-header">
-        <h2 className="section-title">Jobs</h2>
+        <h2 className="section-title">Jobs ({jobs?.length || 0})</h2>
       </div>
 
       {/* No Jobs */}
-      {jobs?.length === 0 && (
+      {jobs?.length === 0 ? (
         <p className="card-subtitle">No jobs available</p>
+      ) : (
+        jobs.map((job, index) => (
+      <div key={job.id || index} className="job-card">
+<div className="job-header flex items-center justify-between">
+  <h3 className="job-title">
+    {job.projectName || job.role}
+    
+  </h3>
+  <span className="job-badge">{job.experience}</span>
+  </div>
+  <p className="job-sub">
+    {job.role} • {job.city}, {job.state}
+  </p>
+
+
+
+  <p className="job-desc">
+    {job.jobDescription}
+  </p>
+
+  <div className="job-extra">
+    <span>₹{job.salaryMin} - ₹{job.salaryMax}</span>
+  </div>
+<button className="apply-btn">Apply Now</button>
+</div>
+          
+        ))
       )}
 
-      {/* Jobs List */}
-      {jobs?.map((job) => (
-        <div key={job._id} className="content-card">
-          <h3 className="card-title">{job.title}</h3>
-
-          <p className="card-subtitle">
-            {job.type} • {job.location}
-          </p>
-
-          <p className="card-desc">
-            {job.description}
-          </p>
-        </div>
-      ))}
-
     </section>
-
   </div>
 )}
   {/* Post Interaction Modal */}

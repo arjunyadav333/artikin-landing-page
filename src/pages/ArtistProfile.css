@@ -680,3 +680,213 @@
   font-size: 12px;
   color: #9ca3af;
 }
+.main-navbar {
+  width: 100%;
+  padding: 12px 24px;
+  background: #fff;
+}
+
+.navbar-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+
+.logo {
+  height: 40px;   /* control logo size */
+  width: auto;
+  object-fit: contain;
+}
+
+.brand-text {
+  font-size: 20px;
+  font-weight: 600;
+  color: #000;
+}
+
+.nav-download-btn {
+  background: black;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+}
+/* ================= NAVBAR ================= */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+
+.logo {
+  height: 38px;
+  width: auto;
+  object-fit: contain;
+}
+
+.brand-text {
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+  letter-spacing: 0.3px;
+}
+
+.nav-download-btn {
+ 
+  color: #fff;
+  padding: 8px 18px;
+  border-radius: 999px; 
+  border: none;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.nav-download-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(79, 70, 229, 0.25);
+}
+
+/* ================= PROFILE STATS ================= */
+.connection-stats {
+  display: flex;
+  gap: 18px;
+  margin-top: 6px;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.connection-stats strong {
+  color: #111827;
+  font-weight: 600;
+}
+.job-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+/* ================= JOB CARD ================= */
+.job-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 18px;
+  margin-bottom: 16px;
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.25s ease;
+  cursor: pointer;
+}
+.job-salary {
+  margin-top: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--primary-blue);
+}
+.job-card:hover {
+  transform: translateY(-3px);
+  /* border-color: var(--primary-blue); */
+  /* box-shadow: 0 10px 24px rgba(0, 119, 181, 0.12); */
+}
+/* ================= TITLE ================= */
+.job-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+/* ================= ROLE + LOCATION ================= */
+.job-sub {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+/* ================= DESCRIPTION ================= */
+.job-desc {
+  margin-top: 10px;
+  font-size: 14px;
+  color: var(--text-main);
+  line-height: 1.5;
+}
+/* ================= EXTRA INFO ================= */
+.job-extra {
+  display: flex;
+  gap: 14px;
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* ================= BADGE ================= */
+.job-badge {
+  padding: 4px 12px;
+  font-size: 11px;
+  border-radius: 999px;
+  background: var(--badge-bg);
+  color: var(--badge-text);
+  font-weight: 600;
+}
+.apply-btn {
+  margin-top: 12px;
+  background: var(--primary-blue);
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.apply-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0, 119, 181, 0.25);
+}
+/* ================= SECTION ================= */
+.section-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.portfolio-section {
+  margin-top: 10px;
+}
+
+/* ================= TABS ================= */
+.tab-btn {
+  padding: 10px 18px;
+  border: none;
+  background: transparent;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  position: relative;
+}
+
+.tab-btn.active {
+  color: var(--primary-blue);
+  font-weight: 600;
+}
+
+.tab-btn.active::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 20%;
+  right: 20%;
+  height: 3px;
+  background: var(--primary-blue);
+  border-radius: 3px;
+}

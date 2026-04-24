@@ -12,7 +12,7 @@ export default defineConfig(({ mode }) => ({
 
     proxy: {
       "/api": {
-        target: "https://api.artikin.com", 
+        target: "http://localhost:4500", 
         changeOrigin: true,
         secure: true,
 
