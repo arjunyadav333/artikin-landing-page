@@ -19,7 +19,7 @@ import {
 import { toast } from "sonner";
 import LegalHeader from "@/components/landing/LegalHeader";
 import LegalFooter from "@/components/landing/LegalFooter";
-import artikinLogo from "@/assets/artikin-logo.png";
+import artikinLogo from "@/assets/ARTIKIN_Header_Logo.png";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -219,8 +219,8 @@ const AccountDeletion = () => {
             <Card className="border border-slate-200 shadow-xl bg-white/95 backdrop-blur-sm">
               <CardHeader className="space-y-1 text-center">
                 <div className="flex justify-center mb-4">
-                  <div className="p-3 bg-white rounded-2xl shadow-sm border border-slate-100 bg-[#0073cc]">
-                    <img src={artikinLogo} alt="Artikin Logo" className="w-12 h-12 object-contain" />
+                  <div className="p-3 bg-white rounded-2xl shadow-sm border border-slate-100 flex items-center justify-center">
+                    <img src={artikinLogo} alt="Artikin Logo" className="h-10 w-auto object-contain" />
                   </div>
                 </div>
                 <CardTitle className="text-2xl font-bold tracking-tight">Login to Artikin</CardTitle>
