@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import artikinLogo from "@/assets/artikin-logo.png";
+import artikinLogo from "@/assets/ARTIKIN_Header_Logo.png";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -26,56 +26,55 @@ const Header = () => {
   };
 
   return <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 sm:h-20">
-          {/* Logo */}
-          <div className="flex items-center gap-3">
-            <img src={artikinLogo} alt="Artikin Logo" className="w-10 h-10 object-contain rounded-lg cursor-pointer" />
-          <Link to="/" className="flex items-center space-x-2">
-          <span className="text-2xl font-bold bg-gradient-to-r from-[#0073cf] to-[#4F8FF0] bg-clip-text text-transparent">
-            Artikin
-          </span>
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="flex items-center justify-between h-16 sm:h-20">
+        {/* Logo */}
+        <Link to="/" className="flex items-center">
+          <img
+            src={artikinLogo}
+            alt="Artikin Logo"
+            className="h-8 sm:h-10 w-auto object-contain cursor-pointer"
+          />
         </Link>
-          </div>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-8">
-            {navLinks.map(link => <button key={link.name} onClick={() => handleNavClick(link.href)} className="text-foreground hover:text-primary transition-colors font-medium">
-                {link.name}
-              </button>)}
-          </nav>
+        {/* Desktop Navigation */}
+        <nav className="hidden md:flex items-center gap-8">
+          {navLinks.map(link => <button key={link.name} onClick={() => handleNavClick(link.href)} className="text-foreground hover:text-primary transition-colors font-medium">
+            {link.name}
+          </button>)}
+        </nav>
 
-          {/* Desktop CTA Button */}
-          <div className="hidden md:block">
-            <Button variant="default" onClick={() => handleNavClick("#contact")} className="px-6 py-2 font-semibold text-base">
-              Get Started
-            </Button>
-          </div>
-
-          {/* Mobile Menu Button */}
-          <button className="md:hidden w-10 h-10 flex items-center justify-center rounded-xl hover:bg-accent/50 transition-colors" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
+        {/* Desktop CTA Button */}
+        <div className="hidden md:block">
+          <Button variant="default" onClick={() => handleNavClick("#contact")} className="px-6 py-2 font-semibold text-base">
+            Get Started
+          </Button>
         </div>
 
-        {/* Mobile Navigation */}
-        {isMenuOpen && <div className="md:hidden absolute top-full left-0 right-0 bg-background/95 backdrop-blur-sm border-b border-border">
-            <div className="px-4 py-3 space-y-2">
-              {navLinks.map(link => <button key={link.name} onClick={() => handleNavClick(link.href)} className="block w-full text-left py-3 px-3 rounded-xl hover:bg-accent/50 transition-colors font-medium">
-                  {link.name}
-                </button>)}
-              <div className="pt-2">
-                <Button variant="default" onClick={() => {
+        {/* Mobile Menu Button */}
+        <button className="md:hidden w-10 h-10 flex items-center justify-center rounded-xl hover:bg-accent/50 transition-colors" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+          {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
+      </div>
+
+      {/* Mobile Navigation */}
+      {isMenuOpen && <div className="md:hidden absolute top-full left-0 right-0 bg-background/95 backdrop-blur-sm border-b border-border">
+        <div className="px-4 py-3 space-y-2">
+          {navLinks.map(link => <button key={link.name} onClick={() => handleNavClick(link.href)} className="block w-full text-left py-3 px-3 rounded-xl hover:bg-accent/50 transition-colors font-medium">
+            {link.name}
+          </button>)}
+          <div className="pt-2">
+            <Button variant="default" onClick={() => {
               handleNavClick("#contact");
               setIsMenuOpen(false);
             }} className="w-full font-semibold">
-                  Get Started
-                </Button>
-              </div>
-            </div>
-          </div>}
-      </div>
-    </header>;
+              Get Started
+            </Button>
+          </div>
+        </div>
+      </div>}
+    </div>
+  </header>;
 };
 
 export default Header;
