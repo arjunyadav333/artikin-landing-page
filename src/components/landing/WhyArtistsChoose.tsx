@@ -1,25 +1,27 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Palette, Briefcase, Users } from "lucide-react";
+import { Palette, Briefcase, Users, ArrowRight } from "lucide-react";
 
 const features = [
   {
     icon: Palette,
     title: "Portfolio Builder",
-    description:
-      "Create stunning portfolios with drag-and-drop media and customizable layouts to showcase your best work.",
+    description: "Create stunning portfolios with drag-and-drop media and customizable layouts to showcase your best work.",
+    color: "from-pink-500 to-rose-400",
+    bg: "bg-pink-50"
   },
   {
     icon: Briefcase,
     title: "Find Opportunities",
-    description:
-      "Discover casting calls, gigs, and projects that match your skills and artistic vision.",
+    description: "Discover casting calls, gigs, and projects that match your skills and artistic vision.",
+    color: "from-blue-600 to-cyan-500",
+    bg: "bg-blue-50"
   },
   {
     icon: Users,
     title: "Build Your Network",
-    description:
-      "Connect with like-minded artists, collaborators, and industry professionals to grow your career.",
+    description: "Connect with like-minded artists, collaborators, and industry professionals to grow your career.",
+    color: "from-violet-600 to-purple-500",
+    bg: "bg-violet-50"
   },
 ];
 
@@ -32,67 +34,92 @@ const FeaturesAndCTASection = () => {
   };
 
   return (
-    <>
-      {/* CTA Section */}
-      <section className="py-16 sm:py-20 lg:py-24 bg-muted/30">
-        <div className="container mx-auto px-4 sm:px-6 text-center">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-6 sm:mb-8 font-bold text-black-500 mb-2">
-            Start building your creative portfolio today
-          </h2>
+    <div className="bg-white overflow-hidden">
+      {/* --- CTA Section --- */}
+      <section className="relative py-24 lg:py-32 overflow-hidden">
+        {/* Artistic Background Accents */}
+        <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/4 w-[500px] h-[500px] bg-blue-50 rounded-full blur-[120px] opacity-60" />
+        <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/4 w-[400px] h-[400px] bg-purple-50 rounded-full blur-[100px] opacity-60" />
 
-          <p className="text-base sm:text-lg lg:text-xl text-muted-foreground mb-8 sm:mb-10 max-w-3xl mx-auto leading-relaxed px-2">
-            Connect with industry professionals and showcase your talent to the world.
-          </p>
+        <div className="container relative mx-auto px-6 text-center">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-4xl md:text-6xl lg:text-7xl font-black text-slate-900 mb-8 tracking-tighter leading-[0.9]">
+              Start building your <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-600">
+                creative portfolio
+              </span> today
+            </h2>
 
-<Button
-  variant="default"
-  size="lg"
-  onClick={handleCreateProfile}
-  className="h-12 sm:h-14 px-8 sm:px-10 text-base sm:text-lg font-semibold rounded-xl touch-manipulation font-bold bg-primary text-white hover:bg-primary/90 hover:scale-110 hover:-translate-y-1 transition-all duration-300 shadow-lg hover:shadow-xl mb-2"
->
-  Create Your Profile
-</Button>
+            <p className="text-lg md:text-xl text-slate-600 mb-10 max-w-2xl mx-auto leading-relaxed">
+              Connect with industry professionals and showcase your talent to the world.
+            </p>
 
+            <Button
+              onClick={handleCreateProfile}
+              className="group relative h-16 px-10 text-lg font-bold rounded-full overflow-hidden transition-all duration-300 bg-slate-900 text-white hover:bg-slate-800 hover:shadow-[0_0_30px_rgba(37,99,235,0.3)]"
+            >
+              <span className="relative z-10 flex items-center gap-2">
+                Create Your Profile <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </span>
+            </Button>
+          </div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-16 sm:py-20 lg:py-24 bg-muted/30">
-        <div className="container mx-auto px-4 sm:px-6">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-center mb-12 sm:mb-16 font-bold text-blue-500 mb-2">
-            Detailed Features
-          </h2>
+      {/* --- Features Section --- */}
+      <section className="py-24 bg-slate-50/50 relative">
+        <div className="container mx-auto px-6">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-4">
+            <div className="max-w-xl">
+              <h2 className="text-4xl md:text-5xl font-bold text-blue-600 tracking-tight">
+                Detailed Features
+              </h2>
+              <div className="h-1.5 w-24 bg-blue-600 mt-4 rounded-full" />
+            </div>
+            <p className="text-slate-500 font-medium">Tools built for the modern creator.</p>
+          </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-7xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-8">
             {features.map((feature, index) => (
-              <Card
-                key={index}
-                className="text-center hover:shadow-soft transition-all duration-200 hover:scale-[1.02] border-0 shadow-soft bg-background/80 backdrop-blur-sm p-6 sm:p-8"
+              <div 
+                key={index} 
+                className="group relative"
               >
-                <CardHeader className="pb-4">
+                {/* Decorative glow on hover */}
+                <div className={`absolute inset-0 bg-gradient-to-r ${feature.color} opacity-0 group-hover:opacity-5 blur-2xl transition-opacity duration-500`} />
+                
+                <div className="relative h-full bg-white border border-slate-100 p-8 rounded-[2rem] transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-[0_20px_40px_rgba(0,0,0,0.04)]">
+                  
+                  {/* Icon Wrapper */}
                   <a
                     href="https://preview--artikin-artist.lovable.app/auth"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-14 h-14 sm:w-16 sm:h-16 mx-auto mb-4 bg-gradient-primary rounded-2xl flex items-center justify-center hover:scale-105 transition-transform"
+                    className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br ${feature.color} text-white shadow-lg mb-8 group-hover:rotate-6 transition-transform duration-300`}
                   >
-                    <feature.icon className="w-7 h-7 sm:w-8 sm:h-8 text-white" />
+                    <feature.icon className="w-8 h-8" />
                   </a>
-                  <CardTitle className="text-lg sm:text-xl font-bold leading-tight">
+
+                  <h3 className="text-2xl font-bold text-slate-900 mb-4 tracking-tight">
                     {feature.title}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <CardDescription className="text-muted-foreground leading-relaxed text-sm sm:text-base">
+                  </h3>
+                  
+                  <p className="text-slate-600 leading-relaxed">
                     {feature.description}
-                  </CardDescription>
-                </CardContent>
-              </Card>
+                  </p>
+
+                  <div className="mt-8 pt-6 border-t border-slate-50">
+                    <span className="text-xs font-bold uppercase tracking-widest text-slate-400 group-hover:text-blue-500 transition-colors">
+                      Learn More
+                    </span>
+                  </div>
+                </div>
+              </div>
             ))}
           </div>
         </div>
       </section>
-    </>
+    </div>
   );
 };
 

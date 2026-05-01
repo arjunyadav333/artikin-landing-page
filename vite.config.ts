@@ -7,19 +7,7 @@ import { componentTagger } from "lovable-tagger";
 export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
-    port: 8081, 
-
-
-    proxy: {
-      "/api": {
-        target: "http://localhost:4500", 
-        changeOrigin: true,
-        secure: true,
-
-        // optional but safer for some APIs
-        rewrite: (path) => path.replace(/^\/api/, "/api"),
-      },
-    },
+    port: 8081,
   },
 
   plugins: [

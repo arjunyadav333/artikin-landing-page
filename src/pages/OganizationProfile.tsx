@@ -71,26 +71,77 @@ const closeModal = () => {
     awards: useRef<HTMLElement>(null),
   };
 
-const { data, isLoading, isError } = useQuery({
+const API_URL = 'http://localhost:4500/api';
+
+const { data, isLoading, isError, error, refetch } = useQuery({
   queryKey: ["orgProfile", id],
+  enabled: !!id,
+
   queryFn: async () => {
-    const res = await fetch(`/api/users/external/profile/${id}`);
-    const json = await res.json();
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000);
 
-    if (!res.ok) {
-      throw new Error(json?.message || "API Failed");
+    try {
+      const url = `${API_URL}/users/external/profile/${id}`;
+      console.log("🚀 Fetching:", url);
+
+      const res = await fetch(url, {
+        signal: controller.signal,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      // ✅ read raw response first
+      const text = await res.text();
+      console.log("📦 Raw Response:", text);
+
+      if (!res.ok) {
+        throw new Error(
+          `Server Error (${res.status}): ${text || res.statusText}`
+        );
+      }
+
+      // ✅ safe parse
+      let json;
+      try {
+        json = JSON.parse(text);
+      } catch {
+        throw new Error(
+          "Invalid JSON response → API returned HTML or broken JSON"
+        );
+      }
+
+      if (!json?.success) {
+        throw new Error(json?.message || "API Failed");
+      }
+
+      return {
+        ...json.data,
+        jobs: json.data?.portfolio?.jobs || [],
+      };
+    } catch (err: any) {
+      console.error("❌ Fetch Error:", err);
+
+      if (err.name === "AbortError") {
+        throw new Error("Request timeout. Please try again.");
+      }
+
+      if (err.message?.includes("Failed to fetch")) {
+        throw new Error(
+          "Cannot connect to server. Check API URL or backend status."
+        );
+      }
+
+      throw err;
+    } finally {
+      clearTimeout(timeout);
     }
-
-    return {
-      ...json.data,
-      jobs: json.data?.portfolio?.jobs || [],
-    };
   },
+
+  retry: 2,
 });
 
-// ✅ DEBUG HERE
-console.log("FULL DATA 👉", data);
-console.log("JOBS 👉", data?.jobs);
 
   const handleSubTabClick = (tab: string) => {
     setActiveSubTab(tab);
