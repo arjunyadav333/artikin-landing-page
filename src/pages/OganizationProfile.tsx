@@ -71,7 +71,7 @@ const closeModal = () => {
     awards: useRef<HTMLElement>(null),
   };
 
-const API_URL = 'http://localhost:4500/api';
+const API_URL = 'https://api.artikin.com/api';
 
 const { data, isLoading, isError, error, refetch } = useQuery({
   queryKey: ["orgProfile", id],
