@@ -7,6 +7,7 @@ const BlueHighlightSection = lazy(() => import("./BlueHighlightSection"));
 const HowItWorks = lazy(() => import("./HowItWorks"));
 const ArtFormsCarousel = lazy(() => import("./ArtFormsCarousel"));
 const WhatIsArtikin = lazy(() => import("./WhatIsArtikin"));
+const Mission = lazy(() => import("./Mission"));
 const WhyArtistsChoose = lazy(() => import("./WhyArtistsChoose"));
 const Testimonials = lazy(() => import("./Testimonials"));
 const FAQ = lazy(() => import("./FAQ"));
@@ -43,6 +44,9 @@ const ModernLandingPage = React.memo(() => {
         <HeroSection isScrolled={isScrolled} isMuted={isMuted} onToggleMute={() => setIsMuted(!isMuted)} />
         <Suspense fallback={<SectionLoader />}>
           <WhatIsArtikin />
+        </Suspense>
+        <Suspense fallback={<SectionLoader />}>
+          <Mission />
         </Suspense>
         <Suspense fallback={<SectionLoader />}>
           <BlueHighlightSection />
