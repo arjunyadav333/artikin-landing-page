@@ -1,5 +1,6 @@
 import { Facebook, Twitter, Instagram, Linkedin, Mail, Youtube } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import AppStoreButtons from './AppStoreButtons';
 
 const Footer = () => {
   const footerLinks = {
@@ -35,6 +36,10 @@ const Footer = () => {
             <p className="text-gray-400 mb-6 max-w-md">
               Bridging the gap between art and opportunity, Artikin empowers artists to display their work and collaborate with organizations worldwide.
             </p>
+
+            <div className="mb-8">
+              <AppStoreButtons dark={true} className="scale-90 origin-left" />
+            </div>
 
             {/* Newsletter Signup */}
             <div className="space-y-3">

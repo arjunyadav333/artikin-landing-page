@@ -40,27 +40,27 @@ const HumanoidSection = () => {
 
   return (
     <section
-      className="w-full h-screen py-0 md:py-0 overflow-hidden bg-white"
+      className="w-full h-[80vh] min-h-[600px] py-16 sm:py-20 bg-slate-50 border-t border-slate-100"
       id="why-humanoid"
     >
-      <div className="container px-6 lg:px-8 mx-auto h-full flex flex-col">
-        <div className="flex flex-col items-center">
-          <h2 className="section-title text-3xl sm:text-4xl md:text-5xl font-display font-bold mb-1 md:mb-2 font-bold text-blue-500">
+      <div className="container px-4 sm:px-6 lg:px-8 mx-auto h-full flex flex-col">
+        <div className="flex flex-col items-center mb-10">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-center text-blue-500">
             Why Artikin?
           </h2>
-          <div className="flex items-center gap-4 pt-8 sm:pt-6 md:pt-4">
+          <div className="w-24 h-1 bg-blue-500/20 mt-4 rounded-full" />
+          
+          <div className="flex items-center gap-4 pt-6">
             <div
               className="pulse-chip opacity-0 animate-fade-in"
               style={{ animationDelay: "0.1s" }}
             >
-              <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-pulse-500 text-white mr-2">
-                
-              </span>
-              <span>Artikin</span>
+              <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-pulse-500 text-white mr-2"></span>
+              <span className="text-slate-600 font-medium">Artikin</span>
             </div>
           </div>
         </div>
-        <div className="relative flex-1" style={{ minHeight: 340 }}>
+        <div className="relative flex-1 w-full" style={{ minHeight: 340 }}>
           <div
             className="absolute inset-0 rounded-3xl shadow-xl flex flex-col justify-center items-start px-14 py-12"
             style={{

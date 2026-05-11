@@ -75,31 +75,52 @@ LazyImage.displayName = "LazyImage";
 
 const ArtFormsCarousel = memo(() => {
   return (
-    <section className="py-16 sm:py-20 lg:py-24 bg-muted/30">
-      <div className="container mx-auto px-4 sm:px-6">
-        <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-center mb-12 sm:mb-16 text-blue-500">
-          Explore Art Forms
-        </h2>
+    <section className="py-16 sm:py-20 bg-slate-50 text-slate-900 border-t border-slate-200">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col items-center mb-16">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-center tracking-tight text-blue-500">
+            Explore Art Forms
+          </h2>
+          <div className="w-24 h-1 bg-blue-500/20 mt-6 rounded-full" />
+        </div>
+        
         <Swiper 
           modules={[Navigation, Pagination, Autoplay]} 
           slidesPerView={1} 
-          spaceBetween={20} 
+          spaceBetween={24} 
           navigation 
-          pagination={{ clickable: true }} 
-          autoplay={{ delay: 3000, disableOnInteraction: false }} 
-          breakpoints={{640:{slidesPerView:2},1024:{slidesPerView:3}}}
+          pagination={{ clickable: true, dynamicBullets: true }} 
+          autoplay={{ delay: 4000, disableOnInteraction: false }} 
+          breakpoints={{
+            640: { slidesPerView: 2 },
+            1024: { slidesPerView: 3 },
+            1280: { slidesPerView: 4 }
+          }}
+          className="pb-16 px-4"
         >
           {artforms.map((art, index) => (
-            <SwiperSlide key={index}>
-              <div className="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300">
-                <LazyImage 
-                  src={art.imagePath} 
-                  alt={art.title} 
-                  className="w-full h-56 object-cover"
-                />
-                <div className="p-6">
-                  <h3 className="text-xl font-bold mb-2">{art.title}</h3>
-                  <p className="text-gray-600">{art.description}</p>
+            <SwiperSlide key={index} className="h-full">
+              <div className="group relative h-[400px] w-full rounded-2xl overflow-hidden shadow-lg shadow-slate-200/50 hover:shadow-2xl hover:shadow-blue-500/20 cursor-pointer bg-white">
+                {/* Background Image */}
+                <div className="absolute inset-0 w-full h-[60%]">
+                  <LazyImage 
+                    src={art.imagePath} 
+                    alt={art.title} 
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
+                </div>
+                
+                {/* Gradient Overlays for Image */}
+                <div className="absolute inset-x-0 top-[30%] h-[30%] bg-gradient-to-t from-white to-transparent" />
+                
+                {/* Content */}
+                <div className="absolute inset-x-0 bottom-0 top-[55%] p-6 flex flex-col items-center justify-start text-center bg-white">
+                  <h3 className="text-2xl font-bold mb-3 text-slate-800 group-hover:text-blue-500 transition-colors duration-300">
+                    {art.title}
+                  </h3>
+                  <p className="text-slate-600 text-sm leading-relaxed">
+                    {art.description}
+                  </p>
                 </div>
               </div>
             </SwiperSlide>

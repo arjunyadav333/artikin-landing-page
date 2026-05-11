@@ -1,9 +1,10 @@
-import React, { lazy, Suspense } from "react";
+import React, { lazy, Suspense, useState, useEffect } from "react";
 import Header from "./Header";
 import HeroSection from "./HeroSection";
 
 // Lazy load non-critical sections
 const BlueHighlightSection = lazy(() => import("./BlueHighlightSection"));
+const HowItWorks = lazy(() => import("./HowItWorks"));
 const ArtFormsCarousel = lazy(() => import("./ArtFormsCarousel"));
 const WhatIsArtikin = lazy(() => import("./WhatIsArtikin"));
 const WhyArtistsChoose = lazy(() => import("./WhyArtistsChoose"));
@@ -20,16 +21,32 @@ const SectionLoader = () => (
 );
 
 const ModernLandingPage = React.memo(() => {
+  const [isMuted, setIsMuted] = useState(true);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  // Scroll detection - shared between Header and HeroSection
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   return (
     <div className="min-h-screen bg-white">
-      <Header />
+      <Header isScrolled={isScrolled} isMuted={isMuted} onToggleMute={() => setIsMuted(!isMuted)} />
       <main>
-        <HeroSection />
+        <HeroSection isScrolled={isScrolled} isMuted={isMuted} onToggleMute={() => setIsMuted(!isMuted)} />
         <Suspense fallback={<SectionLoader />}>
           <WhatIsArtikin />
         </Suspense>
         <Suspense fallback={<SectionLoader />}>
           <BlueHighlightSection />
+        </Suspense>
+        <Suspense fallback={<SectionLoader />}>
+          <HowItWorks />
         </Suspense>
         <Suspense fallback={<SectionLoader />}>
           <ArtFormsCarousel />
