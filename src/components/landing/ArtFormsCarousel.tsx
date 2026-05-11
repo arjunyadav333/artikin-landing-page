@@ -1,9 +1,6 @@
-import React, { useState, useEffect, useRef, memo } from "react";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation, Pagination, Autoplay } from "swiper/modules";
-import "swiper/css";
-import "swiper/css/navigation";
-import "swiper/css/pagination";
+import React, { useState, memo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ChevronRight, ArrowRight } from "lucide-react";
 
 import actingSlide from "@/assets/acting-slide.jpg";
 import danceSlide from "@/assets/dance-slide.jpg";
@@ -16,117 +13,140 @@ import drawingSlide from "@/assets/drawing-slide.jpg";
 import paintingSlide from "@/assets/painting-slide.jpg";
 
 const artforms = [
-  { title: "Acting", description: "An actor brings stories to life by expressing emotions, characters, and experiences on stage or screen.", imagePath: actingSlide },
-  { title: "Dancer", description: "A dancer expresses stories and emotions through graceful movements and rhythm.", imagePath: danceSlide },
-  { title: "Model", description: "They express creativity through presence and pose.", imagePath: modelingSlide },
-  { title: "Photographer", description: "A photographer captures stories, emotions, and beauty through their lens.", imagePath: photographySlide },
-  { title: "Videographer", description: "They create visuals that bring ideas, events, and memories to life.", imagePath: videographySlide },
-  { title: "Instrumentalist", description: "A skilled musician expressing deep emotion through a musical instrument.", imagePath: instrumentalistSlide },
-  { title: "Singer", description: "The voice is their instrument, emotion their song.", imagePath: singerSlide },
-  { title: "Drawing", description: "Using simple tools to bring complex imaginations to life.", imagePath: drawingSlide },
-  { title: "Painting", description: "Bringing a canvas to life with color, light, and emotion.", imagePath: paintingSlide },
+  { id: 1, title: "Acting", description: "Bringing stories to life on stage and screen.", imagePath: actingSlide, color: "from-blue-600/80" },
+  { id: 2, title: "Dancer", description: "Expressing emotion through rhythm and movement.", imagePath: danceSlide, color: "from-purple-600/80" },
+  { id: 3, title: "Model", description: "Creative presence and professional posing.", imagePath: modelingSlide, color: "from-indigo-600/80" },
+  { id: 4, title: "Photographer", description: "Capturing stories and beauty through a lens.", imagePath: photographySlide, color: "from-sky-600/80" },
+  { id: 5, title: "Videographer", description: "Visual storytelling and cinematic memories.", imagePath: videographySlide, color: "from-cyan-600/80" },
+  { id: 6, title: "Musician", description: "Deep emotion through instrumental skill.", imagePath: instrumentalistSlide, color: "from-blue-700/80" },
+  { id: 7, title: "Singer", description: "The voice as a powerful artistic instrument.", imagePath: singerSlide, color: "from-blue-500/80" },
+  { id: 8, title: "Artist", description: "Traditional and digital drawing & painting.", imagePath: drawingSlide, color: "from-slate-600/80" },
 ];
 
-// Optimized image component with lazy loading
-const LazyImage = memo(({ src, alt, className }: { src: string; alt: string; className: string }) => {
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [shouldLoad, setShouldLoad] = useState(false);
-  const imgRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setShouldLoad(true);
-            observer.disconnect();
-          }
-        });
-      },
-      { rootMargin: "50px" }
-    );
-
-    if (imgRef.current) {
-      observer.observe(imgRef.current);
-    }
-
-    return () => observer.disconnect();
-  }, []);
-
-  return (
-    <div ref={imgRef} className="relative bg-gray-200 overflow-hidden h-56">
-      {!isLoaded && (
-        <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 animate-pulse" />
-      )}
-      {shouldLoad && (
-        <img
-          src={src}
-          alt={alt}
-          className={`${className} transition-opacity duration-300 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
-          onLoad={() => setIsLoaded(true)}
-          loading="lazy"
-        />
-      )}
-    </div>
-  );
-});
-
-LazyImage.displayName = "LazyImage";
-
 const ArtFormsCarousel = memo(() => {
+  const [hoveredId, setHoveredId] = useState<number | null>(null);
+
   return (
-    <section className="py-16 sm:py-20 bg-slate-50 text-slate-900 border-t border-slate-200">
+    <section className="py-24 bg-white overflow-hidden border-t border-slate-100">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col items-center mb-16">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-center tracking-tight text-blue-500">
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-center tracking-tight text-blue-500">
             Explore Art Forms
           </h2>
-          <div className="w-24 h-1 bg-blue-500/20 mt-6 rounded-full" />
+          <p className="text-slate-600 mt-6 text-lg text-center max-w-2xl mx-auto font-medium">
+            Discover a diverse community of creators across multiple disciplines, each bringing a unique perspective to the Artikin ecosystem.
+          </p>
+          <div className="w-24 h-1 bg-blue-500/20 mt-8 rounded-full" />
         </div>
-        
-        <Swiper 
-          modules={[Navigation, Pagination, Autoplay]} 
-          slidesPerView={1} 
-          spaceBetween={24} 
-          navigation 
-          pagination={{ clickable: true, dynamicBullets: true }} 
-          autoplay={{ delay: 4000, disableOnInteraction: false }} 
-          breakpoints={{
-            640: { slidesPerView: 2 },
-            1024: { slidesPerView: 3 },
-            1280: { slidesPerView: 4 }
-          }}
-          className="pb-16 px-4"
-        >
-          {artforms.map((art, index) => (
-            <SwiperSlide key={index} className="h-full">
-              <div className="group relative h-[400px] w-full rounded-2xl overflow-hidden shadow-lg shadow-slate-200/50 hover:shadow-2xl hover:shadow-blue-500/20 cursor-pointer bg-white">
-                {/* Background Image */}
-                <div className="absolute inset-0 w-full h-[60%]">
-                  <LazyImage 
-                    src={art.imagePath} 
-                    alt={art.title} 
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  />
-                </div>
-                
-                {/* Gradient Overlays for Image */}
-                <div className="absolute inset-x-0 top-[30%] h-[30%] bg-gradient-to-t from-white to-transparent" />
-                
-                {/* Content */}
-                <div className="absolute inset-x-0 bottom-0 top-[55%] p-6 flex flex-col items-center justify-start text-center bg-white">
-                  <h3 className="text-2xl font-bold mb-3 text-slate-800 group-hover:text-blue-500 transition-colors duration-300">
-                    {art.title}
-                  </h3>
-                  <p className="text-slate-600 text-sm leading-relaxed">
-                    {art.description}
-                  </p>
+
+        {/* Desktop Expanding Deck */}
+        <div className="hidden lg:flex gap-4 h-[600px] w-full max-w-[1400px] mx-auto">
+          {artforms.map((art) => (
+            <motion.div
+              key={art.id}
+              onMouseEnter={() => setHoveredId(art.id)}
+              onMouseLeave={() => setHoveredId(null)}
+              animate={{
+                flex: hoveredId === art.id ? 4 : (hoveredId === null ? 1 : 0.8),
+              }}
+              transition={{
+                type: "spring",
+                stiffness: 300,
+                damping: 30,
+              }}
+              className="relative rounded-[2.5rem] overflow-hidden group cursor-pointer shadow-2xl shadow-blue-900/5 border border-white/20"
+            >
+              {/* Background Image */}
+              <motion.img
+                src={art.imagePath}
+                alt={art.title}
+                className="absolute inset-0 w-full h-full object-cover"
+                animate={{
+                  scale: hoveredId === art.id ? 1.05 : 1,
+                  filter: hoveredId === art.id ? "brightness(1.1) contrast(1.1)" : "brightness(0.8) contrast(1)",
+                }}
+                transition={{ duration: 0.6 }}
+              />
+
+              {/* Gradient Overlay */}
+              <div className={`absolute inset-0 bg-gradient-to-t ${art.color} via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity duration-500`} />
+              <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-500" />
+
+              {/* Content Overlay */}
+              <div className="absolute inset-0 p-8 flex flex-col justify-end text-white overflow-hidden">
+                  <AnimatePresence>
+                    {hoveredId === art.id && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 10 }}
+                        className="relative z-10"
+                      >
+                        <motion.div className="flex items-center mb-2">
+                          <h3 className="text-3xl font-bold tracking-tight whitespace-nowrap">
+                            {art.title}
+                          </h3>
+                        </motion.div>
+                        
+                        <p className="text-blue-50 text-lg leading-snug mb-6 max-w-xs font-medium">
+                          {art.description}
+                        </p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+              </div>
+
+              {/* Vertical Title Removed as requested */}
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Mobile & Tablet Grid (Scrollable) */}
+        <div className="lg:hidden">
+          <div className="flex overflow-x-auto gap-4 pb-8 snap-x snap-mandatory hide-scrollbar px-4">
+            {artforms.map((art) => (
+              <div 
+                key={art.id} 
+                className="flex-shrink-0 w-[280px] h-[400px] relative rounded-3xl overflow-hidden snap-start shadow-xl"
+              >
+                <img
+                  src={art.imagePath}
+                  alt={art.title}
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+                <div className={`absolute inset-0 bg-gradient-to-t ${art.color} to-transparent opacity-70`} />
+                <div className="absolute inset-0 p-6 flex flex-col justify-end text-white">
+                  <h3 className="text-2xl font-bold mb-2">{art.title}</h3>
+                  <p className="text-sm text-blue-50 mb-4">{art.description}</p>
+                  {/* Removed View All button */}
                 </div>
               </div>
-            </SwiperSlide>
-          ))}
-        </Swiper>
+            ))}
+          </div>
+          <div className="flex justify-center mt-4">
+            <p className="text-slate-400 text-sm flex items-center gap-2 italic">
+              Scroll to explore more <ArrowRight className="w-4 h-4 animate-bounce-x" />
+            </p>
+          </div>
+        </div>
       </div>
+
+      <style>{`
+        .hide-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .hide-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        @keyframes bounce-x {
+          0%, 100% { transform: translateX(0); }
+          50% { transform: translateX(5px); }
+        }
+        .animate-bounce-x {
+          animation: bounce-x 1s infinite;
+        }
+      `}</style>
     </section>
   );
 });

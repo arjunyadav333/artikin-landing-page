@@ -34,7 +34,7 @@ const FeaturesAndCTASection = () => {
   return (
     <>
       {/* Features Section */}
-      <section className="py-24 bg-white border-t border-slate-100 relative overflow-hidden">
+      <section className="pt-12 pb-24 bg-white border-t border-slate-100 relative overflow-hidden">
         {/* Decorative background circle */}
         <div className="absolute top-0 right-0 -mr-32 -mt-32 w-96 h-96 border-[48px] border-blue-500/5 rounded-full pointer-events-none" />
         <div className="absolute bottom-0 left-0 -ml-32 -mb-32 w-96 h-96 border-[48px] border-blue-500/5 rounded-full pointer-events-none opacity-50" />
@@ -65,7 +65,7 @@ const FeaturesAndCTASection = () => {
               </div>
 
               {/* Floating UI Mockup */}
-              <div className="absolute right-0 bottom-0 w-full md:w-3/5 h-full pointer-events-none transition-transform duration-700 group-hover:scale-105 group-hover:rotate-1 origin-bottom-right">
+              <div className="hidden md:block absolute right-0 bottom-0 w-full md:w-3/5 h-full pointer-events-none transition-transform duration-700 group-hover:scale-105 group-hover:rotate-1 origin-bottom-right">
                 <div className="absolute right-10 bottom-10 w-[400px] aspect-video bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden transform rotate-[-4deg] translate-y-4">
                   <div className="h-6 bg-slate-100 flex items-center px-3 gap-1.5">
                     <div className="w-2 h-2 rounded-full bg-slate-300" />

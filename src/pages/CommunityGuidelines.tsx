@@ -1,6 +1,6 @@
 import React from "react";
-import LegalHeader from "@/components/landing/LegalHeader";
-import LegalFooter from "@/components/landing/LegalFooter";
+import Header from "@/components/landing/Header";
+import Footer from "@/components/landing/Footer";
 import { Users, CheckCircle, Briefcase, ChevronRight } from "lucide-react";
 
 const CommunityGuidelines = () => {
@@ -48,10 +48,10 @@ const CommunityGuidelines = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 font-inter">
-      <LegalHeader />
+    <div className="min-h-screen bg-white font-inter">
+      <Header isScrolled={true} />
       
-      <main className="pt-24 pb-16">
+      <main className="pt-32 pb-24">
         <div className="container mx-auto px-4 max-w-5xl">
           {/* Hero Section */}
           <header className="text-center mb-16">
@@ -78,18 +78,18 @@ const CommunityGuidelines = () => {
           {/* Core Values Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
             {cards.map((card, index) => (
-              <div key={index} className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center text-center transition-all hover:-translate-y-1 hover:shadow-md group">
-                <div className="w-16 h-16 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mb-6 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+              <div key={index} className="bg-slate-50 p-8 rounded-[2rem] border border-slate-100 flex flex-col items-center text-center transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-blue-500/10 group">
+                <div className="w-16 h-16 rounded-2xl bg-blue-500 text-white flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                   {card.icon}
                 </div>
-                <h3 className="text-xl font-bold text-slate-900 mb-4 group-hover:text-blue-600 transition-colors">{card.title}</h3>
-                <p className="text-slate-600 leading-relaxed">{card.description}</p>
+                <h3 className="text-xl font-bold text-slate-900 mb-4 transition-colors tracking-tight">{card.title}</h3>
+                <p className="text-slate-600 leading-relaxed text-sm">{card.description}</p>
               </div>
             ))}
           </div>
 
           {/* Table of Contents */}
-          <div className="bg-white p-8 rounded-2xl shadow-sm border-l-4 border-blue-600 mb-16">
+          <div className="bg-slate-50 p-8 rounded-[2rem] border border-slate-100 mb-16">
             <h2 className="text-xl font-bold text-slate-900 mb-6">Table of Contents</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {toc.map((item) => (
@@ -205,7 +205,7 @@ const CommunityGuidelines = () => {
         </div>
       </main>
 
-      <LegalFooter />
+      <Footer />
     </div>
   );
 };

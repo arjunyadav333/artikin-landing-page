@@ -1,6 +1,6 @@
 import React from "react";
-import LegalHeader from "@/components/landing/LegalHeader";
-import LegalFooter from "@/components/landing/LegalFooter";
+import Header from "@/components/landing/Header";
+import Footer from "@/components/landing/Footer";
 import { Link } from "react-router-dom";
 import { MessageCircle, HelpCircle, FileText, Globe, ExternalLink, ChevronRight } from "lucide-react";
 
@@ -38,15 +38,15 @@ const Support = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 font-inter text-slate-700">
-      <LegalHeader />
+    <div className="min-h-screen bg-white font-inter">
+      <Header isScrolled={true} />
 
-      <main className="pt-24 pb-16">
+      <main className="pt-32 pb-24">
         <div className="container mx-auto px-4 max-w-5xl">
           {/* Hero Section */}
           <header className="text-center mb-20 animate-in fade-in slide-in-from-bottom-5 duration-700">
             <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-6 tracking-tight">
-              Artikin <span className="text-[#0073cf]">Support</span> Center
+              Artikin <span className="text-blue-500">Support</span> Center
             </h1>
             <p className="text-xl text-slate-600 max-w-2xl mx-auto">
               How can we help you today? Explore our resources or contact us for personalized assistance.
@@ -70,19 +70,19 @@ const Support = () => {
           {/* Categories Grid */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-24">
             {categories.map((category, idx) => (
-              <div key={idx} className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow group">
-                <div className="w-16 h-16 bg-blue-50 text-[#0073cf] rounded-2xl flex items-center justify-center mb-8 group-hover:bg-[#0073cf] group-hover:text-white transition-all">
+              <div key={idx} className="bg-slate-50 p-8 rounded-[2rem] border border-slate-100 shadow-xl shadow-blue-900/5 hover:shadow-blue-900/10 transition-all duration-500 group">
+                <div className="w-16 h-16 bg-blue-500 text-white rounded-2xl flex items-center justify-center mb-8 shadow-lg shadow-blue-500/20 group-hover:scale-110 transition-transform">
                   {category.icon}
                 </div>
-                <h3 className="text-xl font-bold text-slate-900 mb-4">{category.title}</h3>
-                <p className="text-slate-600 mb-6">{category.description}</p>
+                <h3 className="text-xl font-bold text-slate-900 mb-4 tracking-tight">{category.title}</h3>
+                <p className="text-slate-600 mb-6 text-sm leading-relaxed">{category.description}</p>
                 <div className="space-y-3">
                   {category.links.map((link: any, i) => (
                     link.isExternal ? (
                       <a
                         key={i}
                         href={link.path}
-                        className="flex items-center gap-2 text-sm font-semibold text-[#0073cf] hover:underline"
+                        className="flex items-center gap-2 text-sm font-bold text-blue-600 hover:text-blue-700 transition-colors"
                       >
                         {link.name} <ExternalLink size={14} />
                       </a>
@@ -90,9 +90,9 @@ const Support = () => {
                       <Link
                         key={i}
                         to={link.path}
-                        className="flex items-center gap-2 text-sm font-semibold text-[#0073cf] hover:underline"
+                        className="flex items-center gap-2 text-sm font-bold text-blue-600 hover:text-blue-700 transition-colors group/link"
                       >
-                        {link.name} <ChevronRight size={14} className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
+                        {link.name} <ChevronRight size={14} className="ml-auto opacity-0 group-hover/link:opacity-100 group-hover/link:translate-x-1 transition-all" />
                       </Link>
                     )
                   ))}
@@ -111,7 +111,7 @@ const Support = () => {
               </p>
               <a
                 href="mailto:support@artikin.com"
-                className="inline-block bg-white text-slate-900 px-10 py-4 rounded-2xl font-bold text-lg hover:bg-slate-100 transition-colors"
+                className="inline-block bg-white text-slate-900 px-10 py-4 rounded-2xl font-bold text-lg hover:bg-slate-100 hover:scale-105 transition-all shadow-xl shadow-black/20"
               >
                 Contact Our Team
               </a>
@@ -123,7 +123,7 @@ const Support = () => {
         </div>
       </main>
 
-      <LegalFooter />
+      <Footer />
     </div>
   );
 };

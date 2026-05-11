@@ -1,6 +1,6 @@
 import React from "react";
-import LegalHeader from "@/components/landing/LegalHeader";
-import LegalFooter from "@/components/landing/LegalFooter";
+import Header from "@/components/landing/Header";
+import Footer from "@/components/landing/Footer";
 import { FileText, ChevronRight } from "lucide-react";
 
 const TermsAndConditions = () => {
@@ -33,10 +33,10 @@ const TermsAndConditions = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 font-inter text-slate-700">
-      <LegalHeader />
+    <div className="min-h-screen bg-white font-inter">
+      <Header isScrolled={true} />
       
-      <main className="pt-24 pb-16">
+      <main className="pt-32 pb-24">
         <div className="container mx-auto px-4 max-w-5xl">
           {/* Header Section */}
           <header className="text-center mb-16">
@@ -62,7 +62,7 @@ const TermsAndConditions = () => {
           </header>
 
           {/* Table of Contents */}
-          <div className="bg-white p-8 rounded-2xl shadow-sm border-l-4 border-blue-600 mb-16">
+          <div className="bg-slate-50 p-8 rounded-[2rem] border border-slate-100 mb-16">
             <h2 className="text-xl font-bold text-slate-900 mb-6 flex items-center">
               <FileText className="w-5 h-5 mr-2 text-blue-600" />
               Table of Contents
@@ -232,7 +232,7 @@ const TermsAndConditions = () => {
         </div>
       </main>
 
-      <LegalFooter />
+      <Footer />
     </div>
   );
 };

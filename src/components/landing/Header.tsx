@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Menu, X, Volume2, VolumeX } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import AppStoreButtons from './AppStoreButtons';
@@ -14,18 +14,35 @@ interface HeaderProps {
 
 const Header = ({ isScrolled = false, isMuted = true, onToggleMute }: HeaderProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const location = useLocation();
+  const isHomePage = location.pathname === "/";
   const navigate = useNavigate();
 
-  const navLinks = [
-    { name: "Home", href: "#home" },
-    { name: "About", href: "#about" },
-    { name: "Contact", href: "#contact" },
-  ];
+  const navLinks = isHomePage 
+    ? [
+        { name: "Home", href: "#home" },
+        { name: "About", href: "#about" },
+        { name: "Contact", href: "#contact" },
+      ]
+    : [
+        { name: "User Agreement", href: "/legal/terms-conditions" },
+        { name: "Privacy Policy", href: "/legal/privacy-policy" },
+        { name: "Guidelines", href: "/legal/community-guidelines" },
+        { name: "About Us", href: "/about-us" },
+        { name: "Support", href: "/support" }
+      ];
 
   const handleNavClick = (href: string) => {
-    const element = document.querySelector(href);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
+    if (href.startsWith('#')) {
+      const element = document.querySelector(href);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth" });
+        setIsMenuOpen(false);
+      } else {
+        navigate('/' + href);
+      }
+    } else {
+      navigate(href);
       setIsMenuOpen(false);
     }
   };
@@ -49,7 +66,15 @@ const Header = ({ isScrolled = false, isMuted = true, onToggleMute }: HeaderProp
         isScrolled ? 'h-14 sm:h-16' : 'h-16 sm:h-20'
       }`}>
         {/* Logo */}
-        <Link to="/" className="flex items-center">
+        <Link 
+          to="/" 
+          className="flex items-center"
+          onClick={() => {
+            if (window.location.pathname === '/') {
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+          }}
+        >
           <img
             src={artikinLogo}
             alt="Artikin Logo"
