@@ -8,6 +8,8 @@ const HowItWorks = lazy(() => import("./HowItWorks"));
 const ArtFormsCarousel = lazy(() => import("./ArtFormsCarousel"));
 const WhatIsArtikin = lazy(() => import("./WhatIsArtikin"));
 const WhyArtistsChoose = lazy(() => import("./WhyArtistsChoose"));
+const Testimonials = lazy(() => import("./Testimonials"));
+const FAQ = lazy(() => import("./FAQ"));
 const FinalCTA = lazy(() => import("./FinalCTA"));
 const Footer = lazy(() => import("./Footer"));
 
@@ -52,7 +54,13 @@ const ModernLandingPage = React.memo(() => {
           <ArtFormsCarousel />
         </Suspense>
         <Suspense fallback={<SectionLoader />}>
+          <Testimonials />
+        </Suspense>
+        <Suspense fallback={<SectionLoader />}>
           <WhyArtistsChoose />
+        </Suspense>
+        <Suspense fallback={<SectionLoader />}>
+          <FAQ />
         </Suspense>
         <Suspense fallback={<SectionLoader />}>
           <FinalCTA />
