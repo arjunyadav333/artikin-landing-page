@@ -16,23 +16,45 @@ const Header = ({ isScrolled = false, isMuted = true, onToggleMute }: HeaderProp
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
   const isHomePage = location.pathname === "/";
+  const isCareersPage = location.pathname.includes('/careers');
   const navigate = useNavigate();
 
-  const navLinks = isHomePage 
+  const navLinks = isCareersPage 
+    ? [
+        { name: "Home", href: "/" },
+        { name: "Careers", href: "/careers" },
+        { name: "About Us", href: "/about-us" },
+        { name: "Support", href: "/support" }
+      ]
+    : isHomePage 
     ? [
         { name: "Home", href: "#home" },
         { name: "About", href: "#about" },
         { name: "Contact", href: "#contact" },
+        { name: "Careers", href: "/careers" },
       ]
     : [
         { name: "User Agreement", href: "/legal/terms-conditions" },
         { name: "Privacy Policy", href: "/legal/privacy-policy" },
         { name: "Guidelines", href: "/legal/community-guidelines" },
         { name: "About Us", href: "/about-us" },
+        { name: "Careers", href: "/careers" },
         { name: "Support", href: "/support" }
       ];
 
   const handleNavClick = (href: string) => {
+    const [path, hash] = href.split('#');
+    const isCurrentPath = path === location.pathname || path === "" || (path === '/careers' && location.pathname.startsWith('/careers'));
+
+    if (hash && isCurrentPath) {
+      const element = document.getElementById(hash);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth" });
+        setIsMenuOpen(false);
+        return;
+      }
+    }
+
     if (href.startsWith('#')) {
       const element = document.querySelector(href);
       if (element) {
@@ -111,7 +133,22 @@ const Header = ({ isScrolled = false, isMuted = true, onToggleMute }: HeaderProp
               {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
             </button>
           )}
-          <AppStoreButtons iconOnly dark={isScrolled ? false : true} />
+          {isCareersPage ? (
+            <Button 
+              variant="default"
+              size="sm"
+              className={`rounded-full px-6 font-bold shadow-lg transition-all ${
+                isScrolled 
+                ? "bg-primary text-white shadow-primary/20" 
+                : "bg-white text-primary shadow-white/10"
+              }`}
+              onClick={() => handleNavClick('/careers#roles')}
+            >
+              Search Jobs
+            </Button>
+          ) : (
+            <AppStoreButtons iconOnly dark={isScrolled ? false : true} />
+          )}
         </div>
 
         {/* Mobile Menu Button */}
@@ -152,7 +189,18 @@ const Header = ({ isScrolled = false, isMuted = true, onToggleMute }: HeaderProp
             {link.name}
           </button>)}
           <div className="pt-4 pb-2 flex justify-center border-t border-border mt-2">
-            <AppStoreButtons iconOnly dark={false} />
+            {isCareersPage ? (
+              <Button 
+                className="w-full bg-primary text-white rounded-xl font-bold"
+                onClick={() => {
+                  handleNavClick('/careers#roles');
+                }}
+              >
+                Search Jobs
+              </Button>
+            ) : (
+              <AppStoreButtons iconOnly dark={false} />
+            )}
           </div>
         </div>
       </div>}

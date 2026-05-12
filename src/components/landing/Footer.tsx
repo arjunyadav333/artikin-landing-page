@@ -11,6 +11,7 @@ const Footer = () => {
       { name: 'Home', path: '/' },
       { name: 'About Artikin', path: '/about-us' },
       { name: 'How it Works', path: '#how-it-works' },
+      { name: 'Careers', path: '/careers' },
       { name: 'Contact Support', path: '/support' }
     ],
     Legal: [
