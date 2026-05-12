@@ -142,7 +142,7 @@ const ArtistProfile: React.FC = () => {
   const { data, isLoading, error } = useQuery({
     queryKey: ['artistProfile', id],
     queryFn: async () => {
-      const response = await fetch(`/api/users/external/profile/${id}`);
+      const response = await fetch(`https://api.artikin.com/api/users/external/profile/${id}`);
       if (!response.ok) {
         throw new Error('Failed to fetch profile');
       }
