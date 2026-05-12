@@ -29,11 +29,13 @@ export const AppStoreButtons: React.FC<AppStoreButtonsProps> = ({ className = ""
 
   if (iconOnly) {
     return (
-      <div className={`flex items-center gap-3 ${className}`}>
-        <a href="https://play.google.com/store/apps/details?id=com.artikin" target="_blank" rel="noopener noreferrer" className={iconClass} title="Get it on Google Play">
+      <div className={`flex items-center gap-3 cursor-pointer ${className}`}>
+        <a  target="_blank" rel="noopener noreferrer" className={iconClass} title="Coming soon">
+          {/* href="https://play.google.com/store/apps/details?id=com.artikin" */}
           <PlaySVG />
         </a>
-        <a href="https://apps.apple.com/app/artikin" target="_blank" rel="noopener noreferrer" className={iconClass} title="Download on the App Store">
+        <a  target="_blank" rel="noopener noreferrer" className={iconClass} title="Coming soon">
+          {/* href="https://apps.apple.com/app/artikin" */}
           <AppleSVG />
         </a>
       </div>
@@ -45,15 +47,15 @@ export const AppStoreButtons: React.FC<AppStoreButtonsProps> = ({ className = ""
       <a href="https://play.google.com/store/apps/details?id=com.artikin" target="_blank" rel="noopener noreferrer" className={buttonClass}>
         <PlaySVG />
         <div className="flex flex-col items-start">
-          <span className="text-[10px] font-medium uppercase leading-none opacity-80">GET IT ON</span>
-          <span className="text-base font-bold leading-tight">Google Play</span>
+          <span className="text-[10px] font-medium uppercase leading-none opacity-80">Comming Soon</span>
+          <span className="text-base font-bold leading-tight"></span>
         </div>
       </a>
       <a href="https://apps.apple.com/app/artikin" target="_blank" rel="noopener noreferrer" className={buttonClass}>
         <AppleSVG />
         <div className="flex flex-col items-start">
-          <span className="text-[10px] font-medium uppercase leading-none opacity-80">Download on the</span>
-          <span className="text-base font-bold leading-tight">App Store</span>
+          <span className="text-[10px] font-medium uppercase leading-none opacity-80">Comming Soon</span>
+          <span className="text-base font-bold leading-tight"></span>
         </div>
       </a>
     </div>

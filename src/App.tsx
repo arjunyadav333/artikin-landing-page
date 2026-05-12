@@ -77,6 +77,8 @@ const AppRoutes = () => {
         <Route path="/artist/:id" element={<ArtistProfile />} />
        <Route path="/org/:id" element={<OrgProfile />} />
         <Route path="/restricted" element={<RestrictedAccessPage/>} />
+          <Route path="/post" element={<RestrictedAccessPage />} />
+        <Route path="/post/:id" element={<RestrictedAccessPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>

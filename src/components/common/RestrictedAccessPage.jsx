@@ -19,7 +19,7 @@ const RestrictedSimple = () => {
         <div className="ra-content">
           <h1 className="ra-title">Mobile Only Feature</h1>
           <p className="ra-text">
-           the best experience, this feature is exclusively available on our mobile application.
+          For the best experience, this feature is exclusively available on our mobile application.
           </p>
           
           <div className="ra-divider">
