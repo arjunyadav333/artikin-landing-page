@@ -47,9 +47,15 @@ const Footer = () => {
                 className="h-10 w-auto object-contain"
               />
             </Link>
-            <p className="text-slate-500 text-base leading-relaxed mb-8">
+            <p className="text-slate-500 text-base leading-relaxed mb-6">
               The professional networking platform designed exclusively for the creative industry. Connect, showcase, and grow.
             </p>
+            <div className="mb-8">
+              <a href="mailto:support@artikin.com" className="text-blue-500 hover:text-blue-600 font-bold text-sm flex items-center gap-2">
+                <Mail className="w-4 h-4" />
+                support@artikin.com
+              </a>
+            </div>
             <div className="flex items-center gap-4">
               <AppStoreButtons dark={false} iconOnly={false} className="scale-90 origin-left" />
             </div>

@@ -225,7 +225,7 @@ const TermsAndConditions = () => {
               </h2>
               <div className="space-y-4">
                 <p>If you have questions about these Terms and Conditions, you may contact us at:</p>
-                <p className="font-semibold">Email: support@artikin.com</p>
+                <p className="font-semibold">Email: <a href="mailto:support@artikin.com" className="text-blue-600 hover:underline">support@artikin.com</a></p>
               </div>
             </section>
           </div>
