@@ -5,10 +5,6 @@ import { Link } from "react-router-dom";
 import { MessageCircle, HelpCircle, FileText, Globe, ExternalLink, ChevronRight } from "lucide-react";
 
 const Support = () => {
-    const supportEmail = "support@artikin.com";
-  const emailSubject = "Support Request";
-  const mailtoUrl = `mailto:${supportEmail}?subject=${encodeURIComponent(emailSubject)}`;
-
   const categories = [
     {
       icon: <HelpCircle className="w-8 h-8" />,
@@ -113,15 +109,14 @@ const Support = () => {
                 If our help articles don't solve your problem, please submit a formal support ticket. Our team
                 usually responds within 24 hours.
               </p>
-
-
-  
-  <a
-    href={mailtoUrl}
-    className="inline-block bg-white text-slate-900 px-10 py-4 rounded-2xl font-bold text-lg hover:bg-slate-100 hover:scale-105 transition-all shadow-xl shadow-black/20"
-  >
-    Contact Our Team
-  </a>
+            <a
+  href="mailto:support@artikin.com?subject=Support Request"
+  className="inline-block bg-white text-slate-900 px-10 py-4 rounded-2xl font-bold text-lg hover:bg-slate-100 hover:scale-105 transition-all shadow-xl shadow-black/20"
+>
+  Contact Our Team
+</a>
+ <br />
+               <p className="mt-3">support@artikin.com</p>
             </div>
             {/* Background decorative element */}
             <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600 opacity-20 blur-3xl -translate-y-1/2 translate-x-1/2 rounded-full"></div>
