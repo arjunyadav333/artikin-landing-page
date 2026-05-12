@@ -16,6 +16,9 @@ import ArtistProfile from "./pages/ArtistProfile";
 import { Toaster } from "@/components/ui/sonner";
 import OrgProfile from "./pages/OganizationProfile";
 import RestrictedAccessPage from "../src/components/common/RestrictedAccessPage";
+import Careers from "./pages/Careers";
+import JobDetails from "./pages/JobDetails";
+
 
 // Optimized loading components for different pages
 const HomeLoader = () => <HomePageSkeleton />;
@@ -79,6 +82,9 @@ const AppRoutes = () => {
         <Route path="/restricted" element={<RestrictedAccessPage/>} />
           <Route path="/post" element={<RestrictedAccessPage />} />
         <Route path="/post/:id" element={<RestrictedAccessPage />} />
+        <Route path="/careers" element={<Careers />} />
+        <Route path="/careers/jobs/:id" element={<JobDetails />} />
+
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
