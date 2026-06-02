@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X, Volume2, VolumeX } from "lucide-react";
@@ -19,12 +19,74 @@ const Header = ({ isScrolled = false, isMuted = true, onToggleMute }: HeaderProp
   const isCareersPage = location.pathname.includes('/careers');
   const navigate = useNavigate();
 
+  const [activeHash, setActiveHash] = useState(location.hash || (isHomePage ? "#home" : ""));
+
+  useEffect(() => {
+    if (!isHomePage) return;
+
+    const handleScrollSpy = () => {
+      const sections = ['home', 'about', 'contact'];
+      let currentSection = '';
+
+      const isAtBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 50;
+
+      if (isAtBottom) {
+        currentSection = '#contact';
+      } else {
+        for (const sectionId of sections) {
+          const element = document.getElementById(sectionId);
+          if (element) {
+            const rect = element.getBoundingClientRect();
+            // Active if center of section is in viewport view
+            if (rect.top <= 150 && rect.bottom >= 150) {
+              currentSection = `#${sectionId}`;
+              break;
+            }
+          }
+        }
+      }
+
+      if (currentSection) {
+        setActiveHash(currentSection);
+        if (currentSection === '#home') {
+          if (window.location.hash) {
+            window.history.replaceState(null, '', window.location.pathname);
+          }
+        } else {
+          if (window.location.hash !== currentSection) {
+            window.history.replaceState(null, '', currentSection);
+          }
+        }
+      } else if (window.scrollY < 100) {
+        setActiveHash("#home");
+        if (window.location.hash) {
+          window.history.replaceState(null, '', window.location.pathname);
+        }
+      }
+    };
+
+    window.addEventListener('scroll', handleScrollSpy);
+    // Trigger initial spy check
+    handleScrollSpy();
+
+    return () => window.removeEventListener('scroll', handleScrollSpy);
+  }, [isHomePage]);
+
+  const isActive = (href: string) => {
+    if (href === "/careers" && isCareersPage) return true;
+    if (isHomePage) {
+      if (href === "/careers") return false;
+      return activeHash === href;
+    }
+    return false;
+  };
+
   const navLinks = isCareersPage 
     ? [
         { name: "Home", href: "/" },
-        { name: "Careers", href: "/careers" },
-        { name: "About Us", href: "/about-us" },
-        { name: "Support", href: "/support" }
+        { name: "About", href: "/#about" },
+        { name: "Contact", href: "/#contact" },
+        { name: "Careers", href: "/careers" }
       ]
     : isHomePage 
     ? [
@@ -108,13 +170,29 @@ const Header = ({ isScrolled = false, isMuted = true, onToggleMute }: HeaderProp
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-8">
-          {navLinks.map(link => <button key={link.name} onClick={() => handleNavClick(link.href)} className={`font-medium transition-colors duration-300 ${
-            isScrolled
-              ? 'text-foreground hover:text-primary'
-              : 'text-white hover:text-white/80'
-          }`}>
-            {link.name}
-          </button>)}
+          {navLinks.map(link => {
+            const active = isActive(link.href);
+            return (
+              <button 
+                key={link.name} 
+                onClick={() => handleNavClick(link.href)} 
+                className={`font-medium transition-colors duration-300 relative py-1 ${
+                  active
+                    ? isScrolled
+                      ? 'text-primary font-bold'
+                      : 'text-white font-bold border-b-2 border-white'
+                    : isScrolled
+                      ? 'text-foreground hover:text-primary'
+                      : 'text-white/85 hover:text-white'
+                }`}
+              >
+                {link.name}
+                {active && isScrolled && (
+                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-0.5 bg-primary rounded-full" />
+                )}
+              </button>
+            );
+          })}
         </nav>
 
         {/* Desktop CTA + Sound Button */}
@@ -185,9 +263,20 @@ const Header = ({ isScrolled = false, isMuted = true, onToggleMute }: HeaderProp
         }}
       >
         <div className="px-4 py-3 space-y-2">
-          {navLinks.map(link => <button key={link.name} onClick={() => handleNavClick(link.href)} className="block w-full text-left py-3 px-3 rounded-xl hover:bg-accent/50 transition-colors font-medium">
-            {link.name}
-          </button>)}
+          {navLinks.map(link => {
+            const active = isActive(link.href);
+            return (
+              <button 
+                key={link.name} 
+                onClick={() => handleNavClick(link.href)} 
+                className={`block w-full text-left py-3 px-3 rounded-xl hover:bg-accent/50 transition-colors font-medium ${
+                  active ? 'text-primary font-bold bg-accent/30' : 'text-foreground'
+                }`}
+              >
+                {link.name}
+              </button>
+            );
+          })}
           <div className="pt-4 pb-2 flex justify-center border-t border-border mt-2">
             {isCareersPage ? (
               <Button 

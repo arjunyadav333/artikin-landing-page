@@ -1,7 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, MapPin, ArrowRight, Briefcase } from "lucide-react";
 import { Link } from "react-router-dom";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 const roles = [
   { 
@@ -40,8 +42,34 @@ const roles = [
 
 const JobList = () => {
   const [search, setSearch] = useState("");
+  const [activeRoles, setActiveRoles] = useState(roles);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchJobs = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "jobs"));
+        if (!querySnapshot.empty) {
+          const jobsList = querySnapshot.docs.map(doc => ({
+            id: doc.id,
+            title: doc.data().title || "",
+            dept: doc.data().dept || doc.data().department || "",
+            loc: doc.data().loc || doc.data().location || "",
+            type: doc.data().type || "",
+            info: doc.data().info || ""
+          }));
+          setActiveRoles(jobsList);
+        }
+      } catch (error) {
+        console.error("Error fetching jobs from Firestore, using fallback:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchJobs();
+  }, []);
   
-  const filtered = roles.filter(r => 
+  const filtered = activeRoles.filter(r => 
     r.title.toLowerCase().includes(search.toLowerCase()) || 
     r.dept.toLowerCase().includes(search.toLowerCase())
   );

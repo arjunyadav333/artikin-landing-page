@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import Header from "@/components/landing/Header";
 import JobHero from "@/components/careers/JobHero";
@@ -7,6 +7,8 @@ import ApplicationForm from "@/components/careers/ApplicationForm";
 import Footer from "@/components/landing/Footer";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 const jobData = {
   "eng-1": {
@@ -113,11 +115,40 @@ const jobData = {
 
 const JobDetails = () => {
   const { id } = useParams();
-  const job = jobData[id as keyof typeof jobData] || jobData["eng-1"];
+  const defaultJob = jobData[id as keyof typeof jobData] || jobData["eng-1"];
+  const [job, setJob] = useState(defaultJob);
 
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, [id]);
+
+    const fetchJobDetail = async () => {
+      if (!id) return;
+      try {
+        const docRef = doc(db, "jobs", id);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          setJob({
+            title: data.title || "",
+            department: data.dept || data.department || "",
+            location: data.loc || data.location || "",
+            type: data.type || "",
+            meta: data.meta || {
+              "Employment Type": data.type || "",
+              "Salary": data.info || "Industry Standard"
+            },
+            summary: data.summary || "",
+            responsibilities: data.responsibilities || [],
+            requirements: data.requirements || [],
+            perks: data.perks || []
+          });
+        }
+      } catch (err) {
+        console.error("Error fetching job details from Firestore, using fallback:", err);
+      }
+    };
+    fetchJobDetail();
+  }, [id, defaultJob]);
 
   return (
     <div className="bg-white min-h-screen selection:bg-primary/10 text-slate-900">
@@ -171,7 +202,7 @@ const JobDetails = () => {
               </section>
 
               <div id="apply" className="pt-20 border-t border-slate-100">
-                <ApplicationForm />
+                <ApplicationForm jobTitle={job.title} />
               </div>
             </div>
 

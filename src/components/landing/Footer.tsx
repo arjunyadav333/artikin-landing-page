@@ -35,16 +35,16 @@ const Footer = () => {
         <div className="flex flex-col lg:flex-row justify-between items-start gap-12 lg:gap-24 mb-16">
           {/* Brand Info */}
           <div className="max-w-sm">
-            <Link 
-              to="/" 
+            <Link
+              to="/"
               className="inline-block mb-6"
               onClick={() => {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
             >
-              <img 
-                src={artikinLogo} 
-                alt="Artikin Official Logo" 
+              <img
+                src={artikinLogo}
+                alt="Artikin Official Logo"
                 className="h-10 w-auto object-contain"
               />
             </Link>
@@ -96,8 +96,8 @@ const Footer = () => {
             <h4 className="text-slate-900 font-bold text-sm uppercase tracking-widest mb-6">Newsletter</h4>
             <p className="text-slate-500 text-sm mb-4">Get the latest updates from Artikin</p>
             <div className="flex gap-2">
-              <input 
-                type="email" 
+              <input
+                type="email"
                 placeholder="Email address"
                 className="flex-1 h-12 px-4 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm"
               />
@@ -111,7 +111,7 @@ const Footer = () => {
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex items-center gap-2 text-slate-400 text-sm">
-            <span>© 2025 Artikin Official.</span>
+            <span>© 2026 Artikin Official.</span>
             <span className="hidden sm:inline">•</span>
             <span className="text-xs">Proudly built for the global creative community.</span>
           </div>

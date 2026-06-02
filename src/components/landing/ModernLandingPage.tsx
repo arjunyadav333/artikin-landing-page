@@ -37,6 +37,30 @@ const ModernLandingPage = React.memo(() => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Force scroll to top on mount / reload
+  useEffect(() => {
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
+    window.scrollTo(0, 0);
+  }, []);
+
+  // Scroll to hash on load or URL hash change
+  useEffect(() => {
+    if (window.location.hash) {
+      const element = document.querySelector(window.location.hash);
+      if (element) {
+        // Delay to allow lazy loaded modules to render
+        const timer = setTimeout(() => {
+          element.scrollIntoView({ behavior: "smooth" });
+          // Clear the hash from the URL after triggering scroll
+          window.history.replaceState(null, '', window.location.pathname);
+        }, 300);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [window.location.hash]);
+
   return (
     <div className="min-h-screen bg-white">
       <Header isScrolled={isScrolled} isMuted={isMuted} onToggleMute={() => setIsMuted(!isMuted)} />
