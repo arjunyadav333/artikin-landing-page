@@ -186,8 +186,8 @@ const CommunityGuidelines = () => {
                 7. Reporting Violations
               </h2>
               <div className="text-slate-600 space-y-4">
-                <p>If you see content that violates these Community Guidelines, please report it using the reporting tools available within the platform.</p>
-                <p>User reports help us maintain a safe and professional environment. Our moderation team and automated systems review reported content to determine whether it violates our policies.</p>
+                <p>If you see content that violates these Community Guidelines, please report it using the reporting tools available within the platform. User reports help us maintain a safe and professional environment.</p>
+                <p>Our moderation team reviews all reported content within 24 hours to determine whether it violates our policies. Action will be taken promptly to address any policy breaches.</p>
               </div>
             </section>
 
@@ -197,8 +197,8 @@ const CommunityGuidelines = () => {
                 8. Policy Enforcement
               </h2>
               <div className="text-slate-600 space-y-4">
-                <p>Violations of these Community Guidelines may result in actions including removal of content, reduced visibility, account warnings, or suspension of accounts.</p>
-                <p>Repeated or severe violations may lead to permanent removal from the platform.</p>
+                <p>Artikin operates a strict zero-tolerance policy for objectionable content, abuse, and harassment. Violations of these Community Guidelines may result in immediate actions including removal of violating content, feature restrictions, account warnings, temporary suspension, or permanent termination of accounts.</p>
+                <p>Repeated or severe violations will lead to permanent removal from the platform.</p>
               </div>
             </section>
           </div>

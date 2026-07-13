@@ -112,6 +112,7 @@ const TermsAndConditions = () => {
               </h2>
               <div className="space-y-4">
                 <p>Users may upload content including images, videos, portfolios, posts, comments, and other materials. By posting content on Artikin, you confirm that you have the necessary rights or permissions to share that content.</p>
+                <p>Users are solely responsible for the content they upload, publish, or share on Artikin. Artikin reserves the right to review, remove, or restrict any content that violates these Terms, Community Guidelines, or applicable laws.</p>
                 <p>You retain ownership of your content, but you grant Artikin a license to display and distribute that content within the platform for the purpose of operating and improving the service.</p>
               </div>
             </section>
@@ -150,6 +151,8 @@ const TermsAndConditions = () => {
                     <span>Content that infringes copyrights, trademarks, or intellectual property rights.</span>
                   </li>
                 </ul>
+                <p>Artikin has a zero-tolerance policy for objectionable content and abusive behavior. Users can report objectionable content or abusive behavior through the in-app reporting feature. Reported content will be reviewed by our moderation team within 24 hours, and appropriate action will be taken, including content removal or account suspension.</p>
+                <p>Users may also block other users to prevent further communication or interaction.</p>
                 <p>Artikin reserves the right to remove content and suspend or terminate accounts that violate these rules.</p>
               </div>
             </section>
@@ -182,6 +185,7 @@ const TermsAndConditions = () => {
               </h2>
               <div className="space-y-4">
                 <p>Artikin reserves the right to suspend or terminate accounts that violate these Terms, misuse the platform, or engage in harmful or illegal behavior.</p>
+                <p>Artikin may investigate reports submitted by users and take appropriate action, including removing content, restricting features, temporarily suspending accounts, or permanently terminating accounts that violate these Terms or Community Guidelines.</p>
                 <p>Users may also choose to delete their account through the application settings.</p>
               </div>
             </section>
